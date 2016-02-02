@@ -18,12 +18,14 @@ package com.arpnetworking.metrics.mad;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.Terminated;
+import akka.http.javadsl.ConnectHttp;
 import akka.http.javadsl.Http;
 import akka.http.javadsl.IncomingConnection;
 import akka.http.javadsl.ServerBinding;
-import akka.stream.ActorFlowMaterializer;
-import akka.stream.ActorFlowMaterializerSettings;
+import akka.stream.ActorMaterializer;
+import akka.stream.Materializer;
 import ch.qos.logback.classic.LoggerContext;
+import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.configuration.jackson.DynamicConfiguration;
 import com.arpnetworking.configuration.jackson.JsonNodeFileSource;
 import com.arpnetworking.configuration.triggers.FileTrigger;
@@ -32,8 +34,10 @@ import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.metrics.impl.TsdLogSink;
 import com.arpnetworking.metrics.impl.TsdMetricsFactory;
 import com.arpnetworking.metrics.jvm.JvmMetricsRunnable;
+import com.arpnetworking.metrics.mad.actors.Status;
 import com.arpnetworking.metrics.mad.configuration.AggregatorConfiguration;
 import com.arpnetworking.metrics.mad.configuration.PipelineConfiguration;
+import com.arpnetworking.metrics.proxy.actors.Telemetry;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.utility.Configurator;
@@ -57,6 +61,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -105,12 +110,11 @@ public final class Main implements Launchable {
         final File configurationFile = new File(args[0]);
         final Configurator<Main, AggregatorConfiguration> configurator =
                 new Configurator<>(Main::new, AggregatorConfiguration.class);
-        final ObjectMapper objectMapper = AggregatorConfiguration.createObjectMapper();
         final DynamicConfiguration configuration = new DynamicConfiguration.Builder()
-                .setObjectMapper(objectMapper)
+                .setObjectMapper(OBJECT_MAPPER)
                 .addSourceBuilder(
                         new JsonNodeFileSource.Builder()
-                                .setObjectMapper(objectMapper)
+                                .setObjectMapper(OBJECT_MAPPER)
                                 .setFile(configurationFile))
                 .addTrigger(
                         new FileTrigger.Builder()
@@ -198,19 +202,26 @@ public final class Main implements Launchable {
         // Create the status actor
         actorSystem.actorOf(Props.create(Status.class), "status");
 
-        final ActorFlowMaterializerSettings materializerSettings = ActorFlowMaterializerSettings.create(actorSystem);
-        final ActorFlowMaterializer materializer = ActorFlowMaterializer.create(materializerSettings, actorSystem);
+        // Create the telemetry connection actor
+        actorSystem.actorOf(Props.create(Telemetry.class, injector.getInstance(MetricsFactory.class)), "telemetry");
 
         // Create and bind Http server
-        final Routes routes = new Routes(actorSystem, injector.getInstance(MetricsFactory.class));
+        final Materializer materializer = ActorMaterializer.create(actorSystem);
+        final Routes routes = new Routes(
+                actorSystem,
+                injector.getInstance(MetricsFactory.class),
+                _configuration.getHttpHealthCheckPath(),
+                _configuration.getHttpStatusPath());
         final Http http = Http.get(actorSystem);
-        final akka.stream.javadsl.Source<IncomingConnection, Future<ServerBinding>> binding = http.bind(
-                _configuration.getHttpHost(),
-                _configuration.getHttpPort(),
+        final akka.stream.javadsl.Source<IncomingConnection, CompletionStage<ServerBinding>> binding = http.bind(
+                ConnectHttp.toHost(
+                        _configuration.getHttpHost(),
+                        _configuration.getHttpPort()),
                 materializer);
-        binding.runForeach(
-                connection -> connection.handleWithAsyncHandler(routes, materializer),
-                materializer);
+        binding.to(
+                akka.stream.javadsl.Sink.foreach(
+                        connection -> connection.handleWithAsyncHandler(routes, materializer)))
+                .run(materializer);
     }
 
     private Injector launchGuice(final ActorSystem actorSystem) {
@@ -299,6 +310,7 @@ public final class Main implements Launchable {
 
     private static final Long INITIAL_DELAY_IN_MILLIS = 0L;
     private static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     private static final class PipelinesLaunchable implements Launchable, Runnable {

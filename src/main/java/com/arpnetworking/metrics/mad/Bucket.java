@@ -19,11 +19,9 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.arpnetworking.steno.RateLimitLogBuilder;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.FQDSN;
@@ -322,7 +320,10 @@ import java.util.function.BiFunction;
                 // 1) Send the record back to Aggregator.
                 // 2) This causes a new bucket to be created for this start+period.
                 // 3) Enhance aggregation at edges to support re-aggregation (or prevent overwrite).
-                BUCKET_CLOSED_LOG_BUILDER
+                BUCKET_CLOSED_LOGGER
+                        .warn()
+                        .setMessage("Discarding metric")
+                        .addData("reason", "added after close")
                         .addData("name", name)
                         .addData("metric", metric)
                         .addData("time", time)
@@ -410,11 +411,7 @@ import java.util.function.BiFunction;
     private static final StatisticFactory STATISTIC_FACTORY;
     private static final Statistic COUNT_STATISTIC;
     private static final Logger LOGGER = LoggerFactory.getLogger(Bucket.class);
-    private static final LogBuilder BUCKET_CLOSED_LOG_BUILDER = new RateLimitLogBuilder(
-            LOGGER.warn()
-                    .setMessage("Discarding metric")
-                    .addData("reason", "added after close"),
-            Duration.ofSeconds(30));
+    private static final Logger BUCKET_CLOSED_LOGGER = LoggerFactory.getRateLimitLogger(Bucket.class, Duration.ofSeconds(30));
 
     static {
         STATISTIC_FACTORY = new StatisticFactory();

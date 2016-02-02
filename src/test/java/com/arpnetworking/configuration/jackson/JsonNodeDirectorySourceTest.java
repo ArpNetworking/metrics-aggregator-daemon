@@ -38,12 +38,12 @@ public class JsonNodeDirectorySourceTest {
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        Files.createDirectories(new File("./target/tmp/test/JsonNodeDirectorySourceTest").toPath());
+        Files.createDirectories(new File("./target/tmp/filter/JsonNodeDirectorySourceTest").toPath());
     }
 
     @Test
     public void testDirectoryDoesNotExist() throws IOException {
-        final File directory = new File("./target/tmp/test/JsonNodeDirectorySourceTest/testDirectoryDoesNotExist");
+        final File directory = new File("./target/tmp/filter/JsonNodeDirectorySourceTest/testDirectoryDoesNotExist");
         final JsonNodeDirectorySource source = new JsonNodeDirectorySource.Builder()
                 .setDirectory(directory)
                 .build();
@@ -52,7 +52,7 @@ public class JsonNodeDirectorySourceTest {
 
     @Test
     public void testDirectoryNotDirectory() throws IOException {
-        final File directory = new File("./target/tmp/test/JsonNodeDirectorySourceTest/testDirectoryNotDirectory");
+        final File directory = new File("./target/tmp/filter/JsonNodeDirectorySourceTest/testDirectoryNotDirectory");
         Files.deleteIfExists(directory.toPath());
         Files.createFile(directory.toPath());
         final JsonNodeDirectorySource source = new JsonNodeDirectorySource.Builder()
@@ -63,7 +63,7 @@ public class JsonNodeDirectorySourceTest {
 
     @Test
     public void testDirectoryAll() throws IOException {
-        final File directory = new File("./target/tmp/test/JsonNodeDirectorySourceTest/testDirectoryAll");
+        final File directory = new File("./target/tmp/filter/JsonNodeDirectorySourceTest/testDirectoryAll");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
         Files.write(directory.toPath().resolve("foo.json"), "[\"one\"]".getBytes(Charsets.UTF_8));
@@ -81,7 +81,7 @@ public class JsonNodeDirectorySourceTest {
 
     @Test
     public void testDirectoryOnlyMatchingNames() throws IOException {
-        final File directory = new File("./target/tmp/test/JsonNodeDirectorySourceTest/testDirectoryOnlyMatchingNames");
+        final File directory = new File("./target/tmp/filter/JsonNodeDirectorySourceTest/testDirectoryOnlyMatchingNames");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
         Files.write(directory.toPath().resolve("foo.json"), "[\"one\"]".getBytes(Charsets.UTF_8));
@@ -99,7 +99,7 @@ public class JsonNodeDirectorySourceTest {
 
     @Test
     public void testDirectoryOnlyMatchingNamePatterns() throws IOException {
-        final File directory = new File("./target/tmp/test/JsonNodeDirectorySourceTest/testDirectoryOnlyMatchingNamePatterns");
+        final File directory = new File("./target/tmp/filter/JsonNodeDirectorySourceTest/testDirectoryOnlyMatchingNamePatterns");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
         Files.write(directory.toPath().resolve("foo.json"), "[\"one\"]".getBytes(Charsets.UTF_8));
@@ -117,7 +117,7 @@ public class JsonNodeDirectorySourceTest {
 
     @Test(expected = RuntimeException.class)
     public void testInvalidJson() throws IOException {
-        final File directory = new File("./target/tmp/test/JsonNodeDirectorySourceTest/testInvalidJson.json");
+        final File directory = new File("./target/tmp/filter/JsonNodeDirectorySourceTest/testInvalidJson.json");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
         Files.write(directory.toPath().resolve("foo.json"), "this=not-json".getBytes(Charsets.UTF_8));

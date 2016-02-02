@@ -35,12 +35,12 @@ public class JsonNodeFileSourceTest {
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        Files.createDirectories(new File("./target/tmp/test/JsonNodeFileSourceTest").toPath());
+        Files.createDirectories(new File("./target/tmp/filter/JsonNodeFileSourceTest").toPath());
     }
-    
+
     @Test
     public void testFileDoesNotExist() throws IOException {
-        final File file = new File("./target/tmp/test/JsonNodeFileSourceTest/testFileDoesNotExist.json");
+        final File file = new File("./target/tmp/filter/JsonNodeFileSourceTest/testFileDoesNotExist.json");
         final JsonNodeFileSource source = new JsonNodeFileSource.Builder()
                 .setFile(file)
                 .build();
@@ -49,7 +49,7 @@ public class JsonNodeFileSourceTest {
 
     @Test
     public void testFileUnreadable() throws IOException {
-        final File file = new File("./target/tmp/test/JsonNodeFileSourceTest/testFileUnreadable.json");
+        final File file = new File("./target/tmp/filter/JsonNodeFileSourceTest/testFileUnreadable.json");
         Files.write(file.toPath(), "{\"foo\":\"bar\"}".getBytes(Charsets.UTF_8));
         Files.setPosixFilePermissions(file.toPath(), ImmutableSet.of(PosixFilePermission.OWNER_WRITE));
         final JsonNodeFileSource source = new JsonNodeFileSource.Builder()
@@ -60,7 +60,7 @@ public class JsonNodeFileSourceTest {
 
     @Test
     public void testValidJson() throws IOException {
-        final File file = new File("./target/tmp/test/JsonNodeFileSourceTest/testValidJson.json");
+        final File file = new File("./target/tmp/filter/JsonNodeFileSourceTest/testValidJson.json");
         Files.write(file.toPath(), "{\"foo\":\"bar\"}".getBytes(Charsets.UTF_8));
         final JsonNodeFileSource source = new JsonNodeFileSource.Builder()
                 .setFile(file)
@@ -72,7 +72,7 @@ public class JsonNodeFileSourceTest {
 
     @Test(expected = RuntimeException.class)
     public void testInvalidJson() throws IOException {
-        final File file = new File("./target/tmp/test/JsonNodeFileSourceTest/testInvalidJson.json");
+        final File file = new File("./target/tmp/filter/JsonNodeFileSourceTest/testInvalidJson.json");
         Files.write(file.toPath(), "This=not-json".getBytes(Charsets.UTF_8));
         new JsonNodeFileSource.Builder()
                 .setFile(file)

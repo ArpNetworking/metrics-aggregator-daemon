@@ -16,13 +16,9 @@
 package com.arpnetworking.metrics.mad.configuration;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
-import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
-import com.arpnetworking.jackson.BuilderDeserializer;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.utility.InterfaceDatabase;
 import com.arpnetworking.utility.ReflectionsDatabase;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.base.MoreObjects;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
@@ -40,22 +36,6 @@ import java.util.Map;
  */
 @Loggable
 public final class AggregatorConfiguration {
-
-    /**
-     * Create an <code>ObjectMapper</code> for TsdAggregator configuration.
-     *
-     * @return An <code>ObjectMapper</code> for TsdAggregator configuration.
-     */
-    public static ObjectMapper createObjectMapper() {
-        final ObjectMapper objectMapper = ObjectMapperFactory.createInstance();
-
-        final SimpleModule module = new SimpleModule("TsdAggregator");
-        BuilderDeserializer.addTo(module, AggregatorConfiguration.class);
-
-        objectMapper.registerModules(module);
-
-        return objectMapper;
-    }
 
     public String getMonitoringCluster() {
         return _monitoringCluster;
@@ -75,6 +55,14 @@ public final class AggregatorConfiguration {
 
     public int getHttpPort() {
         return _httpPort;
+    }
+
+    public String getHttpHealthCheckPath() {
+        return _httpHealthCheckPath;
+    }
+
+    public String getHttpStatusPath() {
+        return _httpStatusPath;
     }
 
     public Period getJvmMetricsCollectionInterval() {
@@ -97,6 +85,8 @@ public final class AggregatorConfiguration {
                 .add("PipelinesDirectory", _pipelinesDirectory)
                 .add("HttpHost", _httpHost)
                 .add("HttpPort", _httpPort)
+                .add("HttpHealthCheckPath", _httpHealthCheckPath)
+                .add("HttpStatusPath", _httpStatusPath)
                 .add("AkkaConfiguration", _akkaConfiguration)
                 .add("JvmMetricsCollectorInterval", _jvmMetricsCollectionInterval)
                 .toString();
@@ -108,6 +98,8 @@ public final class AggregatorConfiguration {
         _pipelinesDirectory = builder._pipelinesDirectory;
         _httpHost = builder._httpHost;
         _httpPort = builder._httpPort;
+        _httpHealthCheckPath = builder._httpHealthCheckPath;
+        _httpStatusPath = builder._httpStatusPath;
         _jvmMetricsCollectionInterval = builder._jvmMetricsCollectionInterval;
         _akkaConfiguration = builder._akkaConfiguration;
     }
@@ -116,6 +108,8 @@ public final class AggregatorConfiguration {
     private final File _logDirectory;
     private final File _pipelinesDirectory;
     private final String _httpHost;
+    private final String _httpHealthCheckPath;
+    private final String _httpStatusPath;
     private final int _httpPort;
     private final Period _jvmMetricsCollectionInterval;
     private final Map<String, ?> _akkaConfiguration;
@@ -181,6 +175,28 @@ public final class AggregatorConfiguration {
         }
 
         /**
+         * The http health check path. Cannot be null or empty. Optional. Default is "/ping".
+         *
+         * @param value The health check path.
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setHttpHealthCheckPath(final String value) {
+            _httpHealthCheckPath = value;
+            return this;
+        }
+
+        /**
+         * The http status path. Cannot be null or empty. Optional. Default is "/status".
+         *
+         * @param value The status path.
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setHttpStatusPath(final String value) {
+            _httpStatusPath = value;
+            return this;
+        }
+
+        /**
          * The http port to listen on. Cannot be null, must be between 1 and
          * 65535 (inclusive).
          *
@@ -233,6 +249,12 @@ public final class AggregatorConfiguration {
         @NotNull
         @Range(min = 1, max = 65535)
         private Integer _httpPort;
+        @NotNull
+        @NotEmpty
+        private String _httpHealthCheckPath = "/ping";
+        @NotNull
+        @NotEmpty
+        private String _httpStatusPath = "/status";
         @NotNull
         private Period _jvmMetricsCollectionInterval = Period.millis(500);
         @NotNull

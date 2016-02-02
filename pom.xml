@@ -71,11 +71,11 @@
 
   <properties>
     <!--Dependency versions-->
-    <akka.version>2.4.1</akka.version>
-    <akka.http.version>1.0-RC1</akka.http.version>
+    <akka.version>2.4.2</akka.version>
+    <akka.http.version>2.4.2</akka.http.version>
     <apache.httpclient.version>4.5.1</apache.httpclient.version>
     <apache.httpcore.version>4.4.3</apache.httpcore.version>
-    <arpnetworking.commons.version>1.1.0</arpnetworking.commons.version>
+    <arpnetworking.commons.version>1.2.0</arpnetworking.commons.version>
     <cglib.version>3.1</cglib.version>
     <commons.codec.version>1.10</commons.codec.version>
     <commons.io.version>2.4</commons.io.version>
@@ -90,7 +90,7 @@
     <junit.benchmarks.version>0.7.2</junit.benchmarks.version>
     <junit.version>4.12</junit.version>
     <logback.version>1.1.3</logback.version>
-    <logback.steno.version>1.9.3</logback.steno.version>
+    <logback.steno.version>1.12.0</logback.steno.version>
     <log4j.over.slf4j.version>1.7.12</log4j.over.slf4j.version>
     <metrics.aggregator.protocol.version>1.0.2</metrics.aggregator.protocol.version>
     <metrics.client.version>0.4.5</metrics.client.version>
@@ -102,6 +102,7 @@
     <protobuf.version>2.6.1</protobuf.version>
     <reflections.version>0.9.10</reflections.version>
     <scala.version>2.11</scala.version>
+    <scala.java.compat.version>0.7.0</scala.java.compat.version>
     <scala.java8.version>0.2.0</scala.java8.version>
     <scala.library.version>2.11.7</scala.library.version>
     <slf4j.version>1.7.12</slf4j.version>
@@ -109,16 +110,12 @@
     <vertx.core.version>2.1.6</vertx.core.version>
     <wiremock.version>1.57</wiremock.version>
 
-    <!-- Version overrides, pending dependency plugin updates to pick the highest
-      version as a resolution strategy -->
-    <scala.java.compat.version>0.7.0</scala.java.compat.version>
-
     <!-- Findbugs -->
     <findbugs.exclude>${project.basedir}/findbugs.exclude.xml</findbugs.exclude>
 
     <!-- Code Coverage -->
-    <jacoco.check.line.coverage>0.60</jacoco.check.line.coverage>
-    <jacoco.check.branch.coverage>0.60</jacoco.check.branch.coverage>
+    <jacoco.check.line.coverage>0.50</jacoco.check.line.coverage>
+    <jacoco.check.branch.coverage>0.50</jacoco.check.branch.coverage>
 
   </properties>
   <build>
@@ -302,19 +299,14 @@
       <artifactId>akka-actor_${scala.version}</artifactId>
       <version>${akka.version}</version>
     </dependency>
-    <!--<dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-http-java-experimental_${scala.version}</artifactId>
-      <version>${akka.http.version}</version>
-    </dependency>-->
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-http-core-experimental_${scala.version}</artifactId>
+      <artifactId>akka-http-core_${scala.version}</artifactId>
       <version>${akka.http.version}</version>
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-stream-experimental_${scala.version}</artifactId>
+      <artifactId>akka-stream_${scala.version}</artifactId>
       <version>${akka.http.version}</version>
     </dependency>
     <dependency>
@@ -352,6 +344,11 @@
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
       <version>${scala.library.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang.modules</groupId>
+      <artifactId>scala-java8-compat_${scala.version}</artifactId>
+      <version>${scala.java.compat.version}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>

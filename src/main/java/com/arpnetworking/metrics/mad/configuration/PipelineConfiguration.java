@@ -17,11 +17,8 @@ package com.arpnetworking.metrics.mad.configuration;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
-import com.arpnetworking.configuration.jackson.DynamicConfigurationFactory;
-import com.arpnetworking.jackson.BuilderDeserializer;
 import com.arpnetworking.logback.annotations.Loggable;
-import com.arpnetworking.metrics.mad.parsers.Parser;
-import com.arpnetworking.metrics.mad.sources.Source;
+import com.arpnetworking.metrics.common.sources.Source;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticDeserializer;
@@ -68,29 +65,6 @@ public final class PipelineConfiguration {
 
         final SimpleModule module = new SimpleModule("Pipeline");
         module.addDeserializer(Statistic.class, new StatisticDeserializer());
-        BuilderDeserializer.addTo(module, PipelineConfiguration.class);
-
-        final Set<Class<? extends Sink>> sinkClasses = INTERFACE_DATABASE.findClassesWithInterface(Sink.class);
-        for (final Class<? extends Sink> sinkClass : sinkClasses) {
-            BuilderDeserializer.addTo(module, sinkClass);
-        }
-
-        final Set<Class<? extends Source>> sourceClasses = INTERFACE_DATABASE.findClassesWithInterface(Source.class);
-        for (final Class<? extends Source> sourceClass : sourceClasses) {
-            BuilderDeserializer.addTo(module, sourceClass);
-        }
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        final Set<Class<? extends Parser<?>>> parserClasses = INTERFACE_DATABASE.findClassesWithInterface((Class) Parser.class);
-        for (final Class<? extends Parser<?>> parserClass : parserClasses) {
-            BuilderDeserializer.addTo(module, parserClass);
-        }
-
-        final Set<Class<? extends DynamicConfigurationFactory>> dcFactoryClasses =
-                INTERFACE_DATABASE.findClassesWithInterface(DynamicConfigurationFactory.class);
-        for (final Class<? extends DynamicConfigurationFactory> dcFactoryClass : dcFactoryClasses) {
-            BuilderDeserializer.addTo(module, dcFactoryClass);
-        }
 
         objectMapper.registerModules(module);
 

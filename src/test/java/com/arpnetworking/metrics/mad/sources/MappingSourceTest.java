@@ -17,10 +17,11 @@ package com.arpnetworking.metrics.mad.sources;
 
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
+import com.arpnetworking.metrics.common.sources.Source;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.sources.MappingSource.MergingMetric;
-import com.arpnetworking.tsdaggregator.test.TestBeanFactory;
-import com.arpnetworking.tsdaggregator.test.UnorderedRecordEquality;
+import com.arpnetworking.test.TestBeanFactory;
+import com.arpnetworking.test.UnorderedRecordEquality;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;

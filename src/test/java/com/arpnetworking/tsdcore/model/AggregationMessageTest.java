@@ -41,7 +41,7 @@ public class AggregationMessageTest {
         final Buffer vertxBuffer = message.serialize();
         final byte[] messageBuffer = vertxBuffer.getBytes();
         final byte[] protobufBuffer = protobufMessage.toByteArray();
-        final ByteString byteString = ByteString.fromArray(vertxBuffer.getBytes());
+        ByteString.fromArray(vertxBuffer.getBytes());
 
         // Assert length
         Assert.assertEquals(protobufBuffer.length + 5, messageBuffer.length);

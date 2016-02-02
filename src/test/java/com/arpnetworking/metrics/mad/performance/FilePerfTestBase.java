@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 public class FilePerfTestBase {
 
     /**
-     * Runs a test.
+     * Runs a filter.
      *
      * @param pipelineConfigurationFile Pipeline configuration file.
      * @param duration Timeout period.
@@ -76,7 +76,7 @@ public class FilePerfTestBase {
                         if (TestFileGenerator.CANARY.equals(datum.getFQDSN().getMetric())) {
                             if (periods.add(periodicData.getPeriod())) {
                                 LOGGER.info(String.format(
-                                        "Canary flew; test=%s, period=%s",
+                                        "Canary flew; filter=%s, period=%s",
                                         this.getClass(),
                                         periodicData.getPeriod()));
                                 latch.countDown();
@@ -115,7 +115,7 @@ public class FilePerfTestBase {
 
             timer.stop();
             LOGGER.info(String.format(
-                    "Performance test result; test=%s, seconds=%s",
+                    "Performance filter result; filter=%s, seconds=%s",
                     this.getClass(),
                     timer.elapsed(TimeUnit.SECONDS)));
 

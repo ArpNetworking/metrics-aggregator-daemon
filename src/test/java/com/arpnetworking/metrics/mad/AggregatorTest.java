@@ -17,7 +17,7 @@ package com.arpnetworking.metrics.mad;
 
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
-import com.arpnetworking.tsdaggregator.test.TestBeanFactory;
+import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.Condition;
 import com.arpnetworking.tsdcore.model.FQDSN;

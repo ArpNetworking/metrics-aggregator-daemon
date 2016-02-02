@@ -35,12 +35,12 @@ public class FileTriggerTest {
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        Files.createDirectories(new File("./target/tmp/test/FileTriggerTest").toPath());
+        Files.createDirectories(new File("./target/tmp/filter/FileTriggerTest").toPath());
     }
 
     @Test
     public void testInitialFile() throws IOException {
-        final File file = new File("./target/tmp/test/FileTriggerTest/testInitialFile");
+        final File file = new File("./target/tmp/filter/FileTriggerTest/testInitialFile");
         Files.deleteIfExists(file.toPath());
         Files.createFile(file.toPath());
 
@@ -53,7 +53,7 @@ public class FileTriggerTest {
 
     @Test
     public void testInitialFileAlwaysExisted() throws IOException {
-        final File file = new File("./target/tmp/test/FileTriggerTest/testInitialFileAlwaysExisted");
+        final File file = new File("./target/tmp/filter/FileTriggerTest/testInitialFileAlwaysExisted");
         Files.deleteIfExists(file.toPath());
         Files.createFile(file.toPath());
         Files.setLastModifiedTime(file.toPath(), FileTime.fromMillis(0L));
@@ -67,7 +67,7 @@ public class FileTriggerTest {
 
     @Test
     public void testNoInitialFile() throws IOException {
-        final File file = new File("./target/tmp/test/FileTriggerTest/testNoInitialFile");
+        final File file = new File("./target/tmp/filter/FileTriggerTest/testNoInitialFile");
         Files.deleteIfExists(file.toPath());
 
         final Trigger trigger = new FileTrigger.Builder()
@@ -79,7 +79,7 @@ public class FileTriggerTest {
 
     @Test
     public void testFileDeleted() throws IOException {
-        final File file = new File("./target/tmp/test/FileTriggerTest/testFileDeleted");
+        final File file = new File("./target/tmp/filter/FileTriggerTest/testFileDeleted");
         Files.deleteIfExists(file.toPath());
         Files.createFile(file.toPath());
 
@@ -97,7 +97,7 @@ public class FileTriggerTest {
 
     @Test
     public void testFileCreated() throws IOException {
-        final File file = new File("./target/tmp/test/FileTriggerTest/testFileCreated");
+        final File file = new File("./target/tmp/filter/FileTriggerTest/testFileCreated");
         Files.deleteIfExists(file.toPath());
 
         final Trigger trigger = new FileTrigger.Builder()
@@ -114,7 +114,7 @@ public class FileTriggerTest {
 
     @Test
     public void testFileChanged() throws IOException, InterruptedException {
-        final File file = new File("./target/tmp/test/FileTriggerTest/testFileChanged");
+        final File file = new File("./target/tmp/filter/FileTriggerTest/testFileChanged");
         Files.deleteIfExists(file.toPath());
         Files.write(file.toPath(), "foo".getBytes(Charsets.UTF_8));
 
@@ -134,7 +134,7 @@ public class FileTriggerTest {
 
     @Test
     public void testFileChangedLastModifiedOnly() throws IOException {
-        final File file = new File("./target/tmp/test/FileTriggerTest/testFileChangedLastModifiedOnly");
+        final File file = new File("./target/tmp/filter/FileTriggerTest/testFileChangedLastModifiedOnly");
         Files.deleteIfExists(file.toPath());
         Files.write(file.toPath(), "foo".getBytes(Charsets.UTF_8));
         Files.setLastModifiedTime(file.toPath(), FileTime.fromMillis(1418112007000L));

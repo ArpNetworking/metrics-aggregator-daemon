@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
 import java.util.Locale;
 
 /**
- * Common test utility helper methods.
+ * Common filter utility helper methods.
  *
  * @author Ville Koskela (vkoskela at groupon dot com)
  */

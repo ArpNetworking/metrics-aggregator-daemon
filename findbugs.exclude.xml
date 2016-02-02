@@ -15,19 +15,19 @@
   -->
 <FindBugsFilter>
 
-     <!-- Match all DLS_DEAD_LOCAL_STORE violations. As per FindBugs 
+     <!-- Match all DLS_DEAD_LOCAL_STORE violations. As per FindBugs
          documentation these generate numerous false positives under Sun/Oracle
-         compilers. 
-         
+         compilers.
+
          http://findbugs.sourceforge.net/bugDescriptions.html#DLS_DEAD_LOCAL_STORE
      -->
      <Match>
          <Bug pattern="DLS_DEAD_LOCAL_STORE" />
      </Match>
-     
+
      <!-- Match all RV_RETURN_VALUE_IGNORED_BAD_PRACTICE violations on all unit
-        test files since Mockito usage can cause this violation when stating
-        expectations. 
+        filter files since Mockito usage can cause this violation when stating
+        expectations.
      -->
      <Match>
          <Or>

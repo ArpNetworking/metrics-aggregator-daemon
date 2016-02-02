@@ -14,7 +14,7 @@ Metrics Aggregator Daemon
          alt="Maven Artifact">
 </a>
 
-Aggregates samples into configurable time buckets (e.g. 1 second, 1 minute, etc.) published by metrics client libraries (e.g. [Java](https://github.com/ArpNetworking/metrics-client-java), [NodeJS](https://github.com/ArpNetworking/metrics-client-nodejs), [Ruby](https://github.com/ArpNetworking/metrics-client-ruby), etc.) to compute a variety of statistics. The statistics are reaggreable and are published together with supporting data to configurable destination(s).
+Aggregates samples into configurable time buckets (e.g. 1 second, 1 minute, etc.) published by metrics client libraries (e.g. [Java](https://github.com/ArpNetworking/metrics-client-java), [NodeJS](https://github.com/ArpNetworking/metrics-client-nodejs), [Ruby](https://github.com/ArpNetworking/metrics-client-ruby), etc.) to compute a variety of statistics. The statistics are reaggregatable and are published together with supporting data to configurable destination(s).
 
 
 Usage
@@ -53,6 +53,8 @@ The configuration specifies:
 * pipelinesDirectory - The location of configuration files for each metrics pipeline.
 * httpHost - The ip address to bind the http server to.
 * httpPort - The port to bind the http server to.
+* httpHealthCheckPath - The path in the http server for the health check.
+* httpStatusPath - The path in the http server for the status.
 * jvmMetricsCollectionInterval - The JVM metrics collection interval in ISO-8601 period notation.
 * limiters - Configuration of zero or more limiters by name.
 * akkaConfiguration - Configuration of Akka.
@@ -66,6 +68,8 @@ For example:
     "pipelinesDirectory": "/usr/local/lib/metrics-aggregator-daemon/config/pipelines",
     "httpHost": "0.0.0.0",
     "httpPort": 6080,
+    "httpHealthCheckPath": "/mad/healthcheck",
+    "httpStatusPath": "/mad/status",
     "jvmMetricsCollectionInterval": "PT.5S",
     "akkaConfiguration": {
         "akka": {
@@ -98,7 +102,7 @@ For example:
     "sources":
     [
         {
-            "type": "com.arpnetworking.metrics.mad.sources.FileSource",
+            "type": "com.arpnetworking.metrics.common.sources.FileSource",
             "name": "my_application_source",
             "filePath": "/var/log/my-application-query.log",
             "parser": {
@@ -109,14 +113,8 @@ For example:
     "sinks":
     [
         {
-            "type": "com.arpnetworking.tsdcore.sinks.ReMetSink",
-            "name": "my_application_remet_sink",
-            "uri": "http://localhost:7090/report"
-        },
-        {
-            "type": "com.arpnetworking.tsdcore.sinks.CarbonSink",
-            "name": "my_application_carbon_sink",
-            "serverAddress": "192.168.0.1"
+            "type": "com.arpnetworking.tsdcore.sinks.TelemetrySink",
+            "name": "my_application_telemetry_sink"
         },
         {
             "type": "com.arpnetworking.tsdcore.sinks.AggregationServerSink",

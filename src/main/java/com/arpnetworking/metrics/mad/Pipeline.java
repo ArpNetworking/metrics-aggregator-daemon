@@ -16,8 +16,8 @@
 package com.arpnetworking.metrics.mad;
 
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.common.sources.Source;
 import com.arpnetworking.metrics.mad.configuration.PipelineConfiguration;
-import com.arpnetworking.metrics.mad.sources.Source;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;

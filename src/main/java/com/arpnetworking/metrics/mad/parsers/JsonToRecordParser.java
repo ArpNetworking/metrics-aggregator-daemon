@@ -19,7 +19,8 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.jackson.databind.EnumerationDeserializer;
 import com.arpnetworking.commons.jackson.databind.EnumerationDeserializerStrategyUsingToUpperCase;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
-import com.arpnetworking.jackson.BuilderDeserializer;
+import com.arpnetworking.metrics.common.parsers.Parser;
+import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Metric;
@@ -29,10 +30,8 @@ import com.arpnetworking.metrics.mad.model.json.Version2d;
 import com.arpnetworking.metrics.mad.model.json.Version2e;
 import com.arpnetworking.metrics.mad.model.json.Version2f;
 import com.arpnetworking.metrics.mad.model.json.Version2fSteno;
-import com.arpnetworking.metrics.mad.parsers.exceptions.ParsingException;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.arpnetworking.steno.RateLimitLogBuilder;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
@@ -407,10 +406,7 @@ public final class JsonToRecordParser implements Parser<Record> {
     private static final String DATA_KEY = "data";
     private static final String VERSION_KEY = "version";
     private static final String LOCAL_HOST_NAME;
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonToRecordParser.class);
-    private static final RateLimitLogBuilder INVALID_SAMPLE_LOG = new RateLimitLogBuilder(
-            LOGGER.warn().setMessage("Invalid sample for metric"),
-            Duration.ofMinutes(1));
+    private static final Logger INVALID_SAMPLE_LOGGER = LoggerFactory.getRateLimitLogger(JsonToRecordParser.class, Duration.ofMinutes(1));
 
     private static final Function<String, Quantity> VERSION_2C_SAMPLE_TO_QUANTITY = sample -> {
         if (sample != null) {
@@ -420,7 +416,11 @@ public final class JsonToRecordParser implements Parser<Record> {
                     return new Quantity.Builder().setValue(value).build();
                 } else {
                     // TODO(barp): Create a counter for invalid metrics [AINT-680]
-                    INVALID_SAMPLE_LOG.addData("value", sample).log();
+                    INVALID_SAMPLE_LOGGER
+                            .warn()
+                            .setMessage("Invalid sample for metric")
+                            .addData("value", sample)
+                            .log();
                     return null;
                 }
             } catch (final NumberFormatException nfe) {
@@ -440,7 +440,11 @@ public final class JsonToRecordParser implements Parser<Record> {
                         .build();
             } else {
                 // TODO(barp): Create a counter for invalid metrics [AINT-680]
-                INVALID_SAMPLE_LOG.addData("value", sample.getValue()).log();
+                INVALID_SAMPLE_LOGGER
+                        .warn()
+                        .setMessage("Invalid sample for metric")
+                        .addData("value", sample.getValue())
+                        .log();
                 return null;
             }
         } else {
@@ -457,7 +461,11 @@ public final class JsonToRecordParser implements Parser<Record> {
                         .build();
             } else {
                 // TODO(barp): Create a counter for invalid metrics [AINT-680]
-                INVALID_SAMPLE_LOG.addData("value", sample.getValue()).log();
+                INVALID_SAMPLE_LOGGER
+                        .warn()
+                        .setMessage("Invalid sample for metric")
+                        .addData("value", sample.getValue())
+                        .log();
                 return null;
             }
         } else {
@@ -477,7 +485,11 @@ public final class JsonToRecordParser implements Parser<Record> {
                         .build();
             } else {
                 // TODO(barp): Create a counter for invalid metrics [AINT-680]
-                INVALID_SAMPLE_LOG.addData("value", sample.getValue()).log();
+                INVALID_SAMPLE_LOGGER
+                        .warn()
+                        .setMessage("Invalid sample for metric")
+                        .addData("value", sample.getValue())
+                        .log();
                 return null;
             }
         } else {
@@ -497,7 +509,11 @@ public final class JsonToRecordParser implements Parser<Record> {
                         .build();
             } else {
                 // TODO(barp): Create a counter for invalid metrics [AINT-680]
-                INVALID_SAMPLE_LOG.addData("value", sample.getValue()).log();
+                INVALID_SAMPLE_LOGGER
+                        .warn()
+                        .setMessage("Invalid sample for metric")
+                        .addData("value", sample.getValue())
+                        .log();
                 return null;
             }
         } else {
@@ -507,11 +523,6 @@ public final class JsonToRecordParser implements Parser<Record> {
 
     static {
         final SimpleModule queryLogParserModule = new SimpleModule("QuerLogParser");
-        BuilderDeserializer.addTo(queryLogParserModule, Version2c.class);
-        BuilderDeserializer.addTo(queryLogParserModule, Version2d.class);
-        BuilderDeserializer.addTo(queryLogParserModule, Version2e.class);
-        BuilderDeserializer.addTo(queryLogParserModule, Version2f.class);
-        BuilderDeserializer.addTo(queryLogParserModule, Version2fSteno.class);
         queryLogParserModule.addDeserializer(
                 Unit.class,
                 EnumerationDeserializer.newInstance(

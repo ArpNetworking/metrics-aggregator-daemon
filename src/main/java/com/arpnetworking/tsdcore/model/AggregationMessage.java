@@ -17,7 +17,6 @@ package com.arpnetworking.tsdcore.model;
 
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.google.protobuf.GeneratedMessage;
-
 import org.vertx.java.core.buffer.Buffer;
 
 /**

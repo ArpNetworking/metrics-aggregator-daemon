@@ -36,12 +36,12 @@ public class DirectoryTriggerTest {
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        Files.createDirectories(new File("./target/tmp/test/DirectoryTriggerTest").toPath());
+        Files.createDirectories(new File("./target/tmp/filter/DirectoryTriggerTest").toPath());
     }
-    
+
     @Test
     public void testInitialDirectory() throws IOException {
-        final File directory = new File("./target/tmp/test/DirectoryTriggerTest/testInitialDirectory");
+        final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testInitialDirectory");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
 
@@ -54,7 +54,7 @@ public class DirectoryTriggerTest {
 
     @Test
     public void testNoInitialDirectory() throws IOException {
-        final File directory = new File("./target/tmp/test/DirectoryTriggerTest/testNoInitialDirectory");
+        final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testNoInitialDirectory");
         deleteDirectory(directory);
 
         final Trigger trigger = new DirectoryTrigger.Builder()
@@ -66,7 +66,7 @@ public class DirectoryTriggerTest {
 
     @Test
     public void testDirectoryDeleted() throws IOException {
-        final File directory = new File("./target/tmp/test/DirectoryTriggerTest/testDirectoryDeleted");
+        final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testDirectoryDeleted");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
 
@@ -84,7 +84,7 @@ public class DirectoryTriggerTest {
 
     @Test
     public void testDirectoryCreated() throws IOException {
-        final File directory = new File("./target/tmp/test/DirectoryTriggerTest/testDirectoryCreated");
+        final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testDirectoryCreated");
         deleteDirectory(directory);
 
         final Trigger trigger = new DirectoryTrigger.Builder()
@@ -101,7 +101,7 @@ public class DirectoryTriggerTest {
 
     @Test
     public void testDirectoryChangedFileCreated() throws IOException, InterruptedException {
-        final File directory = new File("./target/tmp/test/DirectoryTriggerTest/testDirectoryChangedFileCreated");
+        final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testDirectoryChangedFileCreated");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
 
@@ -119,7 +119,7 @@ public class DirectoryTriggerTest {
 
     @Test
     public void testDirectoryChangedFileModified() throws IOException, InterruptedException {
-        final File directory = new File("./target/tmp/test/DirectoryTriggerTest/testDirectoryChangedFileModified");
+        final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testDirectoryChangedFileModified");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
         final File file = directory.toPath().resolve("foo.txt").toFile();
@@ -141,7 +141,7 @@ public class DirectoryTriggerTest {
 
     @Test
     public void testDirectoryChangedFileDeleted() throws IOException, InterruptedException {
-        final File directory = new File("./target/tmp/test/DirectoryTriggerTest/testDirectoryChangedFileDeleted");
+        final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testDirectoryChangedFileDeleted");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
         final File file = directory.toPath().resolve("foo.txt").toFile();
@@ -161,7 +161,7 @@ public class DirectoryTriggerTest {
 
     @Test
     public void testOnlyMatchedName() throws IOException, InterruptedException {
-        final File directory = new File("./target/tmp/test/DirectoryTriggerTest/testIgnoreUnmatchedName");
+        final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testIgnoreUnmatchedName");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
 
@@ -182,7 +182,7 @@ public class DirectoryTriggerTest {
 
     @Test
     public void testOnlyMatchedNamePattern() throws IOException, InterruptedException {
-        final File directory = new File("./target/tmp/test/DirectoryTriggerTest/testIgnoreUnmatchedNamePattern");
+        final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testIgnoreUnmatchedNamePattern");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
 

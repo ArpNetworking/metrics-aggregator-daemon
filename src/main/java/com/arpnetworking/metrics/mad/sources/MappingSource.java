@@ -19,6 +19,8 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.common.sources.BaseSource;
+import com.arpnetworking.metrics.common.sources.Source;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Metric;
