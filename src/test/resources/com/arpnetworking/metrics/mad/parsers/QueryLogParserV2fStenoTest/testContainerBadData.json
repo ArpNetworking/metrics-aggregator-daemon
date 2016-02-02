@@ -1,0 +1,10 @@
+{
+    "time": "2014-03-24T12:15:41.110Z",
+    "name": "aint.metrics",
+    "level": "info",
+    "id": "oRw59PrARvatGNC7fiWw4A",
+    "context": {
+        "host": "MyHost"
+    },
+    "data": "This must be a dictionary"
+}

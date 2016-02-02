@@ -1,0 +1,41 @@
+{
+    "name": "collectd_pipeline",
+    "sources": [
+        {
+            "type": "com.arpnetworking.tsdaggregator.sources.MappingSource",
+            "name": "collectd_mapping_source",
+            "findAndReplace": {
+                "^cpu/([\\d]+)/cpu/([^/]+)/value": ["cpu/$2"],
+                "^load/load/((1|5|15)min)": ["load/$1"],
+                "^memory/memory/([^/]+)/value": ["memory/$1"],
+                "^vmem/vmpage_number/([^/]+)/value": ["vmem/$1"],
+                "^vmem/vmpage_io/([^/]+)/(.*)": ["vmem/io/$1/$2"],
+                "^vmem/vmpage_faults/(.*)": ["vmem/faults/$1"],
+                "^swap/swap/([^/]+)/value": ["swap/$1"],
+                "^swap/swap_io/([^/]+)/value": ["swap/io/$1"],
+                "^interface/([^/]+)/if_([^/]+)/(.*)": ["interface/$1/$3/$2"],
+                "^disk/([^/]+)/disk_([^/]+)/(read|write)": ["disk/$1/$3/$2"],
+                "^df/(.*)/value": ["disk/$1"],
+                "^ntpd/(.*)/value": ["ntpd/$1"],
+                "^processes/([^/]+)/ps_(vm|rss|data|code|stacksize)/value": ["processes/$1/$2"],
+                "^processes/([^/]+)/ps_(cputime|count|pagefaults)/(.*)": ["processes/$1/$2/$3"],
+                "^processes/([^/]+)/ps_disk_([^/]+)/(.*)": ["processes/$1/disk/$3/$2"],
+                "^tcpconns/([^-]+)-(local|remote)/tcp_connections/([^/]+)/value": ["tcpconns/$2/$1/$3"]
+            },
+            "source": {
+                "type": "com.arpnetworking.tsdcore.sources.FileSource",
+                "name": "collectd_source",
+                "sourceFile": "target/tmp/perf/collectd-sample1.log",
+                "stateFile": null,
+                "parser": {
+                    "type": "com.arpnetworking.tsdaggregator.parsers.QueryLogParser",
+                    "defaultService": "collectd",
+                    "defaultCluster": "test_cluster",
+                    "defaultHost": "test_host.local"
+                }
+            }
+        }
+    ],
+    "sinks": [
+    ]
+}

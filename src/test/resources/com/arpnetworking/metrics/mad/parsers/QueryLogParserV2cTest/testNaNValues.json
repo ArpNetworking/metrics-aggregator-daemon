@@ -1,0 +1,16 @@
+{
+    "version": "2c",
+    "annotations": {
+        "initTimestamp": "1347527680.486",
+        "finalTimestamp": "1347527687.686"
+    },
+    "timers": {
+        "t1": [ "NaN" ]
+    },
+    "gauges": {
+        "g1": [ "NaN" ]
+    },
+    "counters": {
+        "c1": [ "NaN" ]
+    }
+}

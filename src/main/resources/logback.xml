@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2014 Brandon Arp
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<configuration>
+    <appender name="mad-logger" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/mad.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <timeBasedFileNamingAndTriggeringPolicy class="com.arpnetworking.logback.SizeAndRandomizedTimeBasedFNATP">
+                <maxOffsetInMillis>900000</maxOffsetInMillis>
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <fileNamePattern>logs/mad.%d{yyyy-MM-dd_HH}.%i.log.gz</fileNamePattern>
+            <maxHistory>4</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        <encoder class="com.arpnetworking.logback.KeyValueEncoder">
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>%date %t [%level] %logger : %message %ex%n</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <appender name="mad-async" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="mad-logger"/>
+        <discardingThreshold>20000</discardingThreshold>
+        <queueSize>500</queueSize>
+    </appender>
+
+    <logger name="org.reflections.Reflections" level="ERROR" />
+
+    <root level="DEBUG">
+        <appender-ref ref="mad-async"/>
+    </root>
+</configuration>

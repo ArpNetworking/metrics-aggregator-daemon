@@ -1,0 +1,22 @@
+{
+    "version": "2c",
+    "gauges": {
+        "gauge1": [
+            1,
+            2
+        ],
+        "gauge2": [
+            15
+        ]
+    },
+    "timers": {
+        "/incentive/bestfor": [
+            2070,
+            1844
+        ]
+    },
+    "annotations": {
+        "initTimestamp": "1347527680.486",
+        "finalTimestamp": "1347527687.686"
+    }
+}

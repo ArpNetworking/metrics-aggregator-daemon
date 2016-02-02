@@ -1,0 +1,14 @@
+{
+    "version": "2f",
+    "annotations": {
+        "_start": "2014-03-24T12:15:40.008Z",
+        "_end": "2014-03-24T12:15:41.010Z",
+        "_service": "MyService",
+        "_cluster": "MyCluster",
+        "_host": "MyHost",
+        "_id": ""
+    },
+    "timers": {},
+    "gauges": {},
+    "counters": {}
+}

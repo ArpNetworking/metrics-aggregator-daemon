@@ -1,0 +1,72 @@
+{
+    "version": "2f",
+    "annotations": {
+        "_start": "2014-03-24T12:15:40.008Z",
+        "_end": "2014-03-24T12:15:41.010Z",
+        "_service": "MyService",
+        "_cluster": "MyCluster",
+        "_host": "MyHost",
+        "_id": "6be33313-bb39-423a-a928-1d0cc0da60a9"
+    },
+    "timers": {
+        "t1": {
+            "values": [
+                {
+                    "value": 1,
+                    "unitNumerators": ["second"]
+                },
+                {
+                    "value": 2,
+                    "unitNumerators": ["millisecond"]
+                },
+                {
+                    "value": 0,
+                    "unitNumerators": ["millisecond"]
+                },
+                {
+                    "value": 4,
+                    "unitNumerators": ["second"]
+                }
+            ]
+        },
+        "t2": {
+            "values": [
+                {
+                    "value": 5
+                },
+                {
+                    "value": 6
+                },
+                {
+                    "value": 4
+                }
+            ]
+        }
+    },
+    "gauges": {
+        "g1": {
+            "values": [
+                {
+                    "value": 1.2,
+                    "unitNumerators": ["gigabyte"]
+                },
+                {
+                    "value": 1.1
+                },
+                {
+                    "value": 0.8,
+                    "unitNumerators": ["second"]
+                }
+            ]
+        }
+    },
+    "counters": {
+        "c1": {
+            "values": [
+                {
+                    "value": 1
+                }
+            ]
+        }
+    }
+}

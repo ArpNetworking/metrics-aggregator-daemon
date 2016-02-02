@@ -1,0 +1,21 @@
+{
+    "time": null,
+    "name": "aint.metrics",
+    "level": "info",
+    "id": "oRw59PrARvatGNC7fiWw4A",
+    "context": {
+        "host": "MyHost"
+    },
+    "data": {
+        "version": "2f",
+        "annotations": {
+            "_start": "2014-03-24T12:15:40.008Z",
+            "_end": "2014-03-24T12:15:41.010Z",
+            "_service": "MyService",
+            "_cluster": "MyCluster"
+        },
+        "timers": {},
+        "gauges": {},
+        "counters": {}
+    }
+}

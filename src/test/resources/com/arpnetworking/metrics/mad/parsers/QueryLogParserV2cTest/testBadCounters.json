@@ -1,0 +1,19 @@
+{
+    "version": "2c",
+    "gauges": {},
+    "counters": [
+        "counter1",
+        [
+            7
+        ],
+        "counter2",
+        [
+            1
+        ]
+    ],
+    "timers": {},
+    "annotations": {
+        "initTimestamp": "1347527680.486",
+        "finalTimestamp": "1347527687.686"
+    }
+}

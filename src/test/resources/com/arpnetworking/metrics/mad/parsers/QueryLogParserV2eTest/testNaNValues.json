@@ -1,0 +1,42 @@
+{
+    "time": "2014-03-24T12:15:41.110Z",
+    "name": "aint.metrics",
+    "level": "info",
+    "id": "oRw59PrARvatGNC7fiWw4A",
+    "context": {},
+    "data": {
+        "version": "2E",
+        "annotations": {
+            "initTimestamp": "2014-03-24T12:15:40.008Z",
+            "finalTimestamp": "2014-03-24T12:15:41.010Z"
+        },
+        "timers": {
+            "t1": {
+                "values": [
+                    {
+                        "value": "NaN",
+                        "unit": "second"
+                    }
+                ]
+            }
+        },
+        "gauges": {
+            "g1": {
+                "values": [
+                    {
+                        "value": "NaN"
+                    }
+                ]
+            }
+        },
+        "counters": {
+            "c1": {
+                "values": [
+                    {
+                        "value": "NaN"
+                    }
+                ]
+            }
+        }
+    }
+}
