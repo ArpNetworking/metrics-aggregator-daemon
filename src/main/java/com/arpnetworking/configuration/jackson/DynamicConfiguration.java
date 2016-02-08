@@ -112,9 +112,10 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
     }
 
     private void loadConfiguration() {
-        final List<JsonNodeSource> sources = Lists.transform(
-                _sourceBuilders,
-                com.arpnetworking.commons.builder.Builder::build);
+        final List<JsonNodeSource> sources =
+                Lists.<com.arpnetworking.commons.builder.Builder<? extends JsonNodeSource>, JsonNodeSource>transform(
+                        _sourceBuilders,
+                        com.arpnetworking.commons.builder.Builder::build);
 
         final StaticConfiguration snapshot = new StaticConfiguration.Builder()
                 .setObjectMapper(_objectMapper)
