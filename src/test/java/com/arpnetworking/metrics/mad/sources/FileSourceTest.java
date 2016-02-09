@@ -42,7 +42,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Tests for the FileSource class.
@@ -156,16 +155,18 @@ public class FileSourceTest {
     public void testTailerFileNotFound() throws InterruptedException, IOException {
         final Path state = _directory.resolve("testTailerFileNotFound.log.state");
         Files.deleteIfExists(state);
+        final Path file = _directory.resolve("testTailerFileNotFound.log");
+        Files.deleteIfExists(file);
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
-                        .setSourceFile(Paths.get("/dne/" + UUID.randomUUID().toString() + ".log"))
+                        .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
                         .setInterval(Duration.millis(INTERVAL)),
                 _logger);
 
         source.start();
-        Thread.sleep(INTERVAL / 2);
+        Thread.sleep(SLEEP_INTERVAL);
         Mockito.verify(_logger).warn();
         Mockito.verify(_logBuilder, Mockito.atLeastOnce()).setMessage("Tailer file not found");
         source.stop();
@@ -175,9 +176,11 @@ public class FileSourceTest {
     public void testTailerFileNotFoundInterval() throws InterruptedException, IOException {
         final Path state = _directory.resolve("testTailerFileNotFoundInterval.log.state");
         Files.deleteIfExists(state);
+        final Path file = _directory.resolve("testTailerFileNotFoundInterval.log");
+        Files.deleteIfExists(file);
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
-                        .setSourceFile(Paths.get("/dne/" + UUID.randomUUID().toString() + ".log"))
+                        .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
                         .setInterval(Duration.millis(INTERVAL)),
@@ -188,6 +191,8 @@ public class FileSourceTest {
         Mockito.verify(_logger).warn();
         Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file not found"));
         Thread.sleep(SLEEP_INTERVAL * 2);
+        Mockito.verify(_logger).warn();
+        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file not found"));
         source.stop();
     }
 
