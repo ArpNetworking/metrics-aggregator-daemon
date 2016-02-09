@@ -7,7 +7,7 @@ env:
   global:
   - JDKW=https://raw.githubusercontent.com/vjkoskela/jdk-wrapper/master/jdk-wrapper.sh
   - JDKW_VERSION=8u65
-  - JDKW_BUILD=17
+  - JDKW_BUILD=b17
 install: true
 #before_script:
 #- gpg --import arpnetworking.key
