@@ -112,7 +112,8 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
     }
 
     private void loadConfiguration() {
-        final List<JsonNodeSource> sources =
+        // TODO(vkoskela): Remove the cast, unnecessary with 1.8.0_60+ but Travis uses 1.8.0_31 [ISSUE-?]
+        final List<JsonNodeSource> sources = (List<JsonNodeSource>)
                 Lists.<com.arpnetworking.commons.builder.Builder<? extends JsonNodeSource>, JsonNodeSource>transform(
                         _sourceBuilders,
                         com.arpnetworking.commons.builder.Builder::build);
