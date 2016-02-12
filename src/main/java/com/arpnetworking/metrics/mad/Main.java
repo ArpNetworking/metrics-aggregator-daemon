@@ -17,6 +17,7 @@ package com.arpnetworking.metrics.mad;
 
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.actor.Terminated;
 import akka.http.javadsl.Http;
 import akka.http.javadsl.IncomingConnection;
 import akka.http.javadsl.ServerBinding;
@@ -47,7 +48,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import scala.concurrent.Await;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 import java.io.File;
 import java.util.Collections;
@@ -264,14 +267,21 @@ public final class Main implements Launchable {
         LOGGER.info().setMessage("Stopping actors").log();
     }
 
-    // TODO(vkoskela): Fix Akka shutdown logic. [ISSUE-?]
-    @SuppressWarnings("deprecation")
     private void shutdownAkka() {
         LOGGER.info().setMessage("Stopping akka").log();
 
         if (_actorSystem != null) {
-            _actorSystem.shutdown();
-            _actorSystem.awaitTermination();
+            final Future<Terminated> terminate = _actorSystem.terminate();
+            try {
+                Await.result(terminate, Duration.create(30, TimeUnit.SECONDS));
+                // CHECKSTYLE.OFF: IllegalCatch - Await.result throws Exception
+            } catch (final Exception e) {
+                // CHECKSTYLE.ON: IllegalCatch
+                LOGGER.warn()
+                        .setMessage("Exception while shutting down actor system")
+                        .setThrowable(e)
+                        .log();
+            }
             _actorSystem = null;
         }
     }

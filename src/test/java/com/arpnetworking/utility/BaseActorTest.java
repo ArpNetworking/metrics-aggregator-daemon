@@ -16,9 +16,15 @@
 package com.arpnetworking.utility;
 
 import akka.actor.ActorSystem;
+import akka.actor.Terminated;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.MockitoAnnotations;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Base for actor tests. Loads configuration and provides an actor system.
@@ -26,8 +32,6 @@ import org.mockito.MockitoAnnotations;
  * @author Brandon Arp (barp at groupon dot com)
  */
 // TODO(barp): Pull this into a test-utils package [MAI-488]
-// TODO(vkoskela): Fix ActorSystem shutdown [ISSUE-?]
-@SuppressWarnings("deprecation")
 public abstract class BaseActorTest {
     /**
      * Binds mockito annotations and starts the actor system.
@@ -42,8 +46,9 @@ public abstract class BaseActorTest {
      * Shuts down the actor system.
      */
     @After
-    public void shutdown() {
-        _system.shutdown();
+    public void shutdown() throws Exception {
+        final Future<Terminated> terminate = _system.terminate();
+        Await.result(terminate, Duration.apply(30, TimeUnit.SECONDS));
     }
 
     protected ActorSystem getSystem() {
