@@ -1,16 +1,19 @@
 cache:
   directories:
-  - $HOME/.m2
-  - $HOME/.jdk
+  - "$HOME/.m2"
+  - "$HOME/.jdk"
 sudo: false
 env:
   global:
   - JDKW=https://raw.githubusercontent.com/vjkoskela/jdk-wrapper/master/jdk-wrapper.sh
   - JDKW_VERSION=8u65
   - JDKW_BUILD=b17
+  - secure: VYjBrRGzDEV1AJ0XOrgRQNcUhIRQslKmOIqLyZ44kywXmZIP5WvrzY5KB/F7GS3tSjw/nFIcfOauKO/oXHVnpA/DB/1whTXwKhkBrH0GRap61E9zP9R9wOK3GyfA7lJaB6VOG3CmtEZMViT12jGXcgfsxoCyRwu/ClmBYOtQy3DKy32yYPI/fsX8s6FhsNPdr3pWpju37Pi++V8AsJBV+sPAcGixtlVbiBc3xixOV4Q45AA8U88dherTFKT3PvFVZYH3YD1Mq2C2tI1bCYDY4gbRZbUbqKNX1bOeFPcaS7Idk539Yzh9KbOZEumbW77jf8DNWickBiA/GjmxnAtEzKrlBSpjjdA/FxhJOCNaD/X0nfeEjNTizB+JTiYDDMfuCf19ekdIW6EhsTbEGay13aSz53F5O60SiVKjV35xoHYVblatCFnT8NvU3r9+H6KTRHH7ge7WKbd7bsLmpr49s9me6QcRNyAvo0mLB2UsOCqXgvG+AwtfPdZUQfm/wPTFJsY13TMXoN4Hs/ivcVyz98dcwROiYLbSCW/qwgv+aRQqw5W2+9UWCj94xCR8K9Nuw5POsQ2mra4mPFOatr5rk7sD0XyhQYvB8Bw5hQwwmLcXNsR3en2kF9OivA7yuxxOXA4AXdgG1+eEZ4SmtBf31a0nMzkztKV8gOigB8Co26c=
+  - secure: ogevJljn5n5gDVIUgBpwWBD9gz11XYv0p5DErM4ry3dO0K+P9Z+3heH02Dio12tqCae/c9ZUwAH1ToNTBML+kctkxiEQpXqW4mJLgPJ0Uh9UcWiWR2IN9sQbmX12814EBGV5SQLIHRaAsgZoUETfEmXz7MjA4Ti4V0Q2UkbcEOLglNTVUn9xhh96ohNE9ZMWpX3xNAGKBu2ja/3ZfaM/urNPFMZWHnRjumu2P8J2uuger+mNiaE8o4N0b/iz3J9GbZVc9fzkz2/kHYqr7QhJJ1sMTACFukc/7A9/OrKWV83CTg8ltyYcK7tr4ktWaaW8uWbw40YKx9VRN+ukG/QGKes6hjS7zoMYuJzygiBG9I4CdSIVPu5qNVG7VWAuKmbgshDYmxxqvECO7al7rz531GzcvQjOkt6g3/SPm6OIIKXXWhF8tIMDEnNRMUcjAIrkMDp4qrkHm7B6oDjpWE+Xp+CDLZGhZi7d7G3JPpx83wYEt4+2aRCmXV3raJvqqrjG7sY2wULNMSGiB+u4su11APdQ5WDO+H3XelVhLsbAInMtOaSDmdWtr+mqBxLWirfQQnAoDjdI6DjbFziQ9BfdtnjY2ignlSJTh0UfNUBaSzvkIGitbrCrHu1jVhI4QcME1khidMbmnrJeKNNCRekeiJ6ujnENOTi6jRstazWTp/Q=
+  - secure: Iq6tftYJEhrxSRdGfM1qtkmtwutn53wBxldlFmOlXmK+A7YzioNZTFngcT2wueErAglofyEE2LsxgBldS0yBGGJWHVx4CjAdg5fzKOxf3aAMVuMj1SXQHon+1YSsEjoyZ8/RYUTnx4bPvzWNhwenpdq2xk0dm3qHdeTr4oAK2xg3r160n+XvOe8AlaerBD7eb5DuzTVHnv16MIBrxz9m0cXXXBvH1eGskK7RGFYlU6D+9cRvHRaV9Wo4bj+mzToxai2fplRbhVxlAUvfeSlBL5Qds0cI6AfmJI9BFligB4uj113m6Uxyprw9CuFvnbSRiyi3EJAQzEaclDzW0GTKxlQ/QJbq1Av+Y+/EentZOmG8jx+vpLQUVZGZBk61znLgvR8scH7Jrehir+aIjKCTXxbfV88h4H27WitGHEDQLSX4l0oZ8LBJNaaNvhli/zXCI8wziKVHdBgWX0l2CDgD7OxK6LjXWP7UqoMUWrUyIN2mq15xjmlDKgFpA09tQ0yE7k++L98YNJdEcoVoxQJ3q80svmlHUa4G0gNEwqSI8o+JRUafTE8r1dbvcGbWVwZ1RTnWo4OY7L61kkWfB5pk9qW32+HLTq0N6FIG/9ieyesfwJn6sWBiLj6waZhYZ+3w/X4mBEdzLRgoHfB0zV6cpfZ2S9PivJpiH4Ny5GLnehI=
 install: true
-#before_script:
-#- gpg --import arpnetworking.key
+before_script:
+- gpg --import arpnetworking.key
 script:
 - curl -s ${JDKW} | bash /dev/stdin ./mvnw clean install --settings settings.xml -P ci -Dgpg.skip=true -U
 - if [ \( -n "${TRAVIS_TAG}" \) -a "${TRAVIS_PULL_REQUEST}" = "false" ]; then curl -s ${JDKW} | bash /dev/stdin ./mvnw deploy --settings settings.xml -P ci -DskipAllVerification=true; fi;
