@@ -23,8 +23,6 @@ import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticDeserializer;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
-import com.arpnetworking.utility.InterfaceDatabase;
-import com.arpnetworking.utility.ReflectionsDatabase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -148,7 +146,6 @@ public final class PipelineConfiguration {
     private final ImmutableSet<Statistic> _gaugeStatistic;
     private final ImmutableMap<String, Set<Statistic>> _statistics;
 
-    private static final InterfaceDatabase INTERFACE_DATABASE = ReflectionsDatabase.newInstance();
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
 
     /**
@@ -162,7 +159,7 @@ public final class PipelineConfiguration {
          * Public constructor.
          */
         public Builder() {
-            super(PipelineConfiguration.class);
+            super(PipelineConfiguration::new);
         }
 
         /**

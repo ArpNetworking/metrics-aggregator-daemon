@@ -52,9 +52,8 @@ public final class CalculatedValue<T> {
         /**
          * Public constructor.
          */
-        @SuppressWarnings("unchecked")
         public Builder() {
-            super((Class<CalculatedValue<T>>) (Class<?>) CalculatedValue.class);
+            super((java.util.function.Function<Builder<T>, CalculatedValue<T>>) CalculatedValue::new);
         }
 
         /**

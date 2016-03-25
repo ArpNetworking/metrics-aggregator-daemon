@@ -138,7 +138,7 @@ public class BaseSourceTest {
             }
 
             private Builder() {
-                super(TestSource.class);
+                super(TestSource::new);
             }
         }
     }

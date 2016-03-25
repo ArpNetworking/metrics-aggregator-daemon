@@ -164,7 +164,7 @@ public final class TimeThresholdSink extends BaseSink {
          * Public constructor.
          */
         public Builder() {
-            super(TimeThresholdSink.class);
+            super(TimeThresholdSink::new);
         }
 
         /**

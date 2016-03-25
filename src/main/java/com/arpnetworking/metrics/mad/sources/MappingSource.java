@@ -237,7 +237,7 @@ public final class MappingSource extends BaseSource {
          * Public constructor.
          */
         public Builder() {
-            super(MappingSource.class);
+            super(MappingSource::new);
         }
 
         /**

@@ -244,7 +244,7 @@ public final class FileSource<T> extends BaseSource {
          * Public constructor.
          */
         public Builder() {
-            super(FileSource.class);
+            super(FileSource::new);
         }
 
         /**

@@ -100,7 +100,7 @@ public final class MultiSink extends BaseSink {
          * Public constructor.
          */
         public Builder() {
-            super(MultiSink.class);
+            super(MultiSink::new);
         }
 
         /**

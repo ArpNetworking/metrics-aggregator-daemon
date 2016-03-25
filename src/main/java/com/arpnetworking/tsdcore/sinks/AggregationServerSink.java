@@ -21,12 +21,10 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.AggregationMessage;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.statistics.HistogramStatistic;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.protobuf.ByteString;
-import net.sf.oval.constraint.NotNull;
 import org.joda.time.DateTime;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.net.NetSocket;
@@ -93,7 +91,7 @@ public final class AggregationServerSink extends VertxSink {
                 .setPeriodStart(periodicData.getStart().toString())
                 .setCluster(firstElement.getFQDSN().getCluster())
                 .setService(firstElement.getFQDSN().getService())
-                .setForwardHostData(_forwardHostData);
+                .setForwardHostData(true);
 
         for (final AggregatedData datum : periodicData.getData()) {
             if (EXPRESSION_STATISTIC.equals(datum.getFQDSN().getStatistic())) {
@@ -166,7 +164,6 @@ public final class AggregationServerSink extends VertxSink {
 
     private AggregationServerSink(final Builder builder) {
         super(builder);
-        _forwardHostData = builder._forwardHostData;
         super.getVertx().setPeriodic(15000, new Handler<Long>() {
             @Override
             public void handle(final Long event) {
@@ -179,12 +176,7 @@ public final class AggregationServerSink extends VertxSink {
         });
     }
 
-    private final boolean _forwardHostData;
-
     private boolean _sentHandshake = false;
-
-    private static final com.google.common.base.Function<Quantity, Double> EXTRACT_VALUES_FROM_SAMPLES =
-            input -> input != null ? input.getValue() : null;
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic EXPRESSION_STATISTIC = STATISTIC_FACTORY.getStatistic("expression");
@@ -201,20 +193,8 @@ public final class AggregationServerSink extends VertxSink {
          * Public constructor.
          */
         public Builder() {
-            super(AggregationServerSink.class);
+            super(AggregationServerSink::new);
             setServerPort(7065);
-        }
-
-        /**
-         * Whether or not the aggregation server should forward this host data to its sinks.
-         * Optional. Default is false.
-         *
-         * @param value Forward the data; true = forward and aggregate, false = just aggregate.
-         * @return This instance of <code>Builder</code>.
-         */
-        public Builder setForwardHostData(final Boolean value) {
-            _forwardHostData = value;
-            return self();
         }
 
         /**
@@ -224,8 +204,5 @@ public final class AggregationServerSink extends VertxSink {
         protected Builder self() {
             return this;
         }
-
-        @NotNull
-        private Boolean _forwardHostData = false;
     }
 }

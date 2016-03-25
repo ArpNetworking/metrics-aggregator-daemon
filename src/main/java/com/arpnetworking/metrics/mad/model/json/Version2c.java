@@ -80,7 +80,7 @@ public final class Version2c {
          * Public constructor.
          */
         public Builder() {
-            super(Version2c.class);
+            super(Version2c::new);
         }
 
         /**
@@ -186,7 +186,7 @@ public final class Version2c {
              * Public constructor.
              */
             public Builder() {
-                super(Annotations.class);
+                super(Annotations::new);
             }
 
             /**

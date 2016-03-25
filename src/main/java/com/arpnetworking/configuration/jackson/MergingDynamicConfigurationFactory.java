@@ -90,7 +90,7 @@ public final class MergingDynamicConfigurationFactory implements DynamicConfigur
          * Public constructor.
          */
         public Builder() {
-            super(MergingDynamicConfigurationFactory.class);
+            super(MergingDynamicConfigurationFactory::new);
         }
 
         /**

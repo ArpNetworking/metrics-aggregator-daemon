@@ -2,12 +2,12 @@
     "name": "application_pipeline",
     "sources": [
         {
-            "type": "com.arpnetworking.tsdcore.sources.FileSource",
+            "type": "com.arpnetworking.metrics.common.sources.FileSource",
             "name": "tsd_aggregator_query_log",
-            "sourceFile": "target/tmp/perf/application-generated-sample.log",
+            "sourceFile": "${SAMPLE_FILE}",
             "stateFile": null,
             "parser": {
-                "type": "com.arpnetworking.tsdaggregator.parsers.QueryLogParser",
+                "type": "com.arpnetworking.metrics.mad.parsers.JsonToRecordParser",
                 "defaultService": "test_service",
                 "defaultCluster": "test_cluster",
                 "defaultHost": "test_host.local"

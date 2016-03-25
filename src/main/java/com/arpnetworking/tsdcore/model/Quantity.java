@@ -322,7 +322,7 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
          * Public constructor.
          */
         public Builder() {
-            super(Quantity.class);
+            super((java.util.function.Function<Builder, Quantity>) Quantity::new);
         }
 
         /**

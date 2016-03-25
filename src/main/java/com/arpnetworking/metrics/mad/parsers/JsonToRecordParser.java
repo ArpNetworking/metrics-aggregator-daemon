@@ -39,6 +39,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -406,7 +407,7 @@ public final class JsonToRecordParser implements Parser<Record> {
     private static final String DATA_KEY = "data";
     private static final String VERSION_KEY = "version";
     private static final String LOCAL_HOST_NAME;
-    private static final Logger INVALID_SAMPLE_LOGGER = LoggerFactory.getRateLimitLogger(JsonToRecordParser.class, Duration.ofMinutes(1));
+    private static final Logger INVALID_SAMPLE_LOGGER = LoggerFactory.getRateLimitLogger(JsonToRecordParser.class, Duration.ofSeconds(30));
 
     private static final Function<String, Quantity> VERSION_2C_SAMPLE_TO_QUANTITY = sample -> {
         if (sample != null) {
@@ -530,6 +531,7 @@ public final class JsonToRecordParser implements Parser<Record> {
                         EnumerationDeserializerStrategyUsingToUpperCase.<Unit>newInstance()));
         OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
         OBJECT_MAPPER.registerModule(queryLogParserModule);
+        OBJECT_MAPPER.registerModule(new AfterburnerModule());
 
         final String localHostName;
         try {
@@ -550,7 +552,7 @@ public final class JsonToRecordParser implements Parser<Record> {
          * Public constructor.
          */
         public Builder() {
-            super(JsonToRecordParser.class);
+            super(JsonToRecordParser::new);
         }
 
         /**

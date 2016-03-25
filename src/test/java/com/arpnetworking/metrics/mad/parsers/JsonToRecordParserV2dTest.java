@@ -36,7 +36,7 @@ import java.util.Map;
  *
  * @author Brandon Arp (barp at groupon dot com)
  */
-public class QueryLogParserV2dTest {
+public class JsonToRecordParserV2dTest {
 
     @Test
     public void testParse() throws ParsingException, IOException {
@@ -178,6 +178,6 @@ public class QueryLogParserV2dTest {
                 .setDefaultService("MyService")
                 .setDefaultHost("MyHost")
                 .build()
-                .parse(Resources.toByteArray(Resources.getResource(QueryLogParserV2dTest.class, fileName)));
+                .parse(Resources.toByteArray(Resources.getResource(JsonToRecordParserV2dTest.class, fileName)));
     }
 }

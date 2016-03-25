@@ -40,6 +40,7 @@ import org.vertx.java.core.net.NetSocket;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 /**
  * Abstract publisher to send data to a server via Vertx <code>NetSocket</code>.
@@ -482,11 +483,10 @@ public abstract class VertxSink extends BaseSink {
         /**
          * Protected constructor for subclasses.
          *
-         * @param targetClass The concrete type to be created by the builder of
-         * <code>AggregatedDataSink</code> implementation.
+         * @param targetConstructor The constructor for the concrete type to be created by this builder.
          */
-        protected Builder(final Class<S> targetClass) {
-            super(targetClass);
+        protected Builder(final Function<B, S> targetConstructor) {
+            super(targetConstructor);
         }
 
         @NotNull

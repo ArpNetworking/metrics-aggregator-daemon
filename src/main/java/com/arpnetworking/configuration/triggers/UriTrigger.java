@@ -215,7 +215,7 @@ public final class UriTrigger implements Trigger {
          * Public constructor.
          */
         public Builder() {
-            super(UriTrigger.class);
+            super(UriTrigger::new);
         }
 
         /**

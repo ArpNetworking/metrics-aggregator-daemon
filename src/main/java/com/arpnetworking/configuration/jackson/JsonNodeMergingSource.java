@@ -134,7 +134,7 @@ public final class JsonNodeMergingSource implements JsonNodeSource {
          * Public constructor.
          */
         public Builder() {
-            super(JsonNodeMergingSource.class);
+            super(JsonNodeMergingSource::new);
         }
 
         /**

@@ -98,7 +98,7 @@ public final class JsonNodeFileSource extends BaseJsonNodeSource {
          * Public constructor.
          */
         public Builder() {
-            super(JsonNodeFileSource.class);
+            super(JsonNodeFileSource::new);
         }
 
         /**

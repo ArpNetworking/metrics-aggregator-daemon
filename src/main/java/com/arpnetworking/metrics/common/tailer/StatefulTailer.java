@@ -528,7 +528,7 @@ public final class StatefulTailer implements Tailer {
 
     // NOTE: Package private for testing
 
-    /* package private */StatefulTailer(final Builder builder, final Trigger trigger) {
+    /* package private */ StatefulTailer(final Builder builder, final Trigger trigger) {
         _file = builder._file;
         _positionStore = builder._positionStore;
         _listener = builder._listener;
@@ -618,7 +618,7 @@ public final class StatefulTailer implements Tailer {
          * Public constructor.
          */
         public Builder() {
-            super(StatefulTailer.class);
+            super((java.util.function.Function<Builder, StatefulTailer>) StatefulTailer::new);
         }
 
         /**

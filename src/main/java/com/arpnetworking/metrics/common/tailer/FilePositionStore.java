@@ -229,7 +229,7 @@ public final class FilePositionStore implements PositionStore {
         private static final class Builder extends OvalBuilder<Descriptor> {
 
             private Builder() {
-                super(Descriptor.class);
+                super(Descriptor::new);
             }
 
             public Builder setPosition(final Long value) {
@@ -260,7 +260,7 @@ public final class FilePositionStore implements PositionStore {
          * Public constructor.
          */
         public Builder() {
-            super(FilePositionStore.class);
+            super(FilePositionStore::new);
         }
 
         /**

@@ -117,7 +117,7 @@ public final class DirectoryDynamicConfigurationFactory implements DynamicConfig
          * Public constructor.
          */
         public Builder() {
-            super(DirectoryDynamicConfigurationFactory.class);
+            super(DirectoryDynamicConfigurationFactory::new);
         }
 
         /**
