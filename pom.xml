@@ -75,12 +75,13 @@
     <akka.http.version>2.4.2</akka.http.version>
     <apache.httpclient.version>4.5.1</apache.httpclient.version>
     <apache.httpcore.version>4.4.3</apache.httpcore.version>
-    <arpnetworking.commons.version>1.3.0</arpnetworking.commons.version>
-    <cglib.version>3.1</cglib.version>
+    <arpnetworking.commons.version>1.4.0</arpnetworking.commons.version>
+    <aspectjrt.version>1.8.8</aspectjrt.version>
+    <cglib.version>3.2.1</cglib.version>
     <commons.codec.version>1.10</commons.codec.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.math3.version>3.3</commons.math3.version>
-    <findbugs.annotations.version>3.0.0</findbugs.annotations.version>
+    <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
     <guava.version>18.0</guava.version>
     <guice.version>4.0</guice.version>
     <hamcrest.version>2.0.0.0</hamcrest.version>
@@ -94,11 +95,11 @@
     <log4j.over.slf4j.version>1.7.12</log4j.over.slf4j.version>
     <metrics.aggregator.protocol.version>1.0.2</metrics.aggregator.protocol.version>
     <metrics.client.version>0.4.5</metrics.client.version>
-    <metrics.generator.version>1.0.3</metrics.generator.version>
+    <metrics.generator.version>1.1.0</metrics.generator.version>
     <metrics.jvm.extra.version>0.4.2</metrics.jvm.extra.version>
     <mockito.version>1.10.19</mockito.version>
     <oval.version>1.82</oval.version>
-    <performance.test.version>1.0.0</performance.test.version>
+    <performance.test.version>1.1.0</performance.test.version>
     <protobuf.version>2.6.1</protobuf.version>
     <reflections.version>0.9.10</reflections.version>
     <scala.version>2.11</scala.version>
@@ -109,6 +110,10 @@
     <typesafe.config.version>1.2.1</typesafe.config.version>
     <vertx.core.version>2.1.6</vertx.core.version>
     <wiremock.version>1.57</wiremock.version>
+
+    <!-- Additional Plugins -->
+    <aspectjtools.maven.plugin>1.8.8</aspectjtools.maven.plugin>
+    <aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
 
     <!-- Findbugs -->
     <findbugs.exclude>${project.basedir}/findbugs.exclude.xml</findbugs.exclude>
@@ -189,6 +194,38 @@
             </program>
           </programs>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>aspectj-maven-plugin</artifactId>
+        <version>${aspectj.maven.plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+              <goal>test-compile</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+          <complianceLevel>1.8</complianceLevel>
+          <aspectLibraries>
+            <aspectLibrary>
+              <groupId>com.arpnetworking.logback</groupId>
+              <artifactId>logback-steno</artifactId>
+            </aspectLibrary>
+          </aspectLibraries>
+          <showWeaveInfo>true</showWeaveInfo>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjtools</artifactId>
+            <version>${aspectjtools.maven.plugin}</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
@@ -287,6 +324,11 @@
       <version>${jackson.version}</version>
       <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-afterburner</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
     <!-- Akka -->
     <dependency>
       <groupId>com.typesafe.akka</groupId>
@@ -331,7 +373,7 @@
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
-      <artifactId>annotations</artifactId>
+      <artifactId>findbugs-annotations</artifactId>
       <version>${findbugs.annotations.version}</version>
     </dependency>
     <dependency>
@@ -373,6 +415,12 @@
       <groupId>org.reflections</groupId>
       <artifactId>reflections</artifactId>
       <version>${reflections.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjrt</artifactId>
+      <version>${aspectjrt.version}</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>cglib</groupId>
@@ -478,7 +526,7 @@
                   <parallel combine.self="override" />
                   <forkCount>1</forkCount>
                   <reuseForks>false</reuseForks>
-                  <argLine>-agentlib:hprof=cpu=samples,depth=15,interval=5,force=n,file=${basedir}/target/perf.profile.hprof.txt</argLine>
+                  <argLine>-agentlib:hprof=cpu=samples,depth=15,interval=5,force=y,file=${basedir}/target/perf.profile.hprof.txt</argLine>
                 </configuration>
               </execution>
             </executions>

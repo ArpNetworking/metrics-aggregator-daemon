@@ -282,7 +282,7 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
          * Public constructor.
          */
         public Builder() {
-            super(DynamicConfiguration.class);
+            super(DynamicConfiguration::new);
         }
 
         /**

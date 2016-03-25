@@ -167,7 +167,7 @@ public final class DefaultRecord implements Record {
          * Public constructor.
          */
         public Builder() {
-            super(DefaultRecord.class);
+            super(DefaultRecord::new);
         }
 
         /**

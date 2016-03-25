@@ -95,7 +95,7 @@ public final class Version2fSteno {
          * Public constructor.
          */
         public Builder() {
-            super(Version2fSteno.class);
+            super(Version2fSteno::new);
         }
 
         /**
@@ -209,7 +209,7 @@ public final class Version2fSteno {
              * Public constructor.
              */
             public Builder() {
-                super(Context.class);
+                super(Context::new);
             }
 
             /**
@@ -292,7 +292,7 @@ public final class Version2fSteno {
              * Public constructor.
              */
             public Builder() {
-                super(Data.class);
+                super(Data::new);
             }
 
             /**
@@ -397,7 +397,7 @@ public final class Version2fSteno {
              * Public constructor.
              */
             public Builder() {
-                super(Sample.class);
+                super(Sample::new);
             }
 
             /**
@@ -464,7 +464,7 @@ public final class Version2fSteno {
              * Public constructor.
              */
             public Builder() {
-                super(Element.class);
+                super(Element::new);
             }
 
             /**
@@ -529,7 +529,7 @@ public final class Version2fSteno {
              * Public constructor.
              */
             public Builder() {
-                super(Annotations.class);
+                super(Annotations::new);
             }
 
             /**

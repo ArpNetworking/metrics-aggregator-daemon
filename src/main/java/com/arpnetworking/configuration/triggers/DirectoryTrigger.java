@@ -184,7 +184,7 @@ public final class DirectoryTrigger implements Trigger {
          * Public constructor.
          */
         public Builder() {
-            super(DirectoryTrigger.class);
+            super(DirectoryTrigger::new);
         }
 
         /**

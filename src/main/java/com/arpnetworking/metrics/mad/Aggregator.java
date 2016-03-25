@@ -324,7 +324,7 @@ public final class Aggregator implements Observer, Launchable {
          * Public constructor.
          */
         public Builder() {
-            super(Aggregator.class);
+            super(Aggregator::new);
         }
 
         /**

@@ -19,8 +19,9 @@ import com.arpnetworking.metrics.generator.util.TestFileGenerator;
 import com.arpnetworking.test.junitbenchmarks.JsonBenchmarkConsumer;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.io.Resources;
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.joda.time.DateTime;
@@ -34,7 +35,6 @@ import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -54,7 +54,37 @@ import java.util.List;
 @BenchmarkOptions(callgc = true, benchmarkRounds = 1, warmupRounds = 0)
 public class ApplicationPipelinePT extends FilePerfTestBase {
 
-    public ApplicationPipelinePT(final String name, final int uowCount, final int namesCount, final int samplesCount) {
+    public ApplicationPipelinePT(
+            final String name,
+            final int uowCount,
+            final int namesCount,
+            final int samplesCount) {
+        final Path path = Paths.get("target/tmp/perf/application-generated-sample-" + name + ".log");
+        final Path parent = path.getParent();
+        if (parent != null) {
+            try {
+                Files.createDirectories(parent);
+            } catch (final IOException e) {
+                throw Throwables.propagate(e);
+            }
+        }
+
+        final DateTime start = DateTime.now().minusDays(1).hourOfDay().roundFloorCopy();
+        final DateTime stop = start.plusMinutes(10);
+        final TestFileGenerator generator = new TestFileGenerator.Builder()
+                .setRandom(RANDOM)
+                .setUnitOfWorkCount(uowCount)
+                .setNamesCount(namesCount)
+                .setSamplesCount(samplesCount)
+                .setStartTime(start)
+                .setEndTime(stop)
+                .setFileName(path)
+                .setClusterName("test_cluster")
+                .setServiceName("test_service")
+                .build();
+        generator.generate();
+
+        _file = path;
         _uowCount = uowCount;
         _namesCount = namesCount;
         _samplesCount = samplesCount;
@@ -90,31 +120,15 @@ public class ApplicationPipelinePT extends FilePerfTestBase {
                 "ApplicationPipeline Performance Test; uowCount=%d, namesCount=%d, samplesCount=%d",
                 _uowCount, _namesCount, _samplesCount));
 
-        final RandomGenerator random = new MersenneTwister(1298); //Just pick a number as the seed.
-        final Path path = Paths.get("target/tmp/perf/application-generated-sample.log");
-        final Path parent = path.getParent();
-        if (parent != null) {
-            Files.createDirectories(parent);
-        }
-
-        final DateTime start = DateTime.now().minusDays(1).hourOfDay().roundFloorCopy();
-        final DateTime stop = start.plusMinutes(10);
-        final TestFileGenerator generator = new TestFileGenerator.Builder()
-                .setRandom(random)
-                .setUnitOfWorkCount(_uowCount)
-                .setNamesCount(_namesCount)
-                .setSamplesCount(_samplesCount)
-                .setStartTime(start)
-                .setEndTime(stop)
-                .setFileName(path)
-                .setClusterName("test_cluster")
-                .setServiceName("test_service")
-                .build();
-        generator.generate();
-
-        benchmark(new File(Resources.getResource("application_perf_pipeline.json").toURI()), Duration.standardMinutes(90));
+        benchmark(
+                "application_perf_pipeline.json",
+                Duration.standardMinutes(90),
+                ImmutableMap.of(
+                        "${SAMPLE_FILE}",
+                        _file.toString()));
     }
 
+    private final Path _file;
     private final int _uowCount;
     private final int _namesCount;
     private final int _samplesCount;
@@ -123,7 +137,8 @@ public class ApplicationPipelinePT extends FilePerfTestBase {
     public final TestRule _benchmarkRule = new BenchmarkRule(JSON_BENCHMARK_CONSUMER);
 
     private static final JsonBenchmarkConsumer JSON_BENCHMARK_CONSUMER = new JsonBenchmarkConsumer(
-            Paths.get("target/site/perf/benchmark-tsdagg.json"));
+            Paths.get("target/site/perf/benchmark-application-mad.json"));
 
+    private static final RandomGenerator RANDOM = new MersenneTwister(1298);
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationPipelinePT.class);
 }

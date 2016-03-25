@@ -124,7 +124,7 @@ public final class JsonNodeDirectorySource extends BaseJsonNodeSource {
          * Public constructor.
          */
         public Builder() {
-            super(JsonNodeDirectorySource.class);
+            super(JsonNodeDirectorySource::new);
         }
 
         /**

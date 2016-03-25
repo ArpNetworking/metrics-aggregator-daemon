@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import net.sf.oval.constraint.NotNull;
 
+import java.util.function.Function;
+
 /**
  * Abstract base class for <code>JsonSource</code> implementations.
  *
@@ -90,12 +92,13 @@ public abstract class BaseJsonNodeSource implements JsonNodeSource {
     protected abstract static class Builder<T extends Builder<?, ?>, S extends JsonNodeSource> extends OvalBuilder<S> {
 
         /**
-         * Protected constructor.
+         * Protected constructor for subclasses.
          *
-         * @param clazz The target <code>Class</code> to build.
+         * @param targetConstructor The constructor for the concrete type to be created by this builder.
          */
-        protected Builder(final Class<S> clazz) {
-            super(clazz);
+        @SuppressWarnings(value = {"rawtypes", "unchecked"})
+        protected Builder(final Function<T, S> targetConstructor) {
+            super((Function<? extends Builder, S>) targetConstructor);
         }
 
         /**

@@ -17,8 +17,6 @@ package com.arpnetworking.metrics.mad.configuration;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
-import com.arpnetworking.utility.InterfaceDatabase;
-import com.arpnetworking.utility.ReflectionsDatabase;
 import com.google.common.base.MoreObjects;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
@@ -114,8 +112,6 @@ public final class AggregatorConfiguration {
     private final Period _jvmMetricsCollectionInterval;
     private final Map<String, ?> _akkaConfiguration;
 
-    private static final InterfaceDatabase INTERFACE_DATABASE = ReflectionsDatabase.newInstance();
-
     /**
      * Implementation of builder pattern for <code>TsdAggregatorConfiguration</code>.
      *
@@ -127,7 +123,7 @@ public final class AggregatorConfiguration {
          * Public constructor.
          */
         public Builder() {
-            super(AggregatorConfiguration.class);
+            super(AggregatorConfiguration::new);
         }
 
         /**

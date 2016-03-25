@@ -123,7 +123,7 @@ public final class PeriodFilteringSink extends BaseSink {
          * Public constructor.
          */
         public Builder() {
-            super(PeriodFilteringSink.class);
+            super(PeriodFilteringSink::new);
         }
 
         /**

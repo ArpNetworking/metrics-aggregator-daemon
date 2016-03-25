@@ -244,7 +244,7 @@ public final class AggregatedData implements Serializable {
          * Public constructor.
          */
         public Builder() {
-            super(AggregatedData.class);
+            super(AggregatedData::new);
         }
 
         /**

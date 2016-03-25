@@ -18,11 +18,10 @@ package com.arpnetworking.tsdcore.sinks;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
-import com.arpnetworking.tsdcore.statistics.Statistic;
-import com.arpnetworking.tsdcore.statistics.StatisticFactory;
-import com.google.common.collect.ImmutableSet;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
+
+import java.util.function.Function;
 
 /**
  * Abstract base class for common functionality for publishing
@@ -71,9 +70,6 @@ public abstract class BaseSink implements Sink {
 
     private final String _name;
 
-    private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
-    private static final ImmutableSet<Statistic> ALL_STATISTICS = STATISTIC_FACTORY.getAllStatistics();
-
     /**
      * Base <code>Builder</code> implementation.
      *
@@ -106,11 +102,10 @@ public abstract class BaseSink implements Sink {
         /**
          * Protected constructor for subclasses.
          *
-         * @param targetClass The concrete type to be created by the builder of
-         * <code>Sink</code> implementation.
+         * @param targetConstructor The constructor for the concrete type to be created by this builder.
          */
-        protected Builder(final Class<? extends S> targetClass) {
-            super(targetClass);
+        protected Builder(final Function<B, S> targetConstructor) {
+            super(targetConstructor);
         }
 
         @NotNull

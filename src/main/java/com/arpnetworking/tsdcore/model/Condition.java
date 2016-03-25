@@ -89,7 +89,7 @@ public final class Condition {
          * Public constructor.
          */
         public Builder() {
-            super(Condition.class);
+            super(Condition::new);
         }
 
         /**

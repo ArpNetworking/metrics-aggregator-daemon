@@ -83,7 +83,7 @@ public final class Version2d {
          * Public constructor.
          */
         public Builder() {
-            super(Version2d.class);
+            super(Version2d::new);
         }
 
         /**
@@ -183,7 +183,7 @@ public final class Version2d {
              * Public constructor.
              */
             public Builder() {
-                super(Sample.class);
+                super(Sample::new);
             }
 
             /**
@@ -239,7 +239,7 @@ public final class Version2d {
              * Public constructor.
              */
             public Builder() {
-                super(Element.class);
+                super(Element::new);
             }
 
             /**
@@ -293,7 +293,7 @@ public final class Version2d {
              * Public constructor.
              */
             public Builder() {
-                super(Annotations.class);
+                super(Annotations::new);
             }
 
             /**

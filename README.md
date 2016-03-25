@@ -67,7 +67,7 @@ For example:
     "logDirectory": "/usr/local/lib/metrics-aggregator-daemon/logs",
     "pipelinesDirectory": "/usr/local/lib/metrics-aggregator-daemon/config/pipelines",
     "httpHost": "0.0.0.0",
-    "httpPort": 6080,
+    "httpPort": 7090,
     "httpHealthCheckPath": "/mad/healthcheck",
     "httpStatusPath": "/mad/status",
     "jvmMetricsCollectionInterval": "PT.5S",

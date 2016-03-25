@@ -91,7 +91,7 @@ public final class TelemetrySink extends BaseSink {
          * Public constructor.
          */
         public Builder() {
-            super(TelemetrySink.class);
+            super(TelemetrySink::new);
         }
 
         /**
