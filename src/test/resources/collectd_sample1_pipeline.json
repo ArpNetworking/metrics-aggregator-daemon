@@ -2,7 +2,7 @@
     "name": "collectd_pipeline",
     "sources": [
         {
-            "type": "com.arpnetworking.tsdaggregator.sources.MappingSource",
+            "type": "com.arpnetworking.metrics.mad.sources.MappingSource",
             "name": "collectd_mapping_source",
             "findAndReplace": {
                 "^cpu/([\\d]+)/cpu/([^/]+)/value": ["cpu/$2"],
@@ -23,12 +23,12 @@
                 "^tcpconns/([^-]+)-(local|remote)/tcp_connections/([^/]+)/value": ["tcpconns/$2/$1/$3"]
             },
             "source": {
-                "type": "com.arpnetworking.tsdcore.sources.FileSource",
+                "type": "com.arpnetworking.metrics.common.sources.FileSource",
                 "name": "collectd_source",
-                "sourceFile": "target/tmp/perf/collectd-sample1.log",
+                "sourceFile": "${SAMPLE_FILE}",
                 "stateFile": null,
                 "parser": {
-                    "type": "com.arpnetworking.tsdaggregator.parsers.QueryLogParser",
+                    "type": "com.arpnetworking.metrics.mad.parsers.JsonToRecordParser",
                     "defaultService": "collectd",
                     "defaultCluster": "test_cluster",
                     "defaultHost": "test_host.local"

@@ -122,7 +122,7 @@ public final class JsonNodeUriSource extends BaseJsonNodeSource {
          * Public constructor.
          */
         public Builder() {
-            super(JsonNodeUriSource.class);
+            super(JsonNodeUriSource::new);
         }
 
         /**

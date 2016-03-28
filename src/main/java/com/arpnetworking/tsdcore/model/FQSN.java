@@ -152,7 +152,7 @@ public final class FQSN {
          * Public constructor.
          */
         public Builder() {
-            super(FQSN.class);
+            super(FQSN::new);
         }
 
         /**

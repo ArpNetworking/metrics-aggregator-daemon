@@ -98,7 +98,7 @@ public final class Version2e {
          * Public constructor.
          */
         public Builder() {
-            super(Version2e.class);
+            super(Version2e::new);
         }
 
         /**
@@ -229,7 +229,7 @@ public final class Version2e {
              * Public constructor.
              */
             public Builder() {
-                super(Data.class);
+                super(Data::new);
             }
 
             /**
@@ -327,7 +327,7 @@ public final class Version2e {
              * Public constructor.
              */
             public Builder() {
-                super(Sample.class);
+                super(Sample::new);
             }
 
             /**
@@ -383,7 +383,7 @@ public final class Version2e {
              * Public constructor.
              */
             public Builder() {
-                super(Element.class);
+                super(Element::new);
             }
 
             /**
@@ -437,7 +437,7 @@ public final class Version2e {
              * Public constructor.
              */
             public Builder() {
-                super(Annotations.class);
+                super(Annotations::new);
             }
 
             /**

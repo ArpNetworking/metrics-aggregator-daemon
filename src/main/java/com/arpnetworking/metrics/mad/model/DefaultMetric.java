@@ -126,7 +126,7 @@ public final class DefaultMetric implements Metric {
          * Public constructor.
          */
         public Builder() {
-            super(DefaultMetric.class);
+            super(DefaultMetric::new);
         }
 
         /**

@@ -159,7 +159,7 @@ public final class PeriodicData {
          * Public constructor.
          */
         public Builder() {
-            super(PeriodicData.class);
+            super(PeriodicData::new);
         }
 
         /**

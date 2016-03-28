@@ -29,6 +29,7 @@ import net.sf.oval.constraint.NotNull;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.function.Function;
 
 /**
  * Common base class for <code>Configuration</code> implementations based on
@@ -184,12 +185,13 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
     protected abstract static class Builder<T extends Builder<?, ?>, S extends Configuration> extends OvalBuilder<S> {
 
         /**
-         * Protected constructor.
+         * Protected constructor for subclasses.
          *
-         * @param clazz The target <code>Class</code> to build.
+         * @param targetConstructor The constructor for the concrete type to be created by this builder.
          */
-        protected Builder(final Class<S> clazz) {
-            super(clazz);
+        @SuppressWarnings(value = {"rawtypes", "unchecked"})
+        protected Builder(final Function<T, S> targetConstructor) {
+            super((Function<? extends Builder, S>) targetConstructor);
         }
 
         /**

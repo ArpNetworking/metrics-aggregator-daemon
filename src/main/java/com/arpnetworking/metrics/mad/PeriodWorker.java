@@ -281,7 +281,7 @@ import java.util.concurrent.LinkedBlockingDeque;
          * Public constructor.
          */
         Builder() {
-            super(PeriodWorker.class);
+            super(PeriodWorker::new);
         }
 
         /**

@@ -16,16 +16,19 @@
 package com.arpnetworking.metrics.mad.performance;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
-import com.arpnetworking.configuration.jackson.JsonNodeFileSource;
+import com.arpnetworking.configuration.jackson.JsonNodeLiteralSource;
 import com.arpnetworking.configuration.jackson.StaticConfiguration;
 import com.arpnetworking.metrics.generator.util.TestFileGenerator;
 import com.arpnetworking.metrics.mad.Pipeline;
 import com.arpnetworking.metrics.mad.configuration.PipelineConfiguration;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.sinks.Sink;
+import com.google.common.base.Charsets;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.io.Resources;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.joda.time.Duration;
@@ -33,8 +36,9 @@ import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -51,12 +55,24 @@ public class FilePerfTestBase {
      *
      * @param pipelineConfigurationFile Pipeline configuration file.
      * @param duration Timeout period.
+     * @param variables Substitution key-value pairs into pipeline configuration file.
+     * @throws IOException if configuration cannot be loaded.
      */
-    protected void benchmark(final File pipelineConfigurationFile, final Duration duration) {
+    protected void benchmark(
+            final String pipelineConfigurationFile,
+            final Duration duration,
+            final ImmutableMap<String, String> variables)
+            throws IOException {
+        // Replace any variables in the configuration file
+        String configuration = Resources.toString(Resources.getResource(pipelineConfigurationFile), Charsets.UTF_8);
+        for (final Map.Entry<String, String> entry : variables.entrySet()) {
+            configuration = configuration.replace(entry.getKey(), entry.getValue());
+        }
+
         // Load the specified stock configuration
         final PipelineConfiguration stockPipelineConfiguration = new StaticConfiguration.Builder()
-                .addSource(new JsonNodeFileSource.Builder()
-                        .setFile(pipelineConfigurationFile)
+                .addSource(new JsonNodeLiteralSource.Builder()
+                        .setSource(configuration)
                         .build())
                 .setObjectMapper(PipelineConfiguration.createObjectMapper(_injector))
                 .build()

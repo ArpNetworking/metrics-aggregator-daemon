@@ -240,7 +240,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
          * Public constructor.
          */
         public Builder() {
-            super(PeriodicStatisticsSink.class);
+            super(PeriodicStatisticsSink::new);
         }
 
         /**

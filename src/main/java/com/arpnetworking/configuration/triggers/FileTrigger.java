@@ -156,7 +156,7 @@ public final class FileTrigger implements Trigger {
          * Public constructor.
          */
         public Builder() {
-            super(FileTrigger.class);
+            super(FileTrigger::new);
         }
 
         /**

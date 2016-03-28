@@ -39,7 +39,7 @@ import java.util.Map;
  *
  * @author Brandon Arp (barp at groupon dot com)
  */
-public class QueryLogParserV2cTest {
+public class JsonToRecordParserV2cTest {
 
     @Test
     public void testParse() throws ParsingException, IOException {
@@ -303,7 +303,7 @@ public class QueryLogParserV2cTest {
                 .setDefaultService("MyService")
                 .build()
                 .parse(Resources.toByteArray(
-                        Resources.getResource(QueryLogParserV2cTest.class, "QueryLogParserV2cTest/testDefaultHostname.json")));
+                        Resources.getResource(JsonToRecordParserV2cTest.class, "QueryLogParserV2cTest/testDefaultHostname.json")));
         Assert.assertFalse(Strings.isNullOrEmpty(record.getHost()));
 
     }
@@ -315,6 +315,6 @@ public class QueryLogParserV2cTest {
                 .setDefaultHost("MyHost")
                 .build()
                 .parse(Resources.toByteArray(
-                        Resources.getResource(QueryLogParserV2cTest.class, fileName)));
+                        Resources.getResource(JsonToRecordParserV2cTest.class, fileName)));
     }
 }

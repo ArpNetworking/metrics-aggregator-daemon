@@ -81,7 +81,7 @@ public final class JsonNodeLiteralSource extends BaseJsonNodeSource {
          * Public constructor.
          */
         public Builder() {
-            super(JsonNodeLiteralSource.class);
+            super(JsonNodeLiteralSource::new);
         }
 
         /**

@@ -125,7 +125,7 @@ public final class JsonNodePaginatedUriSource extends BaseJsonNodeSource {
          * Public constructor.
          */
         public Builder() {
-            super(JsonNodePaginatedUriSource.class);
+            super(JsonNodePaginatedUriSource::new);
         }
 
         /**

@@ -62,7 +62,7 @@ public class BaseSinkTest {
         private static final class Builder extends BaseSink.Builder<Builder, TestAggregatedDataSink> {
 
             private Builder() {
-                super(TestAggregatedDataSink.class);
+                super(TestAggregatedDataSink::new);
             }
 
             @Override

@@ -67,7 +67,7 @@ public final class StaticConfiguration extends BaseJacksonConfiguration {
          * Public constructor.
          */
         public Builder() {
-            super(StaticConfiguration.class);
+            super(StaticConfiguration::new);
         }
 
         /**

@@ -23,6 +23,8 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
+import java.util.function.Function;
+
 /**
  * Abstract base class for common functionality for reading
  * <code>AggregatedData</code>. This class is thread safe.
@@ -126,11 +128,10 @@ public abstract class BaseSource implements Source {
         /**
          * Protected constructor for subclasses.
          *
-         * @param targetClass The concrete type to be created by the builder of
-         * <code>Source</code> implementation.
+         * @param targetConstructor The constructor for the concrete type to be created by this builder.
          */
-        protected Builder(final Class<? extends Source> targetClass) {
-            super(targetClass);
+        protected Builder(final Function<B, Source> targetConstructor) {
+            super(targetConstructor);
         }
 
         @NotNull

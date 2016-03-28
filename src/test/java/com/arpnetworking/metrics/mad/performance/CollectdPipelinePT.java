@@ -18,6 +18,7 @@ package com.arpnetworking.metrics.mad.performance;
 import com.arpnetworking.test.junitbenchmarks.JsonBenchmarkConsumer;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.Duration;
@@ -25,10 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,12 +44,7 @@ import java.util.zip.GZIPInputStream;
 public class CollectdPipelinePT extends FilePerfTestBase {
 
     @BeforeClass
-    public static void setUp() {
-        JSON_BENCHMARK_CONSUMER.prepareClass();
-    }
-
-    @Test
-    public void test() throws IOException, InterruptedException, URISyntaxException {
+    public static void setUp() throws IOException, URISyntaxException {
         // Extract the sample file
         final Path gzipPath = Paths.get(Resources.getResource("collectd-sample1.log.gz").toURI());
         final FileInputStream fileInputStream = new FileInputStream(gzipPath.toFile());
@@ -61,14 +54,22 @@ public class CollectdPipelinePT extends FilePerfTestBase {
 
         IOUtils.copy(gzipInputStream, outputStream);
 
-        benchmark(new File(Resources.getResource("collectd_sample1_pipeline.json").toURI()), Duration.standardMinutes(20));
+        JSON_BENCHMARK_CONSUMER.prepareClass();
+    }
+
+    @Test
+    public void test() throws IOException {
+        benchmark(
+                "collectd_sample1_pipeline.json",
+                Duration.standardMinutes(20),
+                ImmutableMap.of(
+                        "${SAMPLE_FILE}",
+                        "target/tmp/perf/collectd-sample1.log"));
     }
 
     @Rule
     public final TestRule _benchmarkRule = new BenchmarkRule(JSON_BENCHMARK_CONSUMER);
 
     private static final JsonBenchmarkConsumer JSON_BENCHMARK_CONSUMER = new JsonBenchmarkConsumer(
-            Paths.get("target/site/perf/benchmark-collectd-tsdagg.json"));
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationPipelinePT.class);
+            Paths.get("target/site/perf/benchmark-collectd-mad.json"));
 }

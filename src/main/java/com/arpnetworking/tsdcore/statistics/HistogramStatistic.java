@@ -233,7 +233,7 @@ public final class HistogramStatistic extends BaseStatistic {
              * Public constructor.
              */
             public Builder() {
-                super(HistogramSupportingData.class);
+                super(HistogramSupportingData::new);
             }
 
             /**

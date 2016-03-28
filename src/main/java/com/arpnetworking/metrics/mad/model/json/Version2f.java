@@ -88,7 +88,7 @@ public final class Version2f {
          * Public constructor.
          */
         public Builder() {
-            super(Version2f.class);
+            super(Version2f::new);
         }
 
         /**
@@ -192,7 +192,7 @@ public final class Version2f {
              * Public constructor.
              */
             public Builder() {
-                super(Sample.class);
+                super(Sample::new);
             }
 
             /**
@@ -259,7 +259,7 @@ public final class Version2f {
              * Public constructor.
              */
             public Builder() {
-                super(Element.class);
+                super(Element::new);
             }
 
             /**
@@ -336,7 +336,7 @@ public final class Version2f {
              * Public constructor.
              */
             public Builder() {
-                super(Annotations.class);
+                super(Annotations::new);
             }
 
             /**

@@ -130,7 +130,7 @@ public final class FQDSN implements Serializable {
          * Public constructor.
          */
         public Builder() {
-            super(FQDSN.class);
+            super(FQDSN::new);
         }
 
         /**
