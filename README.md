@@ -22,7 +22,11 @@ Usage
 
 ### Installation
 
+#### Manual
 The artifacts from the build are in *metrics-aggregator-daemon/target/appassembler* and should be copied to an appropriate directory on your application host(s).
+
+#### Docker
+If you use Docker, we publish a base docker image that makes it easy for you to layer configuration on top of.  Create a Docker image based on the image arpnetworking/mad.  Configuration files are typically located at /opt/mad/config/ with pipeline files located at /opt/mad/config/pipelines.  In addition, you can specify CONFIG_FILE (defaults to /opt/mad/config/config.json), PARAMS (defaults to $CONFIG_FILE), LOGGING_CONFIG (defaults to "-Dlogback.configurationFile=/opt/mad/config/logback.xml"), and JAVA_OPTS (defaults to $LOGGING_CONFIG) environment variables to control startup.
 
 ### Execution
 

@@ -16,22 +16,26 @@
   -->
 <configuration>
     <appender name="mad-logger" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/mad.log</file>
+        <file>/opt/mad/logs/mad.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <timeBasedFileNamingAndTriggeringPolicy class="com.arpnetworking.logback.SizeAndRandomizedTimeBasedFNATP">
                 <maxOffsetInMillis>900000</maxOffsetInMillis>
                 <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
-            <fileNamePattern>logs/mad.%d{yyyy-MM-dd_HH}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>/opt/mad/logs/mad.%d{yyyy-MM-dd_HH}.%i.log.gz</fileNamePattern>
             <maxHistory>4</maxHistory>
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
-        <encoder class="com.arpnetworking.logback.KeyValueEncoder">
-            <layout class="ch.qos.logback.classic.PatternLayout">
-                <pattern>%date %t [%level] %logger : %message %ex%n</pattern>
-            </layout>
+        <encoder class="com.arpnetworking.logback.StenoEncoder">
+            <injectContextLogger>true</injectContextLogger>
+            <compressLoggerName>true</compressLoggerName>
+            <jacksonModule class="com.fasterxml.jackson.datatype.joda.JodaModule" />
+            <jacksonModule class="com.fasterxml.jackson.datatype.guava.GuavaModule" />
+            <jacksonModule class="com.fasterxml.jackson.datatype.jdk8.Jdk8Module" />
+            <injectBeanIdentifier>true</injectBeanIdentifier>
         </encoder>
     </appender>
+
 
     <appender name="mad-async" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="mad-logger"/>
@@ -41,7 +45,7 @@
 
     <logger name="org.reflections.Reflections" level="ERROR" />
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="mad-async"/>
     </root>
 </configuration>
