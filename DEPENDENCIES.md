@@ -31,7 +31,6 @@ Maven Surefire Report Plugin   | Apache License 2           | https://maven.apac
 Metrics Generator              | Apache License 2           | https://github.com/ArpNetworking/metrics-generator
 Mockito                        | MIT                        | http://mockito.org/
 Performance Test               | Apache License 2           | https://github.com/ArpNetworking/performance-test
-Protocol Buffers               | BSD 3                      | https://code.google.com/p/protobuf/
 Wire Mock                      | Apache License 2           | http://wiremock.org/
 
 

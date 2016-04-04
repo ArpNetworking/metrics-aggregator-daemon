@@ -36,8 +36,7 @@ In the installation's *bin* directory there are scripts to start Metrics Aggrega
 
 To customize logging you may provide a [LogBack](http://logback.qos.ch/) configuration file.  To use a custom logging configuration you need to define and export an environment variable before executing *mad*:
 
-    JAVA_OPTS="-Dlogback.configurationFile=/usr/local/lib/metrics-aggregator-daemon/config/logger.xml"
-    export JAVA_OPTS
+    export JAVA_OPTS="-Dlogback.configurationFile=/usr/local/lib/metrics-aggregator-daemon/config/logger.xml"
 
 Where */usr/local/lib/metrics-aggregator-daemon/config/logger.xml* is the path to your logging configuration file.
 
