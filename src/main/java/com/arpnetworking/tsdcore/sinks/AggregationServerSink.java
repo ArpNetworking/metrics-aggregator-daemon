@@ -90,8 +90,7 @@ public final class AggregationServerSink extends VertxSink {
                 .setPeriod(periodicData.getPeriod().toString())
                 .setPeriodStart(periodicData.getStart().toString())
                 .setCluster(firstElement.getFQDSN().getCluster())
-                .setService(firstElement.getFQDSN().getService())
-                .setForwardHostData(true);
+                .setService(firstElement.getFQDSN().getService());
 
         for (final AggregatedData datum : periodicData.getData()) {
             if (EXPRESSION_STATISTIC.equals(datum.getFQDSN().getStatistic())) {
@@ -106,7 +105,6 @@ public final class AggregationServerSink extends VertxSink {
             }
 
             final Messages.StatisticRecord.Builder entryBuilder = builder.addStatisticsBuilder()
-                    .setUnit(unit)
                     .setStatistic(datum.getFQDSN().getStatistic().getName())
                     .setValue(datum.getValue().getValue())
                     .setUnit(unit)
