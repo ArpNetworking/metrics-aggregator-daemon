@@ -91,7 +91,7 @@ public abstract class BaseSource implements Source {
      *
      * @param builder Instance of <code>Builder</code>.
      */
-    protected BaseSource(final Builder<?> builder) {
+    protected BaseSource(final Builder<?, ?> builder) {
         _name = builder._name;
     }
 
@@ -102,9 +102,10 @@ public abstract class BaseSource implements Source {
      * Base <code>Builder</code> implementation.
      *
      * @param <B> type of the builder
+     * @param <S> type of the source to build
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
-    protected abstract static class Builder<B extends Builder<B>> extends OvalBuilder<Source> {
+    protected abstract static class Builder<B extends Builder<B, S>, S extends Source> extends OvalBuilder<S> {
 
         /**
          * Sets name. Cannot be null or empty.
@@ -130,7 +131,7 @@ public abstract class BaseSource implements Source {
          *
          * @param targetConstructor The constructor for the concrete type to be created by this builder.
          */
-        protected Builder(final Function<B, Source> targetConstructor) {
+        protected Builder(final Function<B, S> targetConstructor) {
             super(targetConstructor);
         }
 

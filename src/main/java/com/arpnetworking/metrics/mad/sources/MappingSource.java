@@ -231,7 +231,7 @@ public final class MappingSource extends BaseSource {
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
-    public static final class Builder extends BaseSource.Builder<Builder> {
+    public static final class Builder extends BaseSource.Builder<Builder, MappingSource> {
 
         /**
          * Public constructor.

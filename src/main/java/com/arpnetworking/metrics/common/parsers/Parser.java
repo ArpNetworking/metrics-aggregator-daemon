@@ -38,5 +38,5 @@ public interface Parser<T> {
      * @return Instance of <code>Record</code> from the data.
      * @throws ParsingException If parsing of the data fails for any reason.
      */
-    T parse(byte[] data) throws ParsingException;
+    T parse(final byte[] data) throws ParsingException;
 }

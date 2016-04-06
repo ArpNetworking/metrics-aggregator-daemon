@@ -230,10 +230,10 @@ public final class FileSource<T> extends BaseSource {
     /**
      * Implementation of builder pattern for <code>FileSource</code>.
      *
-     * @param <T> type of the object to be built
+     * @param <T> the type parsed from the parser.
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
-    public static class Builder<T> extends BaseSource.Builder<Builder<T>> {
+    public static class Builder<T> extends BaseSource.Builder<Builder<T>, FileSource<T>> {
 
         /**
          * Public constructor.

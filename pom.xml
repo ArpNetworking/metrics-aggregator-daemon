@@ -76,7 +76,7 @@
     <apache.httpclient.version>4.5.1</apache.httpclient.version>
     <apache.httpcore.version>4.4.3</apache.httpcore.version>
     <arpnetworking.commons.version>1.4.0</arpnetworking.commons.version>
-    <aspectjrt.version>1.8.8</aspectjrt.version>
+    <aspectjrt.version>1.8.9</aspectjrt.version>
     <cglib.version>3.2.1</cglib.version>
     <commons.codec.version>1.10</commons.codec.version>
     <commons.io.version>2.4</commons.io.version>
@@ -111,7 +111,7 @@
     <wiremock.version>1.57</wiremock.version>
 
     <!-- Additional Plugins -->
-    <aspectjtools.maven.plugin>1.8.8</aspectjtools.maven.plugin>
+    <aspectjtools.maven.plugin>1.8.9</aspectjtools.maven.plugin>
     <aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
     <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
 
@@ -457,12 +457,6 @@
       <groupId>com.github.tomakehurst</groupId>
       <artifactId>wiremock</artifactId>
       <version>${wiremock.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-remote_${scala.version}</artifactId>
-      <version>${akka.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

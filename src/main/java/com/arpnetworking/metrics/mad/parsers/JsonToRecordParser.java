@@ -523,7 +523,7 @@ public final class JsonToRecordParser implements Parser<Record> {
     };
 
     static {
-        final SimpleModule queryLogParserModule = new SimpleModule("QuerLogParser");
+        final SimpleModule queryLogParserModule = new SimpleModule("QueryLogParser");
         queryLogParserModule.addDeserializer(
                 Unit.class,
                 EnumerationDeserializer.newInstance(
@@ -544,7 +544,7 @@ public final class JsonToRecordParser implements Parser<Record> {
     }
 
     /**
-     * Implementation of <code>Builder</code> for <code>QueryLogParser</code>.
+     * Implementation of <code>Builder</code> for {@link JsonToRecordParser}.
      */
     public static final class Builder extends OvalBuilder<JsonToRecordParser> {
 
