@@ -32,13 +32,6 @@ import java.util.function.Function;
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
 public abstract class ActorSource extends BaseSource {
-    public String getActorName() {
-        return _actorName;
-    }
-
-    public ActorSystem getActorSystem() {
-        return _actorSystem;
-    }
 
     /**
      * {@inheritDoc}

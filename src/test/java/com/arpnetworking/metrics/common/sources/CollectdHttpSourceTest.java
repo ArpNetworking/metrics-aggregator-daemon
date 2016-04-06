@@ -88,8 +88,7 @@ public class CollectdHttpSourceTest extends ActorSourceTest {
 
     @Test
     public void test400OnMissingTags() throws ParsingException, ExecutionException, InterruptedException {
-        final DefaultRecord.Builder builder = new DefaultRecord.Builder();
-        builder
+        final DefaultRecord.Builder builder = new DefaultRecord.Builder()
                 .setHost("fake-host")
                 .setTime(DateTime.now())
                 .setId("id")
@@ -109,9 +108,9 @@ public class CollectdHttpSourceTest extends ActorSourceTest {
 
     @Test
     public void testParsesTagHeaders() throws ParsingException, ExecutionException, InterruptedException {
-        final DefaultRecord.Builder builder = TestBeanFactory.createRecordBuilder();
-        builder.setService(null);
-        builder.setCluster(null);
+        final DefaultRecord.Builder builder = TestBeanFactory.createRecordBuilder()
+                .setService(null)
+                .setCluster(null);
 
         final String service = "my-service";
         final String cluster = "my-cluster";

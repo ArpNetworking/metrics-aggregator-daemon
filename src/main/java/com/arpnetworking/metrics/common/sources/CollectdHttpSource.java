@@ -50,6 +50,7 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.collect.Maps;
 import net.sf.oval.ConstraintViolation;
+import net.sf.oval.constraint.NotNull;
 import net.sf.oval.exception.ConstraintsViolatedException;
 
 import java.time.Duration;
@@ -57,16 +58,20 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * Processes HTTP posts from Collectd, Extracts data and emits metrics.
+ * Processes HTTP posts from Collectd, extracts data and emits metrics.
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
 public class CollectdHttpSource extends ActorSource {
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Props createProps() {
         return Actor.props(this);
@@ -110,13 +115,16 @@ public class CollectdHttpSource extends ActorSource {
                         .toMat(_sink, Keep.right())
                         .run(_materializer)
                         .whenComplete((done, err) -> {
-                            if (err != null) {
+                            final CompletableFuture<HttpResponse> responseFuture = request.getResponse();
+                            if (err == null) {
+                                responseFuture.complete(HttpResponse.create().withStatus(200));
+                            } else {
                                 BAD_REQUEST_LOGGER.warn()
                                         .setMessage("Error handling collectd post")
                                         .setThrowable(err)
                                         .log();
                                 if (err instanceof ParsingException) {
-                                    request.getResponse().complete(HttpResponse.create().withStatus(400));
+                                    responseFuture.complete(HttpResponse.create().withStatus(400));
                                 } else if (err instanceof ConstraintsViolatedException) {
                                     final ConstraintsViolatedException violationException = (ConstraintsViolatedException) err;
                                     final StringBuilder errorMessages = new StringBuilder();
@@ -127,12 +135,10 @@ public class CollectdHttpSource extends ActorSource {
                                     final HttpResponse response = HttpResponse.create()
                                             .withStatus(400)
                                             .withEntity(errorMessages.toString());
-                                    request.getResponse().complete(response);
+                                    responseFuture.complete(response);
                                 } else {
-                                    request.getResponse().complete(HttpResponse.create().withStatus(500));
+                                    responseFuture.complete(HttpResponse.create().withStatus(500));
                                 }
-                            } else {
-                                request.getResponse().complete(HttpResponse.create().withStatus(200));
                             }
                         });
             } else {
@@ -165,30 +171,15 @@ public class CollectdHttpSource extends ActorSource {
 
                 final Flow<HttpRequest, Map<String, String>, NotUsed> parseHeadersFlow = Flow.<HttpRequest>create()
                         .map(HttpRequest::getHeaders)
-                        .<Map<String, String>>map(headers -> {
-                            final HashMap<String, String> m = Maps.newHashMap();
-                            for (final HttpHeader header : headers) {
-                                if (header.lowercaseName().startsWith("x-tag-")) {
-                                    m.put(header.lowercaseName().substring(6), header.value());
-                                }
-                            }
-                            return m;
-                        })
+                        .map(Actor::extractTagHeaders)
                         .named("parseHeaders");
 
                 final Flow<
                         Pair<Map<String, String>, List<DefaultRecord.Builder>>,
                         DefaultRecord.Builder,
                         NotUsed> applyTagsFlow = Flow.<Pair<Map<String, String>, List<DefaultRecord.Builder>>>create()
-                                .flatMapConcat(this::mapExpandPair)
-                                .map(pair -> {
-                                    final DefaultRecord.Builder recordBuilder = pair.second();
-                                    final Map<String, String> annotations = pair.first();
-                                    recordBuilder.setAnnotations(annotations);
-                                    applyTag("service", annotations, recordBuilder::setService);
-                                    applyTag("cluster", annotations, recordBuilder::setCluster);
-                                    return recordBuilder;
-                                })
+                                .flatMapConcat(Actor::mapExpandPair)
+                                .map(Actor::applyTags)
                                 .named("applyTags");
 
                 final Flow<DefaultRecord.Builder, Record, NotUsed> buildFlow = Flow.<DefaultRecord.Builder>create()
@@ -216,11 +207,31 @@ public class CollectdHttpSource extends ActorSource {
             });
         }
 
+        private static DefaultRecord.Builder applyTags(final Pair<Map<String, String>, DefaultRecord.Builder> pair)
+                throws Exception {
+            final DefaultRecord.Builder recordBuilder = pair.second();
+            final Map<String, String> annotations = pair.first();
+            recordBuilder.setAnnotations(annotations);
+            applyTag("service", annotations, recordBuilder::setService);
+            applyTag("cluster", annotations, recordBuilder::setCluster);
+            return recordBuilder;
+        }
+
+        private static Map<String, String> extractTagHeaders(final Iterable<HttpHeader> headers) throws Exception {
+            final HashMap<String, String> m = Maps.newHashMap();
+            for (final HttpHeader header : headers) {
+                if (header.lowercaseName().startsWith("x-tag-")) {
+                    m.put(header.lowercaseName().substring(6), header.value());
+                }
+            }
+            return m;
+        }
+
         private List<DefaultRecord.Builder> parseRecords(final byte[] data) throws ParsingException {
             return _parser.parse(data);
         }
 
-        private <A, B extends Collection<C>, C> Source<Pair<A, C>, NotUsed> mapExpandPair(final Pair<A, B> pair) {
+        private static <A, B extends Collection<C>, C> Source<Pair<A, C>, NotUsed> mapExpandPair(final Pair<A, B> pair) {
             return Source.from(
                     pair.second()
                             .stream()
@@ -228,7 +239,7 @@ public class CollectdHttpSource extends ActorSource {
                             .collect(Collectors.toList()));
         }
 
-        private void applyTag(final String key, final Map<String, String> annotations, final Consumer<String> setter) {
+        private static void applyTag(final String key, final Map<String, String> annotations, final Consumer<String> setter) {
             if (annotations.containsKey(key)) {
                 setter.accept(annotations.get(key));
             }
@@ -271,6 +282,7 @@ public class CollectdHttpSource extends ActorSource {
             super(CollectdHttpSource::new);
         }
 
+        @NotNull
         private Parser<List<DefaultRecord.Builder>> _parser = new CollectdJsonToRecordParser();
     }
 }

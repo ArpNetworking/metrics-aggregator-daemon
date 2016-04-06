@@ -29,7 +29,6 @@ import com.arpnetworking.tsdcore.model.Quantity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.base.Charsets;
@@ -62,9 +61,6 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
      */
     @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
     public List<DefaultRecord.Builder> parse(final byte[] data) throws ParsingException {
-        // Attempt to parse the data as JSON to distinguish between the legacy
-        // format and the current JSON format
-        final JsonNode jsonNode;
         try {
             final List<CollectdRecord> records = OBJECT_MAPPER.readValue(data, new TypeReference<List<CollectdRecord>>() { });
             final List<DefaultRecord.Builder> builders = Lists.newArrayList();
@@ -83,7 +79,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
 
                 for (final CollectdRecord.Sample sample : record.getSamples()) {
                     final String metricName = computeMetricName(plugin, pluginInstance, type, typeInstance, sample.getDsName());
-                    final MetricType metricType = mapDsType(sample.getDsType());;
+                    final MetricType metricType = mapDsType(sample.getDsType());
                     final Metric metric = new DefaultMetric.Builder()
                             .setType(metricType)
                             .setValues(Collections.singletonList(
@@ -221,39 +217,6 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
         private final List<Sample> _samples;
 
         /**
-         * Represents a single sample in a collectd metric post.
-         */
-        public static final class Sample {
-            public double getValue() {
-                return _value;
-            }
-
-            public String getDsType() {
-                return _dsType;
-            }
-
-            public String getDsName() {
-                return _dsName;
-            }
-
-            /**
-             * Public constructor.
-             *
-             * @param value The value
-             * @param dsType The DS type
-             * @param dsName The DS name
-             */
-            public Sample(final double value, final String dsType, final String dsName) {
-                _value = value;
-                _dsType = dsType;
-                _dsName = dsName;
-            }
-
-            private final double _value;
-            private final String _dsType;
-            private final String _dsName;
-        }
-        /**
          * Builder for the {@link CollectdRecord} class.
          */
         public static final class Builder extends OvalBuilder<CollectdRecord> {
@@ -384,6 +347,40 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             private List<String> _dsTypes = Collections.emptyList();
             @NotNull
             private List<String> _dsNames = Collections.emptyList();
+        }
+
+        /**
+         * Represents a single sample in a collectd metric post.
+         */
+        public static final class Sample {
+            public double getValue() {
+                return _value;
+            }
+
+            public String getDsType() {
+                return _dsType;
+            }
+
+            public String getDsName() {
+                return _dsName;
+            }
+
+            /**
+             * Public constructor.
+             *
+             * @param value  The value
+             * @param dsType The DS type
+             * @param dsName The DS name
+             */
+            public Sample(final double value, final String dsType, final String dsName) {
+                _value = value;
+                _dsType = dsType;
+                _dsName = dsName;
+            }
+
+            private final double _value;
+            private final String _dsType;
+            private final String _dsName;
         }
     }
 }

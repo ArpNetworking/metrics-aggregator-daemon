@@ -155,9 +155,8 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                                 .withStatus(StatusCodes.OK)
                                 .withEntity(JSON_CONTENT_TYPE, ByteString.fromString(STATUS_JSON)));
             }
-        }
-
-        if (path.startsWith(SOURCE_PREFIX)) {
+        } else if ((HttpMethods.POST.equals(request.method()) || HttpMethods.PUT.equals(request.method()))
+                && path.startsWith(SOURCE_PREFIX)) {
             final Future<ActorRef> refFuture = _actorSystem.actorSelection("/user" + path)
                     .resolveOne(FiniteDuration.create(1, TimeUnit.SECONDS));
             return FutureConverters.toJava(refFuture).thenCompose(
@@ -167,9 +166,9 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                         return response;
                     })
                     .exceptionally(err -> HttpResponse.create().withStatus(404));
-        } else {
-            return CompletableFuture.completedFuture(HttpResponse.create().withStatus(404));
         }
+
+        return CompletableFuture.completedFuture(HttpResponse.create().withStatus(404));
     }
 
     private CompletionStage<HttpResponse> getHttpResponseForTelemetry(
