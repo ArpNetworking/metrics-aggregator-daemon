@@ -29,7 +29,9 @@ import org.joda.time.DateTime;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.net.NetSocket;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Publisher to send data to an upstream aggregation server.
@@ -49,9 +51,15 @@ public final class AggregationServerSink extends VertxSink {
                 .addData("conditionsSize", periodicData.getConditions().size())
                 .log();
 
-        final Messages.StatisticSetRecord record = serializeMetricData(periodicData);
-        if (record.getStatisticsCount() > 0) {
-            enqueueData(AggregationMessage.create(record).serialize());
+        final Map<String, List<AggregatedData>> data = periodicData.getData()
+                .stream()
+                .filter(datum -> !EXPRESSION_STATISTIC.equals(datum.getFQDSN().getStatistic()))
+                .collect(Collectors.groupingBy(d -> d.getFQDSN().getMetric()));
+        for (final List<AggregatedData> dataList : data.values()) {
+            if (!dataList.isEmpty()) {
+                final Messages.StatisticSetRecord record = serializeMetricData(periodicData, dataList);
+                enqueueData(AggregationMessage.create(record).serialize());
+            }
         }
     }
 
@@ -63,9 +71,9 @@ public final class AggregationServerSink extends VertxSink {
         _sentHandshake = false;
     }
 
-    private Messages.StatisticSetRecord serializeMetricData(final PeriodicData periodicData) {
+    private Messages.StatisticSetRecord serializeMetricData(final PeriodicData periodicData, final List<AggregatedData> dataList) {
         // Get the cluster from the first data element
-        final AggregatedData firstElement = periodicData.getData().iterator().next();
+        final AggregatedData firstElement = dataList.iterator().next();
         if (!_sentHandshake) {
             // TODO(barp): Revise aggregator sink protocol for host and cluster support [MAI-443]
             final String host = periodicData.getDimensions().get("host");
@@ -92,7 +100,7 @@ public final class AggregationServerSink extends VertxSink {
                 .setCluster(firstElement.getFQDSN().getCluster())
                 .setService(firstElement.getFQDSN().getService());
 
-        for (final AggregatedData datum : periodicData.getData()) {
+        for (final AggregatedData datum : dataList) {
             if (EXPRESSION_STATISTIC.equals(datum.getFQDSN().getStatistic())) {
                 continue;
             }
