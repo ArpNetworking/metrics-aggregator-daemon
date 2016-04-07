@@ -44,6 +44,8 @@ import com.arpnetworking.utility.Configurator;
 import com.arpnetworking.utility.Launchable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -64,6 +66,7 @@ import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -80,8 +83,6 @@ public final class Main implements Launchable {
      * @param args the command line arguments
      */
     public static void main(final String[] args) {
-        LOGGER.info().setMessage("Launching mad").log();
-
         // Global initialization
         Thread.setDefaultUncaughtExceptionHandler(
                 (thread, throwable) -> {
@@ -96,6 +97,10 @@ public final class Main implements Launchable {
                         .log()
         );
 
+        LOGGER.info().setMessage("Launching mad").log();
+
+        Runtime.getRuntime().addShutdownHook(SHUTDOWN_THREAD);
+
         System.setProperty("org.vertx.logger-delegate-factory-class-name", "org.vertx.java.core.logging.impl.SLF4JLogDelegateFactory");
 
         // Run the tsd aggregator
@@ -107,36 +112,39 @@ public final class Main implements Launchable {
                 .addData("file", args[0])
                 .log();
 
-        final File configurationFile = new File(args[0]);
-        final Configurator<Main, AggregatorConfiguration> configurator =
-                new Configurator<>(Main::new, AggregatorConfiguration.class);
-        final DynamicConfiguration configuration = new DynamicConfiguration.Builder()
-                .setObjectMapper(OBJECT_MAPPER)
-                .addSourceBuilder(
-                        new JsonNodeFileSource.Builder()
-                                .setObjectMapper(OBJECT_MAPPER)
-                                .setFile(configurationFile))
-                .addTrigger(
-                        new FileTrigger.Builder()
-                                .setFile(configurationFile)
-                                .build())
-                .addListener(configurator)
-                .build();
+        Optional<DynamicConfiguration> configuration = Optional.absent();
+        Optional<Configurator<Main, AggregatorConfiguration>> configurator = Optional.absent();
+        try {
+            final File configurationFile = new File(args[0]);
+            configurator = Optional.of(new Configurator<>(Main::new, AggregatorConfiguration.class));
+            configuration = Optional.of(new DynamicConfiguration.Builder()
+                    .setObjectMapper(OBJECT_MAPPER)
+                    .addSourceBuilder(
+                            new JsonNodeFileSource.Builder()
+                                    .setObjectMapper(OBJECT_MAPPER)
+                                    .setFile(configurationFile))
+                    .addTrigger(
+                            new FileTrigger.Builder()
+                                    .setFile(configurationFile)
+                                    .build())
+                    .addListener(configurator.get())
+                    .build());
 
-        configuration.launch();
-
-        Runtime.getRuntime().addShutdownHook(
-                new Thread(
-                        () -> {
-                            LOGGER.info().setMessage("Stopping mad").log();
-                            configuration.shutdown();
-                            configurator.shutdown();
-
-                            LOGGER.info().setMessage("Exiting mad").log();
-                            final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
-                            context.stop();
-                        },
-                        "TsdAggregatorShutdownHook"));
+            configuration.get().launch();
+            // Wait for application shutdown
+            SHUTDOWN_SEMAPHORE.acquire();
+        } catch (final InterruptedException e) {
+            throw Throwables.propagate(e);
+        } finally {
+            if (configurator.isPresent()) {
+                configurator.get().shutdown();
+            }
+            if (configuration.isPresent()) {
+                configuration.get().shutdown();
+            }
+            // Notify the shutdown that we're done
+            SHUTDOWN_SEMAPHORE.release();
+        }
     }
 
     /**
@@ -312,6 +320,9 @@ public final class Main implements Launchable {
     private static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    private static final Duration SHUTDOWN_TIMEOUT = Duration.create(30, TimeUnit.SECONDS);
+    private static final Semaphore SHUTDOWN_SEMAPHORE = new Semaphore(0);
+    private static final Thread SHUTDOWN_THREAD = new ShutdownThread();
 
     private static final class PipelinesLaunchable implements Launchable, Runnable {
 
@@ -411,6 +422,39 @@ public final class Main implements Launchable {
         private ScheduledExecutorService _pipelinesExecutor;
 
         private static final File[] EMPTY_FILE_ARRAY = new File[0];
+    }
+
+    private static final class ShutdownThread extends Thread {
+        private ShutdownThread() {
+            super("MADShutdownHook");
+        }
+
+        @Override
+        public void run() {
+            LOGGER.info()
+                    .setMessage("Stopping mad")
+                    .log();
+
+            // release the main thread waiting for shutdown signal
+            SHUTDOWN_SEMAPHORE.release();
+
+            try {
+                // wait for it to signal that it has completed shutdown
+                if (!SHUTDOWN_SEMAPHORE.tryAcquire(SHUTDOWN_TIMEOUT.toSeconds(), TimeUnit.SECONDS)) {
+                    LOGGER.warn()
+                            .setMessage("Shutdown did not complete in a timely manner")
+                            .log();
+                }
+            } catch (final InterruptedException e) {
+                throw Throwables.propagate(e);
+            } finally {
+                LOGGER.info()
+                        .setMessage("Shutdown complete")
+                        .log();
+                final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
+                context.stop();
+            }
+        }
     }
 
     private static final class MainModule extends AbstractModule {
