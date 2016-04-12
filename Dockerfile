@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM java:8-jre-alpine
+FROM java:8u77-jre-alpine
 MAINTAINER arpnetworking
 EXPOSE 7090
 WORKDIR /opt/mad
