@@ -3,6 +3,10 @@ cache:
   - "$HOME/.m2"
   - "$HOME/.jdk"
 sudo: false
+addons:
+  apt:
+    packages:
+    - rpm
 env:
   global:
   - JDKW=https://raw.githubusercontent.com/vjkoskela/jdk-wrapper/master/jdk-wrapper.sh
@@ -15,5 +19,5 @@ install: true
 before_script:
 - gpg --import arpnetworking.key
 script:
-- curl -s ${JDKW} | bash /dev/stdin ./mvnw clean install --settings settings.xml -P ci -Dgpg.skip=true -U
+- curl -s ${JDKW} | bash /dev/stdin ./mvnw clean install --settings settings.xml -P ci -P rpm -Dgpg.skip=true -U
 - if [ \( -n "${TRAVIS_TAG}" \) -a "${TRAVIS_PULL_REQUEST}" = "false" ]; then curl -s ${JDKW} | bash /dev/stdin ./mvnw deploy --settings settings.xml -P ci -DskipAllVerification=true; fi;

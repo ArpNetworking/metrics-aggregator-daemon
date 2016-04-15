@@ -1,0 +1,170 @@
+#!/bin/sh
+#
+# mad Metrics aggregation daemon.
+#
+# chkconfig: - 60 40
+# description: MAD is an aggregation daemon that computes local \
+#   statistics on data and forwards them to upstream aggregation \
+#   services
+# processname: mad
+# config: /opt/mad/config/config.json
+# pidfile: /var/run/mad/mad.pid
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+user="mad"
+prog="mad"
+dir="/opt/mad"
+log_dir="$dir/logs"
+config="/opt/mad/config/config.json"
+logging_config="-Dlogback.configurationFile=/opt/mad/config/logback.xml"
+exec="/opt/mad/bin/mad"
+pid_file="/var/run/mad/mad.pid"
+export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which java))))"
+export JAVA_OPTS="$logging_config"
+
+[ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
+
+lockfile=/var/lock/subsys/$prog
+
+get_pid() {
+    if [ -f "$pid_file" ]; then
+        cat "$pid_file" 2> /dev/null
+    fi
+    echo ""
+}
+
+is_running() {
+    [ ! -f "$pid_file" ] && return 1
+    kill -0 `get_pid` &> /dev/null && return 0 || return 1
+}
+
+start() {
+    [ -f $config ] || exit 6
+    echo -n $"Starting $prog: "
+    if is_running; then
+        warning "$name: already running"
+    else
+        cd "$dir"
+        su "$user" -s /bin/sh -c "nice $exec $config >> $log_dir/system.out 2>&1 & echo \$! > $pid_file"
+        if ! is_running; then
+            failure "$prog did not start"
+            retval=1
+        else
+            success
+            retval=0
+        fi
+    fi
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    if is_running; then
+        kill `get_pid`
+        for i in {1..10}
+        do
+            if ! is_running; then
+                break
+            fi
+
+            echo -n "."
+            sleep 1
+        done
+        if is_running; then
+            warning
+            echo
+            echo -n "Killing $name: "
+            kill -9 `get_pid`
+            for i in {1..10}
+            do
+                if ! is_running; then
+                    break
+                fi
+
+                echo -n "."
+                sleep 1
+            done
+        fi
+
+        if is_running; then
+            failure
+            echo
+            retval=1
+        else
+            success
+            echo
+            if [ -f "$pid_file" ]; then
+                rm "$pid_file"
+            fi
+            retval=0
+        fi
+    else
+        warning
+        echo
+        echo "$name: not running"
+        if [ -f "$pid_file" ]; then
+            rm "$pid_file"
+        fi
+        retval=0
+    fi
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    is_running
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
+esac
+exit $?
