@@ -113,6 +113,7 @@
     <!-- Additional Plugins -->
     <aspectjtools.maven.plugin>1.8.8</aspectjtools.maven.plugin>
     <aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
+    <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
 
     <!-- Findbugs -->
     <findbugs.exclude>${project.basedir}/findbugs.exclude.xml</findbugs.exclude>
@@ -529,6 +530,83 @@
                 </configuration>
               </execution>
             </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>rpm</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>rpm-maven-plugin</artifactId>
+            <version>${rpm.maven.plugin.version}</version>
+            <executions>
+              <execution>
+                <id>generate-rpm</id>
+                <goals>
+                  <goal>rpm</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <license>Apache 2 License</license>
+              <group>System Environment/Daemons</group>
+              <preinstallScriptlet>
+                <scriptFile>rpm/scripts/pre.sh</scriptFile>
+              </preinstallScriptlet>
+              <postinstallScriptlet>
+                <scriptFile>rpm/scripts/post.sh</scriptFile>
+              </postinstallScriptlet>
+              <preremoveScriptlet>
+                <scriptFile>rpm/scripts/preun.sh</scriptFile>
+              </preremoveScriptlet>
+              <postremoveScriptlet>
+                <scriptFile>rpm/scripts/postun.sh</scriptFile>
+              </postremoveScriptlet>
+              <requires>
+                <require>java &gt;= ${jdk.version}</require>
+              </requires>
+              <mappings>
+                <mapping>
+                  <directory>/opt/mad</directory>
+                  <sources>
+                    <source>
+                      <location>target/appassembler</location>
+                    </source>
+                  </sources>
+                </mapping>
+                <mapping>
+                  <directory>/opt/mad/config</directory>
+                  <sources>
+                    <source>
+                      <location>config</location>
+                    </source>
+                  </sources>
+                </mapping>
+                <mapping>
+                  <directory>/</directory>
+                  <sources>
+                    <source>
+                      <location>rpm/fs</location>
+                    </source>
+                  </sources>
+                </mapping>
+                <!-- symlink the start script -->
+                <mapping>
+                  <directory>/usr/local/bin</directory>
+                  <sources>
+                    <softlinkSource>
+                      <location>/opt/mad/bin/mad</location>
+                    </softlinkSource>
+                  </sources>
+                </mapping>
+              </mappings>
+            </configuration>
           </plugin>
         </plugins>
       </build>
