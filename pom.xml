@@ -556,6 +556,7 @@
             <configuration>
               <license>Apache 2 License</license>
               <group>System Environment/Daemons</group>
+              <autoRequires>false</autoRequires>
               <preinstallScriptlet>
                 <scriptFile>rpm/scripts/pre.sh</scriptFile>
               </preinstallScriptlet>
