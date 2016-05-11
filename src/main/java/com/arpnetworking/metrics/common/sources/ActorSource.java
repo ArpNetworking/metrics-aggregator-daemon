@@ -17,8 +17,8 @@ package com.arpnetworking.metrics.common.sources;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
-import com.arpnetworking.metrics.mad.actors.SourceSupervisor;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
@@ -26,21 +26,19 @@ import net.sf.oval.constraint.NotNull;
 import java.util.function.Function;
 
 /**
- * Serves as a base calss for actor-based sources.  Actor lifecycle is
- * handled by the {@link SourceSupervisor}.
+ * Serves as a base class for actor-based sources.
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
 public abstract class ActorSource extends BaseSource {
-
     /**
      * {@inheritDoc}
      */
     @Override
     public void start() {
-        _actorSystem.actorSelection("/user/source").tell(
-                new SourceSupervisor.StartSource(createProps(), _actorName),
-                ActorRef.noSender());
+        if (_actor == null) {
+            _actor = _actorSystem.actorOf(createProps(), _actorName);
+        }
     }
 
     /**
@@ -48,9 +46,10 @@ public abstract class ActorSource extends BaseSource {
      */
     @Override
     public void stop() {
-        _actorSystem.actorSelection("/user/source").tell(
-                new SourceSupervisor.StopSource(_actorName),
-                ActorRef.noSender());
+        if (_actor != null) {
+            _actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+            _actor = null;
+        }
     }
 
     /**
@@ -70,6 +69,8 @@ public abstract class ActorSource extends BaseSource {
         _actorName = builder._actorName;
         _actorSystem = builder._actorSystem;
     }
+
+    private ActorRef _actor = null;
 
     private final String _actorName;
     private final ActorSystem _actorSystem;

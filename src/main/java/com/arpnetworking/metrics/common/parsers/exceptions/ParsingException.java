@@ -27,8 +27,9 @@ public class ParsingException extends Exception {
      *
      * @param message Describes the exceptional condition.
      */
-    public ParsingException(final String message) {
+    public ParsingException(final String message, final byte[] offendingData) {
         super(message);
+        _offendingData = offendingData;
     }
 
     /**
@@ -37,9 +38,16 @@ public class ParsingException extends Exception {
      * @param message Describes the exceptional condition.
      * @param cause Causing exception.
      */
-    public ParsingException(final String message, final Throwable cause) {
+    public ParsingException(final String message, final byte[] offendingData, final Throwable cause) {
         super(message, cause);
+        _offendingData = offendingData;
     }
+
+    public byte[] getOffendingData() {
+        return _offendingData;
+    }
+
+    private final byte[] _offendingData;
 
     private static final long serialVersionUID = 1L;
 }

@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
-public class CollectdHttpSource extends ActorSource {
+public class CollectdHttpSourceV1 extends ActorSource {
     /**
      * {@inheritDoc}
      */
@@ -82,7 +82,7 @@ public class CollectdHttpSource extends ActorSource {
      *
      * @param builder Instance of <code>Builder</code>.
      */
-    protected CollectdHttpSource(final Builder builder) {
+    protected CollectdHttpSourceV1(final Builder builder) {
         super(builder);
         _parser = builder._parser;
     }
@@ -96,10 +96,10 @@ public class CollectdHttpSource extends ActorSource {
         /**
          * Creates a {@link Props} for this actor.
          *
-         * @param source The {@link CollectdHttpSource} to send notifications through.
+         * @param source The {@link CollectdHttpSourceV1} to send notifications through.
          * @return A new {@link Props}
          */
-        /* package private */ static Props props(final CollectdHttpSource source) {
+        /* package private */ static Props props(final CollectdHttpSourceV1 source) {
             return Props.create(Actor.class, source);
         }
 
@@ -149,9 +149,9 @@ public class CollectdHttpSource extends ActorSource {
         /**
          * Constructor.
          *
-         * @param source The {@link CollectdHttpSource} to send notifications through.
+         * @param source The {@link CollectdHttpSourceV1} to send notifications through.
          */
-        /* package private */ Actor(final CollectdHttpSource source) {
+        /* package private */ Actor(final CollectdHttpSourceV1 source) {
             _parser = source._parser;
             _sink = Sink.foreach(source::notify);
             _materializer = ActorMaterializer.create(
@@ -167,6 +167,7 @@ public class CollectdHttpSource extends ActorSource {
                         .flatMapConcat(RequestEntity::getDataBytes)
                         .map(ByteString::toArray) // Transform to array form
                         .map(this::parseRecords) // Parse the json string into a record builder
+                                                 // NOTE: this should be _parser::parse, but aspectj NPEs with that currently
                         .named("parseJson");
 
                 final Flow<HttpRequest, Map<String, String>, NotUsed> parseHeadersFlow = Flow.<HttpRequest>create()
@@ -250,13 +251,13 @@ public class CollectdHttpSource extends ActorSource {
         private final Materializer _materializer;
         private final Graph<FlowShape<HttpRequest, Record>, NotUsed> _processGraph;
 
-        private static final Logger BAD_REQUEST_LOGGER = LoggerFactory.getRateLimitLogger(CollectdHttpSource.class, Duration.ofMinutes(1));
+        private static final Logger BAD_REQUEST_LOGGER = LoggerFactory.getRateLimitLogger(CollectdHttpSourceV1.class, Duration.ofMinutes(1));
     }
 
     /**
-     * CollectdHttpSource {@link BaseSource.Builder} implementation.
+     * CollectdHttpSourceV1 {@link BaseSource.Builder} implementation.
      */
-    public static class Builder extends ActorSource.Builder<Builder, CollectdHttpSource> {
+    public static class Builder extends ActorSource.Builder<Builder, CollectdHttpSourceV1> {
         /**
          * {@inheritDoc}
          */
@@ -279,7 +280,7 @@ public class CollectdHttpSource extends ActorSource {
          * Public constructor.
          */
         public Builder() {
-            super(CollectdHttpSource::new);
+            super(CollectdHttpSourceV1::new);
         }
 
         @NotNull

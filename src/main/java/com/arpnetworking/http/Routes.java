@@ -156,8 +156,8 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                                 .withEntity(JSON_CONTENT_TYPE, ByteString.fromString(STATUS_JSON)));
             }
         } else if ((HttpMethods.POST.equals(request.method()) || HttpMethods.PUT.equals(request.method()))
-                && path.startsWith(SOURCE_PREFIX)) {
-            final Future<ActorRef> refFuture = _actorSystem.actorSelection("/user" + path)
+                && path.equals(V1_COLLECTD_SOURCE_PREFIX)) {
+            final Future<ActorRef> refFuture = _actorSystem.actorSelection("/user/collectdv1")
                     .resolveOne(FiniteDuration.create(1, TimeUnit.SECONDS));
             return FutureConverters.toJava(refFuture).thenCompose(
                     ref -> {
@@ -243,7 +243,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private static final ProcessorsV2Factory TELEMETRY_V2_FACTORY = new ProcessorsV2Factory();
     private static final String TELEMETRY_STREAM_V1_PATH = "/telemetry/v1/stream";
     private static final String TELEMETRY_STREAM_V2_PATH = "/telemetry/v2/stream";
-    private static final String SOURCE_PREFIX = "/source/";
+    private static final String V1_COLLECTD_SOURCE_PREFIX = "/source/v1/collectd";
 
     // Ping
     private static final HttpHeader PING_CACHE_CONTROL_HEADER = CacheControl.create(

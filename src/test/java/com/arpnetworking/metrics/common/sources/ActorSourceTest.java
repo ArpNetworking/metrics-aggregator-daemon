@@ -16,7 +16,6 @@
 package com.arpnetworking.metrics.common.sources;
 
 import akka.actor.ActorSystem;
-import com.arpnetworking.metrics.mad.actors.SourceSupervisor;
 import org.junit.After;
 import org.junit.Before;
 import scala.concurrent.Await;
@@ -33,8 +32,6 @@ public abstract class ActorSourceTest {
     @Before
     public void setUpAkka() {
         _system = ActorSystem.create();
-        // Launch root source actor
-        _system.actorOf(SourceSupervisor.props(), "source");
     }
 
     @After

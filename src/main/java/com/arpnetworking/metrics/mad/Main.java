@@ -34,7 +34,6 @@ import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.metrics.impl.TsdLogSink;
 import com.arpnetworking.metrics.impl.TsdMetricsFactory;
 import com.arpnetworking.metrics.jvm.JvmMetricsRunnable;
-import com.arpnetworking.metrics.mad.actors.SourceSupervisor;
 import com.arpnetworking.metrics.mad.actors.Status;
 import com.arpnetworking.metrics.mad.configuration.AggregatorConfiguration;
 import com.arpnetworking.metrics.mad.configuration.PipelineConfiguration;
@@ -213,9 +212,6 @@ public final class Main implements Launchable {
 
         // Create the telemetry connection actor
         actorSystem.actorOf(Props.create(Telemetry.class, injector.getInstance(MetricsFactory.class)), "telemetry");
-
-        // Create the actor sources supervisor actor
-        actorSystem.actorOf(SourceSupervisor.props(), "source");
 
         // Create and bind Http server
         final Materializer materializer = ActorMaterializer.create(actorSystem);

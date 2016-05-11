@@ -47,16 +47,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Tests for the CollectdHttpSource.
+ * Tests for the CollectdHttpSourceV1.
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
-public class CollectdHttpSourceTest extends ActorSourceTest {
+public class CollectdHttpSourceV1Test extends ActorSourceTest {
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        _source = new CollectdHttpSource.Builder()
+        _source = new CollectdHttpSourceV1.Builder()
                 .setActorName("collectd")
                 .setName("collectd_source")
                 .setParser(_parser)
@@ -150,7 +150,7 @@ public class CollectdHttpSourceTest extends ActorSourceTest {
     }
 
     private HttpResponse dispatchRequest(final HttpRequest request) {
-        final ActorRef ref = getSystem().actorOf(CollectdHttpSource.Actor.props(_source));
+        final ActorRef ref = getSystem().actorOf(CollectdHttpSourceV1.Actor.props(_source));
         final CompletableFuture<HttpResponse> future = new CompletableFuture<>();
         final RequestReply message = new RequestReply(request, future);
 
@@ -167,5 +167,5 @@ public class CollectdHttpSourceTest extends ActorSourceTest {
     private Observer _observer;
     @Mock
     private Parser<List<DefaultRecord.Builder>> _parser;
-    private CollectdHttpSource _source;
+    private CollectdHttpSourceV1 _source;
 }
