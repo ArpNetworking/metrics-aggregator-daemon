@@ -20,7 +20,7 @@ import com.arpnetworking.logback.annotations.Loggable;
 /**
  * Top 99th percentile statistic. Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 @Loggable
 public final class TP99Statistic extends TPStatistic {

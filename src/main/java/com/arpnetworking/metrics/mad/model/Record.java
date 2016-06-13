@@ -23,8 +23,8 @@ import java.util.Map;
  * The interface to a record. Records consistent of a timestamp, any number of
  * named metrics and annotations (arbitrary key-value pairs).
  *
- * @author Brandon Arp (barp at groupon dot com)
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public interface Record {
 

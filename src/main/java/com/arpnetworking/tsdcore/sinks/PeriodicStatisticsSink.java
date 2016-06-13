@@ -59,7 +59,7 @@ import java.util.concurrent.atomic.LongAccumulator;
  * This can be replaced with a separate lock or a thread-safe accumulator
  * implementation.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class PeriodicStatisticsSink extends BaseSink {
 
@@ -232,7 +232,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
     /**
      * Implementation of builder pattern for <code>PeriodicStatisticsSink</code>.
      *
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public static final class Builder extends BaseSink.Builder<Builder, PeriodicStatisticsSink> {
 

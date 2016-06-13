@@ -28,7 +28,7 @@ import java.util.Set;
  * in theory be moved into each unique instance in the future. Use
  * <code>StatisticFactory</code> for construction.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class ExpressionStatistic extends BaseStatistic {

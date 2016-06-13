@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 /**
  * Contains the data for a specific period in time.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class PeriodicData {

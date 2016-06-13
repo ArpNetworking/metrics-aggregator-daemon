@@ -47,7 +47,7 @@ import java.util.List;
  * the uri is unavailable it is not considered changed to prevent flickering
  * caused by connectivity or server issues.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class UriTrigger implements Trigger {
 

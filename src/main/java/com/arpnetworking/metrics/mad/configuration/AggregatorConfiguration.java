@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * Representation of TsdAggregator configuration.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class AggregatorConfiguration {
@@ -115,7 +115,7 @@ public final class AggregatorConfiguration {
     /**
      * Implementation of builder pattern for <code>TsdAggregatorConfiguration</code>.
      *
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public static class Builder extends OvalBuilder<AggregatorConfiguration> {
 

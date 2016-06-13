@@ -67,8 +67,8 @@ import java.util.UUID;
  * line. Specifications for each version of the query log can be found in the
  * <code>metrics-client-doc</code> repository.
  *
- * @author Brandon Arp (barp at groupon dot com)
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class JsonToRecordParser implements Parser<Record> {
 

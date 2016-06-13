@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Actor class to hold the state for a single connection.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public class Connection extends UntypedActor {
     /**

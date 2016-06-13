@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * is intended to monitor the files in a single directory and is not designed
  * to monitor a directory tree (e.g. it is not recursive).
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class JsonNodeDirectorySource extends BaseJsonNodeSource {
 

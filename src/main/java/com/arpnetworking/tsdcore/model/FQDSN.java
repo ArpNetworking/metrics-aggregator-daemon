@@ -38,7 +38,7 @@ import java.io.Serializable;
  *
  * The identified data space is a time series by period.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class FQDSN implements Serializable {
@@ -122,7 +122,7 @@ public final class FQDSN implements Serializable {
     /**
      * Implementation of builder pattern for <code>FQDSN</code>.
      *
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public static final class Builder extends OvalBuilder<FQDSN> {
 

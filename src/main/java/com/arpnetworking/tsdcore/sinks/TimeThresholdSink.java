@@ -34,8 +34,8 @@ import java.util.function.Consumer;
 /**
  * A sink to filter old data.
  *
- * @author Brandon Arp (barp at groupon dot com)
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class TimeThresholdSink extends BaseSink {
 
@@ -157,7 +157,7 @@ public final class TimeThresholdSink extends BaseSink {
     /**
      * Base <code>Builder</code> implementation.
      *
-     * @author Brandon Arp (barp at groupon dot com)
+     * @author Brandon Arp (brandonarp at gmail dot com)
      */
     public static final class Builder extends BaseSink.Builder<Builder, TimeThresholdSink> {
         /**

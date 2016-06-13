@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  *
  * @param <T> The data type to parse.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.CLASS,

@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 /**
  * Interface to describe a class that publishes <code>PeriodicData</code>.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.CLASS,

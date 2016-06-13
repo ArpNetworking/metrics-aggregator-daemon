@@ -26,7 +26,7 @@ import net.sf.oval.constraint.NotNull;
 /**
  * Describes a condition.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class Condition {

@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Static configuration implementation of <code>Configuration</code>.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class StaticConfiguration extends BaseJacksonConfiguration {
 

@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * Tests for {@link StatisticFactory}.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 @RunWith(Parameterized.class)
 public class StatisticFactoryTest {

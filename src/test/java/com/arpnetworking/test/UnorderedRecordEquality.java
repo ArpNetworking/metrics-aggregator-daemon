@@ -27,7 +27,7 @@ import java.util.Map;
  * Implementation of <code>Comparator</code> which compares <code>Record</code>
  * instances ignoring the order of values in each metric.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class UnorderedRecordEquality {
 

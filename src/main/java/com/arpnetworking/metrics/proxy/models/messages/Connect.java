@@ -23,8 +23,8 @@ import com.google.common.base.MoreObjects;
 /**
  * Akka message to hold new connection data.
  *
- * @author Brandon Arp (barp at groupon dot com)
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class Connect {

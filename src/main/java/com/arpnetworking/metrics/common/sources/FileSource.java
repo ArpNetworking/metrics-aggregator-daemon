@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> The data type to parse from the <code>Source</code>.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class FileSource<T> extends BaseSource {
 
@@ -236,7 +236,7 @@ public final class FileSource<T> extends BaseSource {
      * Implementation of builder pattern for <code>FileSource</code>.
      *
      * @param <T> type of the object to be built
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public static class Builder<T> extends BaseSource.Builder<Builder<T>> {
 

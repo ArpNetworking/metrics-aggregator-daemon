@@ -40,7 +40,7 @@ import java.util.Objects;
  * caller to set any non-source/trigger specific fields on the builder prior to
  * creation of the new dynamic configuration instance.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.CLASS,

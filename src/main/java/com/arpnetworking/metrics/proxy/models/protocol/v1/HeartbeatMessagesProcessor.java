@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
  * Processes heartbeat messages.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public class HeartbeatMessagesProcessor implements MessagesProcessor {
     /**

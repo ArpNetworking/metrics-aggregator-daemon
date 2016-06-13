@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  *
  * TODO(vkoskela): Add tests for interacting with position store. [MAI-321]
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public class StatefulTailerTest {
 

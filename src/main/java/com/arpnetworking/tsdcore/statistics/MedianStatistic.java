@@ -22,7 +22,7 @@ import com.arpnetworking.logback.annotations.Loggable;
  * median but the nearest value; more of a 50th percentile although it is advertised with the more commonly recognized
  * name.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 @Loggable
 public final class MedianStatistic extends TPStatistic {

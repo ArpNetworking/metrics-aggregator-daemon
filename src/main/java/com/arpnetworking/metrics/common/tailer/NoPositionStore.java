@@ -22,7 +22,7 @@ import java.io.IOException;
 /**
  * A <code>PositionStore</code> that always returns absent.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public class NoPositionStore implements PositionStore {
     /**

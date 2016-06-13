@@ -22,7 +22,7 @@ import com.google.common.base.MoreObjects;
 /**
  * Message class to inform clients of a new metric.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 @Loggable
 public final class NewMetric {

@@ -20,7 +20,7 @@ package com.arpnetworking.metrics.common.tailer;
  * on Apache <code>Tailer</code> but implemented as an interface to improve
  * extensibility.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public interface Tailer extends Runnable{
 

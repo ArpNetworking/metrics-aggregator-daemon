@@ -46,7 +46,7 @@ import java.util.UUID;
  * strongly preferred over mocking data type classes as mocking should be
  * reserved for defining behavior and not data.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class TestBeanFactory {
 

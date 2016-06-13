@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Base for actor tests. Loads configuration and provides an actor system.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 // TODO(barp): Pull this into a test-utils package [MAI-488]
 public abstract class BaseActorTest {

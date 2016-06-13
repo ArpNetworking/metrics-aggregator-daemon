@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * Implementation of <code>DynamicConfigurationFactory</code> which maps keys
  * to file names in a directory.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class DirectoryDynamicConfigurationFactory implements DynamicConfigurationFactory {
 

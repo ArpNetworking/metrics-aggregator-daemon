@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
  * wrapped in an <code>Optional</code>.</li>
  * </ul>
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class Version2f {
 

@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
  * Performs aggregation of <code>Record</code> instances per <code>Period</code>.
  * This class is thread safe.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 // NOTE: The _periodWorkerExecutor is accessed both in synchronized lifecycle methods like launch() and shutdown() but
 // also non-synchronized methods like notify(). Access to _periodWorkerExecutor does not need to be synchronized.

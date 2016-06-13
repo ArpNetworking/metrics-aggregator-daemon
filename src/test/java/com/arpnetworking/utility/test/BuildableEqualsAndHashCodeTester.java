@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
  * Test utility class asserts that the <code>equals</code> and <code>hashCode</code>
  * methods work as expected on a buildable class.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class BuildableEqualsAndHashCodeTester {
 

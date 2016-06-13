@@ -32,7 +32,7 @@ import java.util.Collections;
 /**
  * Tests for the {@link TimeThresholdSink}.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public class TimeThresholdSinkTest {
     @Before

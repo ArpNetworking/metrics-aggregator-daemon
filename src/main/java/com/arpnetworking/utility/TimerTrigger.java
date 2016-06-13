@@ -22,7 +22,7 @@ import org.joda.time.Duration;
 /**
  * A {@link Trigger} that waits a set amount of time then fires.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public class TimerTrigger implements Trigger {
 

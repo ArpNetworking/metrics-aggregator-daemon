@@ -51,7 +51,7 @@ import java.util.UUID;
 /**
  * Tests for the <code>Bucket</code> class.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public class BucketTest {
 

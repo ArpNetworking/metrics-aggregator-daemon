@@ -27,7 +27,7 @@ import java.util.List;
  * Implementation of <code>DynamicConfigurationFactory</code> which maps keys
  * to zero or more subordinate <code>DynamicConfigurationFactory</code> instances.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class MergingDynamicConfigurationFactory implements DynamicConfigurationFactory {
 

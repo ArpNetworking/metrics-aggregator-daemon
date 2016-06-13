@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * A variable and data to describe the input to a statistic calculator.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public final class DefaultMetric implements Metric {
 
@@ -118,7 +118,7 @@ public final class DefaultMetric implements Metric {
     /**
      * Implementation of builder pattern for <code>DefaultMetric</code>.
      *
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public static final class Builder extends OvalBuilder<Metric> {
 

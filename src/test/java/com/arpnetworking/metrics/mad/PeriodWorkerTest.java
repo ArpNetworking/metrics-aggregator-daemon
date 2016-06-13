@@ -25,7 +25,7 @@ import org.junit.Test;
 /**
  * Tests for the <code>PeriodWorker</code> class.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public class PeriodWorkerTest {
 

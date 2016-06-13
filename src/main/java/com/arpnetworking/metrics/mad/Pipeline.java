@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * a <code>LineProcessor</code> and zero or more sinks, again typically at least
  * one sink is specified.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class Pipeline implements Launchable {
 

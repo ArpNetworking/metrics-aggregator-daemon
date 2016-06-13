@@ -39,7 +39,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 /**
  * Responsible for managing aggregation buckets for a period.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 /* package private */ final class PeriodWorker implements Runnable {
 

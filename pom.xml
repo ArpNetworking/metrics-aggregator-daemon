@@ -43,9 +43,9 @@
     <developer>
       <id>barp</id>
       <name>Brandon Arp</name>
-      <email>barp@groupon.com</email>
-      <organization>Groupon</organization>
-      <organizationUrl>http://www.groupon.com</organizationUrl>
+      <email>brandonarp@gmail.com</email>
+      <organization>ArpNetworking</organization>
+      <organizationUrl>http://www.arpnetworking.com</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>
@@ -53,9 +53,9 @@
     <developer>
       <id>vkoskela</id>
       <name>Ville Koskela</name>
-      <email>vkoskela@groupon.com</email>
-      <organization>Groupon</organization>
-      <organizationUrl>http://www.groupon.com</organizationUrl>
+      <email>ville.koskela@inscopemetrics.com</email>
+      <organization>Inscope Metrics</organization>
+      <organizationUrl>http://www.inscopemetrics.com</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>

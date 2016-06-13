@@ -22,7 +22,7 @@ import java.io.Closeable;
 /**
  * Interface to storage for tracking the read position in a file.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public interface PositionStore extends Closeable {
 

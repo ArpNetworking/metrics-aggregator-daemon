@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Takes the sum of the entries. Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 @Loggable
 public final class SumStatistic extends BaseStatistic {
@@ -84,7 +84,7 @@ public final class SumStatistic extends BaseStatistic {
     /**
      * Accumulator computing the sum of values.
      *
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public static final class SumAccumulator extends BaseCalculator<Void> implements Accumulator<Void> {
 

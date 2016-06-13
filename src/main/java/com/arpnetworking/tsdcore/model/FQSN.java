@@ -39,7 +39,7 @@ import java.util.Map;
  * service name, metric name, statistic, period, period start and any
  * dimensions.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class FQSN {
@@ -144,7 +144,7 @@ public final class FQSN {
     /**
      * Implementation of builder pattern for <code>FQSN</code>.
      *
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public static final class Builder extends OvalBuilder<FQSN> {
 

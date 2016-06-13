@@ -20,7 +20,7 @@ import akka.actor.UntypedActor;
 /**
  * Actor to determine the status of the system.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public class Status extends UntypedActor {
 

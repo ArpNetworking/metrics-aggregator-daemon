@@ -23,7 +23,7 @@ import java.util.Map;
  * Interface for classes providing computation of a statistic.
  *
  * @param <T> The type of supporting data.
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public interface Calculator<T> {
 

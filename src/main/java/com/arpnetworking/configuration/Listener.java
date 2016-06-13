@@ -18,7 +18,7 @@ package com.arpnetworking.configuration;
 /**
  * Interface for consumers registered for configuration events.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public interface Listener {
 

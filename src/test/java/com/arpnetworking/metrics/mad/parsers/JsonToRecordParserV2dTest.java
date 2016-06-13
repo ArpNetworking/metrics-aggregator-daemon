@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * Tests for the 2d version of the query log format.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public class JsonToRecordParserV2dTest {
 
