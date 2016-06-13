@@ -24,10 +24,10 @@ import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.tsdcore.statistics.HistogramStatistic;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
+import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
 import org.joda.time.DateTime;
 import org.vertx.java.core.Handler;
-import org.vertx.java.core.net.NetSocket;
 
 import java.util.List;
 import java.util.Map;
@@ -63,40 +63,25 @@ public final class AggregationServerSink extends VertxSink {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void onConnect(final NetSocket socket) {
-        _sentHandshake = false;
-    }
-
     private Messages.StatisticSetRecord serializeMetricData(final PeriodicData periodicData, final List<AggregatedData> dataList) {
         // Get the cluster from the first data element
         final AggregatedData firstElement = dataList.iterator().next();
-        if (!_sentHandshake) {
-            // TODO(barp): Revise aggregator sink protocol for host and cluster support [MAI-443]
-            final String host = periodicData.getDimensions().get("host");
-            final String cluster = firstElement.getFQDSN().getCluster();
-            final Messages.HostIdentification identifyHostMessage =
-                    Messages.HostIdentification.newBuilder()
-                            .setHostName(host)
-                            .setClusterName(cluster)
-                            .build();
-            enqueueData(AggregationMessage.create(identifyHostMessage).serialize());
-            LOGGER.debug()
-                    .setMessage("Writing host identification message")
-                    .addData("sink", getName())
-                    .addData("hostName", host)
-                    .addData("clusterName", cluster)
-                    .log();
-            _sentHandshake = true;
+
+        final List<Messages.DimensionEntry> dimensions = Lists.newArrayList();
+        for (final Map.Entry<String, String> entry : periodicData.getDimensions().entrySet()) {
+            dimensions.add(
+                    Messages.DimensionEntry.newBuilder()
+                            .setKey(entry.getKey())
+                            .setValue(entry.getValue())
+                            .build()
+            );
         }
 
         final Messages.StatisticSetRecord.Builder builder = Messages.StatisticSetRecord.newBuilder()
                 .setMetric(firstElement.getFQDSN().getMetric())
                 .setPeriod(periodicData.getPeriod().toString())
                 .setPeriodStart(periodicData.getStart().toString())
+                .addAllDimensions(dimensions)
                 .setCluster(firstElement.getFQDSN().getCluster())
                 .setService(firstElement.getFQDSN().getService());
 
@@ -181,8 +166,6 @@ public final class AggregationServerSink extends VertxSink {
             }
         });
     }
-
-    private boolean _sentHandshake = false;
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic EXPRESSION_STATISTIC = STATISTIC_FACTORY.getStatistic("expression");

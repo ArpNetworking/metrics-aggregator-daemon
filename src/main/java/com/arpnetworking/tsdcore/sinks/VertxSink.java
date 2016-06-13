@@ -114,7 +114,7 @@ public abstract class VertxSink extends BaseSink {
      *
      * @param socket The <code>NetSocket</code> instance that was connected.
      */
-    protected abstract void onConnect(final NetSocket socket);
+    protected void onConnect(final NetSocket socket) { }
 
     /**
      * Adds a {@link Buffer} of data to the pending data queue.
