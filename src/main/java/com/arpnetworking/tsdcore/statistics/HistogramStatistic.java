@@ -33,7 +33,7 @@ import java.util.TreeMap;
  * a value itself. It is used by percentile statistics as a common dependency.
  * Use <code>StatisticFactory</code> for construction.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class HistogramStatistic extends BaseStatistic {
 
@@ -77,7 +77,7 @@ public final class HistogramStatistic extends BaseStatistic {
      * Accumulator computing the histogram of values. There is a dependency on the
      * histogram accumulator from each percentile statistic's calculator.
      *
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     /* package private */ static final class HistogramAccumulator
             extends BaseCalculator<HistogramSupportingData>
@@ -177,7 +177,7 @@ public final class HistogramStatistic extends BaseStatistic {
     /**
      * Supporting data based on a histogram.
      *
-     * @author Brandon Arp (barp at groupon dot com)
+     * @author Brandon Arp (brandonarp at gmail dot com)
      */
     public static final class HistogramSupportingData {
         /**
@@ -226,7 +226,7 @@ public final class HistogramStatistic extends BaseStatistic {
         /**
          * Implementation of the builder pattern for a {@link HistogramSupportingData}.
          *
-         * @author Brandon Arp (barp at groupon dot com)
+         * @author Brandon Arp (brandonarp at gmail dot com)
          */
         public static class Builder extends OvalBuilder<HistogramSupportingData> {
             /**
@@ -318,7 +318,7 @@ public final class HistogramStatistic extends BaseStatistic {
     /**
      * Represents a snapshot of immutable histogram data.
      *
-     * @author Brandon Arp (barp at groupon dot com)
+     * @author Brandon Arp (brandonarp at gmail dot com)
      */
     public static final class HistogramSnapshot {
         private HistogramSnapshot(final TreeMap<Double, Integer> data, final int entriesCount) {

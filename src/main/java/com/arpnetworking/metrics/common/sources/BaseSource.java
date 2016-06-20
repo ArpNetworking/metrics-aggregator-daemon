@@ -29,7 +29,7 @@ import java.util.function.Function;
  * Abstract base class for common functionality for reading
  * <code>AggregatedData</code>. This class is thread safe.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public abstract class BaseSource implements Source {
 
@@ -102,7 +102,7 @@ public abstract class BaseSource implements Source {
      * Base <code>Builder</code> implementation.
      *
      * @param <B> type of the builder
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     protected abstract static class Builder<B extends Builder<B>> extends OvalBuilder<Source> {
 

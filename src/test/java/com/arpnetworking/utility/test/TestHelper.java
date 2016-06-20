@@ -21,7 +21,7 @@ import java.util.Locale;
 /**
  * Common filter utility helper methods.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class TestHelper {
 

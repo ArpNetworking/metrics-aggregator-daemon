@@ -22,7 +22,7 @@ import org.vertx.java.core.buffer.Buffer;
 /**
  * Class for building messages from the raw, on-the-wire bytes in the TCP stream.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public final class AggregationMessage {
 

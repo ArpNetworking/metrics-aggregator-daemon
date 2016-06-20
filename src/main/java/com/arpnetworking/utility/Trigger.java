@@ -18,7 +18,7 @@ package com.arpnetworking.utility;
 /**
  * A simple interface that blocks the current thread.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public interface Trigger {
     /**

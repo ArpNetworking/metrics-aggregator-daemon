@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * <code>JsonNode</code> based configuration sourced from a file.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class JsonNodeUriSource extends BaseJsonNodeSource {
 

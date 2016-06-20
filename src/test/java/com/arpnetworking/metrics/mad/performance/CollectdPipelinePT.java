@@ -38,7 +38,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * Perf tests the collectd pipeline with a real collectd sample and a pipeline pulled from production.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 @BenchmarkOptions(callgc = true, benchmarkRounds = 1, warmupRounds = 0)
 public class CollectdPipelinePT extends FilePerfTestBase {

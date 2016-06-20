@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 /**
  * Model for the version 2c query log line.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class Version2c {

@@ -25,7 +25,7 @@ import java.util.Set;
 /**
  * Default implementation of <code>InterfaceDatabase</code>.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class ReflectionsDatabase implements InterfaceDatabase, AnnotationDatabase {
 

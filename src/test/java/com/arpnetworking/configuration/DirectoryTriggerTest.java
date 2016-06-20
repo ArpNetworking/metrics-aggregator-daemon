@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 /**
  * Tests for the <code>DirectoryTrigger</code> class.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public class DirectoryTriggerTest {
 

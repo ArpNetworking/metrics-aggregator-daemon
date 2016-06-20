@@ -32,8 +32,8 @@ import java.util.Map;
 /**
  * Default implementation of the <code>Record</code> interface.
  *
- * @author Brandon Arp (barp at groupon dot com)
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class DefaultRecord implements Record {
@@ -159,7 +159,7 @@ public final class DefaultRecord implements Record {
     /**
      * Implementation of builder pattern for <code>DefaultRecord</code>.
      *
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public static final class Builder extends OvalBuilder<Record> {
 

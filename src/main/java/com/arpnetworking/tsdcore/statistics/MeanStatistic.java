@@ -32,7 +32,7 @@ import java.util.Set;
 /**
  * Takes the mean of the entries. Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 @Loggable
 public final class MeanStatistic extends BaseStatistic {
@@ -114,7 +114,7 @@ public final class MeanStatistic extends BaseStatistic {
     /**
      * Calculator computing the average.
      *
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public static final class MeanCalculator extends BaseCalculator<Void> {
 

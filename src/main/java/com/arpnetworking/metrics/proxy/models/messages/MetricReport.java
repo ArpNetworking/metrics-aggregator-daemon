@@ -23,7 +23,7 @@ import org.joda.time.DateTime;
 /**
  * Message class to hold data about a metric that should be sent to clients.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 @Loggable
 public final class MetricReport {

@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * <code>JsonNode</code> based configuration sourced from a literal string.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class JsonNodeLiteralSource extends BaseJsonNodeSource {
 

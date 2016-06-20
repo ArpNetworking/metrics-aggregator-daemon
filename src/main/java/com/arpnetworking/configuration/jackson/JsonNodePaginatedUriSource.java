@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * <code>JsonNode</code> based configuration sourced from a paginated <code>URI</code>.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class JsonNodePaginatedUriSource extends BaseJsonNodeSource {
 

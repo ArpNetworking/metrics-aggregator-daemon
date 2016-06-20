@@ -60,7 +60,7 @@ import java.util.function.BiFunction;
 /**
 * Contains samples for a particular aggregation period in time.
 *
-* @author Ville Koskela (vkoskela at groupon dot com)
+* @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
 */
 /* package private */ final class Bucket {
 

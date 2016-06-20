@@ -35,7 +35,7 @@ import java.util.List;
  * Serves as a data class for storing data for aggregated values after
  * computation.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public final class AggregatedData implements Serializable {
 
@@ -236,7 +236,7 @@ public final class AggregatedData implements Serializable {
     /**
      * Implementation of builder pattern for <code>AggregatedData</code>.
      *
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public static final class Builder extends OvalBuilder<AggregatedData> {
 

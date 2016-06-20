@@ -24,7 +24,7 @@ import java.util.List;
  * A factory that creates a <code>List</code> of <code>MessagesProcessor</code> that
  * implement a protocol version.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public interface MessageProcessorsFactory {
     /**

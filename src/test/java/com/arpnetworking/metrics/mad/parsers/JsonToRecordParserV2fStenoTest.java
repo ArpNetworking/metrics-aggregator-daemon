@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * Tests for the 2f version of the query log format.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public class JsonToRecordParserV2fStenoTest {
 

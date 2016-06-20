@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
 /**
  * Represents a sample.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 @Loggable
 public final class Quantity implements Comparable<Quantity>, Serializable {

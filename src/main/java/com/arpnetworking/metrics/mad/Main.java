@@ -72,8 +72,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Class containing entry point for Metrics Data Aggregator (MAD).
  *
- * @author Brandon Arp (barp at groupon dot com)
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class Main implements Launchable {
 

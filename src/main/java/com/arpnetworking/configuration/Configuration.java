@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 /**
  * Interface for classes which provide configuration.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public interface Configuration {
 

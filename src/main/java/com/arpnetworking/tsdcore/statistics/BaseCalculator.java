@@ -20,7 +20,7 @@ package com.arpnetworking.tsdcore.statistics;
  *
  * @param <T> The type of the supporting data produced by the <code>Calculator</code>.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public abstract class BaseCalculator<T> implements Calculator<T> {
 

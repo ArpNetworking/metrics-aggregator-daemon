@@ -18,7 +18,7 @@ package com.arpnetworking.utility;
 /**
  * Interface for components which can be started and stopped.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public interface Launchable {
 

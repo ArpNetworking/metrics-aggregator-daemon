@@ -24,7 +24,7 @@ import com.arpnetworking.metrics.proxy.models.protocol.MessagesProcessor;
 /**
  * Drops all log messages so they aren't "unhandled" and DOS us.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public class LogMessagesDroppingProcessor implements MessagesProcessor {
     /**

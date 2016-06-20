@@ -21,7 +21,7 @@ import com.google.common.base.Optional;
 /**
  * Interface for sourcing <code>JsonNode</code> based configuration.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public interface JsonNodeSource {
 

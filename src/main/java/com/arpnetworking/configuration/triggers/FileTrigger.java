@@ -37,7 +37,7 @@ import java.util.Arrays;
  * its hash. If the file is created or removed the evaluation will return
  * true.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class FileTrigger implements Trigger {
 

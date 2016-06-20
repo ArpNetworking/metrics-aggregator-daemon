@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * This class provides searchable access to classes by interface.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public interface InterfaceDatabase {
 

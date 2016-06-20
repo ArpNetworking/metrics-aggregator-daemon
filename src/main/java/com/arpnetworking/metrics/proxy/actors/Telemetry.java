@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
  * Actor responsible for holding the set of connected websockets and publishing
  * metrics to them.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  * @author Mohammed Kamel (mkamel at groupon dot com)
  */
 public class Telemetry extends UntypedActor {

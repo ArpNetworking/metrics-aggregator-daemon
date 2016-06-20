@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  * required for consumption by Tsd Aggregator.</li>
  * </ul>
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class Version2fSteno {
 

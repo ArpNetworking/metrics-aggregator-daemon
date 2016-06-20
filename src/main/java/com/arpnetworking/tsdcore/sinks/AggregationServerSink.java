@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 /**
  * Publisher to send data to an upstream aggregation server.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public final class AggregationServerSink extends VertxSink {
     /**
@@ -174,7 +174,7 @@ public final class AggregationServerSink extends VertxSink {
     /**
      * Implementation of builder pattern for <code>AggreationServerSink</code>.
      *
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public static final class Builder extends VertxSink.Builder<Builder, AggregationServerSink> {
 

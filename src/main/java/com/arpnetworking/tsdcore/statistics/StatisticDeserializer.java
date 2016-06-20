@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * Jackson <code>JsonDeserializer</code> implementation for <code>Statistic</code> using <code>StatisticFactory</code>.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public class StatisticDeserializer extends JsonDeserializer<Statistic> {
 

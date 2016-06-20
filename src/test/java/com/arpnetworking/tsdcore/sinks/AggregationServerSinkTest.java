@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Tests for the <code>AggregationServerSink</code> class.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public class AggregationServerSinkTest {
 

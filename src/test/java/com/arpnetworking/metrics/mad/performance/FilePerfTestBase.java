@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Serves as the base for performance tests that run a file through a tsd aggregator pipeline.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public class FilePerfTestBase {
 

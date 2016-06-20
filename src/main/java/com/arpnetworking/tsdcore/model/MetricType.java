@@ -18,7 +18,7 @@ package com.arpnetworking.tsdcore.model;
 /**
  * The type of data.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public enum MetricType {
 

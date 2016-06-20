@@ -62,7 +62,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Http server routes.
  *
- * @author Ville Koskela (vkoskela at groupon dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
 public final class Routes implements Function<HttpRequest, CompletionStage<HttpResponse>> {

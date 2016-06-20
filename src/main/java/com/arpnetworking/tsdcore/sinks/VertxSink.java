@@ -74,7 +74,7 @@ import java.util.function.Function;
  *     consumeLoop.
  * </p>
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public abstract class VertxSink extends BaseSink {
     /**
@@ -443,7 +443,7 @@ public abstract class VertxSink extends BaseSink {
      *
      * @param <B> type of the builder
      * @param <S> type of the object to be built
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
     public abstract static class Builder<B extends BaseSink.Builder<B, S>, S extends Sink> extends BaseSink.Builder<B, S> {
 

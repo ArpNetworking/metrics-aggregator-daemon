@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Factory for creating all the processors needed to process a v1 message.
  *
- * @author Brandon Arp (barp at groupon dot com)
+ * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public class ProcessorsV1Factory implements MessageProcessorsFactory {
     /**
