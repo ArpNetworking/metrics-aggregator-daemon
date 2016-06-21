@@ -21,7 +21,6 @@ import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import java.text.DecimalFormat;
@@ -93,13 +92,7 @@ public abstract class TPStatistic extends BaseStatistic implements OrderedStatis
      */
     @Override
     public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
-        final List<Quantity> allSamples = Lists.newArrayList();
-        for (final AggregatedData aggregation : aggregations) {
-            allSamples.addAll(aggregation.getSamples());
-        }
-        Collections.sort(allSamples);
-        final int index = (int) (Math.ceil((_percentile / 100.0) * (allSamples.size() - 1)));
-        return allSamples.get(index);
+        throw new UnsupportedOperationException("Unsupported operation: calculateAggregations(List<AggregatedData>)");
     }
 
     /**

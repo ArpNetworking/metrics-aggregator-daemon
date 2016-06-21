@@ -19,15 +19,15 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
-import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.tsdcore.model.DefaultKey;
+import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.utility.Launchable;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -43,7 +43,6 @@ import org.joda.time.Period;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -115,7 +114,7 @@ public final class Aggregator implements Observer, Launchable {
             return;
         }
         final Record record = (Record) event;
-        final Key key = new Key(record.getCluster(), record.getService(), record.getHost());
+        final Key key = new DefaultKey(createDimensions(record));
         LOGGER.trace()
                 .setMessage("Processing record")
                 .addData("record", record)
@@ -150,6 +149,15 @@ public final class Aggregator implements Observer, Launchable {
         return toLogValue().toString();
     }
 
+    private ImmutableMap<String, String> createDimensions(final Record record) {
+        // TODO(ville): Promote user specified annotations to dimensions.
+        final ImmutableMap.Builder<String, String> dimensionBuilder = ImmutableMap.builder();
+        dimensionBuilder.put(Key.HOST_DIMENSION_KEY, record.getHost());
+        dimensionBuilder.put(Key.SERVICE_DIMENSION_KEY, record.getService());
+        dimensionBuilder.put(Key.CLUSTER_DIMENSION_KEY, record.getCluster());
+        return dimensionBuilder.build();
+    }
+
     private List<PeriodWorker> createPeriodWorkers(final Key key) {
         final List<PeriodWorker> periodWorkerList = Lists.newArrayListWithExpectedSize(_periods.size());
         for (final Period period : _periods) {
@@ -157,9 +165,7 @@ public final class Aggregator implements Observer, Launchable {
                     .setPeriod(period)
                     .setBucketBuilder(
                             new Bucket.Builder()
-                                    .setCluster(key.getCluster())
-                                    .setService(key.getService())
-                                    .setHost(key.getHost())
+                                    .setKey(key)
                                     .setSpecifiedCounterStatistics(_specifiedCounterStatistics)
                                     .setSpecifiedGaugeStatistics(_specifiedGaugeStatistics)
                                     .setSpecifiedTimerStatistics(_specifiedTimerStatistics)
@@ -258,62 +264,6 @@ public final class Aggregator implements Observer, Launchable {
     private ExecutorService _periodWorkerExecutor = null;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Aggregator.class);
-
-    @Loggable
-    private static final class Key {
-
-        public String getCluster() {
-            return _cluster;
-        }
-
-        public String getService() {
-            return _service;
-        }
-
-        public String getHost() {
-            return _host;
-        }
-
-        @Override
-        public boolean equals(final Object other) {
-            if (this == other) {
-                return true;
-            }
-
-            if (!(other instanceof Key)) {
-                return false;
-            }
-
-            final Key otherKey = (Key) other;
-            return Objects.equals(getCluster(), otherKey.getCluster())
-                    && Objects.equals(getService(), otherKey.getService())
-                    && Objects.equals(getHost(), otherKey.getHost());
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(getCluster(), getService(), getHost());
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                    .add("Cluster", _cluster)
-                    .add("Service", _service)
-                    .add("Host", _host)
-                    .toString();
-        }
-
-        Key(final String cluster, final String service, final String host) {
-            _cluster = cluster;
-            _service = service;
-            _host = host;
-        }
-
-        private final String _cluster;
-        private final String _service;
-        private final String _host;
-    }
 
     /**
      * <code>Builder</code> implementation for <code>Aggregator</code>.

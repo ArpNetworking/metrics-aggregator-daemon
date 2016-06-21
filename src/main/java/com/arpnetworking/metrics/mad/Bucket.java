@@ -24,7 +24,7 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.arpnetworking.tsdcore.model.FQDSN;
+import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.sinks.Sink;
@@ -35,12 +35,10 @@ import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -73,7 +71,7 @@ import java.util.function.BiFunction;
             try {
                 // Acquire the write lock and flush the calculated statistics
                 _addCloseLock.writeLock().lock();
-                final ImmutableList.Builder<AggregatedData> data = ImmutableList.builder();
+                final ImmutableMultimap.Builder<String, AggregatedData> data = ImmutableMultimap.builder();
                 computeStatistics(_counterMetricCalculators, _specifiedCounterStatistics, data);
                 computeStatistics(_gaugeMetricCalculators, _specifiedGaugeStatistics, data);
                 computeStatistics(_timerMetricCalculators, _specifiedTimerStatistics, data);
@@ -90,7 +88,7 @@ import java.util.function.BiFunction;
                 // here.
                 final PeriodicData periodicData = new PeriodicData.Builder()
                         .setData(data.build())
-                        .setDimensions(ImmutableMap.of("host", _host))
+                        .setDimensions(_key)
                         .setPeriod(_period)
                         .setStart(_start)
                         .build();
@@ -207,9 +205,7 @@ import java.util.function.BiFunction;
         return LogValueMapFactory.builder(this)
                 .put("isOpen", _isOpen)
                 .put("sink", _sink)
-                .put("service", _service)
-                .put("cluster", _cluster)
-                .put("host", _host)
+                .put("key", _key)
                 .put("start", _start)
                 .put("period", _period)
                 .put("timerStatistics", _specifiedTimerStatistics)
@@ -232,7 +228,7 @@ import java.util.function.BiFunction;
     private void computeStatistics(
             final ConcurrentMap<String, Collection<Calculator<?>>> calculatorsByMetric,
             final LoadingCache<String, Optional<ImmutableSet<Statistic>>> specifiedStatistics,
-            final ImmutableList.Builder<AggregatedData> data) {
+            final ImmutableMultimap.Builder<String, AggregatedData> data) {
         computeStatistics(calculatorsByMetric, (metric, statistic) -> {
             final Optional<ImmutableSet<Statistic>> stats;
             try {
@@ -247,21 +243,15 @@ import java.util.function.BiFunction;
     private void computeStatistics(
             final ConcurrentMap<String, Collection<Calculator<?>>> calculatorsByMetric,
             final ImmutableSet<Statistic> specifiedStatistics,
-            final ImmutableList.Builder<AggregatedData> data) {
+            final ImmutableMultimap.Builder<String, AggregatedData> data) {
         computeStatistics(calculatorsByMetric, (metric, statistic) -> specifiedStatistics.contains(statistic), data);
     }
     private void computeStatistics(
             final ConcurrentMap<String, Collection<Calculator<?>>> calculatorsByMetric,
             final BiFunction<String, Statistic, Boolean> specified,
-            final ImmutableList.Builder<AggregatedData> data) {
+            final ImmutableMultimap.Builder<String, AggregatedData> data) {
 
-        final FQDSN.Builder fqdsnBuilder = new FQDSN.Builder()
-                .setCluster(_cluster)
-                .setService(_service);
-        final AggregatedData.Builder datumBuilder = new AggregatedData.Builder()
-                .setStart(_start)
-                .setPeriod(_period)
-                .setHost(_host);
+        final AggregatedData.Builder datumBuilder = new AggregatedData.Builder();
 
         for (final Map.Entry<String, Collection<Calculator<?>>> entry : calculatorsByMetric.entrySet()) {
             final String metric = entry.getKey();
@@ -288,19 +278,16 @@ import java.util.function.BiFunction;
             }
 
             // Compute each calculated value requested by the client
-            fqdsnBuilder.setMetric(metric);
             for (final Calculator<?> calculator : calculators) {
-                datumBuilder.setFQDSN(
-                        fqdsnBuilder.setStatistic(calculator.getStatistic())
-                                .build());
-
                 datumBuilder.setSupportingData(null);
                 final CalculatedValue<?> calculatedValue = calculator.calculate(dependencies);
-                data.add(
+                data.put(
+                        metric,
                         datumBuilder.setValue(calculatedValue.getValue())
                                 .setIsSpecified(specified.apply(metric, calculator.getStatistic()))
                                 .setPopulationSize((long) populationSize.getValue().getValue())
                                 .setSupportingData(calculatedValue.getData())
+                                .setStatistic(calculator.getStatistic())
                                 .build());
             }
         }
@@ -372,9 +359,7 @@ import java.util.function.BiFunction;
 
     Bucket(final Builder builder) {
         _sink = builder._sink;
-        _cluster = builder._cluster;
-        _service = builder._service;
-        _host = builder._host;
+        _key = builder._key;
         _start = builder._start;
         _period = builder._period;
         _specifiedCounterStatistics = builder._specifiedCounterStatistics;
@@ -394,9 +379,7 @@ import java.util.function.BiFunction;
     private final ConcurrentMap<String, Collection<Calculator<?>>> _timerMetricCalculators = Maps.newConcurrentMap();
     private final ConcurrentMap<String, Collection<Calculator<?>>> _explicitMetricCalculators = Maps.newConcurrentMap();
     private final Sink _sink;
-    private final String _cluster;
-    private final String _service;
-    private final String _host;
+    private final Key _key;
     private final DateTime _start;
     private final Period _period;
     private final ImmutableSet<Statistic> _specifiedCounterStatistics;
@@ -431,35 +414,13 @@ import java.util.function.BiFunction;
         }
 
         /**
-         * Set the service. Cannot be null or empty.
+         * Set the key. Cannot be null or empty.
          *
-         * @param value The service.
+         * @param value The key.
          * @return This <code>Builder</code> instance.
          */
-        public Builder setService(final String value) {
-            _service = value;
-            return this;
-        }
-
-        /**
-         * Set the cluster. Cannot be null or empty.
-         *
-         * @param value The cluster.
-         * @return This <code>Builder</code> instance.
-         */
-        public Builder setCluster(final String value) {
-            _cluster = value;
-            return this;
-        }
-
-        /**
-         * Set the host. Cannot be null or empty.
-         *
-         * @param value The host.
-         * @return This <code>Builder</code> instance.
-         */
-        public Builder setHost(final String value) {
-            _host = value;
+        public Builder setKey(final Key value) {
+            _key = value;
             return this;
         }
 
@@ -596,9 +557,7 @@ import java.util.function.BiFunction;
             return LogValueMapFactory.builder(this)
                     .put("_super", super.toLogValue())
                     .put("sink", _sink)
-                    .put("service", _service)
-                    .put("cluster", _cluster)
-                    .put("host", _host)
+                    .put("key", _key)
                     .put("start", _start)
                     .put("period", _period)
                     .put("specifiedTimerStatistics", _specifiedTimerStatistics)
@@ -618,18 +577,10 @@ import java.util.function.BiFunction;
             return toLogValue().toString();
         }
 
-
-        @NotNull
-        @NotEmpty
-        private String _service;
-        @NotNull
-        @NotEmpty
-        private String _cluster;
-        @NotNull
-        @NotEmpty
-        private String _host;
         @NotNull
         private Sink _sink;
+        @NotNull
+        private Key _key;
         @NotNull
         private DateTime _start;
         @NotNull

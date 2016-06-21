@@ -20,7 +20,8 @@ import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.Condition;
-import com.arpnetworking.tsdcore.model.FQDSN;
+import com.arpnetworking.tsdcore.model.DefaultKey;
+import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.tsdcore.model.Quantity;
@@ -28,6 +29,7 @@ import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.joda.time.DateTime;
@@ -108,30 +110,20 @@ public class AggregatorTest {
         final List<Condition> conditions = periodicData.getConditions();
         Assert.assertTrue(conditions.isEmpty());
 
-        final List<AggregatedData> data = periodicData.getData();
+        final ImmutableMultimap<String, AggregatedData> data = periodicData.getData();
         final AggregatedData.Builder builder = new AggregatedData.Builder()
-                .setHost("MyHost")
-                .setStart(dataTimeInThePast.withMillisOfSecond(0))
                 .setIsSpecified(false)
-                .setPeriod(Period.seconds(1))
                 .setPopulationSize(1L)
-                .setSamples(Collections.emptyList())
                 .setValue(new Quantity.Builder().setValue(1d).build());
         Assert.assertEquals(2, data.size());
         Assert.assertThat(
-                data,
+                data.get("MyMetric"),
                 Matchers.containsInAnyOrder(
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setMetric("MyMetric")
-                                        .setStatistic(COUNT_STATISTIC)
-                                        .build())
+                                .setStatistic(COUNT_STATISTIC)
                                 .build(),
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setMetric("MyMetric")
-                                        .setStatistic(MAX_STATISTIC)
-                                        .build())
+                                .setStatistic(MAX_STATISTIC)
                                 .setIsSpecified(true)
                                 .build()));
     }
@@ -173,43 +165,36 @@ public class AggregatorTest {
         Mockito.verify(_sink, Mockito.times(2)).recordAggregateData(_periodicDataCaptor.capture());
         Mockito.verifyNoMoreInteractions(_sink);
 
-        final List<AggregatedData> unifiedData = getCapturedData();
+        final List<AggregatedData> unifiedData = getCapturedData(
+                "MyCounter",
+                new DefaultKey(ImmutableMap.of(
+                        Key.HOST_DIMENSION_KEY, "MyHost",
+                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                        Key.CLUSTER_DIMENSION_KEY, "MyClusterA")),
+                new DefaultKey(ImmutableMap.of(
+                        Key.HOST_DIMENSION_KEY, "MyHost",
+                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                        Key.CLUSTER_DIMENSION_KEY, "MyClusterB")));
         final AggregatedData.Builder builder = new AggregatedData.Builder()
-                .setHost("MyHost")
-                .setStart(start)
                 .setIsSpecified(false)
-                .setPeriod(Period.seconds(1))
                 .setPopulationSize(1L)
-                .setSamples(Collections.emptyList())
                 .setValue(new Quantity.Builder().setValue(1d).build());
         Assert.assertThat(
                 unifiedData,
                 Matchers.containsInAnyOrder(
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setCluster("MyClusterA")
-                                        .setStatistic(COUNT_STATISTIC)
-                                        .build())
+                                .setStatistic(COUNT_STATISTIC)
                                 .build(),
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setCluster("MyClusterB")
-                                        .setStatistic(COUNT_STATISTIC)
-                                        .build())
+                                .setStatistic(COUNT_STATISTIC)
                                 .build(),
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setCluster("MyClusterA")
-                                        .setStatistic(MAX_STATISTIC)
-                                        .build())
+                                .setStatistic(MAX_STATISTIC)
                                 .setValue(ONE)
                                 .setIsSpecified(true)
                                 .build(),
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setCluster("MyClusterB")
-                                        .setStatistic(MAX_STATISTIC)
-                                        .build())
+                                .setStatistic(MAX_STATISTIC)
                                 .setValue(TWO)
                                 .setIsSpecified(true)
                                 .build()));
@@ -252,42 +237,36 @@ public class AggregatorTest {
         Mockito.verify(_sink, Mockito.times(2)).recordAggregateData(_periodicDataCaptor.capture());
         Mockito.verifyNoMoreInteractions(_sink);
 
-        final List<AggregatedData> unifiedData = getCapturedData();
+        final List<AggregatedData> unifiedData = getCapturedData(
+                "MyCounter",
+                new DefaultKey(ImmutableMap.of(
+                        Key.HOST_DIMENSION_KEY, "MyHost",
+                        Key.SERVICE_DIMENSION_KEY, "MyServiceA",
+                        Key.CLUSTER_DIMENSION_KEY, "MyCluster")),
+                new DefaultKey(ImmutableMap.of(
+                        Key.HOST_DIMENSION_KEY, "MyHost",
+                        Key.SERVICE_DIMENSION_KEY, "MyServiceB",
+                        Key.CLUSTER_DIMENSION_KEY, "MyCluster")));
+
         final AggregatedData.Builder builder = new AggregatedData.Builder()
-                .setHost("MyHost")
-                .setStart(start)
                 .setIsSpecified(false)
-                .setPeriod(Period.seconds(1))
                 .setPopulationSize(1L)
-                .setSamples(Collections.emptyList())
                 .setValue(new Quantity.Builder().setValue(1d).build());
         Assert.assertThat(
                 unifiedData,
                 Matchers.containsInAnyOrder(
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setService("MyServiceA")
-                                        .setStatistic(COUNT_STATISTIC)
-                                        .build())
+                                .setStatistic(COUNT_STATISTIC)
                                 .build(),
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setService("MyServiceB")
-                                        .setStatistic(COUNT_STATISTIC)
-                                        .build())
+                                .setStatistic(COUNT_STATISTIC)
                                 .build(),
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setService("MyServiceA")
-                                        .setStatistic(MAX_STATISTIC)
-                                        .build())
+                                .setStatistic(MAX_STATISTIC)
                                 .setIsSpecified(true)
                                 .build(),
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setService("MyServiceB")
-                                        .setStatistic(MAX_STATISTIC)
-                                        .build())
+                                .setStatistic(MAX_STATISTIC)
                                 .setValue(TWO)
                                 .setIsSpecified(true)
                                 .build()));
@@ -330,63 +309,62 @@ public class AggregatorTest {
         Mockito.verify(_sink, Mockito.times(2)).recordAggregateData(_periodicDataCaptor.capture());
         Mockito.verifyNoMoreInteractions(_sink);
 
-        final List<AggregatedData> unifiedData = getCapturedData();
+        final List<AggregatedData> unifiedData = getCapturedData(
+                "MyCounter",
+                new DefaultKey(ImmutableMap.of(
+                        Key.HOST_DIMENSION_KEY, "MyHostA",
+                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                        Key.CLUSTER_DIMENSION_KEY, "MyCluster")),
+                new DefaultKey(ImmutableMap.of(
+                        Key.HOST_DIMENSION_KEY, "MyHostB",
+                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                        Key.CLUSTER_DIMENSION_KEY, "MyCluster")));
+
         final AggregatedData.Builder builder = new AggregatedData.Builder()
-                .setStart(start)
                 .setIsSpecified(false)
-                .setPeriod(Period.seconds(1))
                 .setPopulationSize(1L)
-                .setSamples(Collections.emptyList())
                 .setValue(new Quantity.Builder().setValue(1d).build());
         Assert.assertThat(
                 unifiedData,
                 Matchers.containsInAnyOrder(
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setStatistic(COUNT_STATISTIC)
-                                        .build())
-                                .setHost("MyHostA")
+                                .setStatistic(COUNT_STATISTIC)
                                 .build(),
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setStatistic(COUNT_STATISTIC)
-                                        .build())
-                                .setHost("MyHostB")
+                                .setStatistic(COUNT_STATISTIC)
                                 .build(),
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setStatistic(MAX_STATISTIC)
-                                        .build())
-                                .setHost("MyHostA")
+                                .setStatistic(MAX_STATISTIC)
                                 .setValue(ONE)
                                 .setIsSpecified(true)
                                 .build(),
                         builder
-                                .setFQDSN(createFqdsnBuilder()
-                                        .setStatistic(MAX_STATISTIC)
-                                        .build())
-                                .setHost("MyHostB")
+                                .setStatistic(MAX_STATISTIC)
                                 .setValue(TWO)
                                 .setIsSpecified(true)
                                 .build()));
     }
 
-    private List<AggregatedData> getCapturedData() {
+    private List<AggregatedData> getCapturedData(
+            final String metricName,
+            final Key dimensionSetA,
+            final Key dimensionSetB) {
         final List<PeriodicData> capturedPeriodicData = _periodicDataCaptor.getAllValues();
         Assert.assertEquals(2, capturedPeriodicData.size());
+        if (capturedPeriodicData.get(0).getDimensions().equals(dimensionSetA)) {
+            Assert.assertEquals(dimensionSetB, capturedPeriodicData.get(1).getDimensions());
+        } else {
+            Assert.assertEquals(dimensionSetB, capturedPeriodicData.get(0).getDimensions());
+            Assert.assertEquals(dimensionSetA, capturedPeriodicData.get(1).getDimensions());
+        }
+        Assert.assertEquals(1, capturedPeriodicData.get(0).getData().keySet().size());
+        Assert.assertEquals(metricName, capturedPeriodicData.get(0).getData().keySet().iterator().next());
         Assert.assertEquals(2, capturedPeriodicData.get(0).getData().size());
         Assert.assertEquals(2, capturedPeriodicData.get(1).getData().size());
         final List<AggregatedData> unifiedData = Lists.newArrayList();
-        unifiedData.addAll(capturedPeriodicData.get(0).getData());
-        unifiedData.addAll(capturedPeriodicData.get(1).getData());
+        unifiedData.addAll(capturedPeriodicData.get(0).getData().get(metricName));
+        unifiedData.addAll(capturedPeriodicData.get(1).getData().get(metricName));
         return unifiedData;
-    }
-
-    private static FQDSN.Builder createFqdsnBuilder() {
-        return new FQDSN.Builder()
-                .setCluster("MyCluster")
-                .setService("MyService")
-                .setMetric("MyCounter");
     }
 
     private Aggregator _aggregator;

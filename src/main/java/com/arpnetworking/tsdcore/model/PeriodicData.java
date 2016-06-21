@@ -19,18 +19,11 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
-
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Contains the data for a specific period in time.
@@ -48,36 +41,16 @@ public final class PeriodicData {
         return _start;
     }
 
-    public ImmutableMap<String, String> getDimensions() {
+    public Key getDimensions() {
         return _dimensions;
     }
 
-    public ImmutableList<AggregatedData> getData() {
+    public ImmutableMultimap<String, AggregatedData> getData() {
         return _data;
     }
 
     public ImmutableList<Condition> getConditions() {
         return _conditions;
-    }
-
-    /**
-     * Retrieve <code>AggregatedData</code> instance by <code>FQDSN</code>.
-     *
-     * @param fqdsn The <code>FQDSN</code> to query for.
-     * @return Tbe <code>Optional</code> instance of <code>AggregatedData</code>.
-     */
-    public Optional<AggregatedData> getDatumByFqdsn(final FQDSN fqdsn) {
-        return Optional.fromNullable(_dataByFqdsn.get().get(fqdsn));
-    }
-
-    /**
-     * Retrieve <code>Condition</code> instance by <code>FQDSN</code>.
-     *
-     * @param fqdsn The <code>FQDSN</code> to query for.
-     * @return Tbe <code>Optional</code> instance of <code>Condition</code>.
-     */
-    public Optional<Condition> getConditionByFqdsn(final FQDSN fqdsn) {
-        return Optional.fromNullable(_conditionsByFqdsn.get().get(fqdsn));
     }
 
     /**
@@ -135,20 +108,13 @@ public final class PeriodicData {
         _dimensions = builder._dimensions;
         _data = builder._data;
         _conditions = builder._conditions;
-
-        _dataByFqdsn = Suppliers.memoize(
-                () -> _data.stream().collect(Collectors.toMap(AggregatedData::getFQDSN, Function.identity())));
-        _conditionsByFqdsn = Suppliers.memoize(
-                () -> _conditions.stream().collect(Collectors.toMap(Condition::getFQDSN, Function.identity())));
     }
 
     private final Period _period;
     private final DateTime _start;
-    private final ImmutableMap<String, String> _dimensions;
-    private final ImmutableList<AggregatedData> _data;
+    private final Key _dimensions;
+    private final ImmutableMultimap<String, AggregatedData> _data;
     private final ImmutableList<Condition> _conditions;
-    private final Supplier<Map<FQDSN, AggregatedData>> _dataByFqdsn;
-    private final Supplier<Map<FQDSN, Condition>> _conditionsByFqdsn;
 
     /**
      * <code>Builder</code> implementation for <code>PeriodicData</code>.
@@ -185,29 +151,29 @@ public final class PeriodicData {
         }
 
         /**
-         * Set the dimensions. Optional. Cannot be null. Defaults to an empty <code>Map</code>.
+         * Set the dimensions. Required. Cannot be null.
          *
          * @param value The dimensions.
          * @return This <code>Builder</code> instance.
          */
-        public Builder setDimensions(final ImmutableMap<String, String> value) {
+        public Builder setDimensions(final Key value) {
             _dimensions = value;
             return this;
         }
 
         /**
-         * Set the data. Optional. Cannot be null. Defaults to an empty <code>List</code>.
+         * Set the data. Optional. Cannot be null. Defaults to an empty <code>ImmutableMap</code>.
          *
          * @param value The data.
          * @return This <code>Builder</code> instance.
          */
-        public Builder setData(final ImmutableList<AggregatedData> value) {
+        public Builder setData(final ImmutableMultimap<String, AggregatedData> value) {
             _data = value;
             return this;
         }
 
         /**
-         * Set the conditions. Optional. Cannot be null. Defaults to an empty <code>List</code>.
+         * Set the conditions. Optional. Cannot be null. Defaults to an empty <code>ImmutableMap</code>.
          *
          * @param value The conditions.
          * @return This <code>Builder</code> instance.
@@ -222,9 +188,9 @@ public final class PeriodicData {
         @NotNull
         private DateTime _start;
         @NotNull
-        private ImmutableMap<String, String> _dimensions = ImmutableMap.of();
+        private Key _dimensions;
         @NotNull
-        private ImmutableList<AggregatedData> _data = ImmutableList.of();
+        private ImmutableMultimap<String, AggregatedData> _data = ImmutableMultimap.of();
         @NotNull
         private ImmutableList<Condition> _conditions = ImmutableList.of();
     }
