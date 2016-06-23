@@ -16,9 +16,10 @@
 package com.arpnetworking.tsdcore.sinks;
 
 import com.arpnetworking.test.TestBeanFactory;
-import com.arpnetworking.tsdcore.model.AggregatedData;
+import com.arpnetworking.tsdcore.model.DefaultKey;
+import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.junit.Before;
@@ -50,12 +51,6 @@ public class TimeThresholdSinkTest {
         final PeriodicData periodicData = TestBeanFactory.createPeriodicDataBuilder()
                 .setPeriod(Period.minutes(1))
                 .setStart(DateTime.now())
-                .setData(
-                        ImmutableList.of(
-                                TestBeanFactory.createAggregatedDataBuilder()
-                                        .setPeriod(Period.minutes(1))
-                                        .setStart(DateTime.now())
-                                        .build()))
                 .build();
         periodFilteringSink.recordAggregateData(periodicData);
         Mockito.verify(_sink).recordAggregateData(periodicData);
@@ -71,12 +66,6 @@ public class TimeThresholdSinkTest {
         final PeriodicData periodicData = TestBeanFactory.createPeriodicDataBuilder()
                 .setPeriod(Period.minutes(1))
                 .setStart(DateTime.now().minus(Period.minutes(30)))
-                .setData(
-                        ImmutableList.of(
-                                TestBeanFactory.createAggregatedDataBuilder()
-                                        .setPeriod(Period.minutes(1))
-                                        .setStart(DateTime.now().minus(Period.minutes(30)))
-                                        .build()))
                 .build();
         periodFilteringSink.recordAggregateData(periodicData);
         Mockito.verify(_sink, Mockito.never()).recordAggregateData(Mockito.any(PeriodicData.class));
@@ -93,12 +82,6 @@ public class TimeThresholdSinkTest {
         final PeriodicData periodicData = TestBeanFactory.createPeriodicDataBuilder()
                 .setPeriod(Period.minutes(1))
                 .setStart(DateTime.now().minus(Period.minutes(30)))
-                .setData(
-                        ImmutableList.of(
-                                TestBeanFactory.createAggregatedDataBuilder()
-                                        .setPeriod(Period.minutes(1))
-                                        .setStart(DateTime.now().minus(Period.minutes(30)))
-                                        .build()))
                 .build();
         periodFilteringSink.recordAggregateData(periodicData);
         Mockito.verify(_sink).recordAggregateData(periodicData);
@@ -112,26 +95,16 @@ public class TimeThresholdSinkTest {
                 .setExcludedServices(Collections.singleton("excluded"))
                 .setSink(_sink)
                 .build();
-        final AggregatedData datumLate = TestBeanFactory.createAggregatedDataBuilder()
+        final PeriodicData periodicData = TestBeanFactory.createPeriodicDataBuilder()
+                .setDimensions(new DefaultKey(ImmutableMap.of(
+                        Key.HOST_DIMENSION_KEY, "MyHost",
+                        Key.SERVICE_DIMENSION_KEY, "excluded",
+                        Key.CLUSTER_DIMENSION_KEY, "MyCluster")))
                 .setPeriod(Period.minutes(1))
                 .setStart(DateTime.now().minus(Period.minutes(30)))
                 .build();
-        final AggregatedData datumLateExcluded = TestBeanFactory.createAggregatedDataBuilder()
-                .setPeriod(Period.minutes(1))
-                .setStart(DateTime.now().minus(Period.minutes(30)))
-                .setFQDSN(TestBeanFactory.createFQDSNBuilder().setService("excluded").build())
-                .build();
-        final PeriodicData.Builder periodicDataBuilder = TestBeanFactory.createPeriodicDataBuilder()
-                .setPeriod(Period.minutes(1))
-                .setStart(DateTime.now().minus(Period.minutes(30)));
-        final PeriodicData periodicDataIn = periodicDataBuilder
-                .setData(ImmutableList.of(datumLate, datumLateExcluded))
-                .build();
-        final PeriodicData periodicDataOut = periodicDataBuilder
-                .setData(ImmutableList.of(datumLateExcluded))
-                .build();
-        periodFilteringSink.recordAggregateData(periodicDataIn);
-        Mockito.verify(_sink).recordAggregateData(periodicDataOut);
+        periodFilteringSink.recordAggregateData(periodicData);
+        Mockito.verify(_sink).recordAggregateData(periodicData);
     }
 
     @Mock

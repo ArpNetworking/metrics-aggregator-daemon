@@ -18,7 +18,7 @@ package com.arpnetworking.tsdcore.sinks;
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 
 import org.junit.Before;
@@ -53,7 +53,9 @@ public class MultiSinkTest {
 
     @Test
     public void testRecordProcessedAggregateData() {
-        final ImmutableList<AggregatedData> data = ImmutableList.of(TestBeanFactory.createAggregatedData());
+        final ImmutableMultimap<String, AggregatedData> data = ImmutableMultimap.of(
+                "MyMetric",
+                TestBeanFactory.createAggregatedData());
         final Sink mockSinkA = Mockito.mock(Sink.class, "mockSinkA");
         final Sink mockSinkB = Mockito.mock(Sink.class, "mockSinkB");
         final Sink multiSink = _multiSinkBuilder

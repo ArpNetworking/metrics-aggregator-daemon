@@ -21,7 +21,7 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Sets;
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.Period;
@@ -57,7 +57,7 @@ public final class TimeThresholdSink extends BaseSink {
             _sink.recordAggregateData(periodicData);
         } else {
             // Apply the filter and rebuild the periodic data
-            final ImmutableList<AggregatedData> filteredData = _filter.filter(periodicData);
+            final ImmutableMultimap<String, AggregatedData> filteredData = _filter.filter(periodicData);
             if (!filteredData.isEmpty() || !periodicData.getConditions().isEmpty()) {
                 _sink.recordAggregateData(
                         PeriodicData.Builder.clone(periodicData, new PeriodicData.Builder())
@@ -98,7 +98,7 @@ public final class TimeThresholdSink extends BaseSink {
         _sink = builder._sink;
         _logOnly = builder._logOnly;
         _threshold = builder._threshold;
-        _logger = (AggregatedData data) ->
+        _logger = (PeriodicData data) ->
                 STALE_DATA_LOGGER
                         .warn()
                         .setMessage("Dropped stale data")
@@ -109,7 +109,7 @@ public final class TimeThresholdSink extends BaseSink {
         _filter = new Filter(_threshold, _logger, _excludedServices);
     }
 
-    private final Consumer<AggregatedData> _logger;
+    private final Consumer<PeriodicData> _logger;
     private final Set<String> _excludedServices;
     private final Sink _sink;
     private final boolean _logOnly;
@@ -122,35 +122,28 @@ public final class TimeThresholdSink extends BaseSink {
     private static final class Filter {
         private Filter(
                 final Period freshnessThreshold,
-                final Consumer<AggregatedData> excludedConsumer,
+                final Consumer<PeriodicData> excludedConsumer,
                 final Set<String> excludedServices) {
             _freshnessThreshold = freshnessThreshold;
             _excludedConsumer = excludedConsumer;
             _excludedServices = excludedServices;
         }
 
-        public ImmutableList<AggregatedData> filter(final PeriodicData periodicData) {
-            final ImmutableList.Builder<AggregatedData> retainedDataBuilder = ImmutableList.builder();
-            if (!periodicData.getStart().plus(periodicData.getPeriod()).plus(_freshnessThreshold).isAfterNow()) {
-                // Only retain data from a service excluded from filtering
-                for (final AggregatedData datum : periodicData.getData()) {
-                    if (_excludedServices.contains(datum.getFQDSN().getService())) {
-                        retainedDataBuilder.add(datum);
-                    } else {
-                        _excludedConsumer.accept(datum);
-                    }
-                }
-            } else {
-                // Retain all data
-                for (final AggregatedData datum : periodicData.getData()) {
-                    retainedDataBuilder.add(datum);
-                }
+        public ImmutableMultimap<String, AggregatedData> filter(final PeriodicData periodicData) {
+            final ImmutableMultimap.Builder<String, AggregatedData> retainedDataBuilder = ImmutableMultimap.builder();
+            if (!periodicData.getStart().plus(periodicData.getPeriod()).plus(_freshnessThreshold).isAfterNow()
+                    && !_excludedServices.contains(periodicData.getDimensions().getService())) {
+                // Exclude all data
+                _excludedConsumer.accept(periodicData);
+                return ImmutableMultimap.of();
             }
-            return retainedDataBuilder.build();
+
+            // Retain all; either because the data ias not late or the service is excluded
+            return periodicData.getData();
         }
 
         private final Period _freshnessThreshold;
-        private final Consumer<AggregatedData> _excludedConsumer;
+        private final Consumer<PeriodicData> _excludedConsumer;
         private final Set<String> _excludedServices;
     }
 

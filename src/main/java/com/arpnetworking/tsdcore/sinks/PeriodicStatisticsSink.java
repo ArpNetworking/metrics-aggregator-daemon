@@ -31,6 +31,7 @@ import com.google.common.collect.Sets;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -78,26 +79,28 @@ public final class PeriodicStatisticsSink extends BaseSink {
         final long now = System.currentTimeMillis();
         _aggregatedData.addAndGet(periodicData.getData().size());
         final Set<String> uniqueMetrics = Sets.newHashSet();
-        for (final AggregatedData datum : periodicData.getData()) {
+        for (final Map.Entry<String, AggregatedData> entry : periodicData.getData().entries()) {
+            final String metricName = entry.getKey();
+            final AggregatedData datum = entry.getValue();
             final String fqsn = new StringBuilder()
-                    .append(datum.getFQDSN().getCluster()).append(".")
-                    .append(periodicData.getDimensions().get("host")).append(".")
-                    .append(datum.getFQDSN().getService()).append(".")
-                    .append(datum.getFQDSN().getMetric()).append(".")
-                    .append(datum.getFQDSN().getStatistic()).append(".")
+                    .append(periodicData.getDimensions().getCluster()).append(".")
+                    .append(periodicData.getDimensions().getHost()).append(".")
+                    .append(periodicData.getDimensions().getService()).append(".")
+                    .append(metricName).append(".")
+                    .append(datum.getStatistic()).append(".")
                     .append(periodicData.getPeriod())
                     .toString();
 
-            final String metricName = new StringBuilder()
-                    .append(datum.getFQDSN().getService()).append(".")
-                    .append(datum.getFQDSN().getMetric())
+            final String serviceMetric = new StringBuilder()
+                    .append(periodicData.getDimensions().getService()).append(".")
+                    .append(metricName)
                     .toString();
 
-            _uniqueMetrics.get().add(metricName);
+            _uniqueMetrics.get().add(serviceMetric);
 
             _uniqueStatistics.get().add(fqsn);
 
-            if (uniqueMetrics.add(metricName)) {
+            if (uniqueMetrics.add(serviceMetric)) {
                 // Allow each service/metric in the periodic data to contribute
                 // its population size (samples processed) to the sample count.
                 _metricSamples.accumulate(datum.getPopulationSize());

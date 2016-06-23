@@ -21,7 +21,9 @@ import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.Condition;
+import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.FQDSN;
+import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.tsdcore.model.Quantity;
@@ -32,6 +34,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 
 import org.joda.time.DateTime;
@@ -151,13 +154,9 @@ public final class TestBeanFactory {
      */
     public static AggregatedData.Builder createAggregatedDataBuilder() {
         return new AggregatedData.Builder()
-                .setFQDSN(createFQDSN())
-                .setHost("host-" + UUID.randomUUID())
+                .setStatistic(MEAN_STATISTIC)
                 .setValue(createSample())
-                .setStart(DateTime.now())
-                .setPeriod(Period.minutes(5))
                 .setIsSpecified(true)
-                .setSamples(Lists.newArrayList(createSample()))
                 .setPopulationSize((long) (Math.random() * 100));
     }
 
@@ -177,8 +176,13 @@ public final class TestBeanFactory {
      */
     public static PeriodicData.Builder createPeriodicDataBuilder() {
         return new PeriodicData.Builder()
-                .setDimensions(ImmutableMap.of("host", "host-" + UUID.randomUUID()))
-                .setData(ImmutableList.of(createAggregatedData()))
+                .setDimensions(
+                        new DefaultKey(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "host-" + UUID.randomUUID(),
+                                        Key.SERVICE_DIMENSION_KEY, "service-" + UUID.randomUUID(),
+                                        Key.CLUSTER_DIMENSION_KEY, "cluster-" + UUID.randomUUID())))
+                .setData(ImmutableMultimap.of("metric-" + UUID.randomUUID(), createAggregatedData()))
                 .setConditions(ImmutableList.of())
                 .setPeriod(Period.minutes(5))
                 .setStart(DateTime.now());
@@ -223,12 +227,8 @@ public final class TestBeanFactory {
         return FluentIterable.from(Lists.newArrayList(values)).transform(CREATE_SAMPLE).toList();
     }
 
-    private static final Function<Double, Quantity> CREATE_SAMPLE = new Function<Double, Quantity>() {
-        @Override
-        public Quantity apply(final Double input) {
-            return new Quantity.Builder().setValue(input).setUnit(Unit.MILLISECOND).build();
-        }
-    };
+    private static final Function<Double, Quantity> CREATE_SAMPLE =
+            input -> new Quantity.Builder().setValue(input).setUnit(Unit.MILLISECOND).build();
 
     private TestBeanFactory() {}
 

@@ -27,6 +27,8 @@ import com.fasterxml.jackson.annotation.JacksonInject;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
+import java.util.Map;
+
 /**
  * A publisher that sends a message to the <code>Telemetry</code> actor.
  *
@@ -39,15 +41,19 @@ public final class TelemetrySink extends BaseSink {
      */
     @Override
     public void recordAggregateData(final PeriodicData periodicData) {
-        for (final AggregatedData datum : periodicData.getData()) {
-            final MetricReport metricReport = new MetricReport(
-                    datum.getFQDSN().getService(),
-                    periodicData.getDimensions().get("host"),
-                    datum.getFQDSN().getStatistic().getName(),
-                    datum.getFQDSN().getMetric(),
-                    datum.getValue().getValue(),
-                    periodicData.getStart());
-            _telemetryActor.tell(metricReport, ActorRef.noSender());
+        for (final Map.Entry<String, AggregatedData> entry : periodicData.getData().entries()) {
+            final String metricName = entry.getKey();
+            final AggregatedData datum = entry.getValue();
+            if (datum.isSpecified()) {
+                final MetricReport metricReport = new MetricReport(
+                        periodicData.getDimensions().getService(),
+                        periodicData.getDimensions().getHost(),
+                        datum.getStatistic().getName(),
+                        metricName,
+                        datum.getValue().getValue(),
+                        periodicData.getStart());
+                _telemetryActor.tell(metricReport, ActorRef.noSender());
+            }
         }
     }
 

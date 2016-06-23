@@ -29,9 +29,9 @@ import com.google.protobuf.ByteString;
 import org.joda.time.DateTime;
 import org.vertx.java.core.Handler;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Publisher to send data to an upstream aggregation server.
@@ -50,25 +50,25 @@ public final class AggregationServerSink extends VertxSink {
                 .addData("dataSize", periodicData.getData().size())
                 .addData("conditionsSize", periodicData.getConditions().size())
                 .log();
-
-        final Map<String, List<AggregatedData>> data = periodicData.getData()
-                .stream()
-                .filter(datum -> !EXPRESSION_STATISTIC.equals(datum.getFQDSN().getStatistic()))
-                .collect(Collectors.groupingBy(d -> d.getFQDSN().getMetric()));
-        for (final List<AggregatedData> dataList : data.values()) {
-            if (!dataList.isEmpty()) {
-                final Messages.StatisticSetRecord record = serializeMetricData(periodicData, dataList);
+        
+        for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
+            final String metricName = entry.getKey();
+            final Collection<AggregatedData> data = entry.getValue();
+            if (!data.isEmpty()) {
+                final Messages.StatisticSetRecord record = serializeMetricData(periodicData, metricName, data);
                 enqueueData(AggregationMessage.create(record).serialize());
             }
         }
     }
 
-    private Messages.StatisticSetRecord serializeMetricData(final PeriodicData periodicData, final List<AggregatedData> dataList) {
-        // Get the cluster from the first data element
-        final AggregatedData firstElement = dataList.iterator().next();
+    private Messages.StatisticSetRecord serializeMetricData(
+            final PeriodicData periodicData,
+            final String metricName,
+            final Collection<AggregatedData> data) {
 
+        // Map all dimensions
         final List<Messages.DimensionEntry> dimensions = Lists.newArrayList();
-        for (final Map.Entry<String, String> entry : periodicData.getDimensions().entrySet()) {
+        for (final Map.Entry<String, String> entry : periodicData.getDimensions().getParameters().entrySet()) {
             dimensions.add(
                     Messages.DimensionEntry.newBuilder()
                             .setKey(entry.getKey())
@@ -77,28 +77,51 @@ public final class AggregationServerSink extends VertxSink {
             );
         }
 
+        // For backwards compatibility map host, service and cluster with old names
+        // TODO(ville): Add support for new meta attribute names (e.g. underscore prefixed) to CAgg and remove this.
+        dimensions.add(
+                Messages.DimensionEntry.newBuilder()
+                        .setKey("host")
+                        .setValue(periodicData.getDimensions().getHost())
+                        .build()
+        );
+        dimensions.add(
+                Messages.DimensionEntry.newBuilder()
+                        .setKey("service")
+                        .setValue(periodicData.getDimensions().getService())
+                        .build()
+        );
+        dimensions.add(
+                Messages.DimensionEntry.newBuilder()
+                        .setKey("cluster")
+                        .setValue(periodicData.getDimensions().getCluster())
+                        .build()
+        );
+
+        // Create a statistic record set
         final Messages.StatisticSetRecord.Builder builder = Messages.StatisticSetRecord.newBuilder()
-                .setMetric(firstElement.getFQDSN().getMetric())
+                .setMetric(metricName)
                 .setPeriod(periodicData.getPeriod().toString())
                 .setPeriodStart(periodicData.getStart().toString())
                 .addAllDimensions(dimensions)
-                .setCluster(firstElement.getFQDSN().getCluster())
-                .setService(firstElement.getFQDSN().getService());
+                .setCluster(periodicData.getDimensions().getCluster())
+                .setService(periodicData.getDimensions().getService());
 
-        for (final AggregatedData datum : dataList) {
-            if (EXPRESSION_STATISTIC.equals(datum.getFQDSN().getStatistic())) {
+        for (final AggregatedData datum : data) {
+            if (EXPRESSION_STATISTIC.equals(datum.getStatistic())) {
                 continue;
             }
 
             final String unit;
             if (datum.getValue().getUnit().isPresent()) {
+                // TODO(ville): The protocol needs to support compound units.
                 unit = datum.getValue().getUnit().get().toString();
             } else {
                 unit = "";
             }
 
             final Messages.StatisticRecord.Builder entryBuilder = builder.addStatisticsBuilder()
-                    .setStatistic(datum.getFQDSN().getStatistic().getName())
+                    .setStatistic(datum.getStatistic().getName())
                     .setValue(datum.getValue().getValue())
                     .setUnit(unit)
                     .setUserSpecified(datum.isSpecified());
@@ -122,6 +145,7 @@ public final class AggregationServerSink extends VertxSink {
             final HistogramStatistic.HistogramSnapshot histogram = histogramSupportingData.getHistogramSnapshot();
             final String unit;
             if (histogramSupportingData.getUnit().isPresent()) {
+                // TODO(ville): The protocol needs to support compound units.
                 unit = histogramSupportingData.getUnit().get().toString();
             } else {
                 unit = "";

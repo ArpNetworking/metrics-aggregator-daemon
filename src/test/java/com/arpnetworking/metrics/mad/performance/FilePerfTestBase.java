@@ -21,7 +21,6 @@ import com.arpnetworking.configuration.jackson.StaticConfiguration;
 import com.arpnetworking.metrics.generator.util.TestFileGenerator;
 import com.arpnetworking.metrics.mad.Pipeline;
 import com.arpnetworking.metrics.mad.configuration.PipelineConfiguration;
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.google.common.base.Charsets;
 import com.google.common.base.Stopwatch;
@@ -88,8 +87,8 @@ public class FilePerfTestBase {
         // Create custom "canary" sink
         final ListeningSink sink = new ListeningSink((periodicData) -> {
                 if (periodicData != null) {
-                    for (final AggregatedData datum : periodicData.getData()) {
-                        if (TestFileGenerator.CANARY.equals(datum.getFQDSN().getMetric())) {
+                    for (final String metricName : periodicData.getData().keys()) {
+                        if (TestFileGenerator.CANARY.equals(metricName)) {
                             if (periods.add(periodicData.getPeriod())) {
                                 LOGGER.info(String.format(
                                         "Canary flew; filter=%s, period=%s",

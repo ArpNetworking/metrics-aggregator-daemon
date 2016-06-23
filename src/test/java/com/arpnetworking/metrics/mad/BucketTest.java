@@ -18,7 +18,8 @@ package com.arpnetworking.metrics.mad;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.tsdcore.model.AggregatedData;
-import com.arpnetworking.tsdcore.model.FQDSN;
+import com.arpnetworking.tsdcore.model.DefaultKey;
+import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.tsdcore.model.Quantity;
@@ -31,6 +32,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import org.hamcrest.Matchers;
 import org.joda.time.DateTime;
@@ -44,9 +46,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
+import javax.annotation.Nullable;
 
 /**
  * Tests for the <code>Bucket</code> class.
@@ -59,9 +61,11 @@ public class BucketTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         _bucket = new Bucket.Builder()
-                .setCluster("MyCluster")
-                .setService("MyService")
-                .setHost("MyHost")
+                .setKey(new DefaultKey(
+                        ImmutableMap.of(
+                                Key.HOST_DIMENSION_KEY, "MyHost",
+                                Key.SERVICE_DIMENSION_KEY, "MyService",
+                                Key.CLUSTER_DIMENSION_KEY, "MyCluster")))
                 .setSink(_sink)
                 .setStart(START)
                 .setPeriod(Period.minutes(1))
@@ -86,40 +90,22 @@ public class BucketTest {
         final ArgumentCaptor<PeriodicData> dataCaptor = ArgumentCaptor.forClass(PeriodicData.class);
         Mockito.verify(_sink).recordAggregateData(dataCaptor.capture());
 
-        final Collection<AggregatedData> data = dataCaptor.getValue().getData();
+        final ImmutableMultimap<String, AggregatedData> data = dataCaptor.getValue().getData();
         Assert.assertEquals(2, data.size());
 
         Assert.assertThat(
-                data,
+                data.get("MyCounter"),
                 Matchers.containsInAnyOrder(
                         new AggregatedData.Builder()
-                                .setFQDSN(new FQDSN.Builder()
-                                        .setCluster("MyCluster")
-                                        .setService("MyService")
-                                        .setMetric("MyCounter")
-                                        .setStatistic(COUNT_STATISTIC)
-                                        .build())
-                                .setHost("MyHost")
-                                .setStart(START)
                                 .setIsSpecified(false)
-                                .setPeriod(Period.minutes(1))
                                 .setPopulationSize(3L)
-                                .setSamples(Collections.emptyList())
+                                .setStatistic(COUNT_STATISTIC)
                                 .setValue(THREE)
                                 .build(),
                         new AggregatedData.Builder()
-                                .setFQDSN(new FQDSN.Builder()
-                                        .setCluster("MyCluster")
-                                        .setService("MyService")
-                                        .setMetric("MyCounter")
-                                        .setStatistic(MIN_STATISTIC)
-                                        .build())
-                                .setHost("MyHost")
-                                .setStart(START)
                                 .setIsSpecified(true)
-                                .setPeriod(Period.minutes(1))
                                 .setPopulationSize(3L)
-                                .setSamples(Collections.emptyList())
+                                .setStatistic(MIN_STATISTIC)
                                 .setValue(ONE)
                                 .build()));
     }
@@ -134,54 +120,28 @@ public class BucketTest {
         final ArgumentCaptor<PeriodicData> dataCaptor = ArgumentCaptor.forClass(PeriodicData.class);
         Mockito.verify(_sink).recordAggregateData(dataCaptor.capture());
 
-        final Collection<AggregatedData> data = dataCaptor.getValue().getData();
+        final ImmutableMultimap<String, AggregatedData> data = dataCaptor.getValue().getData();
         Assert.assertEquals(3, data.size());
 
         Assert.assertThat(
-                data,
+                data.get("MyGauge"),
                 Matchers.containsInAnyOrder(
                         new AggregatedData.Builder()
-                                .setFQDSN(new FQDSN.Builder()
-                                        .setCluster("MyCluster")
-                                        .setService("MyService")
-                                        .setMetric("MyGauge")
-                                        .setStatistic(MEAN_STATISTIC)
-                                        .build())
-                                .setHost("MyHost")
-                                .setStart(START)
                                 .setIsSpecified(true)
-                                .setPeriod(Period.minutes(1))
+                                .setStatistic(MEAN_STATISTIC)
                                 .setPopulationSize(3L)
                                 .setValue(TWO)
                                 .build(),
                         new AggregatedData.Builder()
-                                .setFQDSN(new FQDSN.Builder()
-                                        .setCluster("MyCluster")
-                                        .setService("MyService")
-                                        .setMetric("MyGauge")
-                                        .setStatistic(SUM_STATISTIC)
-                                        .build())
-                                .setHost("MyHost")
-                                .setStart(START)
                                 .setIsSpecified(false)
-                                .setPeriod(Period.minutes(1))
                                 .setPopulationSize(3L)
-                                .setSamples(Collections.emptyList())
+                                .setStatistic(SUM_STATISTIC)
                                 .setValue(SIX)
                                 .build(),
                         new AggregatedData.Builder()
-                                .setFQDSN(new FQDSN.Builder()
-                                        .setCluster("MyCluster")
-                                        .setService("MyService")
-                                        .setMetric("MyGauge")
-                                        .setStatistic(COUNT_STATISTIC)
-                                        .build())
-                                .setHost("MyHost")
-                                .setStart(START)
                                 .setIsSpecified(false)
-                                .setPeriod(Period.minutes(1))
                                 .setPopulationSize(3L)
-                                .setSamples(Collections.emptyList())
+                                .setStatistic(COUNT_STATISTIC)
                                 .setValue(THREE)
                                 .build()));
     }
@@ -196,40 +156,22 @@ public class BucketTest {
         final ArgumentCaptor<PeriodicData> dataCaptor = ArgumentCaptor.forClass(PeriodicData.class);
         Mockito.verify(_sink).recordAggregateData(dataCaptor.capture());
 
-        final Collection<AggregatedData> data = dataCaptor.getValue().getData();
+        final ImmutableMultimap<String, AggregatedData> data = dataCaptor.getValue().getData();
         Assert.assertEquals(2, data.size());
 
         Assert.assertThat(
-                data,
+                data.get("MyTimer"),
                 Matchers.containsInAnyOrder(
                         new AggregatedData.Builder()
-                                .setFQDSN(new FQDSN.Builder()
-                                        .setCluster("MyCluster")
-                                        .setService("MyService")
-                                        .setMetric("MyTimer")
-                                        .setStatistic(COUNT_STATISTIC)
-                                        .build())
-                                .setHost("MyHost")
-                                .setStart(START)
                                 .setIsSpecified(false)
-                                .setPeriod(Period.minutes(1))
                                 .setPopulationSize(3L)
-                                .setSamples(Collections.emptyList())
+                                .setStatistic(COUNT_STATISTIC)
                                 .setValue(THREE)
                                 .build(),
                         new AggregatedData.Builder()
-                                .setFQDSN(new FQDSN.Builder()
-                                        .setCluster("MyCluster")
-                                        .setService("MyService")
-                                        .setMetric("MyTimer")
-                                        .setStatistic(MAX_STATISTIC)
-                                        .build())
-                                .setHost("MyHost")
-                                .setStart(START)
                                 .setIsSpecified(true)
-                                .setPeriod(Period.minutes(1))
                                 .setPopulationSize(3L)
-                                .setSamples(Collections.emptyList())
+                                .setStatistic(MAX_STATISTIC)
                                 .setValue(new Quantity.Builder()
                                         .setValue(3.0)
                                         .setUnit(Unit.SECOND)
@@ -240,9 +182,11 @@ public class BucketTest {
     @Test
     public void testToString() {
         final String asString = new Bucket.Builder()
-                .setCluster("MyCluster")
-                .setService("MyService")
-                .setHost("MyHost")
+                .setKey(new DefaultKey(ImmutableMap.of(
+                        Key.HOST_DIMENSION_KEY, "MyHost",
+                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                        Key.CLUSTER_DIMENSION_KEY, "MyCluster"
+                )))
                 .setSink(Mockito.mock(Sink.class))
                 .setStart(new DateTime())
                 .setPeriod(Period.minutes(1))
@@ -308,7 +252,7 @@ public class BucketTest {
 
     private static final class AbsentStatisticCacheLoader extends CacheLoader<String, Optional<ImmutableSet<Statistic>>> {
         @Override
-        public Optional<ImmutableSet<Statistic>> load(final String key) throws Exception {
+        public Optional<ImmutableSet<Statistic>> load(@Nullable final String key) throws Exception {
             return Optional.absent();
         }
     }
