@@ -251,7 +251,8 @@ public class CollectdHttpSourceV1 extends ActorSource {
         private final Materializer _materializer;
         private final Graph<FlowShape<HttpRequest, Record>, NotUsed> _processGraph;
 
-        private static final Logger BAD_REQUEST_LOGGER = LoggerFactory.getRateLimitLogger(CollectdHttpSourceV1.class, Duration.ofMinutes(1));
+        private static final Logger BAD_REQUEST_LOGGER =
+                LoggerFactory.getRateLimitLogger(CollectdHttpSourceV1.class, Duration.ofMinutes(1));
     }
 
     /**

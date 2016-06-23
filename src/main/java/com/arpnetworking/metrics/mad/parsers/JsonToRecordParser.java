@@ -36,11 +36,12 @@ import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
-import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
@@ -48,10 +49,10 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.sf.oval.exception.ConstraintsViolatedException;
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -83,11 +84,7 @@ public final class JsonToRecordParser implements Parser<Record> {
         try {
             jsonNode = OBJECT_MAPPER.readTree(data);
         } catch (final IOException ex) {
-            // CHECKSTYLE.OFF: IllegalInstantiation - Approved for byte[] to String
-            throw new ParsingException(String.format(
-                    "Unsupported non-json format; data=%s",
-                    new String(data, Charsets.UTF_8)));
-            // CHECKSTYLE.ON: IllegalInstantiation
+            throw new ParsingException("Unsupported non-json format", data);
         }
 
         // If it's JSON extract the version and parse accordingly
@@ -100,38 +97,36 @@ public final class JsonToRecordParser implements Parser<Record> {
             }
         }
         if (!versionNode.isPresent()) {
-            throw new ParsingException(String.format("Unable to determine version; jsonNode=%s", jsonNode));
+            throw new ParsingException("Unable to determine version, version node not found", data);
         }
         final String version = versionNode.get().textValue().toLowerCase(Locale.getDefault());
-        switch (version) {
-            case "2f":
-                if (dataNode.isPresent()) {
-                    return parseV2fStenoLogLine(jsonNode);
-                } else {
-                    return parseV2fLogLine(jsonNode);
-                }
-            case "2e":
-                return parseV2eLogLine(jsonNode);
-            case "2d":
-                return parseV2dLogLine(jsonNode);
-            case "2c":
-                return parseV2cLogLine(jsonNode);
-            default:
-                throw new ParsingException(String.format("Unsupported version; version=%s", version));
+        try {
+            switch (version) {
+                case "2f":
+                    if (dataNode.isPresent()) {
+                        return parseV2fStenoLogLine(jsonNode);
+                    } else {
+                        return parseV2fLogLine(jsonNode);
+                    }
+                case "2e":
+                    return parseV2eLogLine(jsonNode);
+                case "2d":
+                    return parseV2dLogLine(jsonNode);
+                case "2c":
+                    return parseV2cLogLine(jsonNode);
+                default:
+                    throw new ParsingException(String.format("Unsupported version; version=%s", version), data);
+            }
+        } catch (final JsonProcessingException e) {
+            throw new ParsingException("Error parsing record", data, e);
         }
     }
 
     // NOTE: Package private for testing
-    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2cLogLine(
-            final JsonNode jsonNode) throws ParsingException {
+    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2cLogLine(final JsonNode jsonNode)
+            throws JsonProcessingException {
 
-        final Version2c model;
-        try {
-            model = OBJECT_MAPPER.treeToValue(jsonNode, Version2c.class);
-        } catch (final IOException | IllegalArgumentException | ConstraintsViolatedException e) {
-            throw new ParsingException("Failed to deserialize version 2c", e);
-        }
-
+        final Version2c model = OBJECT_MAPPER.treeToValue(jsonNode, Version2c.class);
         final Version2c.Annotations annotations = model.getAnnotations();
         final DateTime timestamp = getTimestampFor2c(annotations);
 
@@ -152,16 +147,10 @@ public final class JsonToRecordParser implements Parser<Record> {
     }
 
     // NOTE: Package private for testing
-    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2dLogLine(
-            final JsonNode jsonNode) throws ParsingException {
+    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2dLogLine(final JsonNode jsonNode)
+            throws JsonProcessingException {
 
-        final Version2d model;
-        try {
-            model = OBJECT_MAPPER.treeToValue(jsonNode, Version2d.class);
-        } catch (final IOException | IllegalArgumentException | ConstraintsViolatedException e) {
-            throw new ParsingException("Failed to deserialize version 2d", e);
-        }
-
+        final Version2d model = OBJECT_MAPPER.treeToValue(jsonNode, Version2d.class);
         final Version2d.Annotations annotations = model.getAnnotations();
         final DateTime timestamp = annotations.getFinalTimestamp();
 
@@ -182,16 +171,10 @@ public final class JsonToRecordParser implements Parser<Record> {
     }
 
     // NOTE: Package private for testing
-    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2eLogLine(
-            final JsonNode jsonNode) throws ParsingException {
+    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2eLogLine(final JsonNode jsonNode)
+            throws JsonProcessingException {
 
-        final Version2e model;
-        try {
-            model = OBJECT_MAPPER.treeToValue(jsonNode, Version2e.class);
-        } catch (final IOException | IllegalArgumentException | ConstraintsViolatedException e) {
-            throw new ParsingException("Failed to deserialize version 2e", e);
-        }
-
+        final Version2e model = OBJECT_MAPPER.treeToValue(jsonNode, Version2e.class);
         final Version2e.Data data = model.getData();
         final Version2e.Annotations annotations = data.getAnnotations();
         final DateTime timestamp = annotations.getFinalTimestamp();
@@ -213,19 +196,13 @@ public final class JsonToRecordParser implements Parser<Record> {
     }
 
     // NOTE: Package private for testing
-    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2fLogLine(
-            final JsonNode jsonNode) throws ParsingException {
+    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2fLogLine(final JsonNode jsonNode)
+            throws JsonProcessingException {
 
-        final Version2f model;
-        try {
-            model = OBJECT_MAPPER.treeToValue(jsonNode, Version2f.class);
-        } catch (final IOException | IllegalArgumentException | ConstraintsViolatedException e) {
-            throw new ParsingException("Failed to deserialize version 2f", e);
-        }
-
+        final Version2f model = OBJECT_MAPPER.treeToValue(jsonNode, Version2f.class);
         final Version2f.Annotations annotations = model.getAnnotations();
-
         final Map<String, Metric> variables = Maps.newHashMap();
+
         putVariablesVersion2f(model.getTimers(), MetricType.TIMER, variables);
         putVariablesVersion2f(model.getCounters(), MetricType.COUNTER, variables);
         putVariablesVersion2f(model.getGauges(), MetricType.GAUGE, variables);
@@ -242,16 +219,10 @@ public final class JsonToRecordParser implements Parser<Record> {
     }
 
     // NOTE: Package private for testing
-    /* package private */ com.arpnetworking.metrics.mad.model.Record parseV2fStenoLogLine(
-            final JsonNode jsonNode) throws ParsingException {
+    /* package private */ com.arpnetworking.metrics.mad.model.Record parseV2fStenoLogLine(final JsonNode jsonNode)
+            throws JsonProcessingException {
 
-        final Version2fSteno model;
-        try {
-            model = OBJECT_MAPPER.treeToValue(jsonNode, Version2fSteno.class);
-        } catch (final IOException | IllegalArgumentException | ConstraintsViolatedException e) {
-            throw new ParsingException("Failed to deserialize version 2f-Steno", e);
-        }
-
+        final Version2fSteno model = OBJECT_MAPPER.treeToValue(jsonNode, Version2fSteno.class);
         final Version2fSteno.Data data = model.getData();
         final Version2fSteno.Context context = model.getContext();
         final Version2fSteno.Annotations annotations = data.getAnnotations();
@@ -367,7 +338,8 @@ public final class JsonToRecordParser implements Parser<Record> {
         }
     }
 
-    private DateTime getTimestampFor2c(final Version2c.Annotations annotations) throws ParsingException {
+    private DateTime getTimestampFor2c(final Version2c.Annotations annotations)
+            throws JsonProcessingException {
         if (annotations.getFinalTimestamp().isPresent()) {
             try {
                 return timestampToDateTime(Double.parseDouble(annotations.getFinalTimestamp().get()));
@@ -386,7 +358,7 @@ public final class JsonToRecordParser implements Parser<Record> {
                 // Ignore.
             }
         }
-        throw new ParsingException(String.format("No timestamp found in annotations; annotations=%s", annotations));
+        throw new JsonMappingException((Closeable) null, "No timestamp found in annotations");
     }
 
     private static DateTime timestampToDateTime(final double seconds) {

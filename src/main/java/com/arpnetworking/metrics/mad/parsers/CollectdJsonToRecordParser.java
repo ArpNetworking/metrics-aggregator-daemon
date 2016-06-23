@@ -31,7 +31,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -93,9 +92,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             return builders;
         } catch (final IOException ex) {
             // CHECKSTYLE.OFF: IllegalInstantiation - Approved for byte[] to String
-            throw new ParsingException(
-                    String.format("Error parsing collectd json; data=%s", new String(data, Charsets.UTF_8)),
-                    ex);
+            throw new ParsingException("Error parsing collectd json", data, ex);
             // CHECKSTYLE.ON: IllegalInstantiation
         }
     }

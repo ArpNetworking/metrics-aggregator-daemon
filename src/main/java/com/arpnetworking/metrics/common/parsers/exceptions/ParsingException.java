@@ -21,30 +21,31 @@ package com.arpnetworking.metrics.common.parsers.exceptions;
  * @author Brandon Arp (brandonarp at gmail dot com)
  */
 public class ParsingException extends Exception {
-
     /**
      * Public constructor with a description.
      *
      * @param message Describes the exceptional condition.
+     * @param offendingData The raw data that failed to parse.
      */
     public ParsingException(final String message, final byte[] offendingData) {
         super(message);
-        _offendingData = offendingData;
+        _offendingData = offendingData.clone();
     }
 
     /**
      * Public constructor with a description and cause.
      *
      * @param message Describes the exceptional condition.
+     * @param offendingData The raw data that failed to parse.
      * @param cause Causing exception.
      */
     public ParsingException(final String message, final byte[] offendingData, final Throwable cause) {
         super(message, cause);
-        _offendingData = offendingData;
+        _offendingData = offendingData.clone();
     }
 
     public byte[] getOffendingData() {
-        return _offendingData;
+        return _offendingData.clone();
     }
 
     private final byte[] _offendingData;

@@ -28,7 +28,7 @@ public class ParsingExceptionTest {
     @Test
     public void testConstructorWithMessage() {
         final String expectedMessage = "This is a message";
-        final ParsingException pe = new ParsingException(expectedMessage);
+        final ParsingException pe = new ParsingException(expectedMessage, new byte[0]);
         Assert.assertEquals(expectedMessage, pe.getMessage());
         Assert.assertNull(pe.getCause());
     }
@@ -37,7 +37,7 @@ public class ParsingExceptionTest {
     public void testConstructorWithMessageAndCause() {
         final String expectedMessage = "This is a message";
         final Throwable expectedCause = new NullPointerException("The cause");
-        final ParsingException pe = new ParsingException(expectedMessage, expectedCause);
+        final ParsingException pe = new ParsingException(expectedMessage, new byte[0], expectedCause);
         Assert.assertEquals(expectedMessage, pe.getMessage());
         Assert.assertEquals(expectedCause, pe.getCause());
     }

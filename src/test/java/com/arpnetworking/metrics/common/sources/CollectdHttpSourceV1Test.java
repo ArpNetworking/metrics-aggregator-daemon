@@ -67,7 +67,7 @@ public class CollectdHttpSourceV1Test extends ActorSourceTest {
     @Test
     public void testParsesEntity() throws ExecutionException, ParsingException {
         final byte[] entity = "not a json document".getBytes(Charsets.UTF_8);
-        Mockito.when(_parser.parse(Mockito.any())).thenThrow(new ParsingException("test exception"));
+        Mockito.when(_parser.parse(Mockito.any())).thenThrow(new ParsingException("test exception", new byte[0]));
         dispatchRequest(HttpRequest.create().withEntity(entity));
         Mockito.verify(_parser).parse(entity);
     }
@@ -81,7 +81,7 @@ public class CollectdHttpSourceV1Test extends ActorSourceTest {
 
     @Test
     public void test400OnBadData() throws ParsingException, ExecutionException {
-        Mockito.when(_parser.parse(Mockito.any())).thenThrow(new ParsingException("test exception"));
+        Mockito.when(_parser.parse(Mockito.any())).thenThrow(new ParsingException("test exception", new byte[0]));
         final HttpResponse response = dispatchRequest();
         Assert.assertEquals(400, response.status().intValue());
     }
