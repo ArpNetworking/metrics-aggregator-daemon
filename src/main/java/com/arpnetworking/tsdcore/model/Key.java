@@ -55,15 +55,15 @@ public interface Key {
     /**
      * The dimension key for the cluster attribute.
      */
-    String CLUSTER_DIMENSION_KEY = "_cluster";
+    String CLUSTER_DIMENSION_KEY = "cluster";
 
     /**
      * The dimension key for the service attribute.
      */
-    String SERVICE_DIMENSION_KEY = "_service";
+    String SERVICE_DIMENSION_KEY = "service";
 
     /**
      * The dimension key for the host attribute.
      */
-    String HOST_DIMENSION_KEY = "_host";
+    String HOST_DIMENSION_KEY = "host";
 }

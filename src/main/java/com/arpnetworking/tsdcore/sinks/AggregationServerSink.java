@@ -77,27 +77,6 @@ public final class AggregationServerSink extends VertxSink {
             );
         }
 
-        // For backwards compatibility map host, service and cluster with old names
-        // TODO(ville): Add support for new meta attribute names (e.g. underscore prefixed) to CAgg and remove this.
-        dimensions.add(
-                Messages.DimensionEntry.newBuilder()
-                        .setKey("host")
-                        .setValue(periodicData.getDimensions().getHost())
-                        .build()
-        );
-        dimensions.add(
-                Messages.DimensionEntry.newBuilder()
-                        .setKey("service")
-                        .setValue(periodicData.getDimensions().getService())
-                        .build()
-        );
-        dimensions.add(
-                Messages.DimensionEntry.newBuilder()
-                        .setKey("cluster")
-                        .setValue(periodicData.getDimensions().getCluster())
-                        .build()
-        );
-
         // Create a statistic record set
         final Messages.StatisticSetRecord.Builder builder = Messages.StatisticSetRecord.newBuilder()
                 .setMetric(metricName)
