@@ -44,7 +44,6 @@ public final class MultiSink extends BaseSink {
                 .setMessage("Writing aggregated data")
                 .addData("sink", getName())
                 .addData("dataSize", periodicData.getData().size())
-                .addData("conditionsSize", periodicData.getConditions().size())
                 .log();
 
         for (final Sink sink : _sinks) {

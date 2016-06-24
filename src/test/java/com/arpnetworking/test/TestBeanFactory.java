@@ -20,9 +20,7 @@ import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.AggregatedData;
-import com.arpnetworking.tsdcore.model.Condition;
 import com.arpnetworking.tsdcore.model.DefaultKey;
-import com.arpnetworking.tsdcore.model.FQDSN;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.PeriodicData;
@@ -32,7 +30,6 @@ import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
@@ -103,51 +100,6 @@ public final class TestBeanFactory {
     }
 
     /**
-     * Create a builder for pseudo-random <code>Condition</code>.
-     *
-     * @return New builder for pseudo-random <code>Condition</code>.
-     */
-    public static Condition.Builder createConditionBuilder() {
-        return new Condition.Builder()
-                .setFQDSN(createFQDSN())
-                .setName("condition-" + UUID.randomUUID())
-                .setExtensions(ImmutableMap.of("severity", "severity-" + UUID.randomUUID()))
-                .setThreshold(createSample())
-                .setTriggered(Boolean.TRUE);
-    }
-
-    /**
-     * Create a new reasonable pseudo-random <code>Condition</code>.
-     *
-     * @return New reasonable pseudo-random <code>Condition</code>.
-     */
-    public static Condition createCondition() {
-        return createConditionBuilder().build();
-    }
-
-    /**
-     * Create a builder for pseudo-random <code>FQDSN</code>.
-     *
-     * @return New builder for pseudo-random <code>FQDSN</code>.
-     */
-    public static FQDSN.Builder createFQDSNBuilder() {
-        return new FQDSN.Builder()
-                .setStatistic(MEAN_STATISTIC)
-                .setService("service-" + UUID.randomUUID())
-                .setMetric("metric-" + UUID.randomUUID())
-                .setCluster("cluster-" + UUID.randomUUID());
-    }
-
-    /**
-     * Create a new reasonable pseudo-random <code>FQDSN</code>.
-     *
-     * @return New reasonable pseudo-random <code>FQDSN</code>.
-     */
-    public static FQDSN createFQDSN() {
-        return createFQDSNBuilder().build();
-    }
-
-    /**
      * Create a builder for pseudo-random <code>AggregatedData</code>.
      *
      * @return New builder for pseudo-random <code>AggregatedData</code>.
@@ -183,7 +135,6 @@ public final class TestBeanFactory {
                                         Key.SERVICE_DIMENSION_KEY, "service-" + UUID.randomUUID(),
                                         Key.CLUSTER_DIMENSION_KEY, "cluster-" + UUID.randomUUID())))
                 .setData(ImmutableMultimap.of("metric-" + UUID.randomUUID(), createAggregatedData()))
-                .setConditions(ImmutableList.of())
                 .setPeriod(Period.minutes(5))
                 .setStart(DateTime.now());
     }
