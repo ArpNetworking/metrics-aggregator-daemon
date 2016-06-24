@@ -48,7 +48,6 @@ public final class TimeThresholdSink extends BaseSink {
                 .setMessage("Writing aggregated data")
                 .addData("sink", getName())
                 .addData("dataSize", periodicData.getData().size())
-                .addData("conditionsSize", periodicData.getConditions().size())
                 .log();
 
         if (_logOnly) {
@@ -58,7 +57,7 @@ public final class TimeThresholdSink extends BaseSink {
         } else {
             // Apply the filter and rebuild the periodic data
             final ImmutableMultimap<String, AggregatedData> filteredData = _filter.filter(periodicData);
-            if (!filteredData.isEmpty() || !periodicData.getConditions().isEmpty()) {
+            if (!filteredData.isEmpty()) {
                 _sink.recordAggregateData(
                         PeriodicData.Builder.clone(periodicData, new PeriodicData.Builder())
                                 .setData(filteredData)

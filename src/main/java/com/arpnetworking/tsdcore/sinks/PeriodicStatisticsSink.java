@@ -73,7 +73,6 @@ public final class PeriodicStatisticsSink extends BaseSink {
                 .setMessage("Writing aggregated data")
                 .addData("sink", getName())
                 .addData("dataSize", periodicData.getData().size())
-                .addData("conditionsSize", periodicData.getConditions().size())
                 .log();
 
         final long now = System.currentTimeMillis();

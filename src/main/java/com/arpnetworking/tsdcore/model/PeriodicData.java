@@ -19,7 +19,6 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.DateTime;
@@ -49,10 +48,6 @@ public final class PeriodicData {
         return _data;
     }
 
-    public ImmutableList<Condition> getConditions() {
-        return _conditions;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -67,8 +62,7 @@ public final class PeriodicData {
 
         final PeriodicData other = (PeriodicData) object;
 
-        return Objects.equal(_conditions, other._conditions)
-                && Objects.equal(_data, other._data)
+        return Objects.equal(_data, other._data)
                 && Objects.equal(_dimensions, other._dimensions)
                 && Objects.equal(_period, other._period)
                 && Objects.equal(_start, other._start);
@@ -80,7 +74,6 @@ public final class PeriodicData {
     @Override
     public int hashCode() {
         return Objects.hashCode(
-                _conditions,
                 _data,
                 _dimensions,
                 _period,
@@ -98,7 +91,6 @@ public final class PeriodicData {
                 .add("Start", _start)
                 .add("Dimensions", _dimensions)
                 .add("Data", _data)
-                .add("Conditions", _conditions)
                 .toString();
     }
 
@@ -107,14 +99,12 @@ public final class PeriodicData {
         _start = builder._start;
         _dimensions = builder._dimensions;
         _data = builder._data;
-        _conditions = builder._conditions;
     }
 
     private final Period _period;
     private final DateTime _start;
     private final Key _dimensions;
     private final ImmutableMultimap<String, AggregatedData> _data;
-    private final ImmutableList<Condition> _conditions;
 
     /**
      * <code>Builder</code> implementation for <code>PeriodicData</code>.
@@ -172,17 +162,6 @@ public final class PeriodicData {
             return this;
         }
 
-        /**
-         * Set the conditions. Optional. Cannot be null. Defaults to an empty <code>ImmutableMap</code>.
-         *
-         * @param value The conditions.
-         * @return This <code>Builder</code> instance.
-         */
-        public Builder setConditions(final ImmutableList<Condition> value) {
-            _conditions = value;
-            return this;
-        }
-
         @NotNull
         private Period _period;
         @NotNull
@@ -191,7 +170,5 @@ public final class PeriodicData {
         private Key _dimensions;
         @NotNull
         private ImmutableMultimap<String, AggregatedData> _data = ImmutableMultimap.of();
-        @NotNull
-        private ImmutableList<Condition> _conditions = ImmutableList.of();
     }
 }

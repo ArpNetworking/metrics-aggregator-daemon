@@ -19,7 +19,6 @@ import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.AggregatedData;
-import com.arpnetworking.tsdcore.model.Condition;
 import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
@@ -106,9 +105,6 @@ public class AggregatorTest {
         Mockito.verifyNoMoreInteractions(_sink);
 
         final PeriodicData periodicData = _periodicDataCaptor.getValue();
-
-        final List<Condition> conditions = periodicData.getConditions();
-        Assert.assertTrue(conditions.isEmpty());
 
         final ImmutableMultimap<String, AggregatedData> data = periodicData.getData();
         final AggregatedData.Builder builder = new AggregatedData.Builder()
