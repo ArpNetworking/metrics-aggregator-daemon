@@ -39,7 +39,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -160,7 +163,6 @@ public class FileSourceTest {
                 _logger);
 
         source.start();
-        Thread.sleep(SLEEP_INTERVAL);
         Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT).atLeastOnce()).setMessage("Tailer file not found");
         source.stop();
     }
@@ -214,6 +216,42 @@ public class FileSourceTest {
 
         renameRotate(file);
         Files.createFile(file);
+
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer file rotate");
+        source.stop();
+    }
+
+    @Test
+    public void testTailerLogRotationRenameSameDataLength() throws IOException, InterruptedException, ParsingException {
+        Files.createDirectories(_directory);
+        final Path file = _directory.resolve("testTailerLogRotationRenameSameDataLength.log");
+        final Path state = _directory.resolve("testTailerLogRotationRenameSameDataLength.log.state");
+        Files.deleteIfExists(file);
+        Files.createFile(file);
+        Files.deleteIfExists(state);
+
+        final String data1 = "Existing data in the log file\n";
+        final String data2 = "new data in the log file     \n";
+        Files.write(file, data1.getBytes(Charsets.UTF_8));
+        Files.setLastModifiedTime(file, FileTime.from(Instant.now().minus(10, ChronoUnit.DAYS)));
+
+        final FileSource<Object> source = new FileSource<>(
+                new FileSource.Builder<>()
+                        .setSourceFile(file)
+                        .setStateFile(state)
+                        .setParser(_parser)
+                        .setInterval(Duration.millis(INTERVAL)),
+                _logger);
+
+        source.start();
+
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer file opened");
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(Mockito.any());
+
+        renameRotate(file);
+        Files.createFile(file);
+        Files.write(file, data2.getBytes(Charsets.UTF_8));
+        Files.setLastModifiedTime(file, FileTime.from(Instant.now()));
 
         Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer file rotate");
         source.stop();
