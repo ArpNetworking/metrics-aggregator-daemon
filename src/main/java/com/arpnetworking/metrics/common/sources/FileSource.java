@@ -84,9 +84,8 @@ public final class FileSource<T> extends BaseSource {
     public Object toLogValue() {
         return LogValueMapFactory.builder(this)
                 .put("super", super.toLogValue())
-                .put("sourceFile", _sourceFile)
-                .put("stateFile", _stateFile)
                 .put("parser", _parser)
+                .put("tailer", _tailer)
                 .build();
     }
 
@@ -107,18 +106,16 @@ public final class FileSource<T> extends BaseSource {
     /* package private */ FileSource(final Builder<T> builder, final Logger logger) {
         super(builder);
         _logger = logger;
-        _sourceFile = builder._sourceFile;
-        _stateFile = builder._stateFile;
         _parser = builder._parser;
         final PositionStore positionStore;
-        if (_stateFile == null) {
+        if (builder._stateFile == null) {
             positionStore = NO_POSITION_STORE;
         } else {
-            positionStore = new FilePositionStore.Builder().setFile(_stateFile).build();
+            positionStore = new FilePositionStore.Builder().setFile(builder._stateFile).build();
         }
 
         _tailer = new StatefulTailer.Builder()
-                .setFile(_sourceFile)
+                .setFile(builder._sourceFile)
                 .setListener(new LogTailerListener())
                 .setReadInterval(builder._interval)
                 .setPositionStore(positionStore)
@@ -127,8 +124,6 @@ public final class FileSource<T> extends BaseSource {
         _tailerExecutor = Executors.newSingleThreadExecutor((runnable) -> new Thread(runnable, "FileSourceTailer"));
     }
 
-    private final Path _sourceFile;
-    private final Path _stateFile;
     private final Parser<T> _parser;
     private final Tailer _tailer;
     private final ExecutorService _tailerExecutor;

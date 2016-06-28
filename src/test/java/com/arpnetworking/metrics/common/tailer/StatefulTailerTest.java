@@ -239,6 +239,7 @@ public class StatefulTailerTest {
 
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         Mockito.verify(_listener).initialize(_tailer);
+        Mockito.verify(_listener).fileOpened();
         for (final String expectedValue : expectedValues) {
             Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
         }
@@ -277,6 +278,7 @@ public class StatefulTailerTest {
 
         Mockito.verify(_positionStore, Mockito.atLeastOnce()).setPosition(Mockito.anyString(), Mockito.anyLong());
         Mockito.verify(_listener).initialize(_tailer);
+        Mockito.verify(_listener).fileOpened();
         for (final String expectedValue : expectedValues) {
             Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
         }
@@ -961,6 +963,7 @@ public class StatefulTailerTest {
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
         Mockito.verify(_listener).initialize(_tailer);
+        Mockito.verify(_listener).fileOpened();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
             Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
@@ -1016,6 +1019,7 @@ public class StatefulTailerTest {
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
+        Mockito.verify(_listener).fileOpened();
         Mockito.verify(_listener).initialize(_tailer);
         for (final String expectedValue : expectedValues) {
             Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
@@ -1078,6 +1082,7 @@ public class StatefulTailerTest {
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
         Mockito.verify(_listener).initialize(_tailer);
+        Mockito.verify(_listener, Mockito.times(2)).fileOpened();
         Mockito.verify(_listener).fileRotated();
         for (final String expectedValue : expectedValues) {
             Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));

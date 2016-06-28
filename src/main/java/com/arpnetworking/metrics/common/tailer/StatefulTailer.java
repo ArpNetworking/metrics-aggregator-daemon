@@ -136,6 +136,7 @@ public final class StatefulTailer implements Tailer {
                 if (reader != null) {
                     // Position the reader
                     resume(reader, nextInitialPosition);
+                    _listener.fileOpened();
 
                     // Any subsequent file opens we should start at the beginning
                     nextInitialPosition = InitialPosition.START;

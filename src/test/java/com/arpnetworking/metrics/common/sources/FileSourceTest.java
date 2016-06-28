@@ -21,6 +21,7 @@ import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.common.tailer.InitialPosition;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
+import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.base.Charsets;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.Duration;
@@ -49,7 +50,6 @@ import java.util.List;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public class FileSourceTest {
-
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
@@ -71,8 +71,6 @@ public class FileSourceTest {
 
     @Test
     public void testParseData() throws IOException, InterruptedException, ParsingException {
-        final long interval = 500;
-        final long sleepInterval = 600;
         Files.createDirectories(_directory);
         final Path file = _directory.resolve("testParseData.log");
         final Path state = _directory.resolve("testParseData.log.state");
@@ -88,28 +86,24 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.millis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
         source.start();
 
-        Thread.sleep(sleepInterval);
         Files.write(
                 file,
                 (expectedData + "\n").getBytes(Charsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
-        Thread.sleep(sleepInterval);
 
-        Mockito.verify(_parser).parse(expectedData.getBytes(Charsets.UTF_8));
-        Mockito.verify(_observer).notify(source, expectedData);
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(Charsets.UTF_8));
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT)).notify(source, expectedData);
         source.stop();
     }
 
     @Test
     public void testTailFromEnd() throws IOException, InterruptedException, ParsingException {
-        final long interval = 500;
-        final long sleepInterval = 600;
         Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailFromEnd.log");
         Files.deleteIfExists(file);
@@ -132,23 +126,23 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setInitialPosition(InitialPosition.END)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.millis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
         source.start();
 
-        Thread.sleep(sleepInterval);
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer file opened");
+
         Files.write(
                 file,
                 (expectedData + "\n").getBytes(Charsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
-        Thread.sleep(sleepInterval);
 
-        Mockito.verify(_parser, Mockito.never()).parse(unexpectedData.getBytes(Charsets.UTF_8));
-        Mockito.verify(_parser).parse(expectedData.getBytes(Charsets.UTF_8));
-        Mockito.verify(_observer).notify(source, expectedData);
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(Charsets.UTF_8));
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT)).notify(source, expectedData);
         source.stop();
+        Mockito.verify(_parser, Mockito.never()).parse(unexpectedData.getBytes(Charsets.UTF_8));
     }
 
     @Test
@@ -167,17 +161,17 @@ public class FileSourceTest {
 
         source.start();
         Thread.sleep(SLEEP_INTERVAL);
-        Mockito.verify(_logger).warn();
-        Mockito.verify(_logBuilder, Mockito.atLeastOnce()).setMessage("Tailer file not found");
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT).atLeastOnce()).setMessage("Tailer file not found");
         source.stop();
     }
 
     @Test
-    public void testTailerFileNotFoundInterval() throws InterruptedException, IOException {
+    public void testTailerFileNotFoundAfterInterval() throws InterruptedException, IOException {
         final Path state = _directory.resolve("testTailerFileNotFoundInterval.log.state");
         Files.deleteIfExists(state);
         final Path file = _directory.resolve("testTailerFileNotFoundInterval.log");
         Files.deleteIfExists(file);
+        Files.createFile(file);
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
                         .setSourceFile(file)
@@ -187,12 +181,11 @@ public class FileSourceTest {
                 _logger);
 
         source.start();
-        Thread.sleep(SLEEP_INTERVAL);
-        Mockito.verify(_logger).warn();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file not found"));
-        Thread.sleep(SLEEP_INTERVAL * 2);
-        Mockito.verify(_logger).warn();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file not found"));
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file opened"));
+
+        Files.delete(file);
+
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file not found"));
         source.stop();
     }
 
@@ -216,13 +209,13 @@ public class FileSourceTest {
                 _logger);
 
         source.start();
-        Thread.sleep(SLEEP_INTERVAL);
+
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer file opened");
+
         renameRotate(file);
         Files.createFile(file);
-        Thread.sleep(2 * SLEEP_INTERVAL);
 
-        Mockito.verify(_logger).debug();
-        Mockito.verify(_logBuilder).setMessage("Tailer file rotate");
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer file rotate");
         source.stop();
     }
 
@@ -246,18 +239,17 @@ public class FileSourceTest {
                 _logger);
 
         source.start();
-        Thread.sleep(SLEEP_INTERVAL);
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer initialized");
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer file opened");
         renameRotate(file);
         Files.createFile(file);
-        Thread.sleep(2 * SLEEP_INTERVAL);
 
-        Mockito.verify(_logger).info();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file rotate"));
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer file rotate");
         source.stop();
     }
 
     @Test
-    public void testTailerLogRotationCopyTruncate() throws IOException, InterruptedException {
+    public void testTailerLogRotationCopyTruncate() throws IOException, InterruptedException, ParsingException {
         Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationCopyTruncate.log");
         final Path state = _directory.resolve("testTailerLogRotationCopyTruncate.log.state");
@@ -276,13 +268,13 @@ public class FileSourceTest {
                 _logger);
 
         source.start();
-        Thread.sleep(SLEEP_INTERVAL);
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer initialized");
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer file opened");
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(Mockito.any());
         copyRotate(file);
         truncate(file);
-        Thread.sleep(2 * SLEEP_INTERVAL);
 
-        Mockito.verify(_logger).info();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file rotate"));
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer file rotate");
         source.stop();
     }
 
@@ -312,15 +304,13 @@ public class FileSourceTest {
         truncate(file);
         Thread.sleep(2 * SLEEP_INTERVAL);
 
-        Mockito.verify(_logger).info();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file rotate"));
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file rotate"));
         source.stop();
     }
 
+
     @Test
     public void testTailerLogRotationRenameWithData() throws IOException, InterruptedException, ParsingException {
-        final long interval = 500;
-        final long sleepInterval = 600;
         Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationRenameWithData.log");
         final Path state = _directory.resolve("testTailerLogRotationRenameWithData.log.state");
@@ -336,27 +326,24 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.millis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
         source.start();
 
-        Thread.sleep(sleepInterval);
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file open"));
+
         Files.write(
                 file,
                 (expectedData + "\n").getBytes(Charsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         renameRotate(file);
         Files.createFile(file);
-        Mockito.verifyZeroInteractions(_parser);
-        Mockito.verifyZeroInteractions(_observer);
-        Thread.sleep(3 * sleepInterval);
 
-        Mockito.verify(_parser).parse(expectedData.getBytes(Charsets.UTF_8));
-        Mockito.verify(_observer).notify(source, expectedData);
-        Mockito.verify(_logger).info();
-        Mockito.verify(_logBuilder, Mockito.after(10000)).setMessage(Mockito.contains("Tailer file rotate"));
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(Charsets.UTF_8));
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT)).notify(source, expectedData);
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file rotate"));
         source.stop();
     }
 
@@ -401,17 +388,14 @@ public class FileSourceTest {
         Mockito.verifyZeroInteractions(_observer);
         Thread.sleep(3 * sleepInterval);
 
-        Mockito.verify(_parser).parse(expectedData.getBytes(Charsets.UTF_8));
-        Mockito.verify(_observer).notify(source, expectedData);
-        Mockito.verify(_logger).info();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file rotate"));
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(Charsets.UTF_8));
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT)).notify(source, expectedData);
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file rotate"));
         source.stop();
     }
 
     @Test
     public void testTailerLogRotationRenameWithDataToOldAndNew() throws IOException, InterruptedException, ParsingException {
-        final long interval = 500;
-        final long sleepInterval = 600;
         Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationRenameWithDataToOldAndNew.log");
         final Path state = _directory.resolve("testTailerLogRotationRenameWithDataToOldAndNew.log.state");
@@ -429,13 +413,14 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.millis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
         source.start();
 
-        Thread.sleep(sleepInterval);
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file opened"));
+
         Files.write(
                 file,
                 (expectedData1 + "\n").getBytes(Charsets.UTF_8),
@@ -446,14 +431,11 @@ public class FileSourceTest {
                 file,
                 (expectedData2 + "\n").getBytes(Charsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
-        Mockito.verifyZeroInteractions(_parser);
-        Mockito.verifyZeroInteractions(_observer);
-        Thread.sleep(3 * sleepInterval);
 
         final ArgumentCaptor<byte[]> parserCapture = ArgumentCaptor.forClass(byte[].class);
         final ArgumentCaptor<Object> notifyCapture = ArgumentCaptor.forClass(Object.class);
 
-        Mockito.verify(_parser, Mockito.times(2)).parse(parserCapture.capture());
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(2)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
         Assert.assertTrue("actual=" + new String(parserValues.get(0), Charsets.UTF_8),
@@ -462,13 +444,12 @@ public class FileSourceTest {
                 Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
-        Mockito.verify(_observer, Mockito.times(2)).notify(Matchers.eq(source), notifyCapture.capture());
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Matchers.eq(source), notifyCapture.capture());
         final List<Object> notifyValues = notifyCapture.getAllValues();
         Assert.assertEquals(expectedData1, notifyValues.get(0));
         Assert.assertEquals(expectedData2, notifyValues.get(1));
 
-        Mockito.verify(_logger).info();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file rotate"));
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file rotate"));
         source.stop();
     }
 
@@ -482,7 +463,6 @@ public class FileSourceTest {
     @Test
     public void testTailerLogRotationCopyTruncateWithDataToOldAndNew() throws IOException, InterruptedException, ParsingException {
         final long interval = 500;
-        final long sleepInterval = 600;
         Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationCopyTruncateWithDataToOldAndNew.log");
         final Path state = _directory.resolve("testTailerLogRotationCopyTruncateWithDataToOldAndNew.log.state");
@@ -506,7 +486,8 @@ public class FileSourceTest {
         source.attach(_observer);
         source.start();
 
-        Thread.sleep(sleepInterval);
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file opened"));
+
         Files.write(
                 file,
                 (expectedData1 + "\n").getBytes(Charsets.UTF_8),
@@ -517,14 +498,11 @@ public class FileSourceTest {
                 file,
                 (expectedData2 + "\n").getBytes(Charsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
-        Mockito.verifyZeroInteractions(_parser);
-        Mockito.verifyZeroInteractions(_observer);
-        Thread.sleep(3 * sleepInterval);
 
         final ArgumentCaptor<byte[]> parserCapture = ArgumentCaptor.forClass(byte[].class);
         final ArgumentCaptor<Object> notifyCapture = ArgumentCaptor.forClass(Object.class);
 
-        Mockito.verify(_parser, Mockito.times(2)).parse(parserCapture.capture());
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(2)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
         Assert.assertTrue("actual=" + new String(parserValues.get(0), Charsets.UTF_8),
@@ -533,21 +511,18 @@ public class FileSourceTest {
                 Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
-        Mockito.verify(_observer, Mockito.times(2)).notify(source, notifyCapture.capture());
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(source, notifyCapture.capture());
         final List<Object> notifyValues = notifyCapture.getAllValues();
         Assert.assertEquals(expectedData1, notifyValues.get(0));
         Assert.assertEquals(expectedData2, notifyValues.get(1));
 
-        Mockito.verify(_logger).info();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file rotate"));
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file rotate"));
         source.stop();
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testTailerLogRotationRenameDroppedData() throws IOException, InterruptedException, ParsingException {
-        final long interval = 500;
-        final long sleepInterval = 600;
         Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationRenameDroppedData.log");
         final Path state = _directory.resolve("testTailerLogRotationRenameDroppedData.log.state");
@@ -567,17 +542,18 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.millis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
         source.start();
 
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file opened"));
+
         Files.write(
                 file,
                 (expectedData1 + "\n").getBytes(Charsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
-        Thread.sleep(sleepInterval);
         Files.write(
                 file,
                 (expectedData2 + "\n").getBytes(Charsets.UTF_8),
@@ -588,12 +564,11 @@ public class FileSourceTest {
                 file,
                 (expectedData3 + "\n").getBytes(Charsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
-        Thread.sleep(3 * sleepInterval);
 
         final ArgumentCaptor<byte[]> parserCapture = ArgumentCaptor.forClass(byte[].class);
         final ArgumentCaptor<Object> notifyCapture = ArgumentCaptor.forClass(Object.class);
 
-        Mockito.verify(_parser, Mockito.times(3)).parse(parserCapture.capture());
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(3)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
         Assert.assertTrue("actual=" + new String(parserValues.get(0), Charsets.UTF_8),
@@ -604,14 +579,13 @@ public class FileSourceTest {
                 Arrays.equals(expectedData3.getBytes(Charsets.UTF_8), parserValues.get(2)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
-        Mockito.verify(_observer, Mockito.times(3)).notify(Matchers.eq(source), notifyCapture.capture());
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(3)).notify(Matchers.eq(source), notifyCapture.capture());
         final List<Object> notifyValues = notifyCapture.getAllValues();
         Assert.assertEquals(expectedData1, notifyValues.get(0));
         Assert.assertEquals(expectedData2, notifyValues.get(1));
         Assert.assertEquals(expectedData3, notifyValues.get(2));
 
-        Mockito.verify(_logger).info();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file rotate"));
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file rotate"));
         source.stop();
     }
 
@@ -672,7 +646,7 @@ public class FileSourceTest {
         final ArgumentCaptor<byte[]> parserCapture = ArgumentCaptor.forClass(byte[].class);
         final ArgumentCaptor<Object> notifyCapture = ArgumentCaptor.forClass(Object.class);
 
-        Mockito.verify(_parser, Mockito.times(3)).parse(parserCapture.capture());
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(3)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
         Assert.assertTrue("actual=" + new String(parserValues.get(0), Charsets.UTF_8),
@@ -683,22 +657,19 @@ public class FileSourceTest {
                 Arrays.equals(expectedData3.getBytes(Charsets.UTF_8), parserValues.get(2)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
-        Mockito.verify(_observer, Mockito.times(3)).notify(Matchers.eq(source), notifyCapture.capture());
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(3)).notify(Matchers.eq(source), notifyCapture.capture());
         final List<Object> notifyValues = notifyCapture.getAllValues();
         Assert.assertEquals(expectedData1, notifyValues.get(0));
         Assert.assertEquals(expectedData2, notifyValues.get(1));
         Assert.assertEquals(expectedData3, notifyValues.get(2));
 
-        Mockito.verify(_logger).info();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file rotate"));
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file rotate"));
         source.stop();
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testTailerLogRotationRenameSmallToLarge() throws IOException, InterruptedException, ParsingException {
-        final long interval = 500;
-        final long sleepInterval = 600;
         Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationRenameSmallToLarge.log");
         final Path state = _directory.resolve("testTailerLogRotationRenameSmallToLarge.log.state");
@@ -716,29 +687,29 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.millis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
         source.start();
 
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file open"));
+
         Files.write(
                 file,
                 (expectedData1 + "\n").getBytes(Charsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
-        Thread.sleep(sleepInterval);
         renameRotate(file);
         Files.createFile(file);
         Files.write(
                 file,
                 (expectedData2 + "\n").getBytes(Charsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
-        Thread.sleep(3 * sleepInterval);
 
         final ArgumentCaptor<byte[]> parserCapture = ArgumentCaptor.forClass(byte[].class);
         final ArgumentCaptor<Object> notifyCapture = ArgumentCaptor.forClass(Object.class);
 
-        Mockito.verify(_parser, Mockito.times(2)).parse(parserCapture.capture());
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(2)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
         Assert.assertTrue("actual=" + new String(parserCapture.getValue(), Charsets.UTF_8),
@@ -747,13 +718,12 @@ public class FileSourceTest {
                 Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
-        Mockito.verify(_observer, Mockito.times(2)).notify(Matchers.eq(source), notifyCapture.capture());
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Matchers.eq(source), notifyCapture.capture());
         final List<Object> notifyValues = notifyCapture.getAllValues();
         Assert.assertEquals(expectedData1, notifyValues.get(0));
         Assert.assertEquals(expectedData2, notifyValues.get(1));
 
-        Mockito.verify(_logger).info();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file rotate"));
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file rotate"));
         source.stop();
     }
 
@@ -770,7 +740,6 @@ public class FileSourceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testTailerLogRotationCopyTruncateSmallToLarge() throws IOException, InterruptedException, ParsingException {
-        final long interval = 500;
         final long sleepInterval = 600;
         Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationCopyTruncateSmallToLarge.log");
@@ -789,7 +758,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.millis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
@@ -811,7 +780,7 @@ public class FileSourceTest {
         final ArgumentCaptor<byte[]> parserCapture = ArgumentCaptor.forClass(byte[].class);
         final ArgumentCaptor<Object> notifyCapture = ArgumentCaptor.forClass(Object.class);
 
-        Mockito.verify(_parser, Mockito.times(2)).parse(parserCapture.capture());
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(2)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
         Assert.assertTrue("actual=" + new String(parserValues.get(0), Charsets.UTF_8),
@@ -820,13 +789,12 @@ public class FileSourceTest {
                 Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
-        Mockito.verify(_observer, Mockito.times(2)).notify(Matchers.eq(source), notifyCapture.capture());
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Matchers.eq(source), notifyCapture.capture());
         final List<Object> notifyValues = notifyCapture.getAllValues();
         Assert.assertEquals(expectedData1, notifyValues.get(0));
         Assert.assertEquals(expectedData2, notifyValues.get(1));
 
-        Mockito.verify(_logger).info();
-        Mockito.verify(_logBuilder).setMessage(Mockito.contains("Tailer file rotate"));
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file rotate"));
         source.stop();
     }
 
@@ -864,12 +832,8 @@ public class FileSourceTest {
                 destination);
     }
 
-    private void truncate(final Path file) {
-        try {
-            FileChannel.open(file, StandardOpenOption.WRITE).truncate(0L).close();
-        } catch (final IOException e) {
-            // Ignore
-        }
+    private void truncate(final Path file) throws IOException {
+        FileChannel.open(file, StandardOpenOption.WRITE).truncate(0L).close();
     }
 
     private Observer _observer;
@@ -881,4 +845,6 @@ public class FileSourceTest {
 
     private static final long INTERVAL = 50;
     private static final long SLEEP_INTERVAL = INTERVAL + 25;
+    private static final int TIMEOUT = 10000;
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileSourceTest.class);
 }
