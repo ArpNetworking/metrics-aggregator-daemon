@@ -111,6 +111,31 @@ public class BucketTest {
     }
 
     @Test
+    public void testEmptyCounter() {
+        _bucket.add(
+                new DefaultRecord.Builder()
+                        .setTime(START.plus(Duration.standardSeconds(10)))
+                        .setCluster("MyCluster")
+                        .setService("MyService")
+                        .setHost("MyHost")
+                        .setId(UUID.randomUUID().toString())
+                        .setMetrics(ImmutableMap.of(
+                                "MyCounter",
+                                new DefaultMetric.Builder()
+                                        .setType(MetricType.COUNTER)
+                                        .setValues(Collections.emptyList())
+                                        .build()))
+                        .build());
+        _bucket.close();
+
+        final ArgumentCaptor<PeriodicData> dataCaptor = ArgumentCaptor.forClass(PeriodicData.class);
+        Mockito.verify(_sink).recordAggregateData(dataCaptor.capture());
+
+        final ImmutableMultimap<String, AggregatedData> data = dataCaptor.getValue().getData();
+        Assert.assertEquals(0, data.size());
+    }
+
+    @Test
     public void testGauge() {
         addData("MyGauge", MetricType.GAUGE, TWO, 10);
         addData("MyGauge", MetricType.GAUGE, ONE, 20);
