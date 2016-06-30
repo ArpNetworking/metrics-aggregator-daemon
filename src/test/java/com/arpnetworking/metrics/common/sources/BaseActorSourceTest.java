@@ -28,15 +28,19 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
-public abstract class ActorSourceTest {
+public abstract class BaseActorSourceTest {
     @Before
-    public void setUpAkka() {
-        _system = ActorSystem.create();
+    public void setUp() {
+        _system = createActorSystem();
     }
 
     @After
-    public void tearDownAkka() throws Exception {
+    public void tearDown() throws Exception {
         Await.result(_system.terminate(), Duration.create(10, TimeUnit.SECONDS));
+    }
+
+    protected ActorSystem createActorSystem() {
+        return ActorSystem.create();
     }
 
     public ActorSystem getSystem() {

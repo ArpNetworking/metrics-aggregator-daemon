@@ -51,10 +51,11 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
-public class CollectdHttpSourceV1Test extends ActorSourceTest {
+public class CollectdHttpSourceV1Test extends BaseActorSourceTest {
 
     @Before
     public void setUp() {
+        super.setUp();
         MockitoAnnotations.initMocks(this);
         _source = new CollectdHttpSourceV1.Builder()
                 .setActorName("collectd")

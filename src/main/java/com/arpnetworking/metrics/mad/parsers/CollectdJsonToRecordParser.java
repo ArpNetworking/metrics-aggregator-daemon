@@ -30,20 +30,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import net.sf.oval.constraint.CheckWith;
+import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Parses Collectd JSON data as a {@link Record}.
@@ -65,7 +69,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             final List<DefaultRecord.Builder> builders = Lists.newArrayList();
             for (final CollectdRecord record : records) {
                 final DefaultRecord.Builder builder = new DefaultRecord.Builder();
-                final Map<String, Metric> metrics = Maps.newHashMap();
+                final Multimap<String, Metric> metrics = HashMultimap.create();
                 builder.setHost(record.getHost())
                         .setId(UUID.randomUUID().toString())
                         .setAnnotations(Collections.emptyMap())
@@ -84,9 +88,13 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
                             .setValues(Collections.singletonList(
                                     new Quantity.Builder().setValue(sample.getValue()).build()))
                             .build();
-                    metrics.merge(metricName, metric, CollectdJsonToRecordParser::mergeMetrics);
+                    metrics.put(metricName, metric);
                 }
-                builder.setMetrics(metrics);
+                final Map<String, Metric> collectedMetrics = metrics.asMap()
+                        .entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, CollectdJsonToRecordParser::mergeMetrics));
+                builder.setMetrics(collectedMetrics);
                 builders.add(builder);
             }
             return builders;
@@ -115,7 +123,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             builder.append("/");
             builder.append(typeInstance);
         }
-        if (dsName != null && dsName.length() > 0) {
+        if (dsName != null && dsName.length() > 0 && !dsName.equals("value")) {
             builder.append("/");
             builder.append(dsName);
         }
@@ -138,21 +146,31 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
         }
     }
 
-    private static Metric mergeMetrics(final Metric m1, final Metric m2) {
-        final ArrayList<Quantity> combinedValues = Lists.newArrayList(m1.getValues());
-        combinedValues.addAll(m2.getValues());
-        return new DefaultMetric.Builder()
-                .setType(m1.getType())
-                .setValues(combinedValues)
-                .build();
+    private static Metric mergeMetrics(final Map.Entry<String, Collection<Metric>> entries) {
+        final Collection<Metric> metrics = entries.getValue();
+        if (metrics.isEmpty()) {
+            throw new IllegalArgumentException("entries must not be empty");
+        }
+        final Metric firstMetric = metrics.iterator().next();
+        if (metrics.size() == 1) {
+            return firstMetric;
+        } else {
+            final List<Quantity> quantities = Lists.newArrayList();
+            for (Metric metric : metrics) {
+                quantities.addAll(metric.getValues());
+            }
+            return new DefaultMetric.Builder()
+                    .setType(firstMetric.getType())
+                    .setValues(quantities)
+                    .build();
+        }
     }
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.createInstance();
 
     static {
-        final SimpleModule queryLogParserModule = new SimpleModule("CollectdJsonParser");
         OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
-        OBJECT_MAPPER.registerModule(queryLogParserModule);
+        OBJECT_MAPPER.registerModule(new AfterburnerModule());
     }
 
     /**
@@ -236,7 +254,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             }
 
             /**
-             * Sets the time.
+             * Sets the time.  Time value is floating point epoch seconds.
              *
              * @param value Value
              * @return This builder
@@ -339,11 +357,28 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             @NotNull
             private String _typeInstance;
             @NotNull
+            @CheckWith(value = ValueArraysValid.class, message = "values, dstypes, and dsnames must have the same number of entries")
             private List<Double> _values = Collections.emptyList();
             @NotNull
             private List<String> _dsTypes = Collections.emptyList();
             @NotNull
             private List<String> _dsNames = Collections.emptyList();
+
+
+            private static class ValueArraysValid implements CheckWithCheck.SimpleCheck {
+                @Override
+                public boolean isSatisfied(final Object validatedObject, final Object value) {
+                    if (validatedObject instanceof Builder) {
+                        final Builder builder = (Builder) validatedObject;
+                        return builder._values != null && builder._dsTypes != null && builder._dsNames != null
+                                && builder._values.size() == builder._dsTypes.size()
+                                && builder._values.size() == builder._dsNames.size();
+                    }
+                    return false;
+                }
+
+                private static final long serialVersionUID = 1L;
+            }
         }
 
         /**
