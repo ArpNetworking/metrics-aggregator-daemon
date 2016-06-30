@@ -136,6 +136,7 @@ public final class StatefulTailer implements Tailer {
                 if (reader != null) {
                     // Position the reader
                     resume(reader, nextInitialPosition);
+                    _listener.fileOpened();
 
                     // Any subsequent file opens we should start at the beginning
                     nextInitialPosition = InitialPosition.START;
@@ -262,18 +263,7 @@ public final class StatefulTailer implements Tailer {
                         // Return to the file loop
                         return;
                     }
-                    try {
-                        lastChecked = Optional.of(Files.getLastModifiedTime(_file).toMillis());
-                    } catch (final NoSuchFileException t) {
-                        rotate(
-                                Optional.of(reader),
-                                String.format(
-                                        "File rotation detected based last modified time access failure; file=%s",
-                                        _file));
-
-                        // Return to the file loop
-                        return;
-                    }
+                    lastChecked = Optional.of(attributes.getLastModifiedTime());
 
                     // This control path, specifically, successfully reading
                     // data from the file does not trigger a wait. This permits
