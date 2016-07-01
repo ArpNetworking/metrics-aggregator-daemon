@@ -38,9 +38,11 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.CheckWith;
 import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.NotNull;
+import org.apache.http.HttpRequest;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -54,7 +56,7 @@ import java.util.stream.Collectors;
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
-public final class CollectdJsonToRecordParser implements Parser<List<DefaultRecord.Builder>> {
+public final class CollectdJsonToRecordParser implements Parser<List<DefaultRecord.Builder>, byte[]> {
     /**
      * Parses a collectd POST body.
      *

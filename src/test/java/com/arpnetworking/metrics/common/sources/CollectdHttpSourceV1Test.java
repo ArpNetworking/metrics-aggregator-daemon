@@ -167,6 +167,6 @@ public class CollectdHttpSourceV1Test extends BaseActorSourceTest {
     @Mock
     private Observer _observer;
     @Mock
-    private Parser<List<DefaultRecord.Builder>> _parser;
+    private Parser<List<DefaultRecord.Builder>, byte[]> _parser;
     private CollectdHttpSourceV1 _source;
 }

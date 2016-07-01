@@ -71,7 +71,7 @@ import java.util.UUID;
  * @author Brandon Arp (brandonarp at gmail dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
-public final class JsonToRecordParser implements Parser<Record> {
+public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
     /**
      * {@inheritDoc}

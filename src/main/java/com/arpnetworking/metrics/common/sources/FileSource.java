@@ -124,7 +124,7 @@ public final class FileSource<T> extends BaseSource {
         _tailerExecutor = Executors.newSingleThreadExecutor((runnable) -> new Thread(runnable, "FileSourceTailer"));
     }
 
-    private final Parser<T> _parser;
+    private final Parser<T, byte[]> _parser;
     private final Tailer _tailer;
     private final ExecutorService _tailerExecutor;
     private final Logger _logger;
@@ -283,7 +283,7 @@ public final class FileSource<T> extends BaseSource {
          * @param value The <code>Parser</code>.
          * @return This instance of <code>Builder</code>.
          */
-        public final Builder<T> setParser(final Parser<T> value) {
+        public final Builder<T> setParser(final Parser<T, byte[]> value) {
             _parser = value;
             return this;
         }
@@ -314,7 +314,7 @@ public final class FileSource<T> extends BaseSource {
         @NotNull
         private Duration _interval = Duration.millis(500);
         @NotNull
-        private Parser<T> _parser;
+        private Parser<T, byte[]> _parser;
         private Path _stateFile;
         @NotNull
         private InitialPosition _initialPosition = InitialPosition.START;

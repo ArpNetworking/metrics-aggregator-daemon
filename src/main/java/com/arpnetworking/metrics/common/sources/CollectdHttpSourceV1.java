@@ -53,6 +53,7 @@ import net.sf.oval.ConstraintViolation;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.exception.ConstraintsViolatedException;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
@@ -87,7 +88,7 @@ public class CollectdHttpSourceV1 extends ActorSource {
         _parser = builder._parser;
     }
 
-    private final Parser<List<DefaultRecord.Builder>> _parser;
+    private final Parser<List<DefaultRecord.Builder>, byte[]> _parser;
 
     /**
      * Internal actor to process requests.
@@ -109,13 +110,14 @@ public class CollectdHttpSourceV1 extends ActorSource {
         @Override
         public void onReceive(final Object message) throws Exception {
             if (message instanceof RequestReply) {
-                final RequestReply request = (RequestReply) message;
-                Source.single((HttpRequest) request.getRequest())
+                final RequestReply requestReply = (RequestReply) message;
+                // TODO(barp): Fix the ugly HttpRequest cast here due to java vs scala dsl
+                Source.single((HttpRequest) requestReply.getRequest())
                         .via(_processGraph)
                         .toMat(_sink, Keep.right())
                         .run(_materializer)
                         .whenComplete((done, err) -> {
-                            final CompletableFuture<HttpResponse> responseFuture = request.getResponse();
+                            final CompletableFuture<HttpResponse> responseFuture = requestReply.getResponse();
                             if (err == null) {
                                 responseFuture.complete(HttpResponse.create().withStatus(200));
                             } else {
@@ -123,19 +125,8 @@ public class CollectdHttpSourceV1 extends ActorSource {
                                         .setMessage("Error handling collectd post")
                                         .setThrowable(err)
                                         .log();
-                                if (err instanceof ParsingException) {
+                                if (err instanceof IOException && err.getCause() instanceof ParsingException) {
                                     responseFuture.complete(HttpResponse.create().withStatus(400));
-                                } else if (err instanceof ConstraintsViolatedException) {
-                                    final ConstraintsViolatedException violationException = (ConstraintsViolatedException) err;
-                                    final StringBuilder errorMessages = new StringBuilder();
-                                    for (final ConstraintViolation violation : violationException.getConstraintViolations()) {
-                                        final String error = violation.getMessage();
-                                        errorMessages.append(error.substring(error.indexOf('_') + 1)).append("\n");
-                                    }
-                                    final HttpResponse response = HttpResponse.create()
-                                            .withStatus(400)
-                                            .withEntity(errorMessages.toString());
-                                    responseFuture.complete(response);
                                 } else {
                                     responseFuture.complete(HttpResponse.create().withStatus(500));
                                 }
@@ -247,12 +238,12 @@ public class CollectdHttpSourceV1 extends ActorSource {
         }
 
         private final Sink<Record, CompletionStage<Done>> _sink;
-        private final Parser<List<DefaultRecord.Builder>> _parser;
+        private final Parser<List<DefaultRecord.Builder>, byte[]> _parser;
         private final Materializer _materializer;
         private final Graph<FlowShape<HttpRequest, Record>, NotUsed> _processGraph;
 
         private static final Logger BAD_REQUEST_LOGGER =
-                LoggerFactory.getRateLimitLogger(CollectdHttpSourceV1.class, Duration.ofMinutes(1));
+                LoggerFactory.getRateLimitLogger(CollectdHttpSourceV1.class, Duration.ofSeconds(30));
     }
 
     /**
@@ -273,7 +264,7 @@ public class CollectdHttpSourceV1 extends ActorSource {
          * @param value Value
          * @return This builder
          */
-        public Builder setParser(final Parser<List<DefaultRecord.Builder>> value) {
+        public Builder setParser(final Parser<List<DefaultRecord.Builder>, byte[]> value) {
             _parser = value;
             return self();
         }
@@ -285,6 +276,6 @@ public class CollectdHttpSourceV1 extends ActorSource {
         }
 
         @NotNull
-        private Parser<List<DefaultRecord.Builder>> _parser = new CollectdJsonToRecordParser();
+        private Parser<List<DefaultRecord.Builder>, byte[]> _parser = new CollectdJsonToRecordParser();
     }
 }

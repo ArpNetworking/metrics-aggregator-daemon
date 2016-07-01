@@ -15,6 +15,9 @@
  */
 package com.arpnetworking.metrics.common.parsers.exceptions;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Exception thrown when a <code>Parser</code> fails to parse the data.
  *
@@ -29,7 +32,7 @@ public class ParsingException extends Exception {
      */
     public ParsingException(final String message, final byte[] offendingData) {
         super(message);
-        _offendingData = offendingData.clone();
+        _offendingData = offendingData;
     }
 
     /**
@@ -41,13 +44,14 @@ public class ParsingException extends Exception {
      */
     public ParsingException(final String message, final byte[] offendingData, final Throwable cause) {
         super(message, cause);
-        _offendingData = offendingData.clone();
+        _offendingData = offendingData;
     }
 
     public byte[] getOffendingData() {
-        return _offendingData.clone();
+        return _offendingData;
     }
 
+    // TODO(barp): change this into a List or similar struture to ensure no modifications
     private final byte[] _offendingData;
 
     private static final long serialVersionUID = 1L;

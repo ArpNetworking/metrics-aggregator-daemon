@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
-public class RequestReply {
+public final class RequestReply {
     /**
      * Public constructor.
      *

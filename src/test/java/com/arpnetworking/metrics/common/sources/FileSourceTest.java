@@ -877,7 +877,7 @@ public class FileSourceTest {
     private Observer _observer;
     private Logger _logger;
     private LogBuilder _logBuilder;
-    private Parser<Object> _parser;
+    private Parser<Object, byte[]> _parser;
     private final SimpleDateFormat _dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH");
     private final Path _directory = Paths.get("./target/tmp/filter/FileSourceTest");
 

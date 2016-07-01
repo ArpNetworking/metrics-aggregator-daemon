@@ -80,7 +80,7 @@ public abstract class ActorSource extends BaseSource {
      *
      * @param <B> type of the builder
      * @param <S> type of the object to be built
-     * @author Ville Koskela (vkoskela at groupon dot com)
+     * @author Brandon Arp (brandonarp at gmail dot com)
      */
     public abstract static class Builder<B extends Builder<B, S>, S extends Source> extends BaseSource.Builder<B, S> {
         /**
