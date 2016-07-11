@@ -16,11 +16,13 @@
 package com.arpnetworking.metrics.mad.parsers;
 
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
-import com.arpnetworking.metrics.mad.model.DefaultRecord;
+import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.io.Resources;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -31,7 +33,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Tests for the CollectdJsonToRecord parser.
@@ -41,11 +42,7 @@ import java.util.stream.Collectors;
 public class CollectdJsonToRecordParserTest {
     @Test
     public void testParse() throws ParsingException, IOException {
-        final List<DefaultRecord.Builder> builders = parseFile("CollectdJsonParserTest/testParse.json");
-
-        final List<Record> records = builders.stream()
-                .map(DefaultRecord.Builder::build)
-                .collect(Collectors.toList());
+        final List<Record> records = parseFile("CollectdJsonParserTest/testParse.json");
 
         Assert.assertEquals(18, records.size());
         final Record record = records.get(0);
@@ -108,13 +105,12 @@ public class CollectdJsonToRecordParserTest {
         parseFile("CollectdJsonParserTest/testParseInvalid.json");
     }
 
-    private static List<DefaultRecord.Builder> parseFile(final String fileName) throws IOException, ParsingException {
-        final List<DefaultRecord.Builder> builders = new CollectdJsonToRecordParser()
-                .parse(Resources.toByteArray(Resources.getResource(CollectdJsonToRecordParser.class, fileName)));
-        for (final DefaultRecord.Builder builder : builders) {
-            builder.setService("MyService");
-            builder.setCluster("MyCluster");
-        }
-        return builders;
+    private static List<Record> parseFile(final String fileName) throws IOException, ParsingException {
+        final byte[] body = Resources.toByteArray(Resources.getResource(CollectdJsonToRecordParser.class, fileName));
+        final Multimap<String, String> headers = ImmutableMultimap.<String, String>builder()
+                .put("x-tag-service", "MyService")
+                .put("x-tag-Cluster", "MyCluster")
+                .build();
+        return new CollectdJsonToRecordParser().parse(new HttpRequest(headers, body));
     }
 }

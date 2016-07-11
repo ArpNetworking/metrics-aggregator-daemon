@@ -26,6 +26,7 @@ import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.test.TestBeanFactory;
+import com.arpnetworking.utility.test.MockitoSupplierAnswer;
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
@@ -51,7 +52,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
-public class CollectdHttpSourceV1Test extends BaseActorSourceTest {
+public final class CollectdHttpSourceV1Test extends BaseActorSourceTest {
 
     @Before
     public void setUp() {
@@ -69,8 +70,12 @@ public class CollectdHttpSourceV1Test extends BaseActorSourceTest {
     public void testParsesEntity() throws ExecutionException, ParsingException {
         final byte[] entity = "not a json document".getBytes(Charsets.UTF_8);
         Mockito.when(_parser.parse(Mockito.any())).thenThrow(new ParsingException("test exception", new byte[0]));
-        dispatchRequest(HttpRequest.create().withEntity(entity));
-        Mockito.verify(_parser).parse(entity);
+        dispatchRequest(HttpRequest.create().withEntity(entity).addHeader(RawHeader.create("x-tag-foo", "bar")));
+        final ArgumentCaptor<com.arpnetworking.metrics.mad.model.HttpRequest> captor =
+                ArgumentCaptor.forClass(com.arpnetworking.metrics.mad.model.HttpRequest.class);
+        Mockito.verify(_parser).parse(captor.capture());
+        Assert.assertArrayEquals(entity, captor.getValue().getBody());
+        Assert.assertEquals("bar", captor.getValue().getHeaders().get("x-tag-foo").toArray()[0]);
     }
 
     @Test
@@ -94,45 +99,17 @@ public class CollectdHttpSourceV1Test extends BaseActorSourceTest {
                 .setTime(DateTime.now())
                 .setId("id")
                 .setMetrics(Collections.emptyMap());
-        Mockito.when(_parser.parse(Mockito.any())).thenReturn(Collections.singletonList(builder));
+        Mockito.when(_parser.parse(Mockito.any())).thenAnswer(MockitoSupplierAnswer.create(builder::build));
         final HttpResponse response = dispatchRequest();
-        final String errorString = response.entity()
-                .toStrict(500, null)
-                .toCompletableFuture()
-                .get()
-                .getData()
-                .utf8String();
         Assert.assertEquals(400, response.status().intValue());
-        Assert.assertTrue(errorString.contains("service cannot be null"));
-        Assert.assertTrue(errorString.contains("cluster cannot be null"));
-    }
-
-    @Test
-    public void testParsesTagHeaders() throws ParsingException, ExecutionException, InterruptedException {
-        final DefaultRecord.Builder builder = TestBeanFactory.createRecordBuilder()
-                .setService(null)
-                .setCluster(null);
-
-        final String service = "my-service";
-        final String cluster = "my-cluster";
-        final HttpRequest request = HttpRequest.create()
-                .addHeader(RawHeader.create("X-TAG-SERVICE", service))
-                .addHeader(RawHeader.create("X-TAG-CLUSTER", cluster));
-        Mockito.when(_parser.parse(Mockito.any())).thenReturn(Collections.singletonList(builder));
-        final HttpResponse response = dispatchRequest(request);
-        Assert.assertEquals(200, response.status().intValue());
-
-        final Record record = builder.build();
-        Assert.assertEquals(cluster, record.getCluster());
-        Assert.assertEquals(service, record.getService());
     }
 
     @Test
     public void testSendsRecords() throws ParsingException, ExecutionException, InterruptedException {
-        final DefaultRecord.Builder builder1 = TestBeanFactory.createRecordBuilder();
-        final DefaultRecord.Builder builder2 = TestBeanFactory.createRecordBuilder();
-        final DefaultRecord.Builder builder3 = TestBeanFactory.createRecordBuilder();
-        final ArrayList<DefaultRecord.Builder> builders = Lists.newArrayList(builder1, builder2, builder3);
+        final Record record1 = TestBeanFactory.createRecord();
+        final Record record2 = TestBeanFactory.createRecord();
+        final Record record3 = TestBeanFactory.createRecord();
+        final ArrayList<Record> builders = Lists.newArrayList(record1, record2, record3);
 
         Mockito.when(_parser.parse(Mockito.any())).thenReturn(builders);
         final HttpResponse response = dispatchRequest();
@@ -141,9 +118,9 @@ public class CollectdHttpSourceV1Test extends BaseActorSourceTest {
         Mockito.verify(_observer, Mockito.times(3)).notify(Mockito.any(), builderCaptor.capture());
 
         final List<Record> constructed = builderCaptor.getAllValues();
-        Assert.assertEquals(builder1.build(), constructed.get(0));
-        Assert.assertEquals(builder2.build(), constructed.get(1));
-        Assert.assertEquals(builder3.build(), constructed.get(2));
+        Assert.assertEquals(record1, constructed.get(0));
+        Assert.assertEquals(record2, constructed.get(1));
+        Assert.assertEquals(record3, constructed.get(2));
     }
 
     private HttpResponse dispatchRequest() throws ExecutionException {
@@ -167,6 +144,6 @@ public class CollectdHttpSourceV1Test extends BaseActorSourceTest {
     @Mock
     private Observer _observer;
     @Mock
-    private Parser<List<DefaultRecord.Builder>, byte[]> _parser;
+    private Parser<List<Record>, com.arpnetworking.metrics.mad.model.HttpRequest> _parser;
     private CollectdHttpSourceV1 _source;
 }

@@ -15,14 +15,14 @@
  */
 package com.arpnetworking.metrics.common.parsers.exceptions;
 
-import java.util.Collections;
-import java.util.List;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Exception thrown when a <code>Parser</code> fails to parse the data.
  *
  * @author Brandon Arp (brandonarp at gmail dot com)
  */
+@SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class ParsingException extends Exception {
     /**
      * Public constructor with a description.

@@ -22,6 +22,7 @@ import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
+import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.MetricType;
@@ -31,18 +32,18 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.CheckWith;
 import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.NotNull;
-import org.apache.http.HttpRequest;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -56,26 +57,36 @@ import java.util.stream.Collectors;
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
-public final class CollectdJsonToRecordParser implements Parser<List<DefaultRecord.Builder>, byte[]> {
+public final class CollectdJsonToRecordParser implements Parser<List<Record>, HttpRequest> {
     /**
      * Parses a collectd POST body.
      *
-     * @param data byte array of json encoded data
+     * @param request an HTTP request
      * @return A list of {@link DefaultRecord.Builder}
      * @throws ParsingException if the body is not parsable as collectd formatted json data
      */
-    @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
-    public List<DefaultRecord.Builder> parse(final byte[] data) throws ParsingException {
+    @SuppressFBWarnings(value = "DM_CONVERT_CASE", justification = "headers must be ASCII encoding")
+    public List<Record> parse(final HttpRequest request) throws ParsingException {
+        final Map<String, String> metricTags = Maps.newHashMap();
+        for (final Map.Entry<String, String> header : request.getHeaders().entries()) {
+            if (header.getKey().toLowerCase().startsWith("x-tag-")) {
+                metricTags.put(header.getKey().toLowerCase().substring(6), header.getValue());
+            }
+        }
+        final String service = metricTags.get("service");
+        final String cluster = metricTags.get("cluster");
         try {
-            final List<CollectdRecord> records = OBJECT_MAPPER.readValue(data, new TypeReference<List<CollectdRecord>>() { });
-            final List<DefaultRecord.Builder> builders = Lists.newArrayList();
+            final List<CollectdRecord> records = OBJECT_MAPPER.readValue(request.getBody(), COLLECTD_RECORD_LIST);
+            final List<Record> parsedRecords = Lists.newArrayList();
             for (final CollectdRecord record : records) {
                 final DefaultRecord.Builder builder = new DefaultRecord.Builder();
                 final Multimap<String, Metric> metrics = HashMultimap.create();
                 builder.setHost(record.getHost())
                         .setId(UUID.randomUUID().toString())
-                        .setAnnotations(Collections.emptyMap())
-                        .setTime(record.getTime());
+                        .setTime(record.getTime())
+                        .setAnnotations(metricTags)
+                        .setCluster(cluster)
+                        .setService(service);
 
                 final String plugin = record.getPlugin();
                 final String pluginInstance = record.getPluginInstance();
@@ -97,13 +108,11 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
                         .stream()
                         .collect(Collectors.toMap(Map.Entry::getKey, CollectdJsonToRecordParser::mergeMetrics));
                 builder.setMetrics(collectedMetrics);
-                builders.add(builder);
+                parsedRecords.add(builder.build());
             }
-            return builders;
+            return parsedRecords;
         } catch (final IOException ex) {
-            // CHECKSTYLE.OFF: IllegalInstantiation - Approved for byte[] to String
-            throw new ParsingException("Error parsing collectd json", data, ex);
-            // CHECKSTYLE.ON: IllegalInstantiation
+            throw new ParsingException("Error parsing collectd json", request.getBody(), ex);
         }
     }
 
@@ -125,7 +134,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             builder.append("/");
             builder.append(typeInstance);
         }
-        if (dsName != null && dsName.length() > 0 && !dsName.equals("value")) {
+        if (!Strings.isNullOrEmpty(dsName) && !dsName.equals("value")) {
             builder.append("/");
             builder.append(dsName);
         }
@@ -169,6 +178,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
     }
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.createInstance();
+    private static final TypeReference<List<CollectdRecord>> COLLECTD_RECORD_LIST = new TypeReference<List<CollectdRecord>>() {};
 
     static {
         OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
@@ -256,18 +266,18 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             }
 
             /**
-             * Sets the time.  Time value is floating point epoch seconds.
+             * Sets the time.  Time value is floating point epoch seconds. Required.
              *
              * @param value Value
              * @return This builder
              */
-            public Builder setTime(final double value) {
+            public Builder setTime(final Double value) {
                 _time = value;
                 return this;
             }
 
             /**
-             * Sets the plugin.
+             * Sets the plugin. Required.
              *
              * @param value Value
              * @return This builder
@@ -278,7 +288,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             }
 
             /**
-             * Sets the plugin instance.
+             * Sets the plugin instance. Required.
              *
              * @param value Value
              * @return This builder
@@ -290,7 +300,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             }
 
             /**
-             * Sets the type.
+             * Sets the type. Required.
              *
              * @param value Value
              * @return This builder
@@ -301,7 +311,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             }
 
             /**
-             * Sets the sample values.
+             * Sets the sample values. Required.
              *
              * @param value Value
              * @return This builder
@@ -312,7 +322,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             }
 
             /**
-             * Sets the sample DS types.
+             * Sets the sample DS types. Required.
              *
              * @param value Value
              * @return This builder
@@ -324,7 +334,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             }
 
             /**
-             * Sets the sample DS names.
+             * Sets the sample DS names. Required.
              *
              * @param value Value
              * @return This builder
@@ -336,7 +346,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
             }
 
             /**
-             * Sets the type instance.
+             * Sets the type instance. Required.
              *
              * @param value Value
              * @return This builder
@@ -349,7 +359,8 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
 
             @NotNull
             private String _host;
-            private double _time;
+            @NotNull
+            private Double _time;
             @NotNull
             private String _plugin;
             @NotNull
@@ -387,7 +398,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
          * Represents a single sample in a collectd metric post.
          */
         public static final class Sample {
-            public double getValue() {
+            public Double getValue() {
                 return _value;
             }
 
@@ -406,13 +417,13 @@ public final class CollectdJsonToRecordParser implements Parser<List<DefaultReco
              * @param dsType The DS type
              * @param dsName The DS name
              */
-            public Sample(final double value, final String dsType, final String dsName) {
+            public Sample(final Double value, final String dsType, final String dsName) {
                 _value = value;
                 _dsType = dsType;
                 _dsName = dsName;
             }
 
-            private final double _value;
+            private final Double _value;
             private final String _dsType;
             private final String _dsName;
         }

@@ -43,26 +43,20 @@ import akka.util.ByteString;
 import com.arpnetworking.http.RequestReply;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
-import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.parsers.CollectdJsonToRecordParser;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.google.common.collect.Maps;
-import net.sf.oval.ConstraintViolation;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.exception.ConstraintsViolatedException;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Processes HTTP posts from Collectd, extracts data and emits metrics.
@@ -88,7 +82,7 @@ public class CollectdHttpSourceV1 extends ActorSource {
         _parser = builder._parser;
     }
 
-    private final Parser<List<DefaultRecord.Builder>, byte[]> _parser;
+    private final Parser<List<Record>, com.arpnetworking.metrics.mad.model.HttpRequest> _parser;
 
     /**
      * Internal actor to process requests.
@@ -125,7 +119,9 @@ public class CollectdHttpSourceV1 extends ActorSource {
                                         .setMessage("Error handling collectd post")
                                         .setThrowable(err)
                                         .log();
-                                if (err instanceof IOException && err.getCause() instanceof ParsingException) {
+                                if ((err instanceof IOException && err.getCause() instanceof ParsingException)
+                                        || err instanceof ConstraintsViolatedException
+                                        || err instanceof ParsingException) {
                                     responseFuture.complete(HttpResponse.create().withStatus(400));
                                 } else {
                                     responseFuture.complete(HttpResponse.create().withStatus(500));
@@ -153,92 +149,66 @@ public class CollectdHttpSourceV1 extends ActorSource {
             _processGraph = GraphDSL.create(builder -> {
 
                 // Flows
-                final Flow<HttpRequest, List<DefaultRecord.Builder>, NotUsed> parseJsonFlow = Flow.<HttpRequest>create()
+                final Flow<HttpRequest, byte[], NotUsed> getBodyFlow = Flow.<HttpRequest>create()
                         .map(HttpRequest::entity)
                         .flatMapConcat(RequestEntity::getDataBytes)
                         .map(ByteString::toArray) // Transform to array form
-                        .map(this::parseRecords) // Parse the json string into a record builder
-                                                 // NOTE: this should be _parser::parse, but aspectj NPEs with that currently
-                        .named("parseJson");
+                        .named("getBody");
 
-                final Flow<HttpRequest, Map<String, String>, NotUsed> parseHeadersFlow = Flow.<HttpRequest>create()
+                final Flow<HttpRequest, Multimap<String, String>, NotUsed> getHeadersFlow = Flow.<HttpRequest>create()
                         .map(HttpRequest::getHeaders)
-                        .map(Actor::extractTagHeaders)
-                        .named("parseHeaders");
+                        .map(Actor::createHeaderMultimap) // Transform to array form
+                        .named("getHeaders");
 
-                final Flow<
-                        Pair<Map<String, String>, List<DefaultRecord.Builder>>,
-                        DefaultRecord.Builder,
-                        NotUsed> applyTagsFlow = Flow.<Pair<Map<String, String>, List<DefaultRecord.Builder>>>create()
-                                .flatMapConcat(Actor::mapExpandPair)
-                                .map(Actor::applyTags)
-                                .named("applyTags");
-
-                final Flow<DefaultRecord.Builder, Record, NotUsed> buildFlow = Flow.<DefaultRecord.Builder>create()
-                        .map(DefaultRecord.Builder::build);
+                final Flow<Pair<byte[], Multimap<String, String>>, Record, NotUsed> createAndParseFlow =
+                        Flow.<Pair<byte[], Multimap<String, String>>>create()
+                                .map(Actor::mapModel)
+                                .mapConcat(this::parseRecords) // Parse the json string into a record builder
+                                // NOTE: this should be _parser::parse, but aspectj NPEs with that currently
+                                .named("createAndParseRequest");
 
                 // Shapes
                 final UniformFanOutShape<HttpRequest, HttpRequest> split = builder.add(Broadcast.create(2));
-                final FlowShape<HttpRequest, List<DefaultRecord.Builder>> parseJson = builder.add(parseJsonFlow);
-                final FlowShape<HttpRequest, Map<String, String>> parseHeaders = builder.add(parseHeadersFlow);
+
+                final FlowShape<HttpRequest, byte[]> getBody = builder.add(getBodyFlow);
+                final FlowShape<HttpRequest, Multimap<String, String>> getHeaders = builder.add(getHeadersFlow);
                 final FanInShape2<
-                        Map<String, String>,
-                        List<DefaultRecord.Builder>,
-                        Pair<Map<String, String>, List<DefaultRecord.Builder>>> join = builder.add(Zip.create());
-                final FlowShape<
-                        Pair<Map<String, String>, List<DefaultRecord.Builder>>,
-                        DefaultRecord.Builder> applyTags = builder.add(applyTagsFlow);
-                final FlowShape<DefaultRecord.Builder, Record> build = builder.add(buildFlow);
+                        byte[],
+                        Multimap<String, String>,
+                        Pair<byte[], Multimap<String, String>>> join = builder.add(Zip.create());
+                final FlowShape<Pair<byte[], Multimap<String, String>>, Record> createRequest =
+                        builder.add(createAndParseFlow);
 
                 // Wire the shapes
-                builder.from(split.out(0)).via(parseHeaders).toInlet(join.in0());
-                builder.from(split.out(1)).via(parseJson).toInlet(join.in1());
-                builder.from(join.out()).via(applyTags).via(build);
+                builder.from(split.out(0)).via(getBody).toInlet(join.in0()); // Split to get the body bytes
+                builder.from(split.out(1)).via(getHeaders).toInlet(join.in1()); // Split to get the headers
+                builder.from(join.out()).toInlet(createRequest.in()); // Join to create the Request and parse it
 
-                return new FlowShape<>(split.in(), build.out());
+                return new FlowShape<>(split.in(), createRequest.out());
             });
         }
 
-        private static DefaultRecord.Builder applyTags(final Pair<Map<String, String>, DefaultRecord.Builder> pair)
-                throws Exception {
-            final DefaultRecord.Builder recordBuilder = pair.second();
-            final Map<String, String> annotations = pair.first();
-            recordBuilder.setAnnotations(annotations);
-            applyTag("service", annotations, recordBuilder::setService);
-            applyTag("cluster", annotations, recordBuilder::setCluster);
-            return recordBuilder;
-        }
+        private static Multimap<String, String> createHeaderMultimap(final Iterable<HttpHeader> headers) {
+            final ImmutableMultimap.Builder<String, String> headersBuilder = ImmutableMultimap.builder();
 
-        private static Map<String, String> extractTagHeaders(final Iterable<HttpHeader> headers) throws Exception {
-            final HashMap<String, String> m = Maps.newHashMap();
-            for (final HttpHeader header : headers) {
-                if (header.lowercaseName().startsWith("x-tag-")) {
-                    m.put(header.lowercaseName().substring(6), header.value());
-                }
+            for (final HttpHeader httpHeader : headers) {
+                headersBuilder.put(httpHeader.lowercaseName(), httpHeader.value());
             }
-            return m;
+
+            return headersBuilder.build();
         }
 
-        private List<DefaultRecord.Builder> parseRecords(final byte[] data) throws ParsingException {
-            return _parser.parse(data);
+        private static com.arpnetworking.metrics.mad.model.HttpRequest mapModel(final Pair<byte[], Multimap<String, String>> pair) {
+            return new com.arpnetworking.metrics.mad.model.HttpRequest(pair.second(), pair.first());
         }
 
-        private static <A, B extends Collection<C>, C> Source<Pair<A, C>, NotUsed> mapExpandPair(final Pair<A, B> pair) {
-            return Source.from(
-                    pair.second()
-                            .stream()
-                            .map(element -> Pair.apply(pair.first(), element))
-                            .collect(Collectors.toList()));
-        }
-
-        private static void applyTag(final String key, final Map<String, String> annotations, final Consumer<String> setter) {
-            if (annotations.containsKey(key)) {
-                setter.accept(annotations.get(key));
-            }
+        private List<Record> parseRecords(final com.arpnetworking.metrics.mad.model.HttpRequest request)
+                throws ParsingException {
+            return _parser.parse(request);
         }
 
         private final Sink<Record, CompletionStage<Done>> _sink;
-        private final Parser<List<DefaultRecord.Builder>, byte[]> _parser;
+        private final Parser<List<Record>, com.arpnetworking.metrics.mad.model.HttpRequest> _parser;
         private final Materializer _materializer;
         private final Graph<FlowShape<HttpRequest, Record>, NotUsed> _processGraph;
 
@@ -264,7 +234,7 @@ public class CollectdHttpSourceV1 extends ActorSource {
          * @param value Value
          * @return This builder
          */
-        public Builder setParser(final Parser<List<DefaultRecord.Builder>, byte[]> value) {
+        public Builder setParser(final Parser<List<Record>, com.arpnetworking.metrics.mad.model.HttpRequest> value) {
             _parser = value;
             return self();
         }
@@ -276,6 +246,6 @@ public class CollectdHttpSourceV1 extends ActorSource {
         }
 
         @NotNull
-        private Parser<List<DefaultRecord.Builder>, byte[]> _parser = new CollectdJsonToRecordParser();
+        private Parser<List<Record>, com.arpnetworking.metrics.mad.model.HttpRequest> _parser = new CollectdJsonToRecordParser();
     }
 }
