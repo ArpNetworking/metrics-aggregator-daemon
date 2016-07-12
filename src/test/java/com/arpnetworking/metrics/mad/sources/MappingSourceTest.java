@@ -85,7 +85,7 @@ public class MappingSourceTest {
 
     @Test
     public void testMergingObserverInvalidEvent() {
-        final MappingSource mappingSource = (MappingSource) new MappingSource.Builder()
+        final MappingSource mappingSource = new MappingSource.Builder()
                 .setName("testMergingObserverInvalidEventMappingSource")
                 .setSource(_mockSource)
                 .setFindAndReplace(Collections.<String, List<String>>emptyMap())

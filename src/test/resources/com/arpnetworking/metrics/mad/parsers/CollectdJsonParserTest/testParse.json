@@ -1,0 +1,326 @@
+[
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.74,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "cpu",
+    "plugin_instance": "0",
+    "type": "cpu",
+    "type_instance": "wait"
+  },
+  {
+    "values": [
+      944937
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "file_pages"
+  },
+  {
+    "values": [
+      6463
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "dirty"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "writeback"
+  },
+  {
+    "values": [
+      64148
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "slab_reclaimable"
+  },
+  {
+    "values": [
+      14457
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "slab_unreclaimable"
+  },
+  {
+    "values": [
+      15848
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "page_table_pages"
+  },
+  {
+    "values": [
+      1003
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "kernel_stack"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "unstable"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "bounce"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "vmscan_write"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "vmscan_immediate_reclaim"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "writeback_temp"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "isolated_anon"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "isolated_file"
+  },
+  {
+    "values": [
+      78266
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_number",
+    "type_instance": "shmem"
+  },
+  {
+    "values": [
+      43.00732622113
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_action",
+    "type_instance": "dirtied"
+  },
+  {
+    "values": [
+      65.0112158597174
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1459466086.741,
+    "interval": 1,
+    "host": "host.example.com",
+    "plugin": "vmem",
+    "plugin_instance": "",
+    "type": "vmpage_action",
+    "type_instance": "written"
+  }
+]

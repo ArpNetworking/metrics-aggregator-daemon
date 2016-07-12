@@ -228,7 +228,7 @@ public final class Main implements Launchable {
                 materializer);
         binding.to(
                 akka.stream.javadsl.Sink.foreach(
-                        connection -> connection.handleWithAsyncHandler(routes, materializer)))
+                        connection -> connection.handleWith(routes.flow(), materializer)))
                 .run(materializer);
     }
 

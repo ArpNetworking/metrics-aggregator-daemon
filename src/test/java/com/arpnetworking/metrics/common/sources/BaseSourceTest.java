@@ -32,7 +32,7 @@ public class BaseSourceTest {
 
     @Test
     public void testAttachDetachNotify() {
-        final TestSource source = (TestSource) new TestSource.Builder()
+        final TestSource source = new TestSource.Builder()
                 .setName("My name")
                 .build();
         final Object event = new Object();
@@ -84,7 +84,7 @@ public class BaseSourceTest {
     @Test
     public void testGetName() {
         final String expectedName = "My name";
-        final BaseSource source = (BaseSource) new TestSource.Builder()
+        final BaseSource source = new TestSource.Builder()
                 .setName(expectedName)
                 .build();
         Assert.assertEquals(expectedName, source.getName());
@@ -94,7 +94,7 @@ public class BaseSourceTest {
     public void testGetMetricSafeName() {
         final String name = "My name/with unsafe.characters";
         final String expectedName = "My_name_with_unsafe_characters";
-        final BaseSource source = (BaseSource) new TestSource.Builder()
+        final BaseSource source = new TestSource.Builder()
                 .setName(name)
                 .build();
         Assert.assertEquals(expectedName, source.getMetricSafeName());
@@ -130,7 +130,7 @@ public class BaseSourceTest {
             super(builder);
         }
 
-        private static final class Builder extends BaseSource.Builder<Builder> {
+        private static final class Builder extends BaseSource.Builder<Builder, TestSource> {
 
             @Override
             protected Builder self() {

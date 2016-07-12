@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.http;
 
+import akka.NotUsed;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
@@ -32,6 +33,7 @@ import akka.japi.JavaPartialFunction;
 import akka.japi.function.Function;
 import akka.pattern.Patterns;
 import akka.stream.OverflowStrategy;
+import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import akka.util.ByteString;
@@ -53,6 +55,7 @@ import com.google.common.io.Resources;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -87,6 +90,16 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     }
 
     /**
+     * Creates a {@link Flow} based on executing the routes asynchronously.
+     *
+     * @return a new {@link Flow}
+     */
+    public Flow<HttpRequest, HttpResponse, NotUsed> flow() {
+        return Flow.<HttpRequest>create()
+                .mapAsync(1, this);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -118,12 +131,13 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     }
 
     private CompletionStage<HttpResponse> process(final HttpRequest request) {
+        final String path = request.getUri().path();
         if (HttpMethods.GET.equals(request.method())) {
-            if (TELEMETRY_STREAM_V1_PATH.equals(request.getUri().path())) {
+            if (TELEMETRY_STREAM_V1_PATH.equals(path)) {
                 return getHttpResponseForTelemetry(request, TELEMETRY_V1_FACTORY);
-            } else if (TELEMETRY_STREAM_V2_PATH.equals(request.getUri().path())) {
+            } else if (TELEMETRY_STREAM_V2_PATH.equals(path)) {
                 return getHttpResponseForTelemetry(request, TELEMETRY_V2_FACTORY);
-            } else if (_healthCheckPath.equals(request.getUri().path())) {
+            } else if (_healthCheckPath.equals(path)) {
                 return ask("/user/status", Status.IS_HEALTHY, Boolean.FALSE)
                         .thenApply(
                                 isHealthy -> HttpResponse.create()
@@ -132,16 +146,29 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                                         .withEntity(
                                                 JSON_CONTENT_TYPE,
                                                 ByteString.fromString(
+                                                        // TODO(barp): Don't use strings to build json
                                                         "{\"status\":\""
                                                                 + (isHealthy ? HEALTHY_STATE : UNHEALTHY_STATE)
                                                                 + "\"}")));
-            } else if (_statusPath.equals(request.getUri().path())) {
+            } else if (_statusPath.equals(path)) {
                 return CompletableFuture.completedFuture(
                         HttpResponse.create()
                                 .withStatus(StatusCodes.OK)
                                 .withEntity(JSON_CONTENT_TYPE, ByteString.fromString(STATUS_JSON)));
             }
+        } else if ((HttpMethods.POST.equals(request.method()))
+                && path.equals(COLLECTD_V1_SOURCE_PREFIX)) {
+            final Future<ActorRef> refFuture = _actorSystem.actorSelection("/user/collectdv1")
+                    .resolveOne(FiniteDuration.create(1, TimeUnit.SECONDS));
+            return FutureConverters.toJava(refFuture).thenCompose(
+                    ref -> {
+                        final CompletableFuture<HttpResponse> response = new CompletableFuture<>();
+                        ref.tell(new RequestReply(request, response), ActorRef.noSender());
+                        return response;
+                    })
+                    .exceptionally(err -> HttpResponse.create().withStatus(404));
         }
+
         return CompletableFuture.completedFuture(HttpResponse.create().withStatus(404));
     }
 
@@ -217,6 +244,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private static final ProcessorsV2Factory TELEMETRY_V2_FACTORY = new ProcessorsV2Factory();
     private static final String TELEMETRY_STREAM_V1_PATH = "/telemetry/v1/stream";
     private static final String TELEMETRY_STREAM_V2_PATH = "/telemetry/v2/stream";
+    private static final String COLLECTD_V1_SOURCE_PREFIX = "/metrics/v1/collectd";
 
     // Ping
     private static final HttpHeader PING_CACHE_CONTROL_HEADER = CacheControl.create(
@@ -244,4 +272,5 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
         }
         STATUS_JSON = statusJson;
     }
+
 }

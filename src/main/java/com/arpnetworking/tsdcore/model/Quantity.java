@@ -103,16 +103,12 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
      * @return The resulting product <code>Quantity</code>.
      */
     public Quantity multiply(final Quantity otherQuantity) {
-        // TODO(vkoskela): Support division by quantity with unit [2F].
-        if (otherQuantity._unit.isPresent()) {
-            throw new UnsupportedOperationException("Compount units not supported yet");
-        }
-        if (_unit.equals(otherQuantity._unit)) {
-            return new Quantity(_value * otherQuantity._value, Optional.absent());
+        if (_unit.isPresent() && otherQuantity._unit.isPresent()) {
+            throw new UnsupportedOperationException("Compound units not supported yet");
         }
         return new Quantity(
                 _value * otherQuantity._value,
-                _unit);
+                _unit.or(otherQuantity._unit));
     }
 
     /**

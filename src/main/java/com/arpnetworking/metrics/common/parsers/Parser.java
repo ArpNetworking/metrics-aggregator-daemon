@@ -21,7 +21,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 /**
  * Interface for classes which create instances of <code>T</code>.
  *
- * @param <T> The data type to parse.
+ * @param <T> The data type of the result.
+ * @param <D> The type of the entity to parse.
  *
  * @author Brandon Arp (brandonarp at gmail dot com)
  */
@@ -29,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         use = JsonTypeInfo.Id.CLASS,
         include = JsonTypeInfo.As.PROPERTY,
         property = "type")
-public interface Parser<T> {
+public interface Parser<T, D> {
 
     /**
      * Create a <code>Record</code> from a serialized representation.
@@ -38,5 +39,5 @@ public interface Parser<T> {
      * @return Instance of <code>Record</code> from the data.
      * @throws ParsingException If parsing of the data fails for any reason.
      */
-    T parse(byte[] data) throws ParsingException;
+    T parse(D data) throws ParsingException;
 }

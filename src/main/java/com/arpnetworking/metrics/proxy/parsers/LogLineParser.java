@@ -30,7 +30,7 @@ import java.nio.file.Path;
  *
  * @author Brandon Arp (brandonarp at gmail dot com)
  */
-public class LogLineParser implements Parser<LogLine> {
+public class LogLineParser implements Parser<LogLine, byte[]> {
 
     /**
      * Public constructor.

@@ -15,31 +15,44 @@
  */
 package com.arpnetworking.metrics.common.parsers.exceptions;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Exception thrown when a <code>Parser</code> fails to parse the data.
  *
  * @author Brandon Arp (brandonarp at gmail dot com)
  */
+@SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class ParsingException extends Exception {
-
     /**
      * Public constructor with a description.
      *
      * @param message Describes the exceptional condition.
+     * @param offendingData The raw data that failed to parse.
      */
-    public ParsingException(final String message) {
+    public ParsingException(final String message, final byte[] offendingData) {
         super(message);
+        _offendingData = offendingData;
     }
 
     /**
      * Public constructor with a description and cause.
      *
      * @param message Describes the exceptional condition.
+     * @param offendingData The raw data that failed to parse.
      * @param cause Causing exception.
      */
-    public ParsingException(final String message, final Throwable cause) {
+    public ParsingException(final String message, final byte[] offendingData, final Throwable cause) {
         super(message, cause);
+        _offendingData = offendingData;
     }
+
+    public byte[] getOffendingData() {
+        return _offendingData;
+    }
+
+    // TODO(barp): change this into a List or similar struture to ensure no modifications
+    private final byte[] _offendingData;
 
     private static final long serialVersionUID = 1L;
 }

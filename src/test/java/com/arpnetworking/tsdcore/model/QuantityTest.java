@@ -15,7 +15,9 @@
  */
 package com.arpnetworking.tsdcore.model;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -244,5 +246,169 @@ public class QuantityTest {
                                 .setValue(1.0)
                                 .setUnit(Unit.SECOND)
                                 .build()));
+    }
+
+    @Test
+    public void testConvertUnits() {
+        final Quantity quantity = new Quantity.Builder()
+                .setValue(60000.0)
+                .setUnit(Unit.MILLISECOND)
+                .build();
+        final Quantity converted = quantity.convertTo(Unit.SECOND);
+        Assert.assertEquals(60, converted.getValue(), 0.00001);
+        Assert.assertEquals(Unit.SECOND, converted.getUnit().orNull());
+    }
+
+    @Test
+    public void testConvertUnitIdentity() {
+        final Quantity quantity = new Quantity.Builder()
+                .setValue(60000.0)
+                .setUnit(Unit.MILLISECOND)
+                .build();
+        final Quantity converted = quantity.convertTo(Unit.MILLISECOND);
+        Assert.assertSame(quantity, converted);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_INFERRED")
+    public void testConvertUnitMissing() {
+        final Quantity quantity = new Quantity.Builder()
+                .setValue(60000.0)
+                .build();
+        quantity.convertTo(Unit.MILLISECOND);
+    }
+
+    @Test
+    public void testConvertUnitsOptional() {
+        final Quantity quantity = new Quantity.Builder()
+                .setValue(60000.0)
+                .setUnit(Unit.MILLISECOND)
+                .build();
+        final Quantity converted = quantity.convertTo(Optional.of(Unit.SECOND));
+        Assert.assertEquals(60, converted.getValue(), 0.00001);
+        Assert.assertEquals(Unit.SECOND, converted.getUnit().orNull());
+    }
+
+    @Test
+    public void testConvertUnitIdentityOptional() {
+        final Quantity quantity = new Quantity.Builder()
+                .setValue(60000.0)
+                .setUnit(Unit.MILLISECOND)
+                .build();
+        final Quantity converted = quantity.convertTo(Optional.of(Unit.MILLISECOND));
+        Assert.assertSame(quantity, converted);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_INFERRED")
+    public void testConvertUnitMissingOptional() {
+        final Quantity quantity = new Quantity.Builder()
+                .setValue(60000.0)
+                .build();
+        quantity.convertTo(Optional.of(Unit.MILLISECOND));
+    }
+
+    @Test
+    public void testAddQuantities() {
+        final Quantity quantity1 = new Quantity.Builder()
+                .setValue(5.0)
+                .build();
+        final Quantity quantity2 = new Quantity.Builder()
+                .setValue(10.0)
+                .build();
+        final Quantity result = quantity1.add(quantity2);
+        Assert.assertEquals(15.0d, result.getValue(), 0.00001);
+    }
+
+    @Test
+    public void testAddQuantitiesUnits() {
+        final Quantity quantity1 = new Quantity.Builder()
+                .setValue(5.0)
+                .setUnit(Unit.SECOND)
+                .build();
+        final Quantity quantity2 = new Quantity.Builder()
+                .setValue(10.0)
+                .setUnit(Unit.MILLISECOND)
+                .build();
+        final Quantity result = quantity1.add(quantity2);
+        Assert.assertEquals(5010.0d, result.getValue(), 0.00001);
+        Assert.assertEquals(Unit.MILLISECOND, result.getUnit().orNull());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddQuantitiesUnitsMismatch() {
+        final Quantity quantity1 = new Quantity.Builder()
+                .setValue(5.0)
+                .setUnit(Unit.SECOND)
+                .build();
+        final Quantity quantity2 = new Quantity.Builder()
+                .setValue(10.0)
+                .setUnit(Unit.BYTE)
+                .build();
+        quantity1.add(quantity2);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testAddQuantitiesUnitsMismatchExist() {
+        final Quantity quantity1 = new Quantity.Builder()
+                .setValue(5.0)
+                .setUnit(Unit.SECOND)
+                .build();
+        final Quantity quantity2 = new Quantity.Builder()
+                .setValue(10.0)
+                .build();
+        quantity1.add(quantity2);
+    }
+
+    @Test
+    public void testSubQuantities() {
+        final Quantity quantity1 = new Quantity.Builder()
+                .setValue(10.0)
+                .build();
+        final Quantity quantity2 = new Quantity.Builder()
+                .setValue(5.0)
+                .build();
+        final Quantity result = quantity1.subtract(quantity2);
+        Assert.assertEquals(5.0d, result.getValue(), 0.00001);
+    }
+
+    @Test
+    public void testSubQuantitiesUnits() {
+        final Quantity quantity1 = new Quantity.Builder()
+                .setValue(5.0)
+                .setUnit(Unit.SECOND)
+                .build();
+        final Quantity quantity2 = new Quantity.Builder()
+                .setValue(10.0)
+                .setUnit(Unit.MILLISECOND)
+                .build();
+        final Quantity result = quantity1.subtract(quantity2);
+        Assert.assertEquals(4990.0d, result.getValue(), 0.00001);
+        Assert.assertEquals(Unit.MILLISECOND, result.getUnit().orNull());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSubQuantitiesUnitsMismatch() {
+        final Quantity quantity1 = new Quantity.Builder()
+                .setValue(5.0)
+                .setUnit(Unit.SECOND)
+                .build();
+        final Quantity quantity2 = new Quantity.Builder()
+                .setValue(10.0)
+                .setUnit(Unit.BYTE)
+                .build();
+        quantity1.subtract(quantity2);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testSubQuantitiesUnitsMismatchExist() {
+        final Quantity quantity1 = new Quantity.Builder()
+                .setValue(5.0)
+                .setUnit(Unit.SECOND)
+                .build();
+        final Quantity quantity2 = new Quantity.Builder()
+                .setValue(10.0)
+                .build();
+        quantity1.subtract(quantity2);
     }
 }
