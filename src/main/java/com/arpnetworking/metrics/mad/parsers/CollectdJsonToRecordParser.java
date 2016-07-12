@@ -25,6 +25,7 @@ import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
+import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,10 +38,10 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.CheckWith;
 import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.NotNull;
+import net.sf.oval.exception.ConstraintsViolatedException;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
@@ -48,6 +49,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -58,6 +60,7 @@ import java.util.stream.Collectors;
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
 public final class CollectdJsonToRecordParser implements Parser<List<Record>, HttpRequest> {
+
     /**
      * Parses a collectd POST body.
      *
@@ -65,22 +68,23 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
      * @return A list of {@link DefaultRecord.Builder}
      * @throws ParsingException if the body is not parsable as collectd formatted json data
      */
-    @SuppressFBWarnings(value = "DM_CONVERT_CASE", justification = "headers must be ASCII encoding")
     public List<Record> parse(final HttpRequest request) throws ParsingException {
         final Map<String, String> metricTags = Maps.newHashMap();
         for (final Map.Entry<String, String> header : request.getHeaders().entries()) {
-            if (header.getKey().toLowerCase().startsWith("x-tag-")) {
-                metricTags.put(header.getKey().toLowerCase().substring(6), header.getValue());
+            if (header.getKey().toLowerCase(Locale.ENGLISH).startsWith(TAG_PREFIX)) {
+                metricTags.put(header.getKey().toLowerCase(Locale.ENGLISH).substring(TAG_PREFIX.length()), header.getValue());
             }
         }
-        final String service = metricTags.get("service");
-        final String cluster = metricTags.get("cluster");
+        final String service = metricTags.get(Key.SERVICE_DIMENSION_KEY);
+        final String cluster = metricTags.get(Key.CLUSTER_DIMENSION_KEY);
         try {
             final List<CollectdRecord> records = OBJECT_MAPPER.readValue(request.getBody(), COLLECTD_RECORD_LIST);
             final List<Record> parsedRecords = Lists.newArrayList();
             for (final CollectdRecord record : records) {
                 final DefaultRecord.Builder builder = new DefaultRecord.Builder();
                 final Multimap<String, Metric> metrics = HashMultimap.create();
+
+                metricTags.put(Key.HOST_DIMENSION_KEY, record.getHost());
                 builder.setHost(record.getHost())
                         .setId(UUID.randomUUID().toString())
                         .setTime(record.getTime())
@@ -111,7 +115,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                 parsedRecords.add(builder.build());
             }
             return parsedRecords;
-        } catch (final IOException ex) {
+        } catch (final IOException | ConstraintsViolatedException ex) {
             throw new ParsingException("Error parsing collectd json", request.getBody(), ex);
         }
     }
@@ -124,13 +128,13 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             final String dsName) {
         final StringBuilder builder = new StringBuilder();
         builder.append(plugin);
-        if (pluginInstance != null && pluginInstance.length() > 0) {
+        if (!Strings.isNullOrEmpty(pluginInstance)) {
             builder.append("/");
             builder.append(pluginInstance);
         }
         builder.append("/");
         builder.append(type);
-        if (typeInstance != null && typeInstance.length() > 0) {
+        if (!Strings.isNullOrEmpty(typeInstance)) {
             builder.append("/");
             builder.append(typeInstance);
         }
@@ -167,7 +171,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             return firstMetric;
         } else {
             final List<Quantity> quantities = Lists.newArrayList();
-            for (Metric metric : metrics) {
+            for (final Metric metric : metrics) {
                 quantities.addAll(metric.getValues());
             }
             return new DefaultMetric.Builder()
@@ -179,6 +183,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.createInstance();
     private static final TypeReference<List<CollectdRecord>> COLLECTD_RECORD_LIST = new TypeReference<List<CollectdRecord>>() {};
+    private static final String TAG_PREFIX = "x-tag-";
 
     static {
         OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);

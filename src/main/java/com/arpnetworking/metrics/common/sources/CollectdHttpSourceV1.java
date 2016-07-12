@@ -50,9 +50,7 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.sf.oval.constraint.NotNull;
-import net.sf.oval.exception.ConstraintsViolatedException;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -63,7 +61,7 @@ import java.util.concurrent.CompletionStage;
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
-public class CollectdHttpSourceV1 extends ActorSource {
+public final class CollectdHttpSourceV1 extends ActorSource {
     /**
      * {@inheritDoc}
      */
@@ -119,9 +117,7 @@ public class CollectdHttpSourceV1 extends ActorSource {
                                         .setMessage("Error handling collectd post")
                                         .setThrowable(err)
                                         .log();
-                                if ((err instanceof IOException && err.getCause() instanceof ParsingException)
-                                        || err instanceof ConstraintsViolatedException
-                                        || err instanceof ParsingException) {
+                                if (err instanceof ParsingException) {
                                     responseFuture.complete(HttpResponse.create().withStatus(400));
                                 } else {
                                     responseFuture.complete(HttpResponse.create().withStatus(500));

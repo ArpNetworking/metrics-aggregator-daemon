@@ -23,14 +23,11 @@ import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.http.RequestReply;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
-import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.test.TestBeanFactory;
-import com.arpnetworking.utility.test.MockitoSupplierAnswer;
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,18 +85,6 @@ public final class CollectdHttpSourceV1Test extends BaseActorSourceTest {
     @Test
     public void test400OnBadData() throws ParsingException, ExecutionException {
         Mockito.when(_parser.parse(Mockito.any())).thenThrow(new ParsingException("test exception", new byte[0]));
-        final HttpResponse response = dispatchRequest();
-        Assert.assertEquals(400, response.status().intValue());
-    }
-
-    @Test
-    public void test400OnMissingTags() throws ParsingException, ExecutionException, InterruptedException {
-        final DefaultRecord.Builder builder = new DefaultRecord.Builder()
-                .setHost("fake-host")
-                .setTime(DateTime.now())
-                .setId("id")
-                .setMetrics(Collections.emptyMap());
-        Mockito.when(_parser.parse(Mockito.any())).thenAnswer(MockitoSupplierAnswer.create(builder::build));
         final HttpResponse response = dispatchRequest();
         Assert.assertEquals(400, response.status().intValue());
     }

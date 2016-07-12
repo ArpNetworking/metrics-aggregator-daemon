@@ -45,5 +45,6 @@ public final class HttpRequest {
     }
 
     private final Multimap<String, String> _headers;
+    // TODO(barp): change this into a List or similar struture to ensure no modifications
     private final byte[] _body;
 }

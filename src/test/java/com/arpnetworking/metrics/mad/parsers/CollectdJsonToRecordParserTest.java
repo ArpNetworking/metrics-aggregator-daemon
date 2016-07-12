@@ -40,9 +40,10 @@ import java.util.Map;
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
 public class CollectdJsonToRecordParserTest {
+
     @Test
     public void testParse() throws ParsingException, IOException {
-        final List<Record> records = parseFile("CollectdJsonParserTest/testParse.json");
+        final List<Record> records = parseFile("CollectdJsonParserTest/testParse.json", DEFAULT_HEADERS);
 
         Assert.assertEquals(18, records.size());
         final Record record = records.get(0);
@@ -101,16 +102,25 @@ public class CollectdJsonToRecordParserTest {
     }
 
     @Test(expected = ParsingException.class)
-    public void testParseInvalid() throws ParsingException, IOException {
-        parseFile("CollectdJsonParserTest/testParseInvalid.json");
+    public void testParseNoHeaders() throws ParsingException, IOException {
+        final ImmutableMultimap<String, String> headers = ImmutableMultimap.<String, String>builder().build();
+        parseFile("CollectdJsonParserTest/testParse.json", headers);
     }
 
-    private static List<Record> parseFile(final String fileName) throws IOException, ParsingException {
+    @Test(expected = ParsingException.class)
+    public void testParseInvalid() throws ParsingException, IOException {
+        parseFile("CollectdJsonParserTest/testParseInvalid.json", DEFAULT_HEADERS);
+    }
+
+    private static List<Record> parseFile(final String fileName, final Multimap<String, String> headers)
+            throws IOException, ParsingException {
         final byte[] body = Resources.toByteArray(Resources.getResource(CollectdJsonToRecordParser.class, fileName));
-        final Multimap<String, String> headers = ImmutableMultimap.<String, String>builder()
-                .put("x-tag-service", "MyService")
-                .put("x-tag-Cluster", "MyCluster")
-                .build();
         return new CollectdJsonToRecordParser().parse(new HttpRequest(headers, body));
     }
+
+    private static final ImmutableMultimap<String, String> DEFAULT_HEADERS = ImmutableMultimap.<String, String>builder()
+            .put("x-tag-service", "MyService")
+            .put("x-tag-Cluster", "MyCluster")
+            .build();
+
 }
