@@ -495,14 +495,6 @@ public final class Version2fSteno {
             return _end;
         }
 
-        public String getCluster() {
-            return _cluster;
-        }
-
-        public String getService() {
-            return _service;
-        }
-
         public Map<String, String> getOtherAnnotations() {
             return _otherAnnotations;
         }
@@ -510,15 +502,11 @@ public final class Version2fSteno {
         private Annotations(final Annotations.Builder builder) {
             _start = builder._start;
             _end = builder._end;
-            _cluster = builder._cluster;
-            _service = builder._service;
             _otherAnnotations = ImmutableMap.copyOf(builder._otherAnnotations);
         }
 
         private final DateTime _start;
         private final DateTime _end;
-        private final String _cluster;
-        private final String _service;
         private final ImmutableMap<String, String> _otherAnnotations;
 
         /**
@@ -557,30 +545,6 @@ public final class Version2fSteno {
             }
 
             /**
-             * Sets the cluster field.
-             *
-             * @param value Value
-             * @return This builder
-             */
-            @JsonSetter("_cluster")
-            public Annotations.Builder setCluster(final String value) {
-                _cluster = value;
-                return this;
-            }
-
-            /**
-             * Sets the service field.
-             *
-             * @param value Value
-             * @return This builder
-             */
-            @JsonSetter("_service")
-            public Annotations.Builder setService(final String value) {
-                _service = value;
-                return this;
-            }
-
-            /**
              * Called by json deserialization to store non-member elements of
              * the json object. Stores the value in the otherAnnotations field.
              *
@@ -598,12 +562,6 @@ public final class Version2fSteno {
             private DateTime _start;
             @NotNull
             private DateTime _end;
-            @NotEmpty
-            @NotNull
-            private String _cluster;
-            @NotEmpty
-            @NotNull
-            private String _service;
             @NotNull
             private final Map<String, String> _otherAnnotations = Maps.newHashMap();
         }

@@ -415,7 +415,7 @@ public final class Version2e {
             return _finalTimestamp;
         }
 
-        public Map<String, String> getOtherAnnotations() {
+        public ImmutableMap<String, String> getOtherAnnotations() {
             return _otherAnnotations;
         }
 

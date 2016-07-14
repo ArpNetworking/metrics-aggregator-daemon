@@ -32,6 +32,7 @@ import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.NotNull;
@@ -95,7 +96,7 @@ public final class MappingSource extends BaseSource {
 
         _findAndReplace = Maps.newHashMapWithExpectedSize(builder._findAndReplace.size());
         for (final Map.Entry<String, ? extends List<String>> entry : builder._findAndReplace.entrySet()) {
-            _findAndReplace.put(Pattern.compile(entry.getKey()), ImmutableList.<String>copyOf(entry.getValue()));
+            _findAndReplace.put(Pattern.compile(entry.getKey()), ImmutableList.copyOf(entry.getValue()));
         }
 
         _source.attach(new MappingObserver(this, _findAndReplace));
@@ -149,14 +150,16 @@ public final class MappingSource extends BaseSource {
             _source.notify(
                     new DefaultRecord.Builder()
                             .setMetrics(
-                                    Maps.transformEntries(
-                                            mergedMetrics,
-                                            (key, mergingMetric) -> OvalBuilder.clone(mergingMetric, new DefaultMetric.Builder()).build()))
+                                    ImmutableMap.copyOf(
+                                            Maps.<String, MergingMetric, Metric>transformEntries(
+                                                    mergedMetrics,
+                                                    (key, mergingMetric) ->
+                                                            OvalBuilder.clone(
+                                                                    mergingMetric,
+                                                                    new DefaultMetric.Builder())
+                                                            .build())))
                             .setId(record.getId())
                             .setTime(record.getTime())
-                            .setCluster(record.getCluster())
-                            .setService(record.getService())
-                            .setHost(record.getHost())
                             .setAnnotations(record.getAnnotations())
                             .build());
         }

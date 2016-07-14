@@ -152,9 +152,9 @@ public final class Aggregator implements Observer, Launchable {
     private ImmutableMap<String, String> createDimensions(final Record record) {
         // TODO(ville): Promote user specified annotations to dimensions.
         final ImmutableMap.Builder<String, String> dimensionBuilder = ImmutableMap.builder();
-        dimensionBuilder.put(Key.HOST_DIMENSION_KEY, record.getHost());
-        dimensionBuilder.put(Key.SERVICE_DIMENSION_KEY, record.getService());
-        dimensionBuilder.put(Key.CLUSTER_DIMENSION_KEY, record.getCluster());
+        dimensionBuilder.put(Key.HOST_DIMENSION_KEY, record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
+        dimensionBuilder.put(Key.SERVICE_DIMENSION_KEY, record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
+        dimensionBuilder.put(Key.CLUSTER_DIMENSION_KEY, record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
         return dimensionBuilder.build();
     }
 

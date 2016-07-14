@@ -115,9 +115,11 @@ public class BucketTest {
         _bucket.add(
                 new DefaultRecord.Builder()
                         .setTime(START.plus(Duration.standardSeconds(10)))
-                        .setCluster("MyCluster")
-                        .setService("MyService")
-                        .setHost("MyHost")
+                        .setAnnotations(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHost",
+                                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyCluster"))
                         .setId(UUID.randomUUID().toString())
                         .setMetrics(ImmutableMap.of(
                                 "MyCounter",
@@ -233,9 +235,11 @@ public class BucketTest {
         _bucket.add(
                 new DefaultRecord.Builder()
                         .setTime(START.plus(Duration.standardSeconds(offset)))
-                        .setCluster("MyCluster")
-                        .setService("MyService")
-                        .setHost("MyHost")
+                        .setAnnotations(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHost",
+                                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyCluster"))
                         .setId(UUID.randomUUID().toString())
                         .setMetrics(ImmutableMap.of(
                                 name,
