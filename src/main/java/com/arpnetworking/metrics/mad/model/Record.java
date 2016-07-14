@@ -15,9 +15,8 @@
  */
 package com.arpnetworking.metrics.mad.model;
 
+import com.google.common.collect.ImmutableMap;
 import org.joda.time.DateTime;
-
-import java.util.Map;
 
 /**
  * The interface to a record. Records consistent of a timestamp, any number of
@@ -43,37 +42,16 @@ public interface Record {
     DateTime getTime();
 
     /**
-     * Gets the host of the record.
-     *
-     * @return the host.
-     */
-    String getHost();
-
-    /**
-     * Gets the service of the record.
-     *
-     * @return the service.
-     */
-    String getService();
-
-    /**
-     * Gets the cluster of the record.
-     *
-     * @return the cluster.
-     */
-    String getCluster();
-
-    /**
      * Gets metrics.
      *
      * @return the metrics
      */
-    Map<String, ? extends Metric> getMetrics();
+    ImmutableMap<String, ? extends Metric> getMetrics();
 
     /**
      * Gets annotations.
      *
      * @return the annotations
      */
-    Map<String, String> getAnnotations();
+    ImmutableMap<String, String> getAnnotations();
 }

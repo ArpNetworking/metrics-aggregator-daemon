@@ -18,6 +18,7 @@ package com.arpnetworking.metrics.mad.parsers;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
+import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.base.Optional;
@@ -42,9 +43,9 @@ public class JsonToRecordParserV2eTest {
     public void testParse() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2eTest/testParse.json");
         Assert.assertNotNull(record);
-        Assert.assertEquals("MyCluster", record.getCluster());
-        Assert.assertEquals("MyService", record.getService());
-        Assert.assertEquals("MyHost", record.getHost());
+        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
 
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
@@ -83,7 +84,10 @@ public class JsonToRecordParserV2eTest {
         Assert.assertNotNull(record);
 
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertTrue(record.getAnnotations().isEmpty());
+        Assert.assertEquals(3, record.getAnnotations().size());
+        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
         Assert.assertTrue(record.getMetrics().isEmpty());
     }
 
@@ -111,7 +115,10 @@ public class JsonToRecordParserV2eTest {
         Assert.assertNotNull(record);
 
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertTrue(record.getAnnotations().isEmpty());
+        Assert.assertEquals(3, record.getAnnotations().size());
+        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertEquals(3, variables.size());
@@ -135,20 +142,23 @@ public class JsonToRecordParserV2eTest {
         Assert.assertNotNull(record);
 
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertTrue(record.getAnnotations().isEmpty());
+        Assert.assertEquals(3, record.getAnnotations().size());
+        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertEquals(3, variables.size());
 
-        Assert.assertThat(variables, Matchers.<String>hasKey("t1"));
+        Assert.assertThat(variables, Matchers.hasKey("t1"));
         final Metric t1 = variables.get("t1");
         Assert.assertTrue(t1.getValues().isEmpty());
 
-        Assert.assertThat(variables, Matchers.<String>hasKey("g1"));
+        Assert.assertThat(variables, Matchers.hasKey("g1"));
         final Metric g1 = variables.get("g1");
         Assert.assertTrue(g1.getValues().isEmpty());
 
-        Assert.assertThat(variables, Matchers.<String>hasKey("c1"));
+        Assert.assertThat(variables, Matchers.hasKey("c1"));
         final Metric c1 = variables.get("c1");
         Assert.assertTrue(c1.getValues().isEmpty());
     }

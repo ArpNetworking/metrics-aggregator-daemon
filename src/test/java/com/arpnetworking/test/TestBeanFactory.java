@@ -57,15 +57,17 @@ public final class TestBeanFactory {
      */
     public static DefaultRecord.Builder createRecordBuilder() {
         return new DefaultRecord.Builder()
-                .setMetrics(Collections.singletonMap(
-                        "foo/bar",
-                        createMetric()))
+                .setMetrics(
+                        ImmutableMap.of(
+                                "foo/bar",
+                                createMetric()))
                 .setTime(new DateTime())
                 .setId(UUID.randomUUID().toString())
-                .setCluster("MyCluster")
-                .setService("MyService")
-                .setHost("MyHost")
-                .setAnnotations(Collections.<String, String>emptyMap());
+                .setAnnotations(
+                        ImmutableMap.of(
+                                Key.HOST_DIMENSION_KEY, "MyHost",
+                                Key.SERVICE_DIMENSION_KEY, "MyService",
+                                Key.CLUSTER_DIMENSION_KEY, "MyCluster"));
     }
 
     /**

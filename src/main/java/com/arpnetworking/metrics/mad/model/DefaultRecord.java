@@ -17,17 +17,16 @@ package com.arpnetworking.metrics.mad.model;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
+import com.arpnetworking.tsdcore.model.Key;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-
+import net.sf.oval.constraint.ValidateWithMethod;
 import org.joda.time.DateTime;
-
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * Default implementation of the <code>Record</code> interface.
@@ -58,31 +57,7 @@ public final class DefaultRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public String getHost() {
-        return _host;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getService() {
-        return _service;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getCluster() {
-        return _cluster;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, ? extends Metric> getMetrics() {
+    public ImmutableMap<String, ? extends Metric> getMetrics() {
         return _metrics;
     }
 
@@ -90,7 +65,7 @@ public final class DefaultRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, String> getAnnotations() {
+    public ImmutableMap<String, String> getAnnotations() {
         return _annotations;
     }
 
@@ -129,9 +104,6 @@ public final class DefaultRecord implements Record {
                 .add("Metrics", _metrics)
                 .add("Id", _id)
                 .add("Time", _time)
-                .add("Host", _host)
-                .add("Service", _service)
-                .add("Cluster", _cluster)
                 .add("Annotations", _annotations)
                 .toString();
     }
@@ -139,21 +111,15 @@ public final class DefaultRecord implements Record {
     // NOTE: Invoked through reflection by OvalBuilder
     @SuppressWarnings("unused")
     private DefaultRecord(final Builder builder) {
-        _metrics = ImmutableMap.copyOf(builder._metrics);
+        _metrics = builder._metrics;
         _id = builder._id;
         _time = builder._time;
-        _host = builder._host;
-        _service = builder._service;
-        _cluster = builder._cluster;
-        _annotations = ImmutableMap.copyOf(builder._annotations);
+        _annotations = builder._annotations;
     }
 
     private final ImmutableMap<String, ? extends Metric> _metrics;
     private final String _id;
     private final DateTime _time;
-    private final String _host;
-    private final String _service;
-    private final String _cluster;
     private final ImmutableMap<String, String> _annotations;
 
     /**
@@ -171,12 +137,12 @@ public final class DefaultRecord implements Record {
         }
 
         /**
-         * The named metrics <code>Map</code>. Cannot be null.
+         * The named metrics <code>ImmutableMap</code>. Cannot be null.
          *
-         * @param value The named metrics <code>Map</code>.
+         * @param value The named metrics <code>ImmutableMap</code>.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setMetrics(final Map<String, ? extends Metric> value) {
+        public Builder setMetrics(final ImmutableMap<String, ? extends Metric> value) {
             _metrics = value;
             return this;
         }
@@ -204,67 +170,41 @@ public final class DefaultRecord implements Record {
         }
 
         /**
-         * The host of the record. Cannot be null or empty.
+         * The annotations <code>ImmutableMap</code>. Optional. Default is an empty
+         * <code>ImmutableMap</code>. Cannot be null.
          *
-         * @param value The host.
+         * @param value The annotations <code>ImmutableMap</code>.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setHost(final String value) {
-            _host = value;
-            return this;
-        }
-
-        /**
-         * The service of the record. Cannot be null or empty.
-         *
-         * @param value The service.
-         * @return This instance of <code>Builder</code>.
-         */
-        public Builder setService(final String value) {
-            _service = value;
-            return this;
-        }
-
-        /**
-         * The cluster of the record. Cannot be null or empty.
-         *
-         * @param value The cluster.
-         * @return This instance of <code>Builder</code>.
-         */
-        public Builder setCluster(final String value) {
-            _cluster = value;
-            return this;
-        }
-
-        /**
-         * The annotations <code>Map</code>. Optional. Default is an empty
-         * <code>Map</code>. Cannot be null.
-         *
-         * @param value The annotations <code>Map</code>.
-         * @return This instance of <code>Builder</code>.
-         */
-        public Builder setAnnotations(final Map<String, String> value) {
+        public Builder setAnnotations(final ImmutableMap<String, String> value) {
             _annotations = value;
             return this;
         }
 
+        // Called by OVal reflectively
+        @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
+        private boolean validateAnnotations(final ImmutableMap<String, String> annotations) {
+            if (Strings.isNullOrEmpty(annotations.get(Key.HOST_DIMENSION_KEY))) {
+                return false;
+            }
+            if (Strings.isNullOrEmpty(annotations.get(Key.SERVICE_DIMENSION_KEY))) {
+                return false;
+            }
+            if (Strings.isNullOrEmpty(annotations.get(Key.CLUSTER_DIMENSION_KEY))) {
+                return false;
+            }
+            return true;
+        }
+
         @NotNull
-        private Map<String, ? extends Metric> _metrics;
+        private ImmutableMap<String, ? extends Metric> _metrics;
         @NotNull
         @NotEmpty
         private String _id;
         @NotNull
         private DateTime _time;
         @NotNull
-        @NotEmpty
-        private String _host;
-        @NotNull
-        @NotEmpty
-        private String _service;
-        @NotNull
-        @NotEmpty
-        private String _cluster;
-        @NotNull
-        private Map<String, String> _annotations = Collections.emptyMap();
+        @ValidateWithMethod(methodName = "validateAnnotations", parameterType = ImmutableMap.class)
+        private ImmutableMap<String, String> _annotations = ImmutableMap.of();
     }
 }

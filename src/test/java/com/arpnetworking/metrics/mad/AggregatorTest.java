@@ -83,7 +83,7 @@ public class AggregatorTest {
         _aggregator.notify(
                 null,
                 new DefaultRecord.Builder()
-                        .setMetrics(Collections.singletonMap(
+                        .setMetrics(ImmutableMap.of(
                                 "MyMetric",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.GAUGE)
@@ -92,9 +92,11 @@ public class AggregatorTest {
                                         .build()))
                         .setTime(dataTimeInThePast)
                         .setId(UUID.randomUUID().toString())
-                        .setCluster("MyCluster")
-                        .setService("MyService")
-                        .setHost("MyHost")
+                        .setAnnotations(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHost",
+                                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyCluster"))
                         .build());
 
         // Wait for the period to close
@@ -132,7 +134,11 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setCluster("MyClusterA")
+                        .setAnnotations(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHost",
+                                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyClusterA"))
                         .setMetrics(ImmutableMap.of(
                                 "MyCounter",
                                 new DefaultMetric.Builder()
@@ -145,7 +151,11 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setCluster("MyClusterB")
+                        .setAnnotations(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHost",
+                                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyClusterB"))
                         .setMetrics(ImmutableMap.of(
                                 "MyCounter",
                                 new DefaultMetric.Builder()
@@ -204,7 +214,11 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setService("MyServiceA")
+                        .setAnnotations(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHost",
+                                        Key.SERVICE_DIMENSION_KEY, "MyServiceA",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyCluster"))
                         .setMetrics(ImmutableMap.of(
                                 "MyCounter",
                                 new DefaultMetric.Builder()
@@ -217,7 +231,11 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setService("MyServiceB")
+                        .setAnnotations(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHost",
+                                        Key.SERVICE_DIMENSION_KEY, "MyServiceB",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyCluster"))
                         .setMetrics(ImmutableMap.of(
                                 "MyCounter",
                                 new DefaultMetric.Builder()
@@ -276,7 +294,11 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setHost("MyHostA")
+                        .setAnnotations(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHostA",
+                                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyCluster"))
                         .setMetrics(ImmutableMap.of(
                                 "MyCounter",
                                 new DefaultMetric.Builder()
@@ -289,7 +311,11 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setHost("MyHostB")
+                        .setAnnotations(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHostB",
+                                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyCluster"))
                         .setMetrics(ImmutableMap.of(
                                 "MyCounter",
                                 new DefaultMetric.Builder()

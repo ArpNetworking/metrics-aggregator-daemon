@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -75,22 +76,17 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                 metricTags.put(header.getKey().toLowerCase(Locale.ENGLISH).substring(TAG_PREFIX.length()), header.getValue());
             }
         }
-        final String service = metricTags.get(Key.SERVICE_DIMENSION_KEY);
-        final String cluster = metricTags.get(Key.CLUSTER_DIMENSION_KEY);
         try {
             final List<CollectdRecord> records = OBJECT_MAPPER.readValue(request.getBody(), COLLECTD_RECORD_LIST);
             final List<Record> parsedRecords = Lists.newArrayList();
             for (final CollectdRecord record : records) {
-                final DefaultRecord.Builder builder = new DefaultRecord.Builder();
                 final Multimap<String, Metric> metrics = HashMultimap.create();
 
                 metricTags.put(Key.HOST_DIMENSION_KEY, record.getHost());
-                builder.setHost(record.getHost())
+                final DefaultRecord.Builder builder = new DefaultRecord.Builder()
                         .setId(UUID.randomUUID().toString())
                         .setTime(record.getTime())
-                        .setAnnotations(metricTags)
-                        .setCluster(cluster)
-                        .setService(service);
+                        .setAnnotations(ImmutableMap.copyOf(metricTags));
 
                 final String plugin = record.getPlugin();
                 final String pluginInstance = record.getPluginInstance();
@@ -111,7 +107,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                         .entrySet()
                         .stream()
                         .collect(Collectors.toMap(Map.Entry::getKey, CollectdJsonToRecordParser::mergeMetrics));
-                builder.setMetrics(collectedMetrics);
+                builder.setMetrics(ImmutableMap.copyOf(collectedMetrics));
                 parsedRecords.add(builder.build());
             }
             return parsedRecords;
