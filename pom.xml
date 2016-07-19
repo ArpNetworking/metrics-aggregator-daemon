@@ -113,6 +113,8 @@
     <!-- Additional Plugins -->
     <aspectjtools.maven.plugin>1.8.9</aspectjtools.maven.plugin>
     <aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
+    <docker.maven.plugin.version>0.15.9</docker.maven.plugin.version>
+    <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
     <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
 
     <!-- Findbugs -->
@@ -122,6 +124,9 @@
     <jacoco.check.line.coverage>0.50</jacoco.check.line.coverage>
     <jacoco.check.branch.coverage>0.50</jacoco.check.branch.coverage>
 
+    <!-- JVM Debug -->
+    <debugJavaOptions/>
+    <debugJavaPort>9000</debugJavaPort>
   </properties>
   <build>
     <resources>
@@ -155,6 +160,19 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <systemPropertyVariables>
+            <dockerHostAddress>${docker.host.address}</dockerHostAddress>
+          </systemPropertyVariables>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -196,6 +214,29 @@
         </configuration>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>${maven.assembly.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>docker-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <appendAssemblyId>false</appendAssemblyId>
+              <finalName>docker-assembly</finalName>
+              <attach>false</attach>
+              <tarLongFileMode>posix</tarLongFileMode>
+              <descriptors>
+                <descripto>src/main/assembly/docker.xml</descripto>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>aspectj-maven-plugin</artifactId>
         <version>${aspectj.maven.plugin.version}</version>
@@ -227,8 +268,88 @@
           </dependency>
         </dependencies>
       </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>${docker.maven.plugin.version}</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <id>build</id>
+            <phase>package</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>pre-build-remove</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>remove</goal>
+            </goals>
+            <configuration>
+              <removeAll>true</removeAll>
+            </configuration>
+          </execution>
+          <execution>
+            <id>start</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>stop</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <showLogs>true</showLogs>
+          <images>
+            <image>
+              <name>arpnetworking/mad:${project.version}</name>
+              <build>
+                <dockerFile>${project.build.directory}/docker-assembly/Dockerfile</dockerFile>
+              </build>
+              <run>
+                <env>
+                  <ADDITIONAL_JAVA_OPTS>${debugJavaOptions}</ADDITIONAL_JAVA_OPTS>
+                </env>
+                <ports>
+                  <port>${debugJavaPort}:${debugJavaPort}</port>
+                  <port>7090:7090</port>
+                </ports>
+                <volumes>
+                  <bind>
+                    <volume>${project.basedir}/logs/docker:/opt/mad/logs</volume>
+                  </bind>
+                </volumes>
+                <wait>
+                  <!--
+                  BLOCKED BY: https://github.com/fabric8io/docker-maven-plugin/issues/430
+                  <tcp>
+                    <host>localhost</host>
+                    <ports>
+                      <port>7090</port>
+                    </ports>
+                    <mode>direct</mode>
+                  </tcp>
+                  -->
+                  <!-- NOTE: The service is _really_ slow to start-up under native docker -->
+                  <time>150000</time>
+                  <kill>1000</kill>
+                </wait>
+              </run>
+            </image>
+          </images>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+
   <dependencies>
     <!-- Logging -->
     <dependency>
@@ -605,6 +726,19 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>debug</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>debug</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <properties>
+        <debugJavaOptions>-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=${debugJavaPort},suspend=n</debugJavaOptions>
+      </properties>
     </profile>
   </profiles>
 </project>

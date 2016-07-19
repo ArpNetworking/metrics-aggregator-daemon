@@ -3,6 +3,8 @@ cache:
   - "$HOME/.m2"
   - "$HOME/.jdk"
 sudo: false
+services:
+  - docker
 addons:
   apt:
     packages:
