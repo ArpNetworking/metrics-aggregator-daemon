@@ -32,6 +32,7 @@ import com.arpnetworking.metrics.mad.model.json.Version2f;
 import com.arpnetworking.metrics.mad.model.json.Version2fSteno;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
@@ -46,13 +47,13 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import net.sf.oval.exception.ConstraintsViolatedException;
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -61,6 +62,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of <code>Parser</code> for the JSON metrics formats. The
@@ -117,7 +119,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 default:
                     throw new ParsingException(String.format("Unsupported version; version=%s", version), data);
             }
-        } catch (final JsonProcessingException e) {
+        } catch (final JsonProcessingException | ConstraintsViolatedException e) {
             throw new ParsingException("Error parsing record", data, e);
         }
     }
@@ -130,19 +132,32 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         final Version2c.Annotations annotations = model.getAnnotations();
         final DateTime timestamp = getTimestampFor2c(annotations);
 
-        final Map<String, Metric> variables = Maps.newHashMap();
+        final ImmutableMap.Builder<String, Metric> variables = ImmutableMap.builder();
         putVariablesVersion2c(model.getTimers(), MetricType.TIMER, variables);
         putVariablesVersion2c(model.getCounters(), MetricType.COUNTER, variables);
         putVariablesVersion2c(model.getGauges(), MetricType.GAUGE, variables);
 
+        // NOTE: We are injecting context into annotations.
+        // The injected annotations will overwrite any specified by the user.
+        final ImmutableMap.Builder<String, String> mappedAnnotations = ImmutableMap.builder();
+        mappedAnnotations.put(Key.HOST_DIMENSION_KEY, _defaultHost);
+        mappedAnnotations.put(Key.SERVICE_DIMENSION_KEY, _defaultService);
+        mappedAnnotations.put(Key.CLUSTER_DIMENSION_KEY, _defaultCluster);
+        for (final Map.Entry<String, String> entry : annotations.getOtherAnnotations().entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if (!Key.HOST_DIMENSION_KEY.equals(key)
+                    && !Key.SERVICE_DIMENSION_KEY.endsWith(key)
+                    && !Key.CLUSTER_DIMENSION_KEY.endsWith(key)) {
+                mappedAnnotations.put(key, value);
+            }
+        }
+
         return new DefaultRecord.Builder()
-                .setMetrics(variables)
+                .setMetrics(variables.build())
                 .setId(UUID.randomUUID().toString())
                 .setTime(timestamp)
-                .setHost(_defaultHost)
-                .setService(_defaultService)
-                .setCluster(_defaultCluster)
-                .setAnnotations(annotations.getOtherAnnotations())
+                .setAnnotations(mappedAnnotations.build())
                 .build();
     }
 
@@ -154,19 +169,32 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         final Version2d.Annotations annotations = model.getAnnotations();
         final DateTime timestamp = annotations.getFinalTimestamp();
 
-        final Map<String, Metric> variables = Maps.newHashMap();
+        final ImmutableMap.Builder<String, Metric> variables = ImmutableMap.builder();
         putVariablesVersion2d(model.getTimers(), MetricType.TIMER, variables);
         putVariablesVersion2d(model.getCounters(), MetricType.COUNTER, variables);
         putVariablesVersion2d(model.getGauges(), MetricType.GAUGE, variables);
 
+        // NOTE: We are injecting context into annotations.
+        // The injected annotations will overwrite any specified by the user.
+        final ImmutableMap.Builder<String, String> mappedAnnotations = ImmutableMap.builder();
+        mappedAnnotations.put(Key.HOST_DIMENSION_KEY, _defaultHost);
+        mappedAnnotations.put(Key.SERVICE_DIMENSION_KEY, _defaultService);
+        mappedAnnotations.put(Key.CLUSTER_DIMENSION_KEY, _defaultCluster);
+        for (final Map.Entry<String, String> entry : annotations.getOtherAnnotations().entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if (!Key.HOST_DIMENSION_KEY.equals(key)
+                    && !Key.SERVICE_DIMENSION_KEY.endsWith(key)
+                    && !Key.CLUSTER_DIMENSION_KEY.endsWith(key)) {
+                mappedAnnotations.put(key, value);
+            }
+        }
+
         return new DefaultRecord.Builder()
-                .setMetrics(variables)
+                .setMetrics(variables.build())
                 .setId(UUID.randomUUID().toString())
                 .setTime(timestamp)
-                .setHost(_defaultHost)
-                .setService(_defaultService)
-                .setCluster(_defaultCluster)
-                .setAnnotations(annotations.getOtherAnnotations())
+                .setAnnotations(mappedAnnotations.build())
                 .build();
     }
 
@@ -179,19 +207,32 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         final Version2e.Annotations annotations = data.getAnnotations();
         final DateTime timestamp = annotations.getFinalTimestamp();
 
-        final Map<String, Metric> variables = Maps.newHashMap();
+        final ImmutableMap.Builder<String, Metric> variables = ImmutableMap.builder();
         putVariablesVersion2e(data.getTimers(), MetricType.TIMER, variables);
         putVariablesVersion2e(data.getCounters(), MetricType.COUNTER, variables);
         putVariablesVersion2e(data.getGauges(), MetricType.GAUGE, variables);
 
+        // NOTE: We are injecting context into annotations.
+        // The injected annotations will overwrite any specified by the user.
+        final ImmutableMap.Builder<String, String> mappedAnnotations = ImmutableMap.builder();
+        mappedAnnotations.put(Key.HOST_DIMENSION_KEY, _defaultHost);
+        mappedAnnotations.put(Key.SERVICE_DIMENSION_KEY, _defaultService);
+        mappedAnnotations.put(Key.CLUSTER_DIMENSION_KEY, _defaultCluster);
+        for (final Map.Entry<String, String> entry : annotations.getOtherAnnotations().entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if (!Key.HOST_DIMENSION_KEY.equals(key)
+                    && !Key.SERVICE_DIMENSION_KEY.endsWith(key)
+                    && !Key.CLUSTER_DIMENSION_KEY.endsWith(key)) {
+                mappedAnnotations.put(key, value);
+            }
+        }
+
         return new DefaultRecord.Builder()
-                .setMetrics(variables)
+                .setMetrics(variables.build())
                 .setId(UUID.randomUUID().toString())
                 .setTime(timestamp)
-                .setHost(_defaultHost)
-                .setService(_defaultService)
-                .setCluster(_defaultCluster)
-                .setAnnotations(annotations.getOtherAnnotations())
+                .setAnnotations(mappedAnnotations.build())
                 .build();
     }
 
@@ -201,20 +242,36 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
         final Version2f model = OBJECT_MAPPER.treeToValue(jsonNode, Version2f.class);
         final Version2f.Annotations annotations = model.getAnnotations();
-        final Map<String, Metric> variables = Maps.newHashMap();
+        final ImmutableMap.Builder<String, Metric> variables = ImmutableMap.builder();
 
         putVariablesVersion2f(model.getTimers(), MetricType.TIMER, variables);
         putVariablesVersion2f(model.getCounters(), MetricType.COUNTER, variables);
         putVariablesVersion2f(model.getGauges(), MetricType.GAUGE, variables);
 
+        // NOTE: We are mapping from the underscore prefixed annotations to non-prefixed ones.
+        // The prefixed annotations will overwrite the non-prefixed ones.
+        final ImmutableMap.Builder<String, String> mappedAnnotations = ImmutableMap.builder();
+        for (final Map.Entry<String, String> entry : annotations.getOtherAnnotations().entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if (PREFIXED_HOST_KEY.equals(key)) {
+                mappedAnnotations.put(Key.HOST_DIMENSION_KEY, value);
+            } else if (PREFIXED_SERVICE_KEY.endsWith(key)) {
+                mappedAnnotations.put(Key.SERVICE_DIMENSION_KEY, value);
+            } else if (PREFIXED_CLUSTER_KEY.endsWith(key)) {
+                mappedAnnotations.put(Key.CLUSTER_DIMENSION_KEY, value);
+            } else if (!Key.HOST_DIMENSION_KEY.equals(key)
+                    && !Key.SERVICE_DIMENSION_KEY.endsWith(key)
+                    && !Key.CLUSTER_DIMENSION_KEY.endsWith(key)) {
+                mappedAnnotations.put(key, value);
+            }
+        }
+
         return new DefaultRecord.Builder()
-                .setMetrics(variables)
+                .setMetrics(variables.build())
                 .setTime(annotations.getEnd())
                 .setId(annotations.getId())
-                .setHost(annotations.getHost())
-                .setService(annotations.getService())
-                .setCluster(annotations.getCluster())
-                .setAnnotations(annotations.getOtherAnnotations())
+                .setAnnotations(mappedAnnotations.build())
                 .build();
     }
 
@@ -227,32 +284,51 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         final Version2fSteno.Context context = model.getContext();
         final Version2fSteno.Annotations annotations = data.getAnnotations();
 
-        final Map<String, Metric> variables = Maps.newHashMap();
+        final ImmutableMap.Builder<String, Metric> variables = ImmutableMap.builder();
         putVariablesVersion2fSteno(data.getTimers(), MetricType.TIMER, variables);
         putVariablesVersion2fSteno(data.getCounters(), MetricType.COUNTER, variables);
         putVariablesVersion2fSteno(data.getGauges(), MetricType.GAUGE, variables);
 
+        // NOTE: We are mapping from the underscore prefixed annotations to non-prefixed ones.
+        // The prefixed annotations will overwrite the non-prefixed ones.
+        final ImmutableMap.Builder<String, String> mappedAnnotations = ImmutableMap.builder();
+        mappedAnnotations.put(Key.HOST_DIMENSION_KEY, context.getHost());
+        for (final Map.Entry<String, String> entry : annotations.getOtherAnnotations().entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if (PREFIXED_SERVICE_KEY.endsWith(key)) {
+                mappedAnnotations.put(Key.SERVICE_DIMENSION_KEY, value);
+            } else if (PREFIXED_CLUSTER_KEY.endsWith(key)) {
+                mappedAnnotations.put(Key.CLUSTER_DIMENSION_KEY, value);
+            } else if (!Key.HOST_DIMENSION_KEY.equals(key)
+                    && !Key.SERVICE_DIMENSION_KEY.endsWith(key)
+                    && !Key.CLUSTER_DIMENSION_KEY.endsWith(key)) {
+                mappedAnnotations.put(key, value);
+            }
+        }
+
         return new DefaultRecord.Builder()
-                .setMetrics(variables)
+                .setMetrics(variables.build())
                 .setTime(annotations.getEnd())
                 .setId(model.getId())
-                .setHost(context.getHost())
-                .setService(annotations.getService())
-                .setCluster(annotations.getCluster())
-                .setAnnotations(annotations.getOtherAnnotations())
+                .setAnnotations(mappedAnnotations.build())
                 .build();
     }
 
     private static void putVariablesVersion2c(
             final Map<String, List<String>> elements,
             final MetricType metricKind,
-            final Map<String, Metric> variables) {
+            final ImmutableMap.Builder<String, Metric> variables) {
 
         for (final Map.Entry<String, List<String>> entry : elements.entrySet()) {
             final List<String> element = entry.getValue();
-            final List<Quantity> quantities = Lists.newArrayList(Iterables.filter(
-                    Lists.transform(element, VERSION_2C_SAMPLE_TO_QUANTITY),
-                    Predicates.notNull()));
+            final List<Quantity> quantities = Lists.newArrayList(
+                    Lists.transform(
+                            element,
+                            VERSION_2C_SAMPLE_TO_QUANTITY)
+                    .stream()
+                    .filter(Predicates.notNull()::apply)
+                    .collect(Collectors.toList()));
             variables.put(
                     entry.getKey(),
                     new DefaultMetric.Builder()
@@ -265,13 +341,17 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static void putVariablesVersion2d(
             final Map<String, Version2d.Element> elements,
             final MetricType metricKind,
-            final Map<String, Metric> variables) {
+            final ImmutableMap.Builder<String, Metric> variables) {
 
         for (final Map.Entry<String, Version2d.Element> entry : elements.entrySet()) {
             final Version2d.Element element = entry.getValue();
-            final List<Quantity> quantities = Lists.newArrayList(Iterables.filter(
-                    Lists.transform(element.getValues(), VERSION_2D_SAMPLE_TO_QUANTITY),
-                    Predicates.notNull()));
+            final List<Quantity> quantities = Lists.newArrayList(
+                    Lists.transform(
+                            element.getValues(),
+                            VERSION_2D_SAMPLE_TO_QUANTITY)
+                    .stream()
+                    .filter(Predicates.notNull()::apply)
+                    .collect(Collectors.toList()));
             variables.put(
                     entry.getKey(),
                     new DefaultMetric.Builder()
@@ -284,13 +364,17 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static void putVariablesVersion2e(
             final Map<String, Version2e.Element> elements,
             final MetricType metricKind,
-            final Map<String, Metric> variables) {
+            final ImmutableMap.Builder<String, Metric> variables) {
 
         for (final Map.Entry<String, Version2e.Element> entry : elements.entrySet()) {
             final Version2e.Element element = entry.getValue();
-            final List<Quantity> quantities = Lists.newArrayList(Iterables.filter(
-                    Lists.transform(element.getValues(), VERSION_2E_SAMPLE_TO_QUANTITY),
-                    Predicates.notNull()));
+            final List<Quantity> quantities = Lists.newArrayList(
+                    Lists.transform(
+                            element.getValues(),
+                            VERSION_2E_SAMPLE_TO_QUANTITY)
+                    .stream()
+                    .filter(Predicates.notNull()::apply)
+                    .collect(Collectors.toList()));
             variables.put(
                     entry.getKey(),
                     new DefaultMetric.Builder()
@@ -303,13 +387,17 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static void putVariablesVersion2f(
             final Map<String, Version2f.Element> elements,
             final MetricType metricKind,
-            final Map<String, Metric> variables) {
+            final ImmutableMap.Builder<String, Metric> variables) {
 
         for (final Map.Entry<String, Version2f.Element> entry : elements.entrySet()) {
             final Version2f.Element element = entry.getValue();
-            final List<Quantity> quantities = Lists.newArrayList(Iterables.filter(
-                    Lists.transform(element.getValues(), VERSION_2F_SAMPLE_TO_QUANTITY),
-                    Predicates.notNull()));
+            final List<Quantity> quantities = Lists.newArrayList(
+                    Lists.transform(
+                            element.getValues(),
+                            VERSION_2F_SAMPLE_TO_QUANTITY)
+                    .stream()
+                    .filter(Predicates.notNull()::apply)
+                    .collect(Collectors.toList()));
             variables.put(
                     entry.getKey(),
                     new DefaultMetric.Builder()
@@ -322,13 +410,17 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static void putVariablesVersion2fSteno(
             final Map<String, Version2fSteno.Element> elements,
             final MetricType metricKind,
-            final Map<String, Metric> variables) {
+            final ImmutableMap.Builder<String, Metric> variables) {
 
         for (final Map.Entry<String, Version2fSteno.Element> entry : elements.entrySet()) {
             final Version2fSteno.Element element = entry.getValue();
-            final List<Quantity> quantities = Lists.newArrayList(Iterables.filter(
-                    Lists.transform(element.getValues(), VERSION_2F_STENO_SAMPLE_TO_QUANTITY),
-                    Predicates.notNull()));
+            final List<Quantity> quantities = Lists.newArrayList(
+                    Lists.transform(
+                            element.getValues(),
+                            VERSION_2F_STENO_SAMPLE_TO_QUANTITY)
+                    .stream()
+                    .filter(Predicates.notNull()::apply)
+                    .collect(Collectors.toList()));
             variables.put(
                     entry.getKey(),
                     new DefaultMetric.Builder()
@@ -358,7 +450,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 // Ignore.
             }
         }
-        throw new JsonMappingException((Closeable) null, "No timestamp found in annotations");
+        throw new JsonMappingException(null, "No timestamp found in annotations");
     }
 
     private static DateTime timestampToDateTime(final double seconds) {
@@ -493,6 +585,10 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
             return null;
         }
     };
+
+    private static final String PREFIXED_HOST_KEY = "_host";
+    private static final String PREFIXED_SERVICE_KEY = "_service";
+    private static final String PREFIXED_CLUSTER_KEY = "_cluster";
 
     static {
         final SimpleModule queryLogParserModule = new SimpleModule("QueryLogParser");

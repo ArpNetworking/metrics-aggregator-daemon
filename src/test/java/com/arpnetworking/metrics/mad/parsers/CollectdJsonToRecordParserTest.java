@@ -19,6 +19,7 @@ import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
+import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.ImmutableMultimap;
@@ -47,9 +48,9 @@ public class CollectdJsonToRecordParserTest {
 
         Assert.assertEquals(18, records.size());
         final Record record = records.get(0);
-        Assert.assertEquals("host.example.com", record.getHost());
-        Assert.assertEquals("MyService", record.getService());
-        Assert.assertEquals("MyCluster", record.getCluster());
+        Assert.assertEquals("host.example.com", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
         verifyMetric(records,
                 DateTime.parse("2016-03-31T23:14:46.740Z"),
                 "cpu/0/cpu/wait",

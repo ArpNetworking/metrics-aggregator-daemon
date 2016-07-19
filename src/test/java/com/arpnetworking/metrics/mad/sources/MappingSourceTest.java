@@ -133,7 +133,6 @@ public class MappingSourceTest {
     @Test
     public void testMergeTwoGauges() {
         final Record matchingRecord = TestBeanFactory.createRecordBuilder()
-                .setAnnotations(Collections.singletonMap("key", "value"))
                 .setMetrics(ImmutableMap.of(
                         "foo/1/bar",
                         TestBeanFactory.createMetricBuilder()
@@ -242,7 +241,6 @@ public class MappingSourceTest {
     @Test
     public void testReplaceWithCapture() {
         final Record matchingRecord = TestBeanFactory.createRecordBuilder()
-                .setAnnotations(Collections.singletonMap("key", "value"))
                 .setMetrics(ImmutableMap.of(
                         "cat/sheep/dog",
                         TestBeanFactory.createMetricBuilder()
@@ -285,7 +283,6 @@ public class MappingSourceTest {
     @Test
     public void testMultipleMatches() {
         final Record matchingRecord = TestBeanFactory.createRecordBuilder()
-                .setAnnotations(Collections.singletonMap("key", "value"))
                 .setMetrics(ImmutableMap.of(
                         "cat/bear/dog",
                         TestBeanFactory.createMetricBuilder()
