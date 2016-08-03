@@ -305,6 +305,13 @@
               <goal>stop</goal>
             </goals>
           </execution>
+          <execution>
+            <id>push</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>push</goal>
+            </goals>
+          </execution>
         </executions>
         <configuration>
           <showLogs>true</showLogs>
@@ -313,6 +320,9 @@
               <name>arpnetworking/mad:${project.version}</name>
               <build>
                 <dockerFile>${project.build.directory}/docker-assembly/Dockerfile</dockerFile>
+                <tags>
+                  <tag>${buildNumber}</tag>
+                </tags>
               </build>
               <run>
                 <env>
