@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Smartsheet
+ * Copyright 2016 Inscope Metrics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.arpnetworking.metrics.common.sources;
 import com.arpnetworking.metrics.mad.parsers.CollectdJsonToRecordParser;
 
 /**
- * Processes HTTP posts from Collectd, extracts data and emits metrics.
+ * Processes HTTP requests from Collectd, extracts data and emits metrics.
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
