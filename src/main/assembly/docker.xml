@@ -42,6 +42,9 @@
       <directory>${project.basedir}/target/appassembler/bin</directory>
       <outputDirectory>bin</outputDirectory>
       <fileMode>0755</fileMode>
+      <includes>
+        <include>mad</include>
+      </includes>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/target/appassembler/lib</directory>
