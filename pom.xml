@@ -160,6 +160,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <!-- TODO: Upgrade parent pom and inherit this block -->
         <executions>
           <execution>
             <goals>
