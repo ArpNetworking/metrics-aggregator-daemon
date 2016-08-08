@@ -339,16 +339,11 @@
                   </bind>
                 </volumes>
                 <wait>
-                  <!--
-                  BLOCKED BY: https://github.com/fabric8io/docker-maven-plugin/issues/430
-                  <tcp>
-                    <host>localhost</host>
-                    <ports>
-                      <port>7090</port>
-                    </ports>
-                    <mode>direct</mode>
-                  </tcp>
-                  -->
+                  <http>
+                    <url>http://${docker.host.address}:7090/ping</url>
+                    <method>GET</method>
+                    <status>200</status>
+                  </http>
                   <!-- NOTE: The service is _really_ slow to start-up under native docker -->
                   <time>150000</time>
                   <kill>1000</kill>
