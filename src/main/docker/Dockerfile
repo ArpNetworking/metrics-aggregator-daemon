@@ -34,10 +34,10 @@ ENV APP_PARAMS="/opt/mad/config/config.json"
 RUN mkdir -p /opt/mad/lib/ext && \
     mkdir -p /opt/mad/logs && \
     mkdir -p /opt/mad/config/pipelines
-ADD deps/* /opt/mad/lib/
-ADD bin/* /opt/mad/bin/
-ADD config/* /opt/mad/config/
-ADD lib/* /opt/mad/lib/
+ADD deps /opt/mad/lib/
+ADD bin /opt/mad/bin/
+ADD config /opt/mad/config/
+ADD lib /opt/mad/lib/
 
 # Entry point
 CMD JAVA_OPTS="${LOGBACK_CONFIG} ${ADDITIONAL_JAVA_OPTS}" /opt/mad/bin/mad ${APP_PARAMS} ${ADDITIONAL_APP_PARAMS}

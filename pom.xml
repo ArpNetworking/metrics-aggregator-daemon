@@ -78,6 +78,7 @@
     <arpnetworking.commons.version>1.7.1</arpnetworking.commons.version>
     <aspectjrt.version>1.8.9</aspectjrt.version>
     <cglib.version>3.2.1</cglib.version>
+    <client.protocol.version>0.9.3</client.protocol.version>
     <commons.codec.version>1.10</commons.codec.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.math3.version>3.3</commons.math3.version>
@@ -97,12 +98,13 @@
     <log4j.over.slf4j.version>1.7.12</log4j.over.slf4j.version>
     <metrics.aggregator.protocol.version>1.0.3</metrics.aggregator.protocol.version>
     <metrics.client.version>0.4.5</metrics.client.version>
+    <metrics.client.http.version>0.1.1</metrics.client.http.version>
     <metrics.generator.version>1.1.0</metrics.generator.version>
     <metrics.jvm.extra.version>0.4.2</metrics.jvm.extra.version>
     <mockito.version>1.10.19</mockito.version>
     <oval.version>1.86</oval.version>
     <performance.test.version>1.1.0</performance.test.version>
-    <protobuf.version>3.0.0-beta-2</protobuf.version>
+    <protobuf.version>3.0.2</protobuf.version>
     <reflections.version>0.9.10</reflections.version>
     <scala.version>2.11</scala.version>
     <scala.java.compat.version>0.7.0</scala.java.compat.version>
@@ -412,6 +414,11 @@
       <version>${metrics.client.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.arpnetworking.metrics</groupId>
+      <artifactId>sink-http-apache</artifactId>
+      <version>${metrics.client.http.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.arpnetworking.metrics.extras</groupId>
       <artifactId>jvm-extra</artifactId>
       <version>${metrics.jvm.extra.version}</version>
@@ -591,6 +598,11 @@
       <groupId>com.arpnetworking.metrics</groupId>
       <artifactId>metrics-aggregator-protocol</artifactId>
       <version>${metrics.aggregator.protocol.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.inscopemetrics.client</groupId>
+      <artifactId>protocol</artifactId>
+      <version>${client.protocol.version}</version>
     </dependency>
     <!-- Test - General -->
     <dependency>
