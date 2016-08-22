@@ -19,6 +19,7 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.mad.model.DimensionRecord;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
@@ -28,15 +29,19 @@ import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.utility.Launchable;
+
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import scala.collection.immutable.HashMap;
+
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.Period;
 
@@ -44,10 +49,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Performs aggregation of <code>Record</code> instances per <code>Period</code>.
@@ -113,15 +120,30 @@ public final class Aggregator implements Observer, Launchable {
                     .log();
             return;
         }
+
         final Record record = (Record) event;
-        final Key key = new DefaultKey(createDimensions(record));
-        LOGGER.trace()
+//        final Key key = new DefaultKey(createDimensions(record));
+//        LOGGER.trace()
+//                .setMessage("Processing record")
+//                .addData("record", record)
+//                .addData("key", key)
+//                .log();
+//
+//        for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
+//            periodWorker.record(record);
+//        }
+
+        List<DimensionRecord> dimRecs = dimensionalizedRecords(record);
+        for (DimensionRecord dimRec : dimRecs) {
+            final Key dimKey = new DefaultKey(dimRec.getDimensions());
+            LOGGER.trace()
                 .setMessage("Processing record")
-                .addData("record", record)
-                .addData("key", key)
+                .addData("record", dimRec)
+                .addData("key", dimKey)
                 .log();
-        for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
-            periodWorker.record(record);
+            for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(dimKey, this::createPeriodWorkers)) {
+                periodWorker.record(dimRec);
+            }
         }
     }
 
@@ -149,13 +171,51 @@ public final class Aggregator implements Observer, Launchable {
         return toLogValue().toString();
     }
 
-    private ImmutableMap<String, String> createDimensions(final Record record) {
-        // TODO(ville): Promote user specified annotations to dimensions.
-        final ImmutableMap.Builder<String, String> dimensionBuilder = ImmutableMap.builder();
-        dimensionBuilder.put(Key.HOST_DIMENSION_KEY, record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
-        dimensionBuilder.put(Key.SERVICE_DIMENSION_KEY, record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        dimensionBuilder.put(Key.CLUSTER_DIMENSION_KEY, record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
-        return dimensionBuilder.build();
+    private Set<String> hardCodedWhiteList = ImmutableSet.of(Key.HOST_DIMENSION_KEY, Key.SERVICE_DIMENSION_KEY, Key.CLUSTER_DIMENSION_KEY);
+    private List<DimensionRecord> dimensionalizedRecords(final Record record) {
+        Map<String, DimensionRecord> dimRecMap = Maps.newHashMap();
+
+        _dimensions.keySet().forEach(service -> {
+            if (service.equalsIgnoreCase("this service")) {
+                _dimensions.get(service).keySet().forEach(metricPattern -> {
+                    for (String metricName : record.getMetrics().keySet()) {
+                        if (metricPattern.matcher(metricName).matches()) {
+
+                            DimensionRecord.Builder dimRec = new DimensionRecord.Builder();
+                            Map<String, String> dimensions = Maps.newHashMap();
+                            if (dimRecMap.containsKey(metricName)) {
+                                final DimensionRecord dimensionRecord = dimRecMap.get(metricName);
+
+                                dimRec.setId(dimensionRecord.getId());
+                                dimRec.setTime(dimensionRecord.getTime());
+                                dimRec.setMetrics(dimensionRecord.getMetrics());
+                                dimRec.setAnnotations(dimensionRecord.getAnnotations());
+                                dimensions = Maps.newHashMap(dimensionRecord.getDimensions());
+                            } else {
+                                dimRec.setId(UUID.randomUUID().toString());
+                                dimRec.setTime(record.getTime());
+                                dimRec.setMetrics(ImmutableMap.of(metricName, record.getMetrics().get(metricName)));
+                                dimRec.setAnnotations(record.getAnnotations());
+                                for (String fred : hardCodedWhiteList) {
+                                    dimensions.put(fred, record.getAnnotations().get(fred));
+                                }
+                            }
+
+                            final Set<String> whiteAnnotations = _dimensions.get(service).get(metricPattern);
+                            for (String annotation : whiteAnnotations) {
+                                dimensions.putIfAbsent(annotation, record.getAnnotations().get(annotation));
+                            }
+
+                            dimRec.setDimensions(ImmutableMap.copyOf(dimensions));
+                        }
+                    }
+                });
+            }
+        });
+
+        // TODO: add record that is all of the metrics with no annotations that were promoted
+
+        return dimRecMap.values().stream().collect(Collectors.toList());
     }
 
     private List<PeriodWorker> createPeriodWorkers(final Key key) {
@@ -213,6 +273,8 @@ public final class Aggregator implements Observer, Launchable {
         }
         _statistics = statisticsBuilder.build();
 
+        _dimensions = builder._dimensions;
+
         _cachedSpecifiedStatistics = CacheBuilder
                 .newBuilder()
                 .concurrencyLevel(1)
@@ -257,6 +319,7 @@ public final class Aggregator implements Observer, Launchable {
     private final ImmutableSet<Statistic> _dependentCounterStatistics;
     private final ImmutableSet<Statistic> _dependentGaugeStatistics;
     private final ImmutableMap<Pattern, ImmutableSet<Statistic>> _statistics;
+    private final Map<String, Map<Pattern, Set<String>>> _dimensions;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedSpecifiedStatistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedDependentStatistics;
     private final Map<Key, List<PeriodWorker>> _periodWorkers = Maps.newConcurrentMap();
@@ -344,6 +407,18 @@ public final class Aggregator implements Observer, Launchable {
             return this;
         }
 
+        /**
+         * dimensions configuration.
+         *
+         * dimensions Configuration
+         * @param value The dimensions configuration
+         * @return This instance of <code>Builder</code>
+         */
+        public Builder setDimensions(final Map<String, Map<Pattern, Set<String>>> value) {
+            _dimensions = value;
+            return this;
+        }
+
         @NotNull
         private Sink _sink;
         @NotNull
@@ -356,5 +431,7 @@ public final class Aggregator implements Observer, Launchable {
         private Set<Statistic> _gaugeStatistics;
         @NotNull
         private Map<String, Set<Statistic>> _statistics = Collections.emptyMap();
+        @NotNull
+        private Map<String, Map<Pattern, Set<String>>> _dimensions;
     }
 }
