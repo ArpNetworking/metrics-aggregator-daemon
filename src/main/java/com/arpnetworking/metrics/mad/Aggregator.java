@@ -20,6 +20,7 @@ import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.mad.model.DimensionRecord;
+import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
@@ -40,7 +41,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import scala.collection.immutable.HashMap;
 
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.Period;
@@ -175,8 +175,13 @@ public final class Aggregator implements Observer, Launchable {
     private List<DimensionRecord> dimensionalizedRecords(final Record record) {
         Map<String, DimensionRecord> dimRecMap = Maps.newHashMap();
 
+        ImmutableMap.Builder<String, String> defaultDimensions = ImmutableMap.builder();
+        for (String fred : hardCodedWhiteList) {
+            defaultDimensions.put(fred, record.getAnnotations().get(fred));
+        }
+
         _dimensions.keySet().forEach(service -> {
-            if (service.equalsIgnoreCase("this service")) {
+//TODO            if (service.equalsIgnoreCase("this service")) {
                 _dimensions.get(service).keySet().forEach(metricPattern -> {
                     for (String metricName : record.getMetrics().keySet()) {
                         if (metricPattern.matcher(metricName).matches()) {
@@ -196,9 +201,7 @@ public final class Aggregator implements Observer, Launchable {
                                 dimRec.setTime(record.getTime());
                                 dimRec.setMetrics(ImmutableMap.of(metricName, record.getMetrics().get(metricName)));
                                 dimRec.setAnnotations(record.getAnnotations());
-                                for (String fred : hardCodedWhiteList) {
-                                    dimensions.put(fred, record.getAnnotations().get(fred));
-                                }
+                                dimensions.putAll(defaultDimensions.build());
                             }
 
                             final Set<String> whiteAnnotations = _dimensions.get(service).get(metricPattern);
@@ -210,10 +213,23 @@ public final class Aggregator implements Observer, Launchable {
                         }
                     }
                 });
+//            }
+        });
+
+        ImmutableMap.Builder<String, Metric> boringMetrics = ImmutableMap.builder();
+        record.getMetrics().forEach((key, value) -> {
+            if (!dimRecMap.containsKey(key)) {
+                boringMetrics.put(key, value);
             }
         });
 
-        // TODO: add record that is all of the metrics with no annotations that were promoted
+        DimensionRecord.Builder leftovers = new DimensionRecord.Builder();
+        leftovers.setId(record.getId());
+        leftovers.setTime(record.getTime());
+        leftovers.setMetrics(boringMetrics.build());
+        leftovers.setAnnotations(record.getAnnotations());
+        leftovers.setDimensions(defaultDimensions.build());
+        dimRecMap.put("leftovers", leftovers.build());
 
         return dimRecMap.values().stream().collect(Collectors.toList());
     }

@@ -136,7 +136,7 @@ public final class DimensionRecord implements Record {
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
-    public static final class Builder extends OvalBuilder<Record> {
+    public static final class Builder extends OvalBuilder<DimensionRecord> {
 
         /**
          * Public constructor.
