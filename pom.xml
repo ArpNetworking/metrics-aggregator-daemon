@@ -289,6 +289,9 @@
             <goals>
               <goal>start</goal>
             </goals>
+            <configuration>
+              <skip>${skipIntegrationTests}</skip>
+            </configuration>
           </execution>
           <execution>
             <id>stop</id>
@@ -296,6 +299,9 @@
             <goals>
               <goal>stop</goal>
             </goals>
+            <configuration>
+              <skip>${skipIntegrationTests}</skip>
+            </configuration>
           </execution>
           <execution>
             <id>push</id>
