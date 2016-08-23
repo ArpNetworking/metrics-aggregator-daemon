@@ -61,6 +61,7 @@ import java.util.stream.Collectors;
  * This class is thread safe.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ryan Ascheman (rascheman at groupon dot com)
  */
 // NOTE: The _periodWorkerExecutor is accessed both in synchronized lifecycle methods like launch() and shutdown() but
 // also non-synchronized methods like notify(). Access to _periodWorkerExecutor does not need to be synchronized.
