@@ -15,15 +15,18 @@
  */
 package com.arpnetworking.metrics.mad.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.joda.time.DateTime;
 
 /**
  * The interface to a record. Records consistent of a timestamp, any number of
- * named metrics and annotations (arbitrary key-value pairs).
+ * named metrics, annotations (arbitrary key-value pairs) dimension values (arbitrary key-value pairs)
+ * and dimension mappings (metric name to list of dimension value keys).
  *
  * @author Brandon Arp (brandonarp at gmail dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ryan Ascheman (rascheman at groupon dot com)
  */
 public interface Record {
 
@@ -54,4 +57,18 @@ public interface Record {
      * @return the annotations
      */
     ImmutableMap<String, String> getAnnotations();
+
+    /**
+     * Gets dimension values.
+     *
+     * @return the dimension values
+     */
+    ImmutableMap<String, String> getDimensionValues();
+
+    /**
+     * Gets dimension mappings.
+     *
+     * @return the dimension mappings
+     */
+    ImmutableMap<String, ImmutableList<String>> getDimensionMappings();
 }

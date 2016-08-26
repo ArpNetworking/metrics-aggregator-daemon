@@ -30,6 +30,7 @@ import com.arpnetworking.metrics.mad.model.json.Version2d;
 import com.arpnetworking.metrics.mad.model.json.Version2e;
 import com.arpnetworking.metrics.mad.model.json.Version2f;
 import com.arpnetworking.metrics.mad.model.json.Version2fSteno;
+import com.arpnetworking.metrics.mad.model.json.Version2g;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.Key;
@@ -72,6 +73,7 @@ import java.util.stream.Collectors;
  *
  * @author Brandon Arp (brandonarp at gmail dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ryan Ascheman (rascheman at groupon dot com)
  */
 public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
@@ -104,6 +106,8 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         final String version = versionNode.get().textValue().toLowerCase(Locale.getDefault());
         try {
             switch (version) {
+                case "2g":
+                    return parseV2gLogLine(jsonNode);
                 case "2f":
                     if (dataNode.isPresent()) {
                         return parseV2fStenoLogLine(jsonNode);
@@ -233,6 +237,48 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 .setId(UUID.randomUUID().toString())
                 .setTime(timestamp)
                 .setAnnotations(mappedAnnotations.build())
+                .build();
+    }
+
+    // NOTE: Package private for testing
+    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2gLogLine(final JsonNode jsonNode)
+            throws JsonProcessingException {
+
+        final Version2g model = OBJECT_MAPPER.treeToValue(jsonNode, Version2g.class);
+        final Version2g.Dimensions dimensions = model.getDimensions();
+        final Version2g.Annotations annotations = model.getAnnotations();
+        final ImmutableMap.Builder<String, Metric> variables = ImmutableMap.builder();
+
+        putVariablesVersion2g(model.getTimers(), MetricType.TIMER, variables);
+        putVariablesVersion2g(model.getCounters(), MetricType.COUNTER, variables);
+        putVariablesVersion2g(model.getGauges(), MetricType.GAUGE, variables);
+
+        // NOTE: We are mapping from the underscore prefixed annotations to non-prefixed ones.
+        // The prefixed annotations will overwrite the non-prefixed ones.
+        final ImmutableMap.Builder<String, String> mappedAnnotations = ImmutableMap.builder();
+        for (final Map.Entry<String, String> entry : annotations.getOtherAnnotations().entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if (PREFIXED_HOST_KEY.equals(key)) {
+                mappedAnnotations.put(Key.HOST_DIMENSION_KEY, value);
+            } else if (PREFIXED_SERVICE_KEY.endsWith(key)) {
+                mappedAnnotations.put(Key.SERVICE_DIMENSION_KEY, value);
+            } else if (PREFIXED_CLUSTER_KEY.endsWith(key)) {
+                mappedAnnotations.put(Key.CLUSTER_DIMENSION_KEY, value);
+            } else if (!Key.HOST_DIMENSION_KEY.equals(key)
+                    && !Key.SERVICE_DIMENSION_KEY.endsWith(key)
+                    && !Key.CLUSTER_DIMENSION_KEY.endsWith(key)) {
+                mappedAnnotations.put(key, value);
+            }
+        }
+
+        return new DefaultRecord.Builder()
+                .setMetrics(variables.build())
+                .setTime(annotations.getEnd())
+                .setId(annotations.getId())
+                .setAnnotations(mappedAnnotations.build())
+                .setDimensionValues(dimensions.getValues())
+                .setDimensionMappings(dimensions.getMappings())
                 .build();
     }
 
@@ -372,6 +418,29 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                     Lists.transform(
                             element.getValues(),
                             VERSION_2E_SAMPLE_TO_QUANTITY)
+                    .stream()
+                    .filter(Predicates.notNull()::apply)
+                    .collect(Collectors.toList()));
+            variables.put(
+                    entry.getKey(),
+                    new DefaultMetric.Builder()
+                            .setType(metricKind)
+                            .setValues(quantities)
+                            .build());
+        }
+    }
+
+    private static void putVariablesVersion2g(
+            final Map<String, Version2g.Element> elements,
+            final MetricType metricKind,
+            final ImmutableMap.Builder<String, Metric> variables) {
+
+        for (final Map.Entry<String, Version2g.Element> entry : elements.entrySet()) {
+            final Version2g.Element element = entry.getValue();
+            final List<Quantity> quantities = Lists.newArrayList(
+                    Lists.transform(
+                            element.getValues(),
+                            VERSION_2G_SAMPLE_TO_QUANTITY)
                     .stream()
                     .filter(Predicates.notNull()::apply)
                     .collect(Collectors.toList()));
@@ -569,6 +638,30 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                         .setValue(sample.getValue())
                         .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))
                                 // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
+                        //.setNumeratorUnits(sample.getUnitNumerators())
+                        //.setDenominatorUnits(sample.getUnitDenominators())
+                        .build();
+            } else {
+                // TODO(barp): Create a counter for invalid metrics [AINT-680]
+                INVALID_SAMPLE_LOGGER
+                        .warn()
+                        .setMessage("Invalid sample for metric")
+                        .addData("value", sample.getValue())
+                        .log();
+                return null;
+            }
+        } else {
+            return null;
+        }
+    };
+
+    private static final Function<Version2g.Sample, Quantity> VERSION_2G_SAMPLE_TO_QUANTITY = sample -> {
+        if (sample != null) {
+            if (Double.isFinite(sample.getValue())) {
+                return new Quantity.Builder()
+                        .setValue(sample.getValue())
+                        .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))
+                        // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
                         //.setNumeratorUnits(sample.getUnitNumerators())
                         //.setDenominatorUnits(sample.getUnitDenominators())
                         .build();

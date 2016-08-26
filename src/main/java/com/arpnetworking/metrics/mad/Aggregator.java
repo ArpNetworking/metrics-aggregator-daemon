@@ -19,7 +19,6 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
-import com.arpnetworking.metrics.mad.model.DimensionRecord;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
@@ -35,7 +34,6 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -123,17 +121,18 @@ public final class Aggregator implements Observer, Launchable {
         }
 
         final Record record = (Record) event;
-//        final Key key = new DefaultKey(createDimensions(record));
-//        LOGGER.trace()
-//                .setMessage("Processing record")
-//                .addData("record", record)
-//                .addData("key", key)
-//                .log();
-//
-//        for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
-//            periodWorker.record(record);
-//        }
+/*
+        final Key key = new DefaultKey(createDimensions(record));
+        LOGGER.trace()
+                .setMessage("Processing record")
+                .addData("record", record)
+                .addData("key", key)
+                .log();
 
+        for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
+            periodWorker.record(record);
+        }
+*//*
         List<DimensionRecord> dimRecs = dimensionalizedRecords(record);
         for (DimensionRecord dimRec : dimRecs) {
             final Key dimKey = new DefaultKey(dimRec.getDimensions());
@@ -146,6 +145,7 @@ public final class Aggregator implements Observer, Launchable {
                 periodWorker.record(dimRec);
             }
         }
+*/
     }
 
     /**
@@ -173,6 +173,7 @@ public final class Aggregator implements Observer, Launchable {
     }
 
     private Set<String> hardCodedWhiteList = ImmutableSet.of(Key.HOST_DIMENSION_KEY, Key.SERVICE_DIMENSION_KEY, Key.CLUSTER_DIMENSION_KEY);
+/*
     private List<DimensionRecord> dimensionalizedRecords(final Record record) {
         Map<String, DimensionRecord> dimRecMap = Maps.newHashMap();
 
@@ -234,6 +235,7 @@ public final class Aggregator implements Observer, Launchable {
 
         return dimRecMap.values().stream().collect(Collectors.toList());
     }
+*/
 
     private List<PeriodWorker> createPeriodWorkers(final Key key) {
         final List<PeriodWorker> periodWorkerList = Lists.newArrayListWithExpectedSize(_periods.size());
@@ -290,7 +292,7 @@ public final class Aggregator implements Observer, Launchable {
         }
         _statistics = statisticsBuilder.build();
 
-        _dimensions = builder._dimensions;
+//        _dimensions = builder._dimensions;
 
         _cachedSpecifiedStatistics = CacheBuilder
                 .newBuilder()
@@ -336,7 +338,7 @@ public final class Aggregator implements Observer, Launchable {
     private final ImmutableSet<Statistic> _dependentCounterStatistics;
     private final ImmutableSet<Statistic> _dependentGaugeStatistics;
     private final ImmutableMap<Pattern, ImmutableSet<Statistic>> _statistics;
-    private final Map<String, Map<Pattern, Set<String>>> _dimensions;
+//    private final Map<String, Map<Pattern, Set<String>>> _dimensions;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedSpecifiedStatistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedDependentStatistics;
     private final Map<Key, List<PeriodWorker>> _periodWorkers = Maps.newConcurrentMap();
@@ -424,18 +426,18 @@ public final class Aggregator implements Observer, Launchable {
             return this;
         }
 
-        /**
+        /*
          * dimensions configuration.
          *
          * dimensions Configuration
          * @param value The dimensions configuration
          * @return This instance of <code>Builder</code>
-         */
+         *
         public Builder setDimensions(final Map<String, Map<Pattern, Set<String>>> value) {
             _dimensions = value;
             return this;
         }
-
+*/
         @NotNull
         private Sink _sink;
         @NotNull
@@ -448,7 +450,7 @@ public final class Aggregator implements Observer, Launchable {
         private Set<Statistic> _gaugeStatistics;
         @NotNull
         private Map<String, Set<Statistic>> _statistics = Collections.emptyMap();
-        @NotNull
-        private Map<String, Map<Pattern, Set<String>>> _dimensions;
+//        @NotNull
+//        private Map<String, Map<Pattern, Set<String>>> _dimensions;
     }
 }
