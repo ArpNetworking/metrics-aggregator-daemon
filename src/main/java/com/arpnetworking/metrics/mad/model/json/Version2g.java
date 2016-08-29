@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.MatchPattern;
 import net.sf.oval.constraint.NotEmpty;
@@ -61,7 +62,9 @@ public final class Version2g {
         return _annotations;
     }
 
-    public Dimensions getDimensions() { return _dimensions; }
+    public Dimensions getDimensions() {
+        return _dimensions;
+    }
 
     public String getVersion() {
         return _version;
@@ -299,9 +302,13 @@ public final class Version2g {
      * Represents the set of dimensions on a line.
      */
     public static final class Dimensions {
-        public ImmutableMap<String, String> getValues() { return _values; }
+        public ImmutableMap<String, String> getValues() {
+            return _values;
+        }
 
-        public ImmutableMap<String, ImmutableList<String>> getMappings() { return _mappings; }
+        public ImmutableMap<String, ImmutableSet<String>> getMappings() {
+            return _mappings;
+        }
 
         private Dimensions(final Dimensions.Builder builder) {
             _values = builder._values;
@@ -309,7 +316,7 @@ public final class Version2g {
         }
 
         private final ImmutableMap<String, String> _values;
-        private final ImmutableMap<String, ImmutableList<String>> _mappings;
+        private final ImmutableMap<String, ImmutableSet<String>> _mappings;
 
         /**
          * Builder for the Dimensions class.
@@ -318,7 +325,9 @@ public final class Version2g {
             /**
              * Public constructor.
              */
-            public Builder() { super(Dimensions::new); }
+            public Builder() {
+                super(Dimensions::new);
+            }
 
             /**
              * Sets the values field.
@@ -339,7 +348,7 @@ public final class Version2g {
              * @return This builder
              */
             @JsonAnySetter
-            public Dimensions.Builder setMappings(final ImmutableMap<String, ImmutableList<String>> value) {
+            public Dimensions.Builder setMappings(final ImmutableMap<String, ImmutableSet<String>> value) {
                 _mappings = value;
                 return this;
             }
@@ -347,7 +356,7 @@ public final class Version2g {
             @NotNull
             private ImmutableMap<String, String> _values;
             @NotNull
-            private ImmutableMap<String, ImmutableList<String>> _mappings;
+            private ImmutableMap<String, ImmutableSet<String>> _mappings;
         }
     }
 

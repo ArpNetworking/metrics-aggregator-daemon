@@ -29,6 +29,7 @@ import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.joda.time.DateTime;
@@ -368,12 +369,99 @@ public class AggregatorTest {
                                 .build()));
     }
 
+    @Test
+    public void testMultipleDimensions() throws InterruptedException {
+        final DateTime start = DateTime.parse("2015-02-05T00:00:00Z");
+
+        _aggregator.notify(
+                null,
+                TestBeanFactory.createRecordBuilder()
+                        .setTime(start)
+                        .setAnnotations(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHost",
+                                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyCluster"))
+                        .setMetrics(ImmutableMap.of(
+                                "MyCounter",
+                                new DefaultMetric.Builder()
+                                        .setType(MetricType.COUNTER)
+                                        .setValues(Collections.singletonList(ONE))
+                                        .build(),
+                                "DimensionCounter",
+                                new DefaultMetric.Builder()
+                                        .setType(MetricType.COUNTER)
+                                        .setValues(Collections.singletonList(TWO))
+                                        .build()))
+                        .setDimensionValues(ImmutableMap.of(
+                                "MyDimension", "MyValue"
+                        ))
+                        .setDimensionMappings(ImmutableMap.of(
+                                "DimensionCounter",
+                                ImmutableSet.of("MyDimension")
+                        ))
+                        .build());
+
+        // Wait for the period to close
+        Thread.sleep(3000);
+
+        // Verify the aggregation was emitted
+        Mockito.verify(_sink, Mockito.times(2)).recordAggregateData(_periodicDataCaptor.capture());
+        Mockito.verifyNoMoreInteractions(_sink);
+
+        final List<AggregatedData> unifiedData = getCapturedData(
+                "MyCounter",
+                new DefaultKey(ImmutableMap.of(
+                        Key.HOST_DIMENSION_KEY, "MyHost",
+                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                        Key.CLUSTER_DIMENSION_KEY, "MyCluster")),
+                "DimensionCounter",
+                new DefaultKey(ImmutableMap.of(
+                        Key.HOST_DIMENSION_KEY, "MyHost",
+                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                        Key.CLUSTER_DIMENSION_KEY, "MyCluster",
+                        "MyDimension", "MyValue")));
+
+        final AggregatedData.Builder builder = new AggregatedData.Builder()
+                .setIsSpecified(false)
+                .setPopulationSize(1L)
+                .setValue(new Quantity.Builder().setValue(1d).build());
+        Assert.assertThat(
+                unifiedData,
+                Matchers.containsInAnyOrder(
+                        builder
+                                .setStatistic(COUNT_STATISTIC)
+                                .build(),
+                        builder
+                                .setStatistic(COUNT_STATISTIC)
+                                .build(),
+                        builder
+                                .setStatistic(MAX_STATISTIC)
+                                .setValue(ONE)
+                                .setIsSpecified(true)
+                                .build(),
+                        builder
+                                .setStatistic(MAX_STATISTIC)
+                                .setValue(TWO)
+                                .setIsSpecified(true)
+                                .build()));
+    }
+
     private List<AggregatedData> getCapturedData(
             final String metricName,
             final Key dimensionSetA,
             final Key dimensionSetB) {
+        return getCapturedData(metricName, dimensionSetA, metricName, dimensionSetB);
+    }
+
+    private List<AggregatedData> getCapturedData(
+            final String metricNameA,
+            final Key dimensionSetA,
+            final String metricNameB,
+            final Key dimensionSetB) {
         final List<PeriodicData> capturedPeriodicData = _periodicDataCaptor.getAllValues();
         Assert.assertEquals(2, capturedPeriodicData.size());
+
         if (capturedPeriodicData.get(0).getDimensions().equals(dimensionSetA)) {
             Assert.assertEquals(dimensionSetB, capturedPeriodicData.get(1).getDimensions());
         } else {
@@ -381,12 +469,17 @@ public class AggregatorTest {
             Assert.assertEquals(dimensionSetA, capturedPeriodicData.get(1).getDimensions());
         }
         Assert.assertEquals(1, capturedPeriodicData.get(0).getData().keySet().size());
-        Assert.assertEquals(metricName, capturedPeriodicData.get(0).getData().keySet().iterator().next());
+        if (capturedPeriodicData.get(0).getData().keySet().iterator().next().equals(metricNameA)) {
+            Assert.assertEquals(metricNameB, capturedPeriodicData.get(1).getData().keySet().iterator().next());
+        } else {
+            Assert.assertEquals(metricNameB, capturedPeriodicData.get(0).getData().keySet().iterator().next());
+            Assert.assertEquals(metricNameA, capturedPeriodicData.get(1).getData().keySet().iterator().next());
+        }
         Assert.assertEquals(2, capturedPeriodicData.get(0).getData().size());
         Assert.assertEquals(2, capturedPeriodicData.get(1).getData().size());
         final List<AggregatedData> unifiedData = Lists.newArrayList();
-        unifiedData.addAll(capturedPeriodicData.get(0).getData().get(metricName));
-        unifiedData.addAll(capturedPeriodicData.get(1).getData().get(metricName));
+        unifiedData.addAll(capturedPeriodicData.get(0).getData().get(metricNameA));
+        unifiedData.addAll(capturedPeriodicData.get(1).getData().get(metricNameB));
         return unifiedData;
     }
 

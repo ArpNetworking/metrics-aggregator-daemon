@@ -21,8 +21,8 @@ import com.arpnetworking.tsdcore.model.Key;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
@@ -75,13 +75,17 @@ public final class DefaultRecord implements Record {
      * {@inheritDoc}
      */
     @Override
-    public ImmutableMap<String, String> getDimensionValues() { return _dimensionValues; }
+    public ImmutableMap<String, String> getDimensionValues() {
+        return _dimensionValues;
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ImmutableMap<String, ImmutableList<String>> getDimensionMappings() { return _dimensionMappings; }
+    public ImmutableMap<String, ImmutableSet<String>> getDimensionMappings() {
+        return _dimensionMappings;
+    }
 
     /**
      * {@inheritDoc}
@@ -140,7 +144,7 @@ public final class DefaultRecord implements Record {
     private final DateTime _time;
     private final ImmutableMap<String, String> _annotations;
     private final ImmutableMap<String, String> _dimensionValues;
-    private final ImmutableMap<String, ImmutableList<String>> _dimensionMappings;
+    private final ImmutableMap<String, ImmutableSet<String>> _dimensionMappings;
 
     /**
      * Implementation of builder pattern for <code>DefaultRecord</code>.
@@ -220,7 +224,7 @@ public final class DefaultRecord implements Record {
          * @param value The dimension mappings <code>ImmutableMap</code>
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setDimensionMappings(final ImmutableMap<String, ImmutableList<String>> value) {
+        public Builder setDimensionMappings(final ImmutableMap<String, ImmutableSet<String>> value) {
             _dimensionMappings = value;
             return this;
         }
@@ -251,6 +255,6 @@ public final class DefaultRecord implements Record {
         @ValidateWithMethod(methodName = "validateAnnotations", parameterType = ImmutableMap.class)
         private ImmutableMap<String, String> _annotations = ImmutableMap.of();
         private ImmutableMap<String, String> _dimensionValues = ImmutableMap.of();
-        private ImmutableMap<String, ImmutableList<String>> _dimensionMappings = ImmutableMap.of();
+        private ImmutableMap<String, ImmutableSet<String>> _dimensionMappings = ImmutableMap.of();
     }
 }

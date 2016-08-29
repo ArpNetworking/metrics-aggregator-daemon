@@ -19,6 +19,7 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
@@ -29,17 +30,17 @@ import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.utility.Launchable;
-
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.Period;
 
@@ -52,7 +53,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Performs aggregation of <code>Record</code> instances per <code>Period</code>.
@@ -121,31 +121,24 @@ public final class Aggregator implements Observer, Launchable {
         }
 
         final Record record = (Record) event;
-/*
-        final Key key = new DefaultKey(createDimensions(record));
-        LOGGER.trace()
-                .setMessage("Processing record")
-                .addData("record", record)
-                .addData("key", key)
-                .log();
+        final Map<String, String> legacyDimensions = extractLegacyDimensions(record);
 
-        for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
-            periodWorker.record(record);
-        }
-*//*
-        List<DimensionRecord> dimRecs = dimensionalizedRecords(record);
-        for (DimensionRecord dimRec : dimRecs) {
-            final Key dimKey = new DefaultKey(dimRec.getDimensions());
+        final List<Record> splitRecords = splitOnDimensions(record);
+        for (Record splitRecord : splitRecords) {
+            final ImmutableMap.Builder<String, String> dimensionBuilder = ImmutableMap.builder();
+            dimensionBuilder.putAll(legacyDimensions);
+            dimensionBuilder.putAll(splitRecord.getDimensionValues());
+
+            final Key key = new DefaultKey(dimensionBuilder.build());
             LOGGER.trace()
                 .setMessage("Processing record")
-                .addData("record", dimRec)
-                .addData("key", dimKey)
+                .addData("record", splitRecord)
+                .addData("key", key)
                 .log();
-            for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(dimKey, this::createPeriodWorkers)) {
-                periodWorker.record(dimRec);
+            for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
+                periodWorker.record(splitRecord);
             }
         }
-*/
     }
 
     /**
@@ -172,70 +165,68 @@ public final class Aggregator implements Observer, Launchable {
         return toLogValue().toString();
     }
 
-    private Set<String> hardCodedWhiteList = ImmutableSet.of(Key.HOST_DIMENSION_KEY, Key.SERVICE_DIMENSION_KEY, Key.CLUSTER_DIMENSION_KEY);
-/*
-    private List<DimensionRecord> dimensionalizedRecords(final Record record) {
-        Map<String, DimensionRecord> dimRecMap = Maps.newHashMap();
+    private Map<String, String> extractLegacyDimensions(final Record record) {
 
-        ImmutableMap.Builder<String, String> defaultDimensions = ImmutableMap.builder();
-        for (String fred : hardCodedWhiteList) {
+        final ImmutableMap.Builder<String, String> defaultDimensions = ImmutableMap.builder();
+        for (String fred : _hardCodedWhiteList) {
             defaultDimensions.put(fred, record.getAnnotations().get(fred));
         }
 
-        _dimensions.keySet().forEach(service -> {
-//TODO            if (service.equalsIgnoreCase("this service")) {
-                _dimensions.get(service).keySet().forEach(metricPattern -> {
-                    for (String metricName : record.getMetrics().keySet()) {
-                        if (metricPattern.matcher(metricName).matches()) {
-
-                            DimensionRecord.Builder dimRec = new DimensionRecord.Builder();
-                            Map<String, String> dimensions = Maps.newHashMap();
-                            if (dimRecMap.containsKey(metricName)) {
-                                final DimensionRecord dimensionRecord = dimRecMap.get(metricName);
-
-                                dimRec.setId(dimensionRecord.getId());
-                                dimRec.setTime(dimensionRecord.getTime());
-                                dimRec.setMetrics(dimensionRecord.getMetrics());
-                                dimRec.setAnnotations(dimensionRecord.getAnnotations());
-                                dimensions = Maps.newHashMap(dimensionRecord.getDimensions());
-                            } else {
-                                dimRec.setId(UUID.randomUUID().toString());
-                                dimRec.setTime(record.getTime());
-                                dimRec.setMetrics(ImmutableMap.of(metricName, record.getMetrics().get(metricName)));
-                                dimRec.setAnnotations(record.getAnnotations());
-                                dimensions.putAll(defaultDimensions.build());
-                            }
-
-                            final Set<String> whiteAnnotations = _dimensions.get(service).get(metricPattern);
-                            for (String annotation : whiteAnnotations) {
-                                dimensions.putIfAbsent(annotation, record.getAnnotations().get(annotation));
-                            }
-
-                            dimRec.setDimensions(ImmutableMap.copyOf(dimensions));
-                        }
-                    }
-                });
-//            }
-        });
-
-        ImmutableMap.Builder<String, Metric> boringMetrics = ImmutableMap.builder();
-        record.getMetrics().forEach((key, value) -> {
-            if (!dimRecMap.containsKey(key)) {
-                boringMetrics.put(key, value);
-            }
-        });
-
-        DimensionRecord.Builder leftovers = new DimensionRecord.Builder();
-        leftovers.setId(record.getId());
-        leftovers.setTime(record.getTime());
-        leftovers.setMetrics(boringMetrics.build());
-        leftovers.setAnnotations(record.getAnnotations());
-        leftovers.setDimensions(defaultDimensions.build());
-        dimRecMap.put("leftovers", leftovers.build());
-
-        return dimRecMap.values().stream().collect(Collectors.toList());
+        return defaultDimensions.build();
     }
-*/
+
+    private List<Record> splitOnDimensions(final Record record) {
+        final ImmutableList.Builder<Record> recordList = ImmutableList.builder();
+
+        final Map<Set<String>, Set<String>> recordSeeds = Maps.newHashMap();
+        for (String metricName : record.getMetrics().keySet()) {
+            // Grab the list of mapped dimension names
+            final ImmutableSet<String> metricDimensions = record.getDimensionMappings().getOrDefault(metricName, ImmutableSet.of());
+            // Exclude the ones that don't have a value set
+            metricDimensions.removeIf(dimensionName -> !record.getDimensionValues().containsKey(dimensionName));
+            // Put the metric into a record that represents a unique set of dimension names
+            recordSeeds.putIfAbsent(metricDimensions, Sets.newHashSet());
+            recordSeeds.get(metricDimensions).add(metricName);
+        }
+
+        for (Map.Entry<Set<String>, Set<String>> recordSeed : recordSeeds.entrySet()) {
+
+            final DefaultRecord.Builder recordBuilder = new DefaultRecord.Builder();
+            recordBuilder.setId(UUID.randomUUID().toString());
+            recordBuilder.setTime(record.getTime());
+            recordBuilder.setAnnotations(record.getAnnotations());
+
+            final ImmutableMap.Builder<String, ImmutableSet<String>> dimensionMapBuilder = ImmutableMap.builder();
+            for (String metric : recordSeed.getValue()) {
+                final ImmutableSet<String> metricDimensions = record.getDimensionMappings().get(metric);
+                if (metricDimensions != null && !metricDimensions.isEmpty()) {
+                    dimensionMapBuilder.put(metric, metricDimensions);
+                }
+            }
+            recordBuilder.setDimensionMappings(dimensionMapBuilder.build());
+
+            // Reduce the list of dimensions added to the ones that are used to create the bucket
+            final ImmutableMap.Builder<String, String> dimensionValueBuilder = ImmutableMap.builder();
+            for (String dimensionName : recordSeed.getKey()) {
+                dimensionValueBuilder.put(dimensionName, record.getDimensionValues().get(dimensionName));
+            }
+            recordBuilder.setDimensionValues(dimensionValueBuilder.build());
+
+            final ImmutableMap.Builder<String, Metric> metricMapBuilder = ImmutableMap.builder();
+            for (String metric : recordSeed.getValue()) {
+                metricMapBuilder.put(metric, record.getMetrics().get(metric));
+            }
+            recordBuilder.setMetrics(metricMapBuilder.build());
+
+            recordList.add(recordBuilder.build());
+        }
+
+        return recordList.build();
+    }
+
+    private final Set<String> _hardCodedWhiteList = ImmutableSet.of(
+            Key.HOST_DIMENSION_KEY, Key.SERVICE_DIMENSION_KEY, Key.CLUSTER_DIMENSION_KEY
+    );
 
     private List<PeriodWorker> createPeriodWorkers(final Key key) {
         final List<PeriodWorker> periodWorkerList = Lists.newArrayListWithExpectedSize(_periods.size());
