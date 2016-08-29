@@ -283,8 +283,6 @@ public final class Aggregator implements Observer, Launchable {
         }
         _statistics = statisticsBuilder.build();
 
-//        _dimensions = builder._dimensions;
-
         _cachedSpecifiedStatistics = CacheBuilder
                 .newBuilder()
                 .concurrencyLevel(1)
@@ -329,7 +327,6 @@ public final class Aggregator implements Observer, Launchable {
     private final ImmutableSet<Statistic> _dependentCounterStatistics;
     private final ImmutableSet<Statistic> _dependentGaugeStatistics;
     private final ImmutableMap<Pattern, ImmutableSet<Statistic>> _statistics;
-//    private final Map<String, Map<Pattern, Set<String>>> _dimensions;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedSpecifiedStatistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedDependentStatistics;
     private final Map<Key, List<PeriodWorker>> _periodWorkers = Maps.newConcurrentMap();
@@ -417,18 +414,6 @@ public final class Aggregator implements Observer, Launchable {
             return this;
         }
 
-        /*
-         * dimensions configuration.
-         *
-         * dimensions Configuration
-         * @param value The dimensions configuration
-         * @return This instance of <code>Builder</code>
-         *
-        public Builder setDimensions(final Map<String, Map<Pattern, Set<String>>> value) {
-            _dimensions = value;
-            return this;
-        }
-*/
         @NotNull
         private Sink _sink;
         @NotNull
@@ -441,7 +426,5 @@ public final class Aggregator implements Observer, Launchable {
         private Set<Statistic> _gaugeStatistics;
         @NotNull
         private Map<String, Set<Statistic>> _statistics = Collections.emptyMap();
-//        @NotNull
-//        private Map<String, Map<Pattern, Set<String>>> _dimensions;
     }
 }

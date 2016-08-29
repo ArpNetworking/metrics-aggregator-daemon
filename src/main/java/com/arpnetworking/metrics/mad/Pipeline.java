@@ -71,7 +71,6 @@ public final class Pipeline implements Launchable {
                 .setCounterStatistics(_pipelineConfiguration.getCounterStatistics())
                 .setGaugeStatistics(_pipelineConfiguration.getGaugeStatistics())
                 .setStatistics(_pipelineConfiguration.getStatistics())
-//                .setDimensions(_pipelineConfiguration.getDimensions())
                 .setSink(rootSink)
                 .build();
         aggregator.launch();
