@@ -42,7 +42,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * Representation of TsdAggregator pipeline configuration. Each pipeline can
@@ -110,10 +109,6 @@ public final class PipelineConfiguration {
         return _statistics;
     }
 
-    public Map<String, Map<Pattern, Set<String>>> getDimensions() {
-        return Collections.unmodifiableMap(_dimensions);
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -128,7 +123,6 @@ public final class PipelineConfiguration {
                 .add("TimerStatistic", _timerStatistic)
                 .add("CounterStatistic", _counterStatistic)
                 .add("GaugeStatistic", _gaugeStatistic)
-                .add("Dimensions", _dimensions)
                 .toString();
     }
 
@@ -141,7 +135,6 @@ public final class PipelineConfiguration {
         _counterStatistic = ImmutableSet.copyOf(builder._counterStatistics);
         _gaugeStatistic = ImmutableSet.copyOf(builder._gaugeStatistics);
         _statistics = ImmutableMap.copyOf(builder._statistics);
-        _dimensions = builder._dimensions;
     }
 
     private final String _name;
@@ -152,7 +145,6 @@ public final class PipelineConfiguration {
     private final ImmutableSet<Statistic> _counterStatistic;
     private final ImmutableSet<Statistic> _gaugeStatistic;
     private final ImmutableMap<String, Set<Statistic>> _statistics;
-    private final Map<String, Map<Pattern, Set<String>>> _dimensions;
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
 
@@ -263,18 +255,6 @@ public final class PipelineConfiguration {
             return this;
         }
 
-        /**
-         * Dimensions configuration.
-         *
-         * Dimensions Configuration
-         * @param value The Dimensions configuration
-         * @return This instance of <code>Builder</code>
-         */
-        public Builder setDimensions(final Map<String, Map<Pattern, Set<String>>> value) {
-            _dimensions = value;
-            return this;
-        }
-
         @NotNull
         @NotEmpty
         private String _name;
@@ -307,7 +287,5 @@ public final class PipelineConfiguration {
                 STATISTIC_FACTORY.getStatistic("mean"));
         @NotNull
         private Map<String, Set<Statistic>> _statistics = Collections.emptyMap();
-        @NotNull
-        private Map<String, Map<Pattern, Set<String>>> _dimensions;
     }
 }

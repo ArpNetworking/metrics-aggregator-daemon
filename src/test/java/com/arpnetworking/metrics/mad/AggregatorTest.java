@@ -66,7 +66,6 @@ public class AggregatorTest {
                 .setTimerStatistics(Collections.singleton(MAX_STATISTIC))
                 .setGaugeStatistics(Collections.singleton(MAX_STATISTIC))
                 .setPeriods(Collections.singleton(Period.seconds(1)))
-//                .setDimensions(ImmutableMap.of())
                 .build();
         _aggregator.launch();
     }

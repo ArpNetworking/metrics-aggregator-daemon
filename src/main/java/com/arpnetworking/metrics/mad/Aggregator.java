@@ -168,8 +168,8 @@ public final class Aggregator implements Observer, Launchable {
     private Map<String, String> extractLegacyDimensions(final Record record) {
 
         final ImmutableMap.Builder<String, String> defaultDimensions = ImmutableMap.builder();
-        for (String fred : _hardCodedWhiteList) {
-            defaultDimensions.put(fred, record.getAnnotations().get(fred));
+        for (String dimension : _legacyDimensionList) {
+            defaultDimensions.put(dimension, record.getAnnotations().get(dimension));
         }
 
         return defaultDimensions.build();
@@ -224,7 +224,7 @@ public final class Aggregator implements Observer, Launchable {
         return recordList.build();
     }
 
-    private final Set<String> _hardCodedWhiteList = ImmutableSet.of(
+    private final Set<String> _legacyDimensionList = ImmutableSet.of(
             Key.HOST_DIMENSION_KEY, Key.SERVICE_DIMENSION_KEY, Key.CLUSTER_DIMENSION_KEY
     );
 
