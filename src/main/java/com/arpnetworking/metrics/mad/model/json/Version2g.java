@@ -163,6 +163,7 @@ public final class Version2g {
             return this;
         }
 
+        @NotNull
         private Dimensions _dimensions;
         @NotNull
         private Annotations _annotations;
