@@ -94,6 +94,17 @@ public class JsonToRecordParserV2gTest {
         Assert.assertTrue(record.getMetrics().isEmpty());
     }
 
+    @Test 
+    public void testPresentDimensions() throws ParsingException, IOException {
+        final Record record = parseRecord("QueryLogParserV2gTest/testPresentDimensions.json");
+        Assert.assertNotNull(record);
+
+        Assert.assertNotNull(record.getDimensions());
+        Assert.assertEquals(2, record.getDimensions().size());
+        Assert.assertEquals("DimVal1", record.getDimensions().get("Dim1"));
+        Assert.assertEquals("DimVal2", record.getDimensions().get("Dim2"));
+    }
+
     @Test
     public void testMissingDimensions() throws ParsingException, IOException {
         parseRecord("QueryLogParserV2gTest/testMissingDimensions.json");
