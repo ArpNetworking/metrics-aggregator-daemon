@@ -100,16 +100,6 @@ public class JsonToRecordParserV2gTest {
     }
 
     @Test(expected = ParsingException.class)
-    public void testMissingDimensionValues() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testMissingDimensionValues.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testMissingDimensionMappings() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testMissingDimensionMappings.json");
-    }
-
-    @Test(expected = ParsingException.class)
     public void testMissingAnnotationService() throws ParsingException, IOException {
         parseRecord("QueryLogParserV2gTest/testMissingAnnotationService.json");
     }

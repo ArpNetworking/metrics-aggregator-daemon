@@ -1,9 +1,6 @@
 {
     "version": "2g",
-    "dimensions": {
-         "values": {},
-         "mappings": {}
-     },
+    "dimensions": {},
     "annotations": {
         "_start": "2014-03-24T12:15:40.008Z",
         "_end": "2014-03-24T12:15:41.010Z",

@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.MatchPattern;
 import net.sf.oval.constraint.NotEmpty;
@@ -62,7 +61,7 @@ public final class Version2g {
         return _annotations;
     }
 
-    public Dimensions getDimensions() {
+    public Map<String, String> getDimensions() {
         return _dimensions;
     }
 
@@ -71,7 +70,7 @@ public final class Version2g {
     }
 
     private Version2g(final Builder builder) {
-        _dimensions = builder._dimensions;
+        _dimensions = builder._dimensions == null ? ImmutableMap.of() : ImmutableMap.copyOf(builder._dimensions);
         _annotations = builder._annotations;
         _version = builder._version;
         _timers = builder._timers == null ? ImmutableMap.of() : ImmutableMap.copyOf(builder._timers);
@@ -79,7 +78,7 @@ public final class Version2g {
         _counters = builder._counters == null ? ImmutableMap.of() : ImmutableMap.copyOf(builder._counters);
     }
 
-    private final Dimensions _dimensions;
+    private final ImmutableMap<String, String> _dimensions;
     private final Annotations _annotations;
     private final ImmutableMap<String, Element> _counters;
     private final ImmutableMap<String, Element> _timers;
@@ -114,7 +113,7 @@ public final class Version2g {
          * @param value Value
          * @return This builder
          */
-        public Builder setDimensions(final Dimensions value) {
+        public Builder setDimensions(final Map<String, String> value) {
             _dimensions = value;
             return this;
         }
@@ -164,7 +163,7 @@ public final class Version2g {
         }
 
         @NotNull
-        private Dimensions _dimensions;
+        private Map<String, String> _dimensions;
         @NotNull
         private Annotations _annotations;
         private Map<String, Element> _counters;
@@ -299,67 +298,67 @@ public final class Version2g {
         }
     }
 
-    /**
-     * Represents the set of dimensions on a line.
-     */
-    public static final class Dimensions {
-        public ImmutableMap<String, String> getValues() {
-            return _values;
-        }
-
-        public ImmutableMap<String, ImmutableSet<String>> getMappings() {
-            return _mappings;
-        }
-
-        private Dimensions(final Dimensions.Builder builder) {
-            _values = builder._values;
-            _mappings = builder._mappings;
-        }
-
-        private final ImmutableMap<String, String> _values;
-        private final ImmutableMap<String, ImmutableSet<String>> _mappings;
-
-        /**
-         * Builder for the Dimensions class.
-         */
-        public static final class Builder extends OvalBuilder<Dimensions> {
-            /**
-             * Public constructor.
-             */
-            public Builder() {
-                super(Dimensions::new);
-            }
-
-            /**
-             * Sets the values field.
-             *
-             * @param value Value
-             * @return This builder
-             */
-            @JsonAnySetter
-            public Dimensions.Builder setValues(final ImmutableMap<String, String> value) {
-                _values = value;
-                return this;
-            }
-
-            /**
-             * Sets the mappings field.
-             *
-             * @param value Value
-             * @return This builder
-             */
-            @JsonAnySetter
-            public Dimensions.Builder setMappings(final ImmutableMap<String, ImmutableSet<String>> value) {
-                _mappings = value;
-                return this;
-            }
-
-            @NotNull
-            private ImmutableMap<String, String> _values;
-            @NotNull
-            private ImmutableMap<String, ImmutableSet<String>> _mappings;
-        }
-    }
+//    /**
+//     * Represents the set of dimensions on a line.
+//     */
+//    public static final class Dimensions {
+//        public ImmutableMap<String, String> getValues() {
+//            return _values;
+//        }
+//
+//        public ImmutableMap<String, ImmutableSet<String>> getMappings() {
+//            return _mappings;
+//        }
+//
+//        private Dimensions(final Dimensions.Builder builder) {
+//            _values = builder._values;
+//            _mappings = builder._mappings;
+//        }
+//
+//        private final ImmutableMap<String, String> _values;
+//        private final ImmutableMap<String, ImmutableSet<String>> _mappings;
+//
+//        /**
+//         * Builder for the Dimensions class.
+//         */
+//        public static final class Builder extends OvalBuilder<Dimensions> {
+//            /**
+//             * Public constructor.
+//             */
+//            public Builder() {
+//                super(Dimensions::new);
+//            }
+//
+//            /**
+//             * Sets the values field.
+//             *
+//             * @param value Value
+//             * @return This builder
+//             */
+//            @JsonAnySetter
+//            public Dimensions.Builder setValues(final ImmutableMap<String, String> value) {
+//                _values = value;
+//                return this;
+//            }
+//
+//            /**
+//             * Sets the mappings field.
+//             *
+//             * @param value Value
+//             * @return This builder
+//             */
+//            @JsonAnySetter
+//            public Dimensions.Builder setMappings(final ImmutableMap<String, ImmutableSet<String>> value) {
+//                _mappings = value;
+//                return this;
+//            }
+//
+//            @NotNull
+//            private ImmutableMap<String, String> _values;
+//            @NotNull
+//            private ImmutableMap<String, ImmutableSet<String>> _mappings;
+//        }
+//    }
 
     /**
      * Represents the set of annotations on a line.

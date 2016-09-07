@@ -19,8 +19,6 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
-import com.arpnetworking.metrics.mad.model.DefaultRecord;
-import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
@@ -34,12 +32,10 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.Period;
@@ -48,7 +44,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -122,23 +117,24 @@ public final class Aggregator implements Observer, Launchable {
 
         final Record record = (Record) event;
         final Map<String, String> legacyDimensions = extractLegacyDimensions(record);
+        final ImmutableMap.Builder<String, String> dimensionBuilder = ImmutableMap.builder();
+        dimensionBuilder.putAll(legacyDimensions);
+        dimensionBuilder.putAll(record.getDimensions());
 
-        final List<Record> splitRecords = splitOnDimensions(record);
-        for (Record splitRecord : splitRecords) {
-            final ImmutableMap.Builder<String, String> dimensionBuilder = ImmutableMap.builder();
-            dimensionBuilder.putAll(legacyDimensions);
-            dimensionBuilder.putAll(splitRecord.getDimensionValues());
+//        final List<Record> splitRecords = splitOnDimensions(record);
+//        for (Record splitRecord : splitRecords) {
+//            dimensionBuilder.putAll(splitRecord.getDimensionValues());
 
             final Key key = new DefaultKey(dimensionBuilder.build());
             LOGGER.trace()
                 .setMessage("Processing record")
-                .addData("record", splitRecord)
+                .addData("record", record)
                 .addData("key", key)
                 .log();
             for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
-                periodWorker.record(splitRecord);
+                periodWorker.record(record);
             }
-        }
+//        }
     }
 
     /**
@@ -173,55 +169,6 @@ public final class Aggregator implements Observer, Launchable {
         }
 
         return defaultDimensions.build();
-    }
-
-    private List<Record> splitOnDimensions(final Record record) {
-        final ImmutableList.Builder<Record> recordList = ImmutableList.builder();
-
-        final Map<Set<String>, Set<String>> recordSeeds = Maps.newHashMap();
-        for (String metricName : record.getMetrics().keySet()) {
-            // Grab the list of mapped dimension names
-            final ImmutableSet<String> metricDimensions = record.getDimensionMappings().getOrDefault(metricName, ImmutableSet.of());
-            // Exclude the ones that don't have a value set
-            metricDimensions.removeIf(dimensionName -> !record.getDimensionValues().containsKey(dimensionName));
-            // Put the metric into a record that represents a unique set of dimension names
-            recordSeeds.putIfAbsent(metricDimensions, Sets.newHashSet());
-            recordSeeds.get(metricDimensions).add(metricName);
-        }
-
-        for (Map.Entry<Set<String>, Set<String>> recordSeed : recordSeeds.entrySet()) {
-
-            final DefaultRecord.Builder recordBuilder = new DefaultRecord.Builder();
-            recordBuilder.setId(UUID.randomUUID().toString());
-            recordBuilder.setTime(record.getTime());
-            recordBuilder.setAnnotations(record.getAnnotations());
-
-            final ImmutableMap.Builder<String, ImmutableSet<String>> dimensionMapBuilder = ImmutableMap.builder();
-            for (String metric : recordSeed.getValue()) {
-                final ImmutableSet<String> metricDimensions = record.getDimensionMappings().get(metric);
-                if (metricDimensions != null && !metricDimensions.isEmpty()) {
-                    dimensionMapBuilder.put(metric, metricDimensions);
-                }
-            }
-            recordBuilder.setDimensionMappings(dimensionMapBuilder.build());
-
-            // Reduce the list of dimensions added to the ones that are used to create the bucket
-            final ImmutableMap.Builder<String, String> dimensionValueBuilder = ImmutableMap.builder();
-            for (String dimensionName : recordSeed.getKey()) {
-                dimensionValueBuilder.put(dimensionName, record.getDimensionValues().get(dimensionName));
-            }
-            recordBuilder.setDimensionValues(dimensionValueBuilder.build());
-
-            final ImmutableMap.Builder<String, Metric> metricMapBuilder = ImmutableMap.builder();
-            for (String metric : recordSeed.getValue()) {
-                metricMapBuilder.put(metric, record.getMetrics().get(metric));
-            }
-            recordBuilder.setMetrics(metricMapBuilder.build());
-
-            recordList.add(recordBuilder.build());
-        }
-
-        return recordList.build();
     }
 
     private final Set<String> _legacyDimensionList = ImmutableSet.of(

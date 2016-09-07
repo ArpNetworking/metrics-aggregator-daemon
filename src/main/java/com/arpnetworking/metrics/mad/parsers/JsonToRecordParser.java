@@ -245,7 +245,6 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
             throws JsonProcessingException {
 
         final Version2g model = OBJECT_MAPPER.treeToValue(jsonNode, Version2g.class);
-        final Version2g.Dimensions dimensions = model.getDimensions();
         final Version2g.Annotations annotations = model.getAnnotations();
         final ImmutableMap.Builder<String, Metric> variables = ImmutableMap.builder();
 
@@ -277,8 +276,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 .setTime(annotations.getEnd())
                 .setId(annotations.getId())
                 .setAnnotations(mappedAnnotations.build())
-                .setDimensionValues(dimensions.getValues())
-                .setDimensionMappings(dimensions.getMappings())
+                .setDimensions(model.getDimensions() == null ? ImmutableMap.of() : ImmutableMap.copyOf(model.getDimensions()))
                 .build();
     }
 

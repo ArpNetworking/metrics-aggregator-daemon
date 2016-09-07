@@ -16,7 +16,6 @@
 package com.arpnetworking.metrics.mad.model;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import org.joda.time.DateTime;
 
 /**
@@ -63,12 +62,5 @@ public interface Record {
      *
      * @return the dimension values
      */
-    ImmutableMap<String, String> getDimensionValues();
-
-    /**
-     * Gets dimension mappings.
-     *
-     * @return the dimension mappings
-     */
-    ImmutableMap<String, ImmutableSet<String>> getDimensionMappings();
+    ImmutableMap<String, String> getDimensions();
 }
