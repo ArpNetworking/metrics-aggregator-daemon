@@ -20,8 +20,7 @@ import org.joda.time.DateTime;
 
 /**
  * The interface to a record. Records consistent of a timestamp, any number of
- * named metrics, annotations (arbitrary key-value pairs) dimension values (arbitrary key-value pairs)
- * and dimension mappings (metric name to list of dimension value keys).
+ * named metrics, annotations (arbitrary key-value pairs) and dimension (arbitrary key-value pairs).
  *
  * @author Brandon Arp (brandonarp at gmail dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)

@@ -116,17 +116,16 @@ public final class Aggregator implements Observer, Launchable {
         }
 
         final Record record = (Record) event;
-        final Map<String, String> legacyDimensions = extractLegacyDimensions(record);
         final ImmutableMap.Builder<String, String> dimensionBuilder = ImmutableMap.builder();
-        dimensionBuilder.putAll(legacyDimensions);
+        dimensionBuilder.putAll(extractLegacyDimensions(record));
         dimensionBuilder.putAll(record.getDimensions());
 
         final Key key = new DefaultKey(dimensionBuilder.build());
         LOGGER.trace()
-            .setMessage("Processing record")
-            .addData("record", record)
-            .addData("key", key)
-            .log();
+                .setMessage("Processing record")
+                .addData("record", record)
+                .addData("key", key)
+                .log();
         for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
             periodWorker.record(record);
         }

@@ -109,28 +109,10 @@
   "type": "object",
   "properties": {
     "dimensions": {
-      "type": "object",
-      "properties": {
-        "values": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "mappings": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
         }
-      },
-      "required": [
-        "values", "mappings"
-      ],
-      "additionalProperties": false
     },
     "annotations": {
       "type": "object",
@@ -186,5 +168,4 @@
     "annotations",
     "version"
   ],
-  "additionalProperties": false
 }

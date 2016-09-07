@@ -162,7 +162,6 @@ public final class Version2g {
             return this;
         }
 
-        @NotNull
         private Map<String, String> _dimensions;
         @NotNull
         private Annotations _annotations;

@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Tests for the 2f version of the query log format.
+ * Tests for the 2g version of the query log format.
  *
  * @author Ryan Ascheman (rascheman at groupon dot com)
  */
@@ -94,7 +94,7 @@ public class JsonToRecordParserV2gTest {
         Assert.assertTrue(record.getMetrics().isEmpty());
     }
 
-    @Test(expected = ParsingException.class)
+    @Test
     public void testMissingDimensions() throws ParsingException, IOException {
         parseRecord("QueryLogParserV2gTest/testMissingDimensions.json");
     }

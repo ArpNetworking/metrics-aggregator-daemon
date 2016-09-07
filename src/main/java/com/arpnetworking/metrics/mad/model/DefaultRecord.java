@@ -126,7 +126,6 @@ public final class DefaultRecord implements Record {
         _time = builder._time;
         _annotations = builder._annotations;
         _dimensions = builder._dimensions;
-
     }
 
     private final ImmutableMap<String, ? extends Metric> _metrics;
