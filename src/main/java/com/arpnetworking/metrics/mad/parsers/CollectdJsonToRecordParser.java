@@ -54,6 +54,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 /**
  * Parses Collectd JSON data as a {@link Record}.
@@ -94,6 +95,9 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                 final String typeInstance = record.getTypeInstance();
 
                 for (final CollectdRecord.Sample sample : record.getSamples()) {
+                    if (sample.getValue() == null) {
+                        continue;
+                    }
                     final String metricName = computeMetricName(plugin, pluginInstance, type, typeInstance, sample.getDsName());
                     final MetricType metricType = mapDsType(sample.getDsType());
                     final Metric metric = new DefaultMetric.Builder()
@@ -226,13 +230,17 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             _pluginInstance = builder._pluginInstance;
             _type = builder._type;
             _typeInstance = builder._typeInstance;
-            _samples = Lists.newArrayListWithExpectedSize(builder._values.size());
+            if (builder._values != null && builder._dsTypes != null && builder._dsNames != null) {
+                _samples = Lists.newArrayListWithExpectedSize(builder._values.size());
 
-            final Iterator<Double> valuesIterator = builder._values.iterator();
-            final Iterator<String> typesIterator = builder._dsTypes.iterator();
-            final Iterator<String> namesIterator = builder._dsNames.iterator();
-            while (valuesIterator.hasNext() && typesIterator.hasNext() && namesIterator.hasNext()) {
-                _samples.add(new Sample(valuesIterator.next(), typesIterator.next(), namesIterator.next()));
+                final Iterator<Double> valuesIterator = builder._values.iterator();
+                final Iterator<String> typesIterator = builder._dsTypes.iterator();
+                final Iterator<String> namesIterator = builder._dsNames.iterator();
+                while (valuesIterator.hasNext() && typesIterator.hasNext() && namesIterator.hasNext()) {
+                    _samples.add(new Sample(valuesIterator.next(), typesIterator.next(), namesIterator.next()));
+                }
+            } else {
+                _samples = Collections.emptyList();
             }
         }
 
@@ -370,12 +378,12 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             private String _type;
             @NotNull
             private String _typeInstance;
-            @NotNull
+            @Nullable
             @CheckWith(value = ValueArraysValid.class, message = "values, dstypes, and dsnames must have the same number of entries")
             private List<Double> _values = Collections.emptyList();
-            @NotNull
+            @Nullable
             private List<String> _dsTypes = Collections.emptyList();
-            @NotNull
+            @Nullable
             private List<String> _dsNames = Collections.emptyList();
 
 
@@ -384,6 +392,9 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                 public boolean isSatisfied(final Object validatedObject, final Object value) {
                     if (validatedObject instanceof Builder) {
                         final Builder builder = (Builder) validatedObject;
+                        if (builder._values == null && builder._dsNames == null && builder._dsTypes == null) {
+                            return true;
+                        }
                         return builder._values != null && builder._dsTypes != null && builder._dsNames != null
                                 && builder._values.size() == builder._dsTypes.size()
                                 && builder._values.size() == builder._dsNames.size();
