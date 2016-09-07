@@ -121,20 +121,15 @@ public final class Aggregator implements Observer, Launchable {
         dimensionBuilder.putAll(legacyDimensions);
         dimensionBuilder.putAll(record.getDimensions());
 
-//        final List<Record> splitRecords = splitOnDimensions(record);
-//        for (Record splitRecord : splitRecords) {
-//            dimensionBuilder.putAll(splitRecord.getDimensionValues());
-
-            final Key key = new DefaultKey(dimensionBuilder.build());
-            LOGGER.trace()
-                .setMessage("Processing record")
-                .addData("record", record)
-                .addData("key", key)
-                .log();
-            for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
-                periodWorker.record(record);
-            }
-//        }
+        final Key key = new DefaultKey(dimensionBuilder.build());
+        LOGGER.trace()
+            .setMessage("Processing record")
+            .addData("record", record)
+            .addData("key", key)
+            .log();
+        for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
+            periodWorker.record(record);
+        }
     }
 
     /**

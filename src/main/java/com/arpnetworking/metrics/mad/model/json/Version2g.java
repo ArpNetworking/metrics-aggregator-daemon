@@ -298,68 +298,6 @@ public final class Version2g {
         }
     }
 
-//    /**
-//     * Represents the set of dimensions on a line.
-//     */
-//    public static final class Dimensions {
-//        public ImmutableMap<String, String> getValues() {
-//            return _values;
-//        }
-//
-//        public ImmutableMap<String, ImmutableSet<String>> getMappings() {
-//            return _mappings;
-//        }
-//
-//        private Dimensions(final Dimensions.Builder builder) {
-//            _values = builder._values;
-//            _mappings = builder._mappings;
-//        }
-//
-//        private final ImmutableMap<String, String> _values;
-//        private final ImmutableMap<String, ImmutableSet<String>> _mappings;
-//
-//        /**
-//         * Builder for the Dimensions class.
-//         */
-//        public static final class Builder extends OvalBuilder<Dimensions> {
-//            /**
-//             * Public constructor.
-//             */
-//            public Builder() {
-//                super(Dimensions::new);
-//            }
-//
-//            /**
-//             * Sets the values field.
-//             *
-//             * @param value Value
-//             * @return This builder
-//             */
-//            @JsonAnySetter
-//            public Dimensions.Builder setValues(final ImmutableMap<String, String> value) {
-//                _values = value;
-//                return this;
-//            }
-//
-//            /**
-//             * Sets the mappings field.
-//             *
-//             * @param value Value
-//             * @return This builder
-//             */
-//            @JsonAnySetter
-//            public Dimensions.Builder setMappings(final ImmutableMap<String, ImmutableSet<String>> value) {
-//                _mappings = value;
-//                return this;
-//            }
-//
-//            @NotNull
-//            private ImmutableMap<String, String> _values;
-//            @NotNull
-//            private ImmutableMap<String, ImmutableSet<String>> _mappings;
-//        }
-//    }
-
     /**
      * Represents the set of annotations on a line.
      */

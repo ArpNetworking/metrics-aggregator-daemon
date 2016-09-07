@@ -371,17 +371,8 @@ public class AggregatorTest {
             final String metricName,
             final Key dimensionSetA,
             final Key dimensionSetB) {
-        return getCapturedData(metricName, dimensionSetA, metricName, dimensionSetB);
-    }
-
-    private List<AggregatedData> getCapturedData(
-            final String metricNameA,
-            final Key dimensionSetA,
-            final String metricNameB,
-            final Key dimensionSetB) {
         final List<PeriodicData> capturedPeriodicData = _periodicDataCaptor.getAllValues();
         Assert.assertEquals(2, capturedPeriodicData.size());
-
         if (capturedPeriodicData.get(0).getDimensions().equals(dimensionSetA)) {
             Assert.assertEquals(dimensionSetB, capturedPeriodicData.get(1).getDimensions());
         } else {
@@ -389,17 +380,12 @@ public class AggregatorTest {
             Assert.assertEquals(dimensionSetA, capturedPeriodicData.get(1).getDimensions());
         }
         Assert.assertEquals(1, capturedPeriodicData.get(0).getData().keySet().size());
-        if (capturedPeriodicData.get(0).getData().keySet().iterator().next().equals(metricNameA)) {
-            Assert.assertEquals(metricNameB, capturedPeriodicData.get(1).getData().keySet().iterator().next());
-        } else {
-            Assert.assertEquals(metricNameB, capturedPeriodicData.get(0).getData().keySet().iterator().next());
-            Assert.assertEquals(metricNameA, capturedPeriodicData.get(1).getData().keySet().iterator().next());
-        }
+        Assert.assertEquals(metricName, capturedPeriodicData.get(0).getData().keySet().iterator().next());
         Assert.assertEquals(2, capturedPeriodicData.get(0).getData().size());
         Assert.assertEquals(2, capturedPeriodicData.get(1).getData().size());
         final List<AggregatedData> unifiedData = Lists.newArrayList();
-        unifiedData.addAll(capturedPeriodicData.get(0).getData().get(metricNameA));
-        unifiedData.addAll(capturedPeriodicData.get(1).getData().get(metricNameB));
+        unifiedData.addAll(capturedPeriodicData.get(0).getData().get(metricName));
+        unifiedData.addAll(capturedPeriodicData.get(1).getData().get(metricName));
         return unifiedData;
     }
 
