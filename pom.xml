@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>1.0.26</version>
+    <version>1.0.27</version>
     <relativePath />
   </parent>
 
@@ -116,9 +116,6 @@
     <docker.maven.plugin.version>0.15.9</docker.maven.plugin.version>
     <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
     <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
-
-    <!-- Findbugs -->
-    <findbugs.exclude>${project.basedir}/findbugs.exclude.xml</findbugs.exclude>
 
     <!-- Code Coverage -->
     <jacoco.check.line.coverage>0.50</jacoco.check.line.coverage>
