@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Groupon.com
+ * Copyright 2016 Groupon.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public final class Version2g {
     }
 
     private Version2g(final Builder builder) {
-        _dimensions = builder._dimensions == null ? ImmutableMap.of() : ImmutableMap.copyOf(builder._dimensions);
+        _dimensions = ImmutableMap.copyOf(builder._dimensions);
         _annotations = builder._annotations;
         _version = builder._version;
         _timers = builder._timers == null ? ImmutableMap.of() : ImmutableMap.copyOf(builder._timers);

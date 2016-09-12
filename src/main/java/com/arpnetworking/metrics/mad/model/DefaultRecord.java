@@ -230,6 +230,7 @@ public final class DefaultRecord implements Record {
         @NotNull
         @ValidateWithMethod(methodName = "validateAnnotations", parameterType = ImmutableMap.class)
         private ImmutableMap<String, String> _annotations = ImmutableMap.of();
+        @NotNull
         private ImmutableMap<String, String> _dimensions = ImmutableMap.of();
     }
 }

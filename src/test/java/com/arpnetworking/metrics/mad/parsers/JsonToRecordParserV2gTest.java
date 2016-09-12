@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Groupon.com
+ * Copyright 2016 Groupon.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public class JsonToRecordParserV2gTest {
         Assert.assertEquals("DimVal2", record.getDimensions().get("Dim2"));
     }
 
-    @Test
+    @Test(expected = ParsingException.class)
     public void testMissingDimensions() throws ParsingException, IOException {
         parseRecord("QueryLogParserV2gTest/testMissingDimensions.json");
     }

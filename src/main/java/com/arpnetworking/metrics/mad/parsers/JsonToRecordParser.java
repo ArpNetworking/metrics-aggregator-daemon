@@ -276,7 +276,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 .setTime(annotations.getEnd())
                 .setId(annotations.getId())
                 .setAnnotations(mappedAnnotations.build())
-                .setDimensions(model.getDimensions() == null ? ImmutableMap.of() : ImmutableMap.copyOf(model.getDimensions()))
+                .setDimensions(ImmutableMap.copyOf(model.getDimensions()))
                 .build();
     }
 
@@ -547,7 +547,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 if (Double.isFinite(value)) {
                     return new Quantity.Builder().setValue(value).build();
                 } else {
-                    // TODO(barp): Create a counter for invalid metrics [AINT-680]
+                    // TODO(barp): Create a counter for invalid metrics
                     INVALID_SAMPLE_LOGGER
                             .warn()
                             .setMessage("Invalid sample for metric")
@@ -571,7 +571,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                         .setUnit(sample.getUnit().orNull())
                         .build();
             } else {
-                // TODO(barp): Create a counter for invalid metrics [AINT-680]
+                // TODO(barp): Create a counter for invalid metrics
                 INVALID_SAMPLE_LOGGER
                         .warn()
                         .setMessage("Invalid sample for metric")
@@ -592,7 +592,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                         .setUnit(sample.getUnit().orNull())
                         .build();
             } else {
-                // TODO(barp): Create a counter for invalid metrics [AINT-680]
+                // TODO(barp): Create a counter for invalid metrics
                 INVALID_SAMPLE_LOGGER
                         .warn()
                         .setMessage("Invalid sample for metric")
@@ -611,12 +611,12 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 return new Quantity.Builder()
                         .setValue(sample.getValue())
                         .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))
-                        // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
+                        // TODO(vkoskela): Support compound units in Tsd Aggregator
                         //.setNumeratorUnits(sample.getUnitNumerators())
                         //.setDenominatorUnits(sample.getUnitDenominators())
                         .build();
             } else {
-                // TODO(barp): Create a counter for invalid metrics [AINT-680]
+                // TODO(barp): Create a counter for invalid metrics
                 INVALID_SAMPLE_LOGGER
                         .warn()
                         .setMessage("Invalid sample for metric")
@@ -635,12 +635,12 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 return new Quantity.Builder()
                         .setValue(sample.getValue())
                         .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))
-                                // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
+                                // TODO(vkoskela): Support compound units in Tsd Aggregator
                         //.setNumeratorUnits(sample.getUnitNumerators())
                         //.setDenominatorUnits(sample.getUnitDenominators())
                         .build();
             } else {
-                // TODO(barp): Create a counter for invalid metrics [AINT-680]
+                // TODO(barp): Create a counter for invalid metrics
                 INVALID_SAMPLE_LOGGER
                         .warn()
                         .setMessage("Invalid sample for metric")
@@ -659,12 +659,12 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 return new Quantity.Builder()
                         .setValue(sample.getValue())
                         .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))
-                        // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
+                        // TODO(vkoskela): Support compound units in Tsd Aggregator
                         //.setNumeratorUnits(sample.getUnitNumerators())
                         //.setDenominatorUnits(sample.getUnitDenominators())
                         .build();
             } else {
-                // TODO(barp): Create a counter for invalid metrics [AINT-680]
+                // TODO(barp): Create a counter for invalid metrics
                 INVALID_SAMPLE_LOGGER
                         .warn()
                         .setMessage("Invalid sample for metric")

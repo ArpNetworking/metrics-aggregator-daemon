@@ -158,14 +158,14 @@ public final class Aggregator implements Observer, Launchable {
     private Map<String, String> extractLegacyDimensions(final Record record) {
 
         final ImmutableMap.Builder<String, String> defaultDimensions = ImmutableMap.builder();
-        for (String dimension : _legacyDimensionList) {
+        for (String dimension : LEGACY_DIMENSION_LIST) {
             defaultDimensions.put(dimension, record.getAnnotations().get(dimension));
         }
 
         return defaultDimensions.build();
     }
 
-    private final Set<String> _legacyDimensionList = ImmutableSet.of(
+    private static final Set<String> LEGACY_DIMENSION_LIST = ImmutableSet.of(
             Key.HOST_DIMENSION_KEY, Key.SERVICE_DIMENSION_KEY, Key.CLUSTER_DIMENSION_KEY
     );
 
