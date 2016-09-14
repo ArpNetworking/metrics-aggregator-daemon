@@ -45,7 +45,6 @@ import net.sf.oval.constraint.NotNull;
 import net.sf.oval.exception.ConstraintsViolatedException;
 import org.joda.time.DateTime;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,6 +54,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 /**
  * Parses Collectd JSON data as a {@link Record}.

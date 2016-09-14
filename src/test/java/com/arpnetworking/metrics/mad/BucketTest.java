@@ -46,9 +46,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.UUID;
+import javax.annotation.Nullable;
 
 /**
  * Tests for the <code>Bucket</code> class.
