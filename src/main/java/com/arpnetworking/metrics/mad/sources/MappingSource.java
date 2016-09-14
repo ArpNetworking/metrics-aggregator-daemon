@@ -151,7 +151,7 @@ public final class MappingSource extends BaseSource {
                     new DefaultRecord.Builder()
                             .setMetrics(
                                     ImmutableMap.copyOf(
-                                            Maps.<String, MergingMetric, Metric>transformEntries(
+                                            Maps.transformEntries(
                                                     mergedMetrics,
                                                     (key, mergingMetric) ->
                                                             OvalBuilder.clone(
@@ -161,6 +161,7 @@ public final class MappingSource extends BaseSource {
                             .setId(record.getId())
                             .setTime(record.getTime())
                             .setAnnotations(record.getAnnotations())
+                            .setDimensions(record.getDimensions())
                             .build());
         }
 

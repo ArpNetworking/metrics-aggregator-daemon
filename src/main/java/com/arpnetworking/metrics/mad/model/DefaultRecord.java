@@ -207,14 +207,14 @@ public final class DefaultRecord implements Record {
 
         // Called by OVal reflectively
         @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
-        private boolean validateAnnotations(final ImmutableMap<String, String> annotations) {
-            if (Strings.isNullOrEmpty(annotations.get(Key.HOST_DIMENSION_KEY))) {
+        private boolean validateDimensions(final ImmutableMap<String, String> dimensions) {
+            if (Strings.isNullOrEmpty(dimensions.get(Key.HOST_DIMENSION_KEY))) {
                 return false;
             }
-            if (Strings.isNullOrEmpty(annotations.get(Key.SERVICE_DIMENSION_KEY))) {
+            if (Strings.isNullOrEmpty(dimensions.get(Key.SERVICE_DIMENSION_KEY))) {
                 return false;
             }
-            if (Strings.isNullOrEmpty(annotations.get(Key.CLUSTER_DIMENSION_KEY))) {
+            if (Strings.isNullOrEmpty(dimensions.get(Key.CLUSTER_DIMENSION_KEY))) {
                 return false;
             }
             return true;
@@ -228,9 +228,9 @@ public final class DefaultRecord implements Record {
         @NotNull
         private DateTime _time;
         @NotNull
-        @ValidateWithMethod(methodName = "validateAnnotations", parameterType = ImmutableMap.class)
         private ImmutableMap<String, String> _annotations = ImmutableMap.of();
         @NotNull
+        @ValidateWithMethod(methodName = "validateDimensions", parameterType = ImmutableMap.class)
         private ImmutableMap<String, String> _dimensions = ImmutableMap.of();
     }
 }

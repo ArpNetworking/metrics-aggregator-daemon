@@ -17,13 +17,9 @@ package com.arpnetworking.metrics.mad.model.json;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.tsdcore.model.Unit;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import net.sf.oval.constraint.MatchPattern;
-import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.DateTime;
 
@@ -45,6 +41,14 @@ import java.util.regex.Pattern;
  */
 public final class Version2g {
 
+    public String getId() {
+        return _id;
+    }
+
+    public DateTime getDate() {
+        return _date;
+    }
+
     public Map<String, Element> getTimers() {
         return _timers;
     }
@@ -57,7 +61,7 @@ public final class Version2g {
         return _counters;
     }
 
-    public Annotations getAnnotations() {
+    public Map<String, String> getAnnotations() {
         return _annotations;
     }
 
@@ -70,16 +74,20 @@ public final class Version2g {
     }
 
     private Version2g(final Builder builder) {
+        _id = builder._id;
+        _date = builder._date;
         _dimensions = ImmutableMap.copyOf(builder._dimensions);
-        _annotations = builder._annotations;
+        _annotations = ImmutableMap.copyOf(builder._annotations);
         _version = builder._version;
         _timers = builder._timers == null ? ImmutableMap.of() : ImmutableMap.copyOf(builder._timers);
         _gauges = builder._gauges == null ? ImmutableMap.of() : ImmutableMap.copyOf(builder._gauges);
         _counters = builder._counters == null ? ImmutableMap.of() : ImmutableMap.copyOf(builder._counters);
     }
 
+    private final String _id;
+    private final DateTime _date;
     private final ImmutableMap<String, String> _dimensions;
-    private final Annotations _annotations;
+    private final ImmutableMap<String, String> _annotations;
     private final ImmutableMap<String, Element> _counters;
     private final ImmutableMap<String, Element> _timers;
     private final ImmutableMap<String, Element> _gauges;
@@ -97,12 +105,34 @@ public final class Version2g {
         }
 
         /**
+         * Sets the date field.
+         *
+         * @param value Value
+         * @return This builder
+         */
+        public Builder setDate(final DateTime value) {
+            _date = value;
+            return this;
+        }
+
+        /**
+         * Sets the id field.
+         *
+         * @param value Value
+         * @return This builder
+         */
+        public Builder setId(final String value) {
+            _id = value;
+            return this;
+        }
+
+        /**
          * Sets the annotations field.
          *
          * @param value Value
          * @return This builder
          */
-        public Builder setAnnotations(final Annotations value) {
+        public Builder setAnnotations(final Map<String, String> value) {
             _annotations = value;
             return this;
         }
@@ -162,9 +192,14 @@ public final class Version2g {
             return this;
         }
 
+        @NotNull
+        private String _id;
+        @NotNull
+        private DateTime _date;
+        @NotNull
         private Map<String, String> _dimensions;
         @NotNull
-        private Annotations _annotations;
+        private Map<String, String> _annotations;
         private Map<String, Element> _counters;
         private Map<String, Element> _gauges;
         private Map<String, Element> _timers;
@@ -294,111 +329,6 @@ public final class Version2g {
 
             @NotNull
             private List<Sample> _values;
-        }
-    }
-
-    /**
-     * Represents the set of annotations on a line.
-     */
-    public static final class Annotations {
-        public DateTime getStart() {
-            return _start;
-        }
-
-        public DateTime getEnd() {
-            return _end;
-        }
-
-        public String getId() {
-            return _id;
-        }
-
-        public ImmutableMap<String, String> getOtherAnnotations() {
-            return _otherAnnotations;
-        }
-
-        private Annotations(final Annotations.Builder builder) {
-            _start = builder._start;
-            _end = builder._end;
-            _id = builder._id;
-            _otherAnnotations = ImmutableMap.copyOf(builder._otherAnnotations);
-        }
-
-        private final DateTime _start;
-        private final DateTime _end;
-        private final String _id;
-        private final ImmutableMap<String, String> _otherAnnotations;
-
-        /**
-         * Builder for the Annotations class.
-         */
-        public static final class Builder extends OvalBuilder<Annotations> {
-            /**
-             * Public constructor.
-             */
-            public Builder() {
-                super(Annotations::new);
-            }
-
-            /**
-             * Sets the start field.
-             *
-             * @param value Value
-             * @return This builder
-             */
-            @JsonSetter("_start")
-            public Annotations.Builder setStart(final DateTime value) {
-                _start = value;
-                return this;
-            }
-
-            /**
-             * Sets the end field.
-             *
-             * @param value Value
-             * @return This builder
-             */
-            @JsonSetter("_end")
-            public Annotations.Builder setEnd(final DateTime value) {
-                _end = value;
-                return this;
-            }
-
-            /**
-             * Sets the id field.
-             *
-             * @param value Value
-             * @return This builder
-             */
-            @JsonSetter("_id")
-            public Annotations.Builder setId(final String value) {
-                _id = value;
-                return this;
-            }
-
-            /**
-             * Called by json deserialization to store non-member elements of
-             * the json object. Stores the value in the otherAnnotations field.
-             *
-             * @param key key
-             * @param value value
-             */
-            @JsonAnySetter
-            public void handleUnknown(final String key, final Object value) {
-                if (value instanceof String) {
-                    _otherAnnotations.put(key, (String) value);
-                }
-            }
-
-            @NotNull
-            private DateTime _start;
-            @NotNull
-            private DateTime _end;
-            @NotEmpty
-            @NotNull
-            private String _id;
-            @NotNull
-            private final Map<String, String> _otherAnnotations = Maps.newHashMap();
         }
     }
 }

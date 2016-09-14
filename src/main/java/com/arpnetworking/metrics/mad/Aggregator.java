@@ -116,11 +116,7 @@ public final class Aggregator implements Observer, Launchable {
         }
 
         final Record record = (Record) event;
-        final ImmutableMap.Builder<String, String> dimensionBuilder = ImmutableMap.builder();
-        dimensionBuilder.putAll(extractLegacyDimensions(record));
-        dimensionBuilder.putAll(record.getDimensions());
-
-        final Key key = new DefaultKey(dimensionBuilder.build());
+        final Key key = new DefaultKey(record.getDimensions());
         LOGGER.trace()
                 .setMessage("Processing record")
                 .addData("record", record)
@@ -154,20 +150,6 @@ public final class Aggregator implements Observer, Launchable {
     public String toString() {
         return toLogValue().toString();
     }
-
-    private Map<String, String> extractLegacyDimensions(final Record record) {
-
-        final ImmutableMap.Builder<String, String> defaultDimensions = ImmutableMap.builder();
-        for (String dimension : LEGACY_DIMENSION_LIST) {
-            defaultDimensions.put(dimension, record.getAnnotations().get(dimension));
-        }
-
-        return defaultDimensions.build();
-    }
-
-    private static final Set<String> LEGACY_DIMENSION_LIST = ImmutableSet.of(
-            Key.HOST_DIMENSION_KEY, Key.SERVICE_DIMENSION_KEY, Key.CLUSTER_DIMENSION_KEY
-    );
 
     private List<PeriodWorker> createPeriodWorkers(final Key key) {
         final List<PeriodWorker> periodWorkerList = Lists.newArrayListWithExpectedSize(_periods.size());

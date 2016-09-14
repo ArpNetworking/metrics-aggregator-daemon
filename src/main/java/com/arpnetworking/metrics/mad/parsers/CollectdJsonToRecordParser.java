@@ -45,6 +45,7 @@ import net.sf.oval.constraint.NotNull;
 import net.sf.oval.exception.ConstraintsViolatedException;
 import org.joda.time.DateTime;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,7 +55,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 /**
  * Parses Collectd JSON data as a {@link Record}.
@@ -87,7 +87,8 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                 final DefaultRecord.Builder builder = new DefaultRecord.Builder()
                         .setId(UUID.randomUUID().toString())
                         .setTime(record.getTime())
-                        .setAnnotations(ImmutableMap.copyOf(metricTags));
+                        .setAnnotations(ImmutableMap.copyOf(metricTags))
+                        .setDimensions(JsonToRecordParser.extractLegacyDimensions(metricTags));
 
                 final String plugin = record.getPlugin();
                 final String pluginInstance = record.getPluginInstance();

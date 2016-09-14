@@ -44,9 +44,9 @@ public class JsonToRecordParserV2gTest {
 
         final Record record = parseRecord("QueryLogParserV2gTest/testParse.json");
         Assert.assertNotNull(record);
-        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
         Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
         Assert.assertFalse(record.getId().isEmpty());
 
@@ -87,10 +87,10 @@ public class JsonToRecordParserV2gTest {
         Assert.assertNotNull(record);
 
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertEquals(3, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
+        Assert.assertEquals(3, record.getDimensions().size());
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
         Assert.assertTrue(record.getMetrics().isEmpty());
     }
 
@@ -100,9 +100,12 @@ public class JsonToRecordParserV2gTest {
         Assert.assertNotNull(record);
 
         Assert.assertNotNull(record.getDimensions());
-        Assert.assertEquals(2, record.getDimensions().size());
+        Assert.assertEquals(5, record.getDimensions().size());
         Assert.assertEquals("DimVal1", record.getDimensions().get("Dim1"));
         Assert.assertEquals("DimVal2", record.getDimensions().get("Dim2"));
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
     }
 
     @Test(expected = ParsingException.class)
@@ -112,42 +115,52 @@ public class JsonToRecordParserV2gTest {
 
     @Test(expected = ParsingException.class)
     public void testMissingAnnotationService() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testMissingAnnotationService.json");
+        parseRecord("QueryLogParserV2gTest/testMissingDimensionService.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testMissingAnnotationId() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testMissingAnnotationId.json");
+    public void testMissingId() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testMissingId.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testMissingAnnotationHost() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testMissingAnnotationHost.json");
+    public void testMissingDate() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testMissingDate.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testMissingAnnotationCluster() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testMissingAnnotationCluster.json");
+    public void testMissingDimensionHost() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testMissingDimensionHost.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testEmptyAnnotationService() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testEmptyAnnotationService.json");
+    public void testMissingDimensionCluster() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testMissingDimensionCluster.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testEmptyAnnotationCluster() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testEmptyAnnotationCluster.json");
+    public void testEmptyDimensionService() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testEmptyDimensionService.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testEmptyAnnotationId() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testEmptyAnnotationId.json");
+    public void testEmptyDimensionCluster() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testEmptyDimensionCluster.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testEmptyAnnotationHost() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testEmptyAnnotationHost.json");
+    public void testEmptyId() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testEmptyId.json");
+    }
+
+    @Test(expected = ParsingException.class)
+    public void testEmptyDate() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testEmptyDate.json");
+    }
+
+    @Test(expected = ParsingException.class)
+    public void testEmptyDimensionHost() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testEmptyDimensionHost.json");
     }
 
     @Test
@@ -195,10 +208,10 @@ public class JsonToRecordParserV2gTest {
         Assert.assertNotNull(record);
 
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertEquals(3, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
+        Assert.assertEquals(3, record.getDimensions().size());
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertEquals(3, variables.size());
@@ -378,10 +391,10 @@ public class JsonToRecordParserV2gTest {
         Assert.assertNotNull(record);
 
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertEquals(3, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
+        Assert.assertEquals(3, record.getDimensions().size());
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertEquals(3, variables.size());

@@ -1,16 +1,15 @@
 {
     "version": "2g",
+    "id": "6be33313-bb39-423a-a928-1d0cc0da60a9",
+    "date": "2014-03-24T12:15:41.010Z",
     "dimensions": {
         "Dim1": "DimVal1",
-        "Dim2": "DimVal2"
+        "Dim2": "DimVal2",
+        "service": "MyService",
+        "cluster": "MyCluster",
+        "host": "MyHost"
     },
     "annotations": {
-        "_start": "2014-03-24T12:15:40.008Z",
-        "_end": "2014-03-24T12:15:41.010Z",
-        "_service": "MyService",
-        "_cluster": "MyCluster",
-        "_host": "MyHost",
-        "_id": "6be33313-bb39-423a-a928-1d0cc0da60a9"
     },
     "timers": {},
     "gauges": {},
