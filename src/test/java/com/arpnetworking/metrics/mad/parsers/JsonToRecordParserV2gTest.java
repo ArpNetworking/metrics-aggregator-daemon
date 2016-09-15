@@ -44,13 +44,15 @@ public class JsonToRecordParserV2gTest {
 
         final Record record = parseRecord("QueryLogParserV2gTest/testParse.json");
         Assert.assertNotNull(record);
+        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
+        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+
+        Assert.assertEquals("bar", record.getAnnotations().get("foo"));
+
         Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
         Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
         Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
-        Assert.assertFalse(record.getId().isEmpty());
-
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals("US", record.getDimensions().get("region"));
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertThat(variables, Matchers.hasKey("t1"));
@@ -85,8 +87,11 @@ public class JsonToRecordParserV2gTest {
     public void testEmpty() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2gTest/testEmpty.json");
         Assert.assertNotNull(record);
-
+        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+
+        Assert.assertTrue(record.getAnnotations().isEmpty());
+
         Assert.assertEquals(3, record.getDimensions().size());
         Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
         Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
@@ -98,6 +103,10 @@ public class JsonToRecordParserV2gTest {
     public void testPresentDimensions() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2gTest/testPresentDimensions.json");
         Assert.assertNotNull(record);
+        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
+        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+
+        Assert.assertTrue(record.getAnnotations().isEmpty());
 
         Assert.assertNotNull(record.getDimensions());
         Assert.assertEquals(5, record.getDimensions().size());
@@ -124,8 +133,8 @@ public class JsonToRecordParserV2gTest {
     }
 
     @Test(expected = ParsingException.class)
-    public void testMissingDate() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testMissingDate.json");
+    public void testMissingTimestamp() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testMissingTimeStamp.json");
     }
 
     @Test(expected = ParsingException.class)
@@ -206,8 +215,11 @@ public class JsonToRecordParserV2gTest {
     public void testEmptyValues() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2gTest/testEmptyValues.json");
         Assert.assertNotNull(record);
-
+        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+
+        Assert.assertTrue(record.getAnnotations().isEmpty());
+
         Assert.assertEquals(3, record.getDimensions().size());
         Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
         Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
@@ -389,8 +401,11 @@ public class JsonToRecordParserV2gTest {
     public void testNaNValues() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2gTest/testNaNValues.json");
         Assert.assertNotNull(record);
-
+        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+
+        Assert.assertTrue(record.getAnnotations().isEmpty());
+
         Assert.assertEquals(3, record.getDimensions().size());
         Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
         Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));

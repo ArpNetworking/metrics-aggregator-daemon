@@ -45,8 +45,8 @@ public final class Version2g {
         return _id;
     }
 
-    public DateTime getDate() {
-        return _date;
+    public DateTime getTimestamp() {
+        return _timestamp;
     }
 
     public Map<String, Element> getTimers() {
@@ -75,17 +75,17 @@ public final class Version2g {
 
     private Version2g(final Builder builder) {
         _id = builder._id;
-        _date = builder._date;
-        _dimensions = ImmutableMap.copyOf(builder._dimensions);
-        _annotations = ImmutableMap.copyOf(builder._annotations);
+        _timestamp = builder._timestamp;
+        _dimensions = builder._dimensions;
+        _annotations = builder._annotations;
         _version = builder._version;
-        _timers = builder._timers == null ? ImmutableMap.of() : ImmutableMap.copyOf(builder._timers);
-        _gauges = builder._gauges == null ? ImmutableMap.of() : ImmutableMap.copyOf(builder._gauges);
-        _counters = builder._counters == null ? ImmutableMap.of() : ImmutableMap.copyOf(builder._counters);
+        _timers = builder._timers == null ? ImmutableMap.of() : builder._timers;
+        _gauges = builder._gauges == null ? ImmutableMap.of() : builder._gauges;
+        _counters = builder._counters == null ? ImmutableMap.of() : builder._counters;
     }
 
     private final String _id;
-    private final DateTime _date;
+    private final DateTime _timestamp;
     private final ImmutableMap<String, String> _dimensions;
     private final ImmutableMap<String, String> _annotations;
     private final ImmutableMap<String, Element> _counters;
@@ -110,8 +110,8 @@ public final class Version2g {
          * @param value Value
          * @return This builder
          */
-        public Builder setDate(final DateTime value) {
-            _date = value;
+        public Builder setTimestamp(final DateTime value) {
+            _timestamp = value;
             return this;
         }
 
@@ -132,7 +132,7 @@ public final class Version2g {
          * @param value Value
          * @return This builder
          */
-        public Builder setAnnotations(final Map<String, String> value) {
+        public Builder setAnnotations(final ImmutableMap<String, String> value) {
             _annotations = value;
             return this;
         }
@@ -143,7 +143,7 @@ public final class Version2g {
          * @param value Value
          * @return This builder
          */
-        public Builder setDimensions(final Map<String, String> value) {
+        public Builder setDimensions(final ImmutableMap<String, String> value) {
             _dimensions = value;
             return this;
         }
@@ -165,7 +165,7 @@ public final class Version2g {
          * @param value Value
          * @return This builder
          */
-        public Builder setCounters(final Map<String, Element> value) {
+        public Builder setCounters(final ImmutableMap<String, Element> value) {
             _counters = value;
             return this;
         }
@@ -176,7 +176,7 @@ public final class Version2g {
          * @param value Value
          * @return This builder
          */
-        public Builder setTimers(final Map<String, Element> value) {
+        public Builder setTimers(final ImmutableMap<String, Element> value) {
             _timers = value;
             return this;
         }
@@ -187,7 +187,7 @@ public final class Version2g {
          * @param value Value
          * @return This builder
          */
-        public Builder setGauges(final Map<String, Element> value) {
+        public Builder setGauges(final ImmutableMap<String, Element> value) {
             _gauges = value;
             return this;
         }
@@ -195,14 +195,14 @@ public final class Version2g {
         @NotNull
         private String _id;
         @NotNull
-        private DateTime _date;
+        private DateTime _timestamp;
         @NotNull
-        private Map<String, String> _dimensions;
+        private ImmutableMap<String, String> _dimensions;
         @NotNull
-        private Map<String, String> _annotations;
-        private Map<String, Element> _counters;
-        private Map<String, Element> _gauges;
-        private Map<String, Element> _timers;
+        private ImmutableMap<String, String> _annotations;
+        private ImmutableMap<String, Element> _counters;
+        private ImmutableMap<String, Element> _gauges;
+        private ImmutableMap<String, Element> _timers;
         @NotNull
         @MatchPattern(pattern = "^2g$", flags = Pattern.CASE_INSENSITIVE)
         private String _version;

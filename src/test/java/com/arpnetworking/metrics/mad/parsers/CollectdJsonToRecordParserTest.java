@@ -104,7 +104,7 @@ public class CollectdJsonToRecordParserTest {
 
     @Test(expected = ParsingException.class)
     public void testParseNoHeaders() throws ParsingException, IOException {
-        final ImmutableMultimap<String, String> headers = ImmutableMultimap.<String, String>builder().build();
+        final ImmutableMultimap<String, String> headers = ImmutableMultimap.of();
         parseFile("CollectdJsonParserTest/testParse.json", headers);
     }
 
@@ -123,5 +123,4 @@ public class CollectdJsonToRecordParserTest {
             .put("x-tag-service", "MyService")
             .put("x-tag-Cluster", "MyCluster")
             .build();
-
 }

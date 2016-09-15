@@ -1,13 +1,13 @@
 {
     "version": "2g",
     "id": "",
-    "date": "2014-03-24T12:15:41.010Z",
-  "dimensions": {
-    "service": "MyService",
-    "cluster": "MyCluster",
-    "host": "MyHost",
-  },
-  "annotations": {},
+    "timestamp": "2014-03-24T12:15:41.010Z",
+    "dimensions": {
+        "service": "MyService",
+        "cluster": "MyCluster",
+        "host": "MyHost",
+    },
+    "annotations": {},
     "timers": {},
     "gauges": {},
     "counters": {}

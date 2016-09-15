@@ -88,7 +88,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                         .setId(UUID.randomUUID().toString())
                         .setTime(record.getTime())
                         .setAnnotations(ImmutableMap.copyOf(metricTags))
-                        .setDimensions(JsonToRecordParser.extractLegacyDimensions(metricTags));
+                        .setDimensions(ImmutableMap.copyOf(metricTags));
 
                 final String plugin = record.getPlugin();
                 final String pluginInstance = record.getPluginInstance();
