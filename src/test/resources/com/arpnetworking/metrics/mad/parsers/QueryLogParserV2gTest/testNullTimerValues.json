@@ -9,7 +9,9 @@
     },
     "annotations": {},
     "timers": {
-        "t1": {"values": null}
+        "t1": {
+            "values": null
+        }
     },
     "gauges": {},
     "counters": {}

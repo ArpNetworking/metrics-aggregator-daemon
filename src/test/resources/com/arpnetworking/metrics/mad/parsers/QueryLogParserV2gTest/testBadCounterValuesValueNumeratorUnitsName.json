@@ -11,6 +11,19 @@
     "timers": {},
     "gauges": {},
     "counters": {
-        "c1": {"values": [{"value": 1, "unitNumerators": ["foo-bar"]}]}
+        "c1": {
+            "values": [
+                {
+                    "value": 1,
+                    "unit": {
+                        "numerators": [
+                            {
+                                "type":"foo-bar"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
     }
 }

@@ -10,7 +10,20 @@
     "annotations": {},
     "timers": {},
     "gauges": {
-        "g1": {"values": [{"value": 1, "unitNumerators": ["foo-bar"]}]}
+        "g1": {
+            "values": [
+                {
+                    "value": 1,
+                    "unit": {
+                        "numerators": [
+                            {
+                                "type":"foo-bar"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
     },
     "counters": {}
 }

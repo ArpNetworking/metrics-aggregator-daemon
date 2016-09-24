@@ -16,7 +16,7 @@
 package com.arpnetworking.metrics.mad.model.json;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
-import com.arpnetworking.tsdcore.model.Unit;
+import com.arpnetworking.tsdcore.model.CompoundUnit;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.MatchPattern;
@@ -212,12 +212,9 @@ public final class Version2g {
      * Represents a single sample.
      */
     public static final class Sample {
-        public List<Unit> getUnitNumerators() {
-            return _unitNumerators;
-        }
 
-        public List<Unit> getUnitDenominators() {
-            return _unitDenominators;
+        public Unit2g getUnit2g() {
+            return _unit2g;
         }
 
         public double getValue() {
@@ -225,17 +222,11 @@ public final class Version2g {
         }
 
         private Sample(final Builder builder) {
-            _unitNumerators = builder._unitNumerators == null
-                    ? ImmutableList.of()
-                    : ImmutableList.copyOf(builder._unitNumerators);
-            _unitDenominators = builder._unitDenominators == null
-                    ? ImmutableList.of()
-                    : ImmutableList.copyOf(builder._unitDenominators);
+            _unit2g = builder._unit2g;
             _value = builder._value;
         }
 
-        private final ImmutableList<Unit> _unitNumerators;
-        private final ImmutableList<Unit> _unitDenominators;
+        private final Unit2g _unit2g;
         private final double _value;
 
         /**
@@ -250,28 +241,6 @@ public final class Version2g {
             }
 
             /**
-             * Sets the unit numerators field.
-             *
-             * @param value Value
-             * @return This builder
-             */
-            public Builder setUnitNumerators(final List<Unit> value) {
-                _unitNumerators = value;
-                return this;
-            }
-
-            /**
-             * Sets the unit denominators field.
-             *
-             * @param value Value
-             * @return This builder
-             */
-            public Builder setUnitDenominators(final List<Unit> value) {
-                _unitDenominators = value;
-                return this;
-            }
-
-            /**
              * Sets the value field.
              *
              * @param value Value
@@ -282,10 +251,82 @@ public final class Version2g {
                 return this;
             }
 
-            private List<Unit> _unitNumerators;
-            private List<Unit> _unitDenominators;
+            /**
+             * Sets the compound unit field.
+             *
+             * @param value Value
+             * @return This builder
+             */
+            public Builder setUnit(final Unit2g value) {
+                _unit2g = value;
+                return this;
+            }
+
             @NotNull
             private Double _value;
+            private Unit2g _unit2g;
+        }
+
+        /**
+         * 2G format Unit class.
+         */
+        public static final class Unit2g {
+
+            public List<CompoundUnit> getNumerators() {
+                return _numerators;
+            }
+
+            public List<CompoundUnit> getDenominators() {
+                return _denominators;
+            }
+
+            private Unit2g(final Builder builder) {
+                _numerators = builder._numerators == null
+                        ? ImmutableList.of()
+                        : ImmutableList.copyOf(builder._numerators);
+                _denominators = builder._denominators == null
+                        ? ImmutableList.of()
+                        : ImmutableList.copyOf(builder._denominators);
+            }
+
+            private final List<CompoundUnit> _numerators;
+            private final List<CompoundUnit> _denominators;
+
+            /**
+             * Builder for the 2G Unit class.
+             */
+            public static class Builder extends OvalBuilder<Unit2g> {
+                /**
+                 * Public constructor.
+                 */
+                public Builder() {
+                    super(Unit2g::new);
+                }
+                /**
+                 * Sets the unit numerators field.
+                 *
+                 * @param value Value
+                 * @return This builder
+                 */
+                public Builder setNumerators(final List<CompoundUnit> value) {
+                    _numerators = value;
+                    return this;
+                }
+
+                /**
+                 * Sets the unit denominators field.
+                 *
+                 * @param value Value
+                 * @return This builder
+                 */
+                public Builder setDenominators(final List<CompoundUnit> value) {
+                    _denominators = value;
+                    return this;
+                }
+
+                private List<CompoundUnit> _numerators;
+                private List<CompoundUnit> _denominators;
+            }
         }
     }
 

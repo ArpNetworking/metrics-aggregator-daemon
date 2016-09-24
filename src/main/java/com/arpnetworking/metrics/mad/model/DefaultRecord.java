@@ -17,15 +17,11 @@ package com.arpnetworking.metrics.mad.model;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
-import com.arpnetworking.tsdcore.model.Key;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-import net.sf.oval.constraint.ValidateWithMethod;
 import org.joda.time.DateTime;
 
 /**
@@ -205,21 +201,6 @@ public final class DefaultRecord implements Record {
             return this;
         }
 
-        // Called by OVal reflectively
-        @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
-        private boolean validateDimensions(final ImmutableMap<String, String> dimensions) {
-            if (Strings.isNullOrEmpty(dimensions.get(Key.HOST_DIMENSION_KEY))) {
-                return false;
-            }
-            if (Strings.isNullOrEmpty(dimensions.get(Key.SERVICE_DIMENSION_KEY))) {
-                return false;
-            }
-            if (Strings.isNullOrEmpty(dimensions.get(Key.CLUSTER_DIMENSION_KEY))) {
-                return false;
-            }
-            return true;
-        }
-
         @NotNull
         private ImmutableMap<String, ? extends Metric> _metrics;
         @NotNull
@@ -230,7 +211,6 @@ public final class DefaultRecord implements Record {
         @NotNull
         private ImmutableMap<String, String> _annotations = ImmutableMap.of();
         @NotNull
-        @ValidateWithMethod(methodName = "validateDimensions", parameterType = ImmutableMap.class)
         private ImmutableMap<String, String> _dimensions = ImmutableMap.of();
     }
 }

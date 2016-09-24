@@ -9,7 +9,18 @@
     },
     "annotations": {},
     "timers": {
-        "t1": {"values": [{"value": 1, "unitNumerators": "This must be a list"}]}
+        "t1": {
+            "values": [
+                {
+                    "value": 1,
+                    "unit": {
+                        "numerators": {
+                            "type":"This must be a list"
+                        }
+                    }
+                }
+            ]
+        }
     },
     "gauges": {},
     "counters": {}

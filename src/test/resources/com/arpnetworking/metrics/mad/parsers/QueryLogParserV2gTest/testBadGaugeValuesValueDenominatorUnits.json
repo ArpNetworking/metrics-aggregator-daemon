@@ -10,7 +10,18 @@
     "annotations": {},
     "timers": {},
     "gauges": {
-        "g1": {"values": [{"value": 1, "unitDenominators": "This must be a list"}]}
+        "g1": {
+            "values": [
+                {
+                    "value": 1,
+                    "unit": {
+                        "denominators": {
+                            "type": "This must be a list"
+                        }
+                    }
+                }
+            ]
+        }
     },
     "counters": {}
 }

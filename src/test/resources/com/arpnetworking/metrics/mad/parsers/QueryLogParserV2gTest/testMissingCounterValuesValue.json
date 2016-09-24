@@ -11,6 +11,10 @@
     "timers": {},
     "gauges": {},
     "counters": {
-        "c1": {"values": [{}]}
+        "c1": {
+            "values": [
+                {}
+            ]
+        }
     }
 }

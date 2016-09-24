@@ -33,6 +33,7 @@ import com.arpnetworking.metrics.mad.model.json.Version2fSteno;
 import com.arpnetworking.metrics.mad.model.json.Version2g;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.tsdcore.model.CompoundUnit;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
@@ -601,12 +602,16 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static final Function<Version2g.Sample, Quantity> VERSION_2G_SAMPLE_TO_QUANTITY = sample -> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
+                final Unit sampleUnit = sample.getUnit2g() != null
+                        ? CompoundUnit.getExistingUnit(Iterables.getFirst(sample.getUnit2g().getNumerators(), null))
+                        : null;
+
                 return new Quantity.Builder()
                         .setValue(sample.getValue())
-                        .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))
+                        .setUnit(sampleUnit)
                         // TODO(vkoskela): Support compound units in Tsd Aggregator
-                        //.setNumeratorUnits(sample.getUnitNumerators())
-                        //.setDenominatorUnits(sample.getUnitDenominators())
+                        //.setNumerator(sampleNumerator)  // same as sampleUnit above
+                        //.setDenominator(sampleDenominator)
                         .build();
             } else {
                 // TODO(barp): Create a counter for invalid metrics
@@ -628,7 +633,17 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 Unit.class,
                 EnumerationDeserializer.newInstance(
                         Unit.class,
-                        EnumerationDeserializerStrategyUsingToUpperCase.<Unit>newInstance()));
+                        EnumerationDeserializerStrategyUsingToUpperCase.newInstance()));
+        queryLogParserModule.addDeserializer(
+                CompoundUnit.Type.class,
+                EnumerationDeserializer.newInstance(
+                        CompoundUnit.Type.class,
+                        EnumerationDeserializerStrategyUsingToUpperCase.newInstance()));
+        queryLogParserModule.addDeserializer(
+                CompoundUnit.Scale.class,
+                EnumerationDeserializer.newInstance(
+                        CompoundUnit.Scale.class,
+                        EnumerationDeserializerStrategyUsingToUpperCase.newInstance()));
         OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
         OBJECT_MAPPER.registerModule(queryLogParserModule);
         OBJECT_MAPPER.registerModule(new AfterburnerModule());

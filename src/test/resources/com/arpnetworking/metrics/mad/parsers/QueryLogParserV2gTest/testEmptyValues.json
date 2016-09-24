@@ -9,12 +9,18 @@
     },
     "annotations": {},
     "timers": {
-        "t1": { "values": [] }
+        "t1": {
+            "values": []
+        }
     },
     "gauges": {
-        "g1": { "values": [] }
+        "g1": {
+            "values": []
+        }
     },
     "counters": {
-        "c1": { "values": [] }
+        "c1": {
+            "values": []
+        }
     }
 }

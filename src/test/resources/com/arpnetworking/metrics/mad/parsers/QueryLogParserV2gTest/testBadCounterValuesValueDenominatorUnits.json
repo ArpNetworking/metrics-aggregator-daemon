@@ -5,12 +5,23 @@
     "dimensions": {
         "service": "MyService",
         "cluster": "MyCluster",
-        "host": "MyHost",
+        "host": "MyHost"
     },
     "annotations": {},
     "timers": {},
     "gauges": {},
     "counters": {
-        "c1": {"values": [{"value": 1, "unitDenominators": "This must be a list"}]}
+        "c1": {
+            "values": [
+                {
+                    "value": 1,
+                    "unit": {
+                        "denominators": {
+                            "type":"This must be a list"
+                        }
+                    }
+                }
+            ]
+        }
     }
 }

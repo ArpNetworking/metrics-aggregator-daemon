@@ -104,43 +104,13 @@ public class JsonToRecordParserV2fTest {
     }
 
     @Test(expected = ParsingException.class)
-    public void testMissingAnnotationService() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fTest/testMissingAnnotationService.json");
-    }
-
-    @Test(expected = ParsingException.class)
     public void testMissingAnnotationId() throws ParsingException, IOException {
         parseRecord("QueryLogParserV2fTest/testMissingAnnotationId.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testMissingAnnotationHost() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fTest/testMissingAnnotationHost.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testMissingAnnotationCluster() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fTest/testMissingAnnotationCluster.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testEmptyAnnotationService() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fTest/testEmptyAnnotationService.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testEmptyAnnotationCluster() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fTest/testEmptyAnnotationCluster.json");
-    }
-
-    @Test(expected = ParsingException.class)
     public void testEmptyAnnotationId() throws ParsingException, IOException {
         parseRecord("QueryLogParserV2fTest/testEmptyAnnotationId.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testEmptyAnnotationHost() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fTest/testEmptyAnnotationHost.json");
     }
 
     @Test

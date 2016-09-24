@@ -5,7 +5,7 @@
     "dimensions": {
         "service": "MyService",
         "cluster": "MyCluster",
-        "host": "MyHost",
+        "host": "MyHost"
     },
     "annotations": {},
     "timers": {},

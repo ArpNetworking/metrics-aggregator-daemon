@@ -9,7 +9,9 @@
     },
     "annotations": {},
     "timers": {
-        "t1": {"values": "This should not be a string"}
+        "t1": {
+            "values": "This should not be a string"
+        }
     },
     "gauges": {},
     "counters": {}

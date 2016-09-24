@@ -123,11 +123,6 @@ public class JsonToRecordParserV2gTest {
     }
 
     @Test(expected = ParsingException.class)
-    public void testMissingAnnotationService() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testMissingDimensionService.json");
-    }
-
-    @Test(expected = ParsingException.class)
     public void testMissingId() throws ParsingException, IOException {
         parseRecord("QueryLogParserV2gTest/testMissingId.json");
     }
@@ -138,26 +133,6 @@ public class JsonToRecordParserV2gTest {
     }
 
     @Test(expected = ParsingException.class)
-    public void testMissingDimensionHost() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testMissingDimensionHost.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testMissingDimensionCluster() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testMissingDimensionCluster.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testEmptyDimensionService() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testEmptyDimensionService.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testEmptyDimensionCluster() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testEmptyDimensionCluster.json");
-    }
-
-    @Test(expected = ParsingException.class)
     public void testEmptyId() throws ParsingException, IOException {
         parseRecord("QueryLogParserV2gTest/testEmptyId.json");
     }
@@ -165,11 +140,6 @@ public class JsonToRecordParserV2gTest {
     @Test(expected = ParsingException.class)
     public void testEmptyDate() throws ParsingException, IOException {
         parseRecord("QueryLogParserV2gTest/testEmptyDate.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testEmptyDimensionHost() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testEmptyDimensionHost.json");
     }
 
     @Test

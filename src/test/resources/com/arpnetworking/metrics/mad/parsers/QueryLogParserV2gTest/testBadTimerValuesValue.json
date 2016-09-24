@@ -9,7 +9,13 @@
     },
     "annotations": {},
     "timers": {
-        "t1": {"values": [{"value": "This should be a number"}]}
+        "t1": {
+            "values": [
+                {
+                    "value": "This should be a number"
+                }
+            ]
+        }
     },
     "gauges": {},
     "counters": {}

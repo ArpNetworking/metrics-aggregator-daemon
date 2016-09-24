@@ -9,7 +9,20 @@
     },
     "annotations": {},
     "timers": {
-        "t1": {"values": [{"value": 1, "unitDenominators": ["foo-bar"]}]}
+        "t1": {
+            "values": [
+                {
+                    "value": 1,
+                    "unit": {
+                        "denominators": [
+                            {
+                                "type": "foo-bar"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
     },
     "gauges": {},
     "counters": {}

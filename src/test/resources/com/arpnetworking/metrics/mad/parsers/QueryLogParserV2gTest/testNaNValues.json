@@ -10,30 +10,36 @@
     "annotations": {},
     "timers": {
         "t1": {
-          "values": [
-            {
-                "value": "NaN",
-                "unitNumerators": ["second"]
-            }
-         ]
-       }
+            "values": [
+                {
+                    "value": "NaN",
+                    "unit": {
+                        "numerators": [
+                            {
+                              "type":"second"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
     },
     "gauges": {
         "g1": {
-          "values": [
-            {
-                "value": "NaN"
-            }
-         ]
-       }
+            "values": [
+                {
+                    "value": "NaN"
+                }
+            ]
+        }
     },
     "counters": {
         "c1": {
-          "values": [
-            {
-                "value": "NaN"
-            }
-         ]
-       }
+            "values": [
+                {
+                    "value": "NaN"
+                }
+            ]
+        }
     }
 }

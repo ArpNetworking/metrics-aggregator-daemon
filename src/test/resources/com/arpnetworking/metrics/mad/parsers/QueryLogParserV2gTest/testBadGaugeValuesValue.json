@@ -10,7 +10,13 @@
     "annotations": {},
     "timers": {},
     "gauges": {
-        "g1": {"values": [{"value": "This should be a number"}]}
+        "g1": {
+            "values": [
+                {
+                    "value": "This should be a number"
+                }
+            ]
+        }
     },
     "counters": {}
 }

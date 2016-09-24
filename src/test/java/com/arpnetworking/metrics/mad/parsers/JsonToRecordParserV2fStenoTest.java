@@ -129,26 +129,6 @@ public class JsonToRecordParserV2fStenoTest {
     }
 
     @Test(expected = ParsingException.class)
-    public void testMissingAnnotationService() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testMissingAnnotationService.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testMissingAnnotationCluster() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testMissingAnnotationCluster.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testEmptyAnnotationService() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testEmptyAnnotationService.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testEmptyAnnotationCluster() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testEmptyAnnotationCluster.json");
-    }
-
-    @Test(expected = ParsingException.class)
     public void testContainerNullId() throws ParsingException, IOException {
         parseRecord("QueryLogParserV2fStenoTest/testContainerNullId.json");
     }
