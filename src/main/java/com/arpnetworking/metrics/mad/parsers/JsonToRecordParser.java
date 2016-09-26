@@ -276,7 +276,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
         return new DefaultRecord.Builder()
                 .setMetrics(variables.build())
-                .setTime(model.getTimestamp())
+                .setTime(model.getEnd())
                 .setId(model.getId())
                 .setAnnotations(ImmutableMap.copyOf(model.getAnnotations()))
                 .setDimensions(ImmutableMap.copyOf(model.getDimensions()))

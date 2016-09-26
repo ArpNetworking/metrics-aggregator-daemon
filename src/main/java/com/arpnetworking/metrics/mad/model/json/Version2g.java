@@ -45,8 +45,12 @@ public final class Version2g {
         return _id;
     }
 
-    public DateTime getTimestamp() {
-        return _timestamp;
+    public DateTime getStart() {
+        return _start;
+    }
+
+    public DateTime getEnd() {
+        return _end;
     }
 
     public Map<String, Element> getTimers() {
@@ -75,7 +79,8 @@ public final class Version2g {
 
     private Version2g(final Builder builder) {
         _id = builder._id;
-        _timestamp = builder._timestamp;
+        _start = builder._start;
+        _end = builder._end;
         _dimensions = builder._dimensions;
         _annotations = builder._annotations;
         _version = builder._version;
@@ -85,7 +90,8 @@ public final class Version2g {
     }
 
     private final String _id;
-    private final DateTime _timestamp;
+    private final DateTime _start;
+    private final DateTime _end;
     private final ImmutableMap<String, String> _dimensions;
     private final ImmutableMap<String, String> _annotations;
     private final ImmutableMap<String, Element> _counters;
@@ -105,13 +111,24 @@ public final class Version2g {
         }
 
         /**
-         * Sets the date field.
+         * Sets the start field.
          *
          * @param value Value
          * @return This builder
          */
-        public Builder setTimestamp(final DateTime value) {
-            _timestamp = value;
+        public Builder setStart(final DateTime value) {
+            _start = value;
+            return this;
+        }
+
+        /**
+         * Sets the end field.
+         *
+         * @param value Value
+         * @return This builder
+         */
+        public Builder setEnd(final DateTime value) {
+            _end = value;
             return this;
         }
 
@@ -195,7 +212,9 @@ public final class Version2g {
         @NotNull
         private String _id;
         @NotNull
-        private DateTime _timestamp;
+        private DateTime _start;
+        @NotNull
+        private DateTime _end;
         @NotNull
         private ImmutableMap<String, String> _dimensions;
         @NotNull

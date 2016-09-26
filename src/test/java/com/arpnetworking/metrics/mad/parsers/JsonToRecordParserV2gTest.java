@@ -128,8 +128,13 @@ public class JsonToRecordParserV2gTest {
     }
 
     @Test(expected = ParsingException.class)
-    public void testMissingTimestamp() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2gTest/testMissingTimeStamp.json");
+    public void testMissingStart() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testMissingStart.json");
+    }
+
+    @Test(expected = ParsingException.class)
+    public void testMissingEnd() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testMissingEnd.json");
     }
 
     @Test(expected = ParsingException.class)
