@@ -37,6 +37,7 @@ import com.arpnetworking.metrics.proxy.models.messages.NewMetric;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -207,7 +208,7 @@ public class Telemetry extends UntypedActor {
         _metrics.incrementCounter(METRICS_LIST_REQUEST);
 
         // Transmit a list of all registered metrics
-        getSender().tell(new MetricsList(_serviceMetrics), getSelf());
+        getSender().tell(new MetricsList(ImmutableMap.copyOf(_serviceMetrics)), getSelf());
     }
 
     private void registerLog(final Path logPath) {

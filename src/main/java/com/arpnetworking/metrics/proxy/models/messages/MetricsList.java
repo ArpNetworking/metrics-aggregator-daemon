@@ -19,6 +19,7 @@ package com.arpnetworking.metrics.proxy.models.messages;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +39,7 @@ public final class MetricsList {
      *
      * @param metrics Metrics map
      */
-    public MetricsList(final Map<String, Map<String, Set<String>>> metrics) {
+    public MetricsList(final ImmutableMap<String, Map<String, Set<String>>> metrics) {
         _metrics = metrics;
     }
 
@@ -60,5 +61,5 @@ public final class MetricsList {
                 .toString();
     }
 
-    private final Map<String, Map<String, Set<String>>> _metrics;
+    private final ImmutableMap<String, Map<String, Set<String>>> _metrics;
 }
