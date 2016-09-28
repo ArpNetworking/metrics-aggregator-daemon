@@ -200,6 +200,7 @@
               <mainClass>com.arpnetworking.metrics.mad.Main</mainClass>
             </program>
           </programs>
+          <endorsedDir>lib/ext</endorsedDir>
         </configuration>
       </plugin>
       <plugin>
