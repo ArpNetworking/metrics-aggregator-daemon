@@ -75,7 +75,7 @@
     <akka.http.version>2.4.2</akka.http.version>
     <apache.httpclient.version>4.5.1</apache.httpclient.version>
     <apache.httpcore.version>4.4.3</apache.httpcore.version>
-    <arpnetworking.commons.version>1.6.0</arpnetworking.commons.version>
+    <arpnetworking.commons.version>1.7.1</arpnetworking.commons.version>
     <aspectjrt.version>1.8.9</aspectjrt.version>
     <cglib.version>3.2.1</cglib.version>
     <commons.codec.version>1.10</commons.codec.version>
@@ -86,6 +86,8 @@
     <guice.version>4.0</guice.version>
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <jackson.version>2.7.3</jackson.version>
+    <javassist.version>3.20.0-GA</javassist.version>
+    <javassist.maven.core.version>0.1.2</javassist.maven.core.version>
     <joda.time.version>2.8.2</joda.time.version>
     <jsr305.version>3.0.0</jsr305.version>
     <junit.benchmarks.version>0.7.2</junit.benchmarks.version>
@@ -98,7 +100,7 @@
     <metrics.generator.version>1.1.0</metrics.generator.version>
     <metrics.jvm.extra.version>0.4.2</metrics.jvm.extra.version>
     <mockito.version>1.10.19</mockito.version>
-    <oval.version>1.82</oval.version>
+    <oval.version>1.86-SNAPSHOT</oval.version>
     <performance.test.version>1.1.0</performance.test.version>
     <protobuf.version>3.0.0-beta-2</protobuf.version>
     <reflections.version>0.9.10</reflections.version>
@@ -114,12 +116,16 @@
     <aspectjtools.maven.plugin>1.8.9</aspectjtools.maven.plugin>
     <aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
     <docker.maven.plugin.version>0.15.9</docker.maven.plugin.version>
+    <javassist.maven.plugin.version>0.1.2</javassist.maven.plugin.version>
     <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
     <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
 
     <!-- Code Coverage -->
     <jacoco.check.line.coverage>0.50</jacoco.check.line.coverage>
     <jacoco.check.branch.coverage>0.50</jacoco.check.branch.coverage>
+
+    <!-- TODO: Remove me with OVal release. -->
+    <enforcer.skip>true</enforcer.skip>
 
     <!-- JVM Debug -->
     <debugJavaOptions />
@@ -134,6 +140,14 @@
     </resources>
     <plugins>
       <!-- Enable Inherited Plugins -->
+      <plugin>
+        <!-- TODO: Remove me with OVal release. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -222,6 +236,31 @@
               <descriptors>
                 <descripto>src/main/assembly/docker.xml</descripto>
               </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.arpnetworking.commons</groupId>
+        <artifactId>javassist-maven-plugin</artifactId>
+        <version>${javassist.maven.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>javassist-process</id>
+            <goals>
+              <goal>process</goal>
+            </goals>
+            <configuration>
+              <processor>com.arpnetworking.commons.builder.ValidationProcessor</processor>
+            </configuration>
+          </execution>
+          <execution>
+            <id>javassist-test-process</id>
+            <goals>
+              <goal>test-process</goal>
+            </goals>
+            <configuration>
+              <processor>com.arpnetworking.commons.builder.ValidationProcessor</processor>
             </configuration>
           </execution>
         </executions>
@@ -489,6 +528,17 @@
       <version>${oval.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>${javassist.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.arpnetworking.commons</groupId>
+      <artifactId>javassist-maven-core</artifactId>
+      <version>${javassist.maven.core.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <version>${jsr305.version}</version>
@@ -742,4 +792,10 @@
       </properties>
     </profile>
   </profiles>
+  <repositories>
+    <repository>
+      <id>local-maven-repo</id>
+      <url>file:///${project.basedir}/local-maven-repo</url>
+    </repository>
+  </repositories>
 </project>
