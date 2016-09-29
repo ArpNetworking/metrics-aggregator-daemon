@@ -125,6 +125,11 @@ public final class Aggregator implements Observer, Launchable {
         for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
             periodWorker.record(record);
         }
+        // Strip out all except the 'base' dimensions and bucket the value again to create a 'roll-up' with no dimensions.
+        final Key rollupKey = new DefaultKey(filterToBaseDimensions(record.getDimensions()));
+        for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(rollupKey, this::createPeriodWorkers)) {
+            periodWorker.record(record);
+        }
     }
 
     /**
@@ -149,6 +154,23 @@ public final class Aggregator implements Observer, Launchable {
     @Override
     public String toString() {
         return toLogValue().toString();
+    }
+
+    private ImmutableMap<String, String> filterToBaseDimensions(final Record record) {
+        final ImmutableMap.Builder<String, String> dimensionBuilder = ImmutableMap.builder();
+
+        final ImmutableMap<String, String> dimensions = record.getDimensions();
+
+        if (dimensions.containsKey(Key.HOST_DIMENSION_KEY)) {
+            dimensionBuilder.put(Key.HOST_DIMENSION_KEY, dimensions.get(Key.HOST_DIMENSION_KEY));
+        }
+        if (dimensions.containsKey(Key.SERVICE_DIMENSION_KEY)) {
+            dimensionBuilder.put(Key.SERVICE_DIMENSION_KEY, dimensions.get(Key.SERVICE_DIMENSION_KEY));
+        }
+        if (dimensions.containsKey(Key.CLUSTER_DIMENSION_KEY)) {
+            dimensionBuilder.put(Key.CLUSTER_DIMENSION_KEY, dimensions.get(Key.CLUSTER_DIMENSION_KEY));
+        }
+        return dimensionBuilder.build();
     }
 
     private List<PeriodWorker> createPeriodWorkers(final Key key) {
