@@ -1,0 +1,14 @@
+{
+    "version": "2g",
+    "start": "2014-03-24T12:14:40.170Z",
+    "end": "2014-03-24T12:15:41.010Z",
+    "dimensions": {
+        "service": "MyService",
+        "cluster": "MyCluster",
+        "host": "MyHost"
+    },
+    "annotations": {},
+    "timers": {},
+    "gauges": {},
+    "counters": {}
+}

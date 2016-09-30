@@ -309,7 +309,7 @@ public abstract class VertxSink extends BaseSink {
         // Write the serialized data
         try {
             final int bufferLength = buffer.length();
-            // TODO(vkoskela): Add conditional logging [AINT-552]
+            // TODO(vkoskela): Add conditional logging
             //LOGGER.trace(String.format("Writing buffer to socket; length=%s buffer=%s", bufferLength, buffer.toString("utf-8")));
             LOGGER.debug()
                     .setMessage("Writing buffer to socket")

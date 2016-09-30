@@ -47,9 +47,13 @@ public class JsonToRecordParserV2cTest {
         final Record record = parseRecord("QueryLogParserV2cTest/testParse.json");
 
         Assert.assertNotNull(record);
-        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
+
+        Assert.assertNotNull(record.getAnnotations());
+
+        Assert.assertEquals(3, record.getDimensions().size());
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
 
         final Map<String, ? extends Metric> map = record.getMetrics();
         Assert.assertEquals(5, map.size());
@@ -94,10 +98,13 @@ public class JsonToRecordParserV2cTest {
         final Record record = parseRecord("QueryLogParserV2cTest/testAnnotations.json");
 
         Assert.assertNotNull(record);
-        Assert.assertEquals(5, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
+
+        Assert.assertEquals(3, record.getDimensions().size());
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
+
+        Assert.assertEquals(2, record.getAnnotations().size());
         Assert.assertThat(record.getAnnotations(), IsMapContaining.hasEntry("method", "POST"));
         Assert.assertThat(record.getAnnotations(), IsMapContaining.hasEntry("request_id", "c5251254-8f7c-4c21-95da-270eb66e100b"));
     }
@@ -280,12 +287,14 @@ public class JsonToRecordParserV2cTest {
     public void testNaNValues() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2cTest/testNaNValues.json");
         Assert.assertNotNull(record);
-
         Assert.assertEquals(new DateTime((long) (1347527687.686 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
-        Assert.assertEquals(3, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
+
+        Assert.assertNotNull(record.getAnnotations());
+
+        Assert.assertEquals(3, record.getDimensions().size());
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertEquals(3, variables.size());
@@ -311,8 +320,7 @@ public class JsonToRecordParserV2cTest {
                 .build()
                 .parse(Resources.toByteArray(
                         Resources.getResource(JsonToRecordParserV2cTest.class, "QueryLogParserV2cTest/testDefaultHostname.json")));
-        Assert.assertFalse(Strings.isNullOrEmpty(record.getAnnotations().get(Key.HOST_DIMENSION_KEY)));
-
+        Assert.assertFalse(Strings.isNullOrEmpty(record.getDimensions().get(Key.HOST_DIMENSION_KEY)));
     }
 
     private static Record parseRecord(final String fileName) throws ParsingException, IOException {

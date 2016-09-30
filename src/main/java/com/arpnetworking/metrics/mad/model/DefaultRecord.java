@@ -17,15 +17,11 @@ package com.arpnetworking.metrics.mad.model;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
-import com.arpnetworking.tsdcore.model.Key;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-import net.sf.oval.constraint.ValidateWithMethod;
 import org.joda.time.DateTime;
 
 /**
@@ -33,6 +29,7 @@ import org.joda.time.DateTime;
  *
  * @author Brandon Arp (brandonarp at gmail dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ryan Ascheman (rascheman at groupon dot com)
  */
 @Loggable
 public final class DefaultRecord implements Record {
@@ -73,6 +70,14 @@ public final class DefaultRecord implements Record {
      * {@inheritDoc}
      */
     @Override
+    public ImmutableMap<String, String> getDimensions() {
+        return _dimensions;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean equals(final Object other) {
         if (this == other) {
             return true;
@@ -105,6 +110,7 @@ public final class DefaultRecord implements Record {
                 .add("Id", _id)
                 .add("Time", _time)
                 .add("Annotations", _annotations)
+                .add("Dimensions", _dimensions)
                 .toString();
     }
 
@@ -115,12 +121,14 @@ public final class DefaultRecord implements Record {
         _id = builder._id;
         _time = builder._time;
         _annotations = builder._annotations;
+        _dimensions = builder._dimensions;
     }
 
     private final ImmutableMap<String, ? extends Metric> _metrics;
     private final String _id;
     private final DateTime _time;
     private final ImmutableMap<String, String> _annotations;
+    private final ImmutableMap<String, String> _dimensions;
 
     /**
      * Implementation of builder pattern for <code>DefaultRecord</code>.
@@ -181,19 +189,16 @@ public final class DefaultRecord implements Record {
             return this;
         }
 
-        // Called by OVal reflectively
-        @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
-        private boolean validateAnnotations(final ImmutableMap<String, String> annotations) {
-            if (Strings.isNullOrEmpty(annotations.get(Key.HOST_DIMENSION_KEY))) {
-                return false;
-            }
-            if (Strings.isNullOrEmpty(annotations.get(Key.SERVICE_DIMENSION_KEY))) {
-                return false;
-            }
-            if (Strings.isNullOrEmpty(annotations.get(Key.CLUSTER_DIMENSION_KEY))) {
-                return false;
-            }
-            return true;
+        /**
+         * The dimension mappings <code>ImmutableMap</code>. Optional. Default is an empty
+         * <code>ImmutableMap</code>. Cannot be null.
+         *
+         * @param value The dimension mappings <code>ImmutableMap</code>
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setDimensions(final ImmutableMap<String, String> value) {
+            _dimensions = value;
+            return this;
         }
 
         @NotNull
@@ -204,7 +209,8 @@ public final class DefaultRecord implements Record {
         @NotNull
         private DateTime _time;
         @NotNull
-        @ValidateWithMethod(methodName = "validateAnnotations", parameterType = ImmutableMap.class)
         private ImmutableMap<String, String> _annotations = ImmutableMap.of();
+        @NotNull
+        private ImmutableMap<String, String> _dimensions = ImmutableMap.of();
     }
 }
