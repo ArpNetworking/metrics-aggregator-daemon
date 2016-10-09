@@ -140,6 +140,8 @@ To build the service locally you must satisfy these prerequisites:
 
 __Note:__ Requires at least Docker for Mac Beta version _Version 1.12.0-rc4-beta19 (build: 10258)_
 
+You will need an account on [Docker Hub](https://hub.docker.com/) and need to provide these credentials in order for the build to pull the base image(s). Please refer to the [Fabric8 Maven Docker Plugin](https://dmp.fabric8.io/#authentication) for how to provide these credentials. To get started quickly you can pass them on the command line via _-Ddocker.pull.username_ and _-Ddocker.pull.password_.
+
 Next, fork the repository, clone and build:
 
 Building:

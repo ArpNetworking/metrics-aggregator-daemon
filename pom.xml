@@ -115,7 +115,7 @@
     <!-- Additional Plugins -->
     <aspectjtools.maven.plugin>1.8.9</aspectjtools.maven.plugin>
     <aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
-    <docker.maven.plugin.version>0.15.9</docker.maven.plugin.version>
+    <docker.maven.plugin.version>0.16.7</docker.maven.plugin.version>
     <javassist.maven.plugin.version>0.1.2</javassist.maven.plugin.version>
     <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
     <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
@@ -304,24 +304,21 @@
         <extensions>true</extensions>
         <executions>
           <execution>
-            <id>build</id>
+            <id>default-build</id>
             <phase>package</phase>
             <goals>
               <goal>build</goal>
             </goals>
           </execution>
           <execution>
-            <id>pre-build-remove</id>
+            <id>default-remove</id>
             <phase>validate</phase>
-            <goals>
-              <goal>remove</goal>
-            </goals>
             <configuration>
               <removeAll>true</removeAll>
             </configuration>
           </execution>
           <execution>
-            <id>start</id>
+            <id>default-start</id>
             <phase>pre-integration-test</phase>
             <goals>
               <goal>start</goal>
@@ -331,7 +328,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>stop</id>
+            <id>default-stop</id>
             <phase>post-integration-test</phase>
             <goals>
               <goal>stop</goal>
@@ -341,7 +338,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>push</id>
+            <id>default-push</id>
             <phase>deploy</phase>
             <goals>
               <goal>push</goal>
