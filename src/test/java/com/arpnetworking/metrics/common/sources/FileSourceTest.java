@@ -55,7 +55,8 @@ import java.util.List;
 public class FileSourceTest {
     @SuppressWarnings("unchecked")
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
+        Files.createDirectories(_directory);
         _observer = Mockito.mock(Observer.class);
         _parser = Mockito.mock(Parser.class);
         _logger = Mockito.mock(Logger.class);
@@ -74,7 +75,6 @@ public class FileSourceTest {
 
     @Test
     public void testParseData() throws IOException, InterruptedException, ParsingException {
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testParseData.log");
         final Path state = _directory.resolve("testParseData.log.state");
         Files.deleteIfExists(file);
@@ -107,7 +107,6 @@ public class FileSourceTest {
 
     @Test
     public void testTailFromEnd() throws IOException, InterruptedException, ParsingException {
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailFromEnd.log");
         Files.deleteIfExists(file);
         Files.createFile(file);
@@ -193,7 +192,6 @@ public class FileSourceTest {
 
     @Test
     public void testTailerLogRotationRename() throws IOException, InterruptedException {
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationRename.log");
         final Path state = _directory.resolve("testTailerLogRotationRename.log.state");
         Files.deleteIfExists(file);
@@ -223,7 +221,6 @@ public class FileSourceTest {
 
     @Test
     public void testTailerLogRotationRenameSameDataLength() throws IOException, InterruptedException, ParsingException {
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationRenameSameDataLength.log");
         final Path state = _directory.resolve("testTailerLogRotationRenameSameDataLength.log.state");
         Files.deleteIfExists(file);
@@ -261,7 +258,6 @@ public class FileSourceTest {
     @Ignore
     @Test
     public void testTailerLogRotationRenameFromEmpty() throws IOException, InterruptedException {
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationRenameFromEmpty.log");
         final Path state = _directory.resolve("testTailerLogRotationRenameFromEmpty.log.state");
         Files.deleteIfExists(file);
@@ -288,7 +284,6 @@ public class FileSourceTest {
 
     @Test
     public void testTailerLogRotationCopyTruncate() throws IOException, InterruptedException, ParsingException {
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationCopyTruncate.log");
         final Path state = _directory.resolve("testTailerLogRotationCopyTruncate.log.state");
         Files.deleteIfExists(file);
@@ -321,7 +316,6 @@ public class FileSourceTest {
     @Ignore
     @Test
     public void testTailerLogRotationCopyTruncateFromEmpty() throws IOException, InterruptedException {
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationCopyTruncate.log");
         final Path state = _directory.resolve("testTailerLogRotationCopyTruncate.log.state");
         Files.deleteIfExists(file);
@@ -349,7 +343,6 @@ public class FileSourceTest {
 
     @Test
     public void testTailerLogRotationRenameWithData() throws IOException, InterruptedException, ParsingException {
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationRenameWithData.log");
         final Path state = _directory.resolve("testTailerLogRotationRenameWithData.log.state");
         Files.deleteIfExists(file);
@@ -394,7 +387,6 @@ public class FileSourceTest {
     public void testTailerLogRotationCopyTruncateWithData() throws IOException, InterruptedException, ParsingException {
         final long interval = 500;
         final long sleepInterval = 600;
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationCopyTruncateWithData.log");
         final Path state = _directory.resolve("testTailerLogRotationCopyTruncateWithData.log.state");
         Files.deleteIfExists(file);
@@ -434,7 +426,6 @@ public class FileSourceTest {
 
     @Test
     public void testTailerLogRotationRenameWithDataToOldAndNew() throws IOException, InterruptedException, ParsingException {
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationRenameWithDataToOldAndNew.log");
         final Path state = _directory.resolve("testTailerLogRotationRenameWithDataToOldAndNew.log.state");
         Files.deleteIfExists(file);
@@ -501,7 +492,6 @@ public class FileSourceTest {
     @Test
     public void testTailerLogRotationCopyTruncateWithDataToOldAndNew() throws IOException, InterruptedException, ParsingException {
         final long interval = 500;
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationCopyTruncateWithDataToOldAndNew.log");
         final Path state = _directory.resolve("testTailerLogRotationCopyTruncateWithDataToOldAndNew.log.state");
         Files.deleteIfExists(file);
@@ -561,7 +551,6 @@ public class FileSourceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testTailerLogRotationRenameDroppedData() throws IOException, InterruptedException, ParsingException {
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationRenameDroppedData.log");
         final Path state = _directory.resolve("testTailerLogRotationRenameDroppedData.log.state");
         Files.deleteIfExists(file);
@@ -639,7 +628,6 @@ public class FileSourceTest {
     public void testTailerLogCopyTruncateRenameDroppedData() throws IOException, InterruptedException, ParsingException {
         final long interval = 500;
         final long sleepInterval = 600;
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogCopyTruncateRenameDroppedData.log");
         final Path state = _directory.resolve("testTailerLogCopyTruncateRenameDroppedData.log.state");
         Files.deleteIfExists(file);
@@ -708,7 +696,6 @@ public class FileSourceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testTailerLogRotationRenameSmallToLarge() throws IOException, InterruptedException, ParsingException {
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationRenameSmallToLarge.log");
         final Path state = _directory.resolve("testTailerLogRotationRenameSmallToLarge.log.state");
         Files.deleteIfExists(file);
@@ -779,7 +766,6 @@ public class FileSourceTest {
     @Test
     public void testTailerLogRotationCopyTruncateSmallToLarge() throws IOException, InterruptedException, ParsingException {
         final long sleepInterval = 600;
-        Files.createDirectories(_directory);
         final Path file = _directory.resolve("testTailerLogRotationCopyTruncateSmallToLarge.log");
         final Path state = _directory.resolve("testTailerLogRotationCopyTruncateSmallToLarge.log.state");
         Files.deleteIfExists(file);
