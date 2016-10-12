@@ -41,6 +41,8 @@ import akka.util.Timeout;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.metrics.Timer;
+import com.arpnetworking.metrics.common.sources.ClientHttpSourceV1;
+import com.arpnetworking.metrics.common.sources.CollectdHttpSourceV1;
 import com.arpnetworking.metrics.mad.actors.Status;
 import com.arpnetworking.metrics.proxy.actors.Connection;
 import com.arpnetworking.metrics.proxy.models.messages.Connect;
@@ -156,20 +158,29 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                                 .withStatus(StatusCodes.OK)
                                 .withEntity(JSON_CONTENT_TYPE, ByteString.fromString(STATUS_JSON)));
             }
-        } else if ((HttpMethods.POST.equals(request.method()))
-                && path.equals(COLLECTD_V1_SOURCE_PREFIX)) {
-            final Future<ActorRef> refFuture = _actorSystem.actorSelection("/user/collectdv1")
-                    .resolveOne(FiniteDuration.create(1, TimeUnit.SECONDS));
-            return FutureConverters.toJava(refFuture).thenCompose(
-                    ref -> {
-                        final CompletableFuture<HttpResponse> response = new CompletableFuture<>();
-                        ref.tell(new RequestReply(request, response), ActorRef.noSender());
-                        return response;
-                    })
-                    .exceptionally(err -> HttpResponse.create().withStatus(404));
+        } else if (HttpMethods.POST.equals(request.method())) {
+            if (path.equals(COLLECTD_V1_SOURCE_PREFIX)) {
+                return dispatchHttpRequest(request, ACTOR_COLLECTD_V1);
+            } else if (path.equals(APP_V1_SOURCE_PREFIX)) {
+                return dispatchHttpRequest(request, ACTOR_APP_V1);
+            }
         }
 
         return CompletableFuture.completedFuture(HttpResponse.create().withStatus(404));
+    }
+
+    private CompletionStage<HttpResponse> dispatchHttpRequest(final HttpRequest request, final String actorName) {
+        final Future<ActorRef> refFuture = _actorSystem.actorSelection(actorName)
+                .resolveOne(FiniteDuration.create(1, TimeUnit.SECONDS));
+        return FutureConverters.toJava(refFuture).thenCompose(
+                ref -> {
+                    final CompletableFuture<HttpResponse> response = new CompletableFuture<>();
+                    ref.tell(new RequestReply(request, response), ActorRef.noSender());
+                    return response;
+                })
+                // We return 404 here since actor startup is controlled by config and
+                // the actors may not be running.
+                .exceptionally(err -> HttpResponse.create().withStatus(404));
     }
 
     private CompletionStage<HttpResponse> getHttpResponseForTelemetry(
@@ -245,6 +256,9 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private static final String TELEMETRY_STREAM_V1_PATH = "/telemetry/v1/stream";
     private static final String TELEMETRY_STREAM_V2_PATH = "/telemetry/v2/stream";
     private static final String COLLECTD_V1_SOURCE_PREFIX = "/metrics/v1/collectd";
+    private static final String APP_V1_SOURCE_PREFIX = "/metrics/v1/application";
+    private static final String ACTOR_COLLECTD_V1 = "/user/" + CollectdHttpSourceV1.ACTOR_NAME;
+    private static final String ACTOR_APP_V1 = "/user/" + ClientHttpSourceV1.ACTOR_NAME;
 
     // Ping
     private static final HttpHeader PING_CACHE_CONTROL_HEADER = CacheControl.create(

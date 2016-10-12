@@ -31,7 +31,7 @@ import com.arpnetworking.configuration.jackson.JsonNodeFileSource;
 import com.arpnetworking.configuration.triggers.FileTrigger;
 import com.arpnetworking.http.Routes;
 import com.arpnetworking.metrics.MetricsFactory;
-import com.arpnetworking.metrics.impl.TsdLogSink;
+import com.arpnetworking.metrics.impl.ApacheHttpSink;
 import com.arpnetworking.metrics.impl.TsdMetricsFactory;
 import com.arpnetworking.metrics.jvm.JvmMetricsRunnable;
 import com.arpnetworking.metrics.mad.actors.Status;
@@ -250,14 +250,15 @@ public final class Main implements Launchable {
         }
 
         // Instantiate the metrics factory
+        final String sinkHost = "0.0.0.0".equals(_configuration.getHttpHost()) ? "localhost" : _configuration.getHttpHost();
+        final String sinkUrl = "http://" + sinkHost + ":" + _configuration.getHttpPort() + "/metrics/v1/application";
         final MetricsFactory metricsFactory = new TsdMetricsFactory.Builder()
                 .setClusterName(_configuration.getMonitoringCluster())
                 .setServiceName("mad")
                 .setSinks(
                         Collections.singletonList(
-                                new TsdLogSink.Builder()
-                                        .setDirectory(_configuration.getLogDirectory())
-                                        .setName("mad-query")
+                                new ApacheHttpSink.Builder()
+                                        .setUri(sinkUrl)
                                         .build()))
                 .build();
 

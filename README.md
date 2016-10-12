@@ -6,7 +6,7 @@ Metrics Aggregator Daemon
          alt="License: Apache 2">
 </a>
 <a href="https://travis-ci.org/ArpNetworking/metrics-aggregator-daemon/">
-    <img src="https://travis-ci.org/ArpNetworking/metrics-aggregator-daemon.png"
+    <img src="https://travis-ci.org/ArpNetworking/metrics-aggregator-daemon.png?branch=master"
          alt="Travis Build">
 </a>
 <a href="http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.arpnetworking.metrics%22%20a%3A%22metrics-aggregator-daemon%22">

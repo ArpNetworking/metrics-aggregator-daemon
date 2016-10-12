@@ -15,44 +15,47 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
-import com.arpnetworking.metrics.mad.parsers.CollectdJsonToRecordParser;
+import com.arpnetworking.metrics.mad.parsers.ProtobufToRecordParser;
 
 /**
- * Processes HTTP requests from Collectd, extracts data and emits metrics.
+ * Processes HTTP requests from the metrics client, extracts data and emits metrics.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
-public final class CollectdHttpSourceV1 extends HttpSource {
+public final class ClientHttpSourceV1 extends HttpSource {
 
     /**
      * Protected constructor.
      *
      * @param builder Instance of <code>Builder</code>.
      */
-    private CollectdHttpSourceV1(final Builder builder) {
+    private ClientHttpSourceV1(final Builder builder) {
         super(builder);
     }
 
     /**
      * Name of the actor created to receive the HTTP Posts.
      */
-    public static final String ACTOR_NAME = "collectdv1";
+    public static final String ACTOR_NAME = "appv1";
 
     /**
-     * CollectdHttpSourceV1 {@link BaseSource.Builder} implementation.
+     * ClientHttpSourceV1 {@link BaseSource.Builder} implementation.
      *
      * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
      */
-    public static final class Builder extends HttpSource.Builder<Builder, CollectdHttpSourceV1> {
+    public static final class Builder extends HttpSource.Builder<Builder, ClientHttpSourceV1> {
         /**
          * Public constructor.
          */
         public Builder() {
-            super(CollectdHttpSourceV1::new);
-            setParser(new CollectdJsonToRecordParser());
+            super(ClientHttpSourceV1::new);
             setActorName(ACTOR_NAME);
+            setParser(new ProtobufToRecordParser());
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected Builder self() {
             return this;

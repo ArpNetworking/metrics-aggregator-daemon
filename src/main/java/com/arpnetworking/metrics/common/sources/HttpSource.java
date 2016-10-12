@@ -114,7 +114,7 @@ public class HttpSource extends ActorSource {
                                 responseFuture.complete(HttpResponse.create().withStatus(200));
                             } else {
                                 BAD_REQUEST_LOGGER.warn()
-                                        .setMessage("Error handling collectd post")
+                                        .setMessage("Error handling http post")
                                         .setThrowable(err)
                                         .log();
                                 if (err instanceof ParsingException) {
