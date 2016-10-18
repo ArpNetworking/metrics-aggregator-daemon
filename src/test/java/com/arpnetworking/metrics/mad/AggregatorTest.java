@@ -92,7 +92,7 @@ public class AggregatorTest {
                                         .build()))
                         .setTime(dataTimeInThePast)
                         .setId(UUID.randomUUID().toString())
-                        .setAnnotations(
+                        .setDimensions(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "MyHost",
                                         Key.SERVICE_DIMENSION_KEY, "MyService",
@@ -134,7 +134,7 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setAnnotations(
+                        .setDimensions(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "MyHost",
                                         Key.SERVICE_DIMENSION_KEY, "MyService",
@@ -151,7 +151,7 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setAnnotations(
+                        .setDimensions(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "MyHost",
                                         Key.SERVICE_DIMENSION_KEY, "MyService",
@@ -214,7 +214,7 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setAnnotations(
+                        .setDimensions(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "MyHost",
                                         Key.SERVICE_DIMENSION_KEY, "MyServiceA",
@@ -231,7 +231,7 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setAnnotations(
+                        .setDimensions(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "MyHost",
                                         Key.SERVICE_DIMENSION_KEY, "MyServiceB",
@@ -294,7 +294,7 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setAnnotations(
+                        .setDimensions(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "MyHostA",
                                         Key.SERVICE_DIMENSION_KEY, "MyService",
@@ -311,7 +311,7 @@ public class AggregatorTest {
                 null,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
-                        .setAnnotations(
+                        .setDimensions(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "MyHostB",
                                         Key.SERVICE_DIMENSION_KEY, "MyService",

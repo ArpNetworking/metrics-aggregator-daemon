@@ -52,7 +52,7 @@ public final class DirectoryDynamicConfigurationFactory implements DynamicConfig
     public void update(
             final DynamicConfiguration.Builder builder,
             final Collection<Key> keys) {
-        // TODO(vkoskela): The source and trigger need to be paired [AINT-553]
+        // TODO(vkoskela): The source and trigger need to be paired
         // -> At the moment any trigger will cause all sources to reload which is
         // not as bad as it sounds since all the sources need to be reloaded in
         // order to merge them properly. Of course this could be changed by keeping

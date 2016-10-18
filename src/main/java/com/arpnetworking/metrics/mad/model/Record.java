@@ -20,10 +20,11 @@ import org.joda.time.DateTime;
 
 /**
  * The interface to a record. Records consistent of a timestamp, any number of
- * named metrics and annotations (arbitrary key-value pairs).
+ * named metrics, annotations (arbitrary key-value pairs) and dimensions (arbitrary key-value pairs).
  *
  * @author Brandon Arp (brandonarp at gmail dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ryan Ascheman (rascheman at groupon dot com)
  */
 public interface Record {
 
@@ -54,4 +55,11 @@ public interface Record {
      * @return the annotations
      */
     ImmutableMap<String, String> getAnnotations();
+
+    /**
+     * Gets dimensions.
+     *
+     * @return the dimensions
+     */
+    ImmutableMap<String, String> getDimensions();
 }

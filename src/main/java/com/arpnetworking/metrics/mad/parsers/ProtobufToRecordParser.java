@@ -59,6 +59,7 @@ public class ProtobufToRecordParser implements Parser<List<Record>, HttpRequest>
                         .setId(new UUID(high, low).toString())
                         .setTime(new DateTime(record.getEndMillisSinceEpoch()))
                         .setAnnotations(buildAnnotations(record))
+                        .setDimensions(buildDimensinos(record))
                         .setMetrics(buildMetrics(record));
 
                 records.add(builder.build());
@@ -125,9 +126,14 @@ public class ProtobufToRecordParser implements Parser<List<Record>, HttpRequest>
         for (final ClientV1.AnnotationEntry annotationEntry : record.getAnnotationsList()) {
             annotations.put(annotationEntry.getName(), annotationEntry.getValue());
         }
-        for (final ClientV1.DimensionEntry dimensionEntry : record.getDimensionsList()) {
-            annotations.put(dimensionEntry.getName(), dimensionEntry.getValue());
-        }
         return annotations.build();
+    }
+
+    private ImmutableMap<String, String> buildDimensinos(final ClientV1.Record record) {
+        final ImmutableMap.Builder<String, String> dimensions = ImmutableMap.builder();
+        for (final ClientV1.DimensionEntry dimensionEntry : record.getDimensionsList()) {
+            dimensions.put(dimensionEntry.getName(), dimensionEntry.getValue());
+        }
+        return dimensions.build();
     }
 }

@@ -344,6 +344,17 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
         }
 
         /**
+         * Set the unit. Optional. Default is no unit.
+         *
+         * @param value The composite unit.
+         * @return This <code>Builder</code> instance.
+         */
+        public Builder setUnitByComposite(final CompositeUnit value) {
+            _unit = CompositeUnit.getLegacyUnit(Optional.fromNullable(value));
+            return this;
+        }
+
+        /**
          * {@inheritDoc}
          */
         @Override
