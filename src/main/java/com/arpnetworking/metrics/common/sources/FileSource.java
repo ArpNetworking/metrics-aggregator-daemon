@@ -400,6 +400,7 @@ public final class FileSource<T> extends BaseSource {
 
         /**
          * Sets the maximum size of the queue of lines to be stored in memory before processing. Optional.
+         * Reading of lines from file will block if the queue is full.
          * Default is Runtime.getRuntime().availableProcessors() * 2.
          *
          * @param value The maximum number of unprocessed lines to store in memory.
