@@ -206,7 +206,7 @@ public final class FileSource<T> extends BaseSource {
         public void handle(final byte[] line) {
             try {
                 _lineQueue.put(line);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 _logger.error()
                         .setMessage("FileSource tailer thread interrupted while waiting to write line to queue")
                         .addData("source", FileSource.this)
@@ -257,9 +257,13 @@ public final class FileSource<T> extends BaseSource {
 
     }
 
-    private static class LineQueueRunner<T> implements Runnable {
+    private static final class LineQueueRunner<T> implements Runnable {
 
-        private LineQueueRunner(final AtomicBoolean lineProcessingStopped, final Parser<T, byte[]> parser, final FileSource<T> fileSource, final ArrayBlockingQueue<byte[]> queue) {
+        private LineQueueRunner(
+                final AtomicBoolean lineProcessingStopped,
+                final Parser<T, byte[]> parser,
+                final FileSource<T> fileSource,
+                final ArrayBlockingQueue<byte[]> queue) {
             _lineProcessingStopped = lineProcessingStopped;
             _parser = parser;
             _fileSource = fileSource;
@@ -268,11 +272,11 @@ public final class FileSource<T> extends BaseSource {
 
         @Override
         public void run() {
-            while(!_lineProcessingStopped.get()) {
+            while (!_lineProcessingStopped.get()) {
                 final byte[] line;
                 try {
                     line = _queue.take();
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     LOGGER.info()
                             .setMessage("Thread interrupted while waiting for query log line.")
                             .log();
@@ -290,13 +294,17 @@ public final class FileSource<T> extends BaseSource {
                         continue;
                     }
                     _fileSource.notify(record);
-                } catch (RuntimeException e) {
+                    // CHECKSTYLE.OFF: IllegalCatch - Prevent thread from being killed
+                } catch (final RuntimeException e) {
+                    // CHECKSTYLE.ON: IllegalCatch
                     LOGGER.error()
                             .setMessage("Caught exception while processing query log line.")
                             .setThrowable(e)
                             .addData("logLine", line)
                             .log();
-                } catch (Throwable e) {
+                    // CHECKSTYLE.OFF: IllegalCatch - Prevent thread from being killed
+                } catch (final Throwable e) {
+                    // CHECKSTYLE.ON: IllegalCatch
                     LOGGER.error()
                             .setMessage("Caught critical exception while processing query log line.")
                             .setThrowable(e)
