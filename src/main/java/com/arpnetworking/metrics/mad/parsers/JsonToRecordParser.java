@@ -493,7 +493,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 if (Double.isFinite(value)) {
                     return new Quantity.Builder().setValue(value).build();
                 } else {
-                    // TODO(barp): Create a counter for invalid metrics
+                    // TODO(barp): Create a counter for invalid metrics [AINT-680]
                     INVALID_SAMPLE_LOGGER
                             .warn()
                             .setMessage("Invalid sample for metric")
@@ -517,7 +517,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                         .setUnit(sample.getUnit().orNull())
                         .build();
             } else {
-                // TODO(barp): Create a counter for invalid metrics
+                // TODO(barp): Create a counter for invalid metrics [AINT-680]
                 INVALID_SAMPLE_LOGGER
                         .warn()
                         .setMessage("Invalid sample for metric")
@@ -538,7 +538,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                         .setUnit(sample.getUnit().orNull())
                         .build();
             } else {
-                // TODO(barp): Create a counter for invalid metrics
+                // TODO(barp): Create a counter for invalid metrics [AINT-680]
                 INVALID_SAMPLE_LOGGER
                         .warn()
                         .setMessage("Invalid sample for metric")
@@ -557,12 +557,12 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 return new Quantity.Builder()
                         .setValue(sample.getValue())
                         .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))
-                        // TODO(vkoskela): Support compound units in Tsd Aggregator
+                        // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
                         //.setNumeratorUnits(sample.getUnitNumerators())
                         //.setDenominatorUnits(sample.getUnitDenominators())
                         .build();
             } else {
-                // TODO(barp): Create a counter for invalid metrics
+                // TODO(barp): Create a counter for invalid metrics [AINT-680]
                 INVALID_SAMPLE_LOGGER
                         .warn()
                         .setMessage("Invalid sample for metric")
@@ -581,12 +581,12 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 return new Quantity.Builder()
                         .setValue(sample.getValue())
                         .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))
-                                // TODO(vkoskela): Support compound units in Tsd Aggregator
+                                // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
                         //.setNumeratorUnits(sample.getUnitNumerators())
                         //.setDenominatorUnits(sample.getUnitDenominators())
                         .build();
             } else {
-                // TODO(barp): Create a counter for invalid metrics
+                // TODO(barp): Create a counter for invalid metrics [AINT-680]
                 INVALID_SAMPLE_LOGGER
                         .warn()
                         .setMessage("Invalid sample for metric")

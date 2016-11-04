@@ -182,7 +182,7 @@ public final class StatefulTailer implements Tailer {
                 final long fileSize = reader.size();
                 if (_maximumOffsetOnResume.isPresent() && fileSize - storedPosition.get() > _maximumOffsetOnResume.get()) {
                     position = fileSize - _maximumOffsetOnResume.get();
-                    // TODO(vkoskela): Discard the current potentially partial line
+                    // TODO(vkoskela): Discard the current potentially partial line [AINT-584]
                 } else {
                     position = storedPosition.get();
                 }
