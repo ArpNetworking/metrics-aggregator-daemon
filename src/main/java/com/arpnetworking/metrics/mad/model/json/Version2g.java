@@ -16,7 +16,8 @@
 package com.arpnetworking.metrics.mad.model.json;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
-import com.arpnetworking.tsdcore.model.CompositeUnit;
+import com.arpnetworking.tsdcore.model.Unit;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.MatchPattern;
@@ -390,5 +391,322 @@ public final class Version2g {
             @NotNull
             private List<Sample> _values;
         }
+    }
+
+    /**
+     * Composite Unit used in 2g file format.
+     *
+     * @author Ryan Ascheman (rascheman at groupon dot com)
+     */
+    public static class CompositeUnit {
+        /**
+         * Default constructor for Composite Unit.
+         */
+        public CompositeUnit() {}
+
+        /**
+         * Constructor for Composite Unit.
+         *
+         * @param scale Scale of the unit
+         * @param type Type fo the unit
+         */
+        public CompositeUnit(final Scale scale, final Type type) {
+            _type = type;
+            _scale = scale;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (obj != null && obj instanceof CompositeUnit) {
+                final CompositeUnit compositeUnit = (CompositeUnit) obj;
+                return _type == compositeUnit._type && _scale == compositeUnit._scale;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return _type.hashCode() ^ (_scale != null ? _scale.hashCode() : 1);
+        }
+
+        public void setType(final Type value) {
+            _type = value;
+        }
+
+        public void setScale(final Scale value) {
+            _scale = value;
+        }
+
+        /**
+         * Composite unit data type.
+         */
+        public enum Type {
+            /*****************************************************************
+             * Time
+             */
+            /**
+             * Second.
+             */
+            SECOND(Category.TIME, 1),
+            /**
+             * Minute, 60 seconds.
+             */
+            MINUTE(Category.TIME, 60),
+            /**
+             * Hour, 60 minutes.
+             */
+            HOUR(Category.TIME, 60 * 60),
+            /**
+             * Day, 24 hours.
+             */
+            DAY(Category.TIME, 60 * 60 * 24),
+            /**
+             * Week, 7 days.
+             */
+            WEEK(Category.TIME, 60 * 60 * 24 * 7),
+            /*****************************************************************
+             * Data Size
+             */
+            /**
+             * Bit.
+             */
+            BIT(Category.DATA_SIZE, 1),
+            /**
+             * Byte, 8 bits.
+             */
+            BYTE(Category.DATA_SIZE, 8),
+            /*****************************************************************
+             * Rotation
+             */
+            /**
+             * Rotation.
+             */
+            ROTATION(Category.ROTATION, 1),
+            /**
+             * Degree, 360 = 1 Rotation.
+             */
+            DEGREE(Category.ROTATION, 360),
+            /**
+             * Radian, 2PI = 1 Rotation.
+             */
+            RADIAN(Category.ROTATION, 2 * Math.PI),
+            /*****************************************************************
+             * Temperature
+             */
+            /**
+             * Celsius.
+             */
+            CELSIUS(Category.TEMPERATURE, 1),
+            /**
+             * Fahrenheit.
+             */
+            FAHRENHEIT(Category.TEMPERATURE, 1),
+            /**
+             * Kelvin.
+             */
+            KELVIN(Category.TEMPERATURE, 1);
+
+            Type(final Category category, final double scaler) {
+                _category = category;
+                _scaler = scaler;
+            }
+
+            private Category _category;
+            private double _scaler;
+        }
+
+        /**
+         * Scalar values.
+         */
+        public enum Scale {
+            /**
+             * 10^-24.
+             */
+            YOCTO(10 ^ -24),
+            /**
+             * 10^-21.
+             */
+            ZEPTO(10 ^ -21),
+            /**
+             * 10^-18.
+             */
+            ATTO(10 ^ -18),
+            /**
+             * 10^-15.
+             */
+            FEMTO(10 ^ -15),
+            /**
+             * 10^-12.
+             */
+            PICO(10 ^ -12),
+            /**
+             * 10^-9.
+             */
+            NANO(10 ^ -9),
+            /**
+             * 10^-6.
+             */
+            MICRO(10 ^ -6),
+            /**
+             * 10^-3.
+             */
+            MILLI(10 ^ -3),
+            /**
+             * 10^-2.
+             */
+            CENTI(10 ^ -2),
+            /**
+             * 10^-1.
+             */
+            DECI(10 ^ -1),
+            /**
+             * 1.
+             */
+            ONE(1),
+            /**
+             * 10.
+             */
+            DECA(10),
+            /**
+             * 10^2.
+             */
+            HECTO(10 ^ 2),
+            /**
+             * 10^3.
+             */
+            KILO(10 ^ 3),
+            /**
+             * 10^6.
+             */
+            MEGA(10 ^ 6),
+            /**
+             * 10^9.
+             */
+            GIGA(10 ^ 9),
+            /**
+             * 10^12.
+             */
+            TERA(10 ^ 12),
+            /**
+             * 10^15.
+             */
+            PETA(10 ^ 15),
+            /**
+             * 10^18.
+             */
+            EXA(10 ^ 18),
+            /**
+             * 10^21.
+             */
+            ZETTA(10 ^ 21),
+            /**
+             * 10^24.
+             */
+            YOTTA(10 ^ 24),
+            /**
+             * 10^27.
+             */
+            KIBI(10 ^ 27),
+            /**
+             * 10^30.
+             */
+            MEBI(10 ^ 30),
+            /**
+             * 10^33.
+             */
+            GIBI(10 ^ 33),
+            /**
+             * 10^36.
+             */
+            TEBI(10 ^ 36),
+            /**
+             * 10^39.
+             */
+            PEBI(10 ^ 39),
+            /**
+             * 10^42.
+             */
+            EXBI(10 ^ 42),
+            /**
+             * 10^45.
+             */
+            ZEBI(10 ^ 45),
+            /**
+             * 10^48.
+             */
+            YOBI(10 ^ 48);
+
+            /**
+             * Constructor for Scale class.
+             *
+             * @param value numerical value of Scale for multiplication
+             */
+            Scale(final long value) {
+                _value = value;
+            }
+
+            private long _value;
+        }
+
+        enum Category {
+            TIME,
+            DATA_SIZE,
+            TEMPERATURE,
+            ROTATION
+        }
+
+        @NotNull
+        private Type _type;
+        private Scale _scale;
+
+        /**
+         * Get the existing unit that maps to the covmmpound unit.
+         *
+         * @param compositeUnit
+         * ompoundUnit newer unit format.
+         * @return existing unit which maps to the newer format
+         */
+        public static Unit getLegacyUnit(final Optional<CompositeUnit> compositeUnit) {
+            return compositeUnit.isPresent()
+                    ? LEGACY_UNIT_MAP.getOrDefault(compositeUnit.get(), null)
+                    : null;
+        }
+
+        private static final ImmutableMap<CompositeUnit, Unit> LEGACY_UNIT_MAP = new ImmutableMap.Builder<CompositeUnit, Unit>()
+                .put(new CompositeUnit(CompositeUnit.Scale.NANO, CompositeUnit.Type.SECOND), Unit.NANOSECOND)
+                .put(new CompositeUnit(CompositeUnit.Scale.MICRO, CompositeUnit.Type.SECOND), Unit.MICROSECOND)
+                .put(new CompositeUnit(CompositeUnit.Scale.MILLI, CompositeUnit.Type.SECOND), Unit.MILLISECOND)
+                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.SECOND), Unit.SECOND)
+                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.MINUTE), Unit.MINUTE)
+                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.HOUR), Unit.HOUR)
+                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.DAY), Unit.DAY)
+                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.WEEK), Unit.WEEK)
+                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.BIT), Unit.BIT)
+                .put(new CompositeUnit(CompositeUnit.Scale.KILO, CompositeUnit.Type.BIT), Unit.KILOBIT)
+                .put(new CompositeUnit(CompositeUnit.Scale.MEGA, CompositeUnit.Type.BIT), Unit.MEGABIT)
+                .put(new CompositeUnit(CompositeUnit.Scale.GIGA, CompositeUnit.Type.BIT), Unit.GIGABIT)
+                .put(new CompositeUnit(CompositeUnit.Scale.TERA, CompositeUnit.Type.BIT), Unit.TERABIT)
+                .put(new CompositeUnit(CompositeUnit.Scale.PETA, CompositeUnit.Type.BIT), Unit.PETABIT)
+                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.BYTE), Unit.BYTE)
+                .put(new CompositeUnit(CompositeUnit.Scale.KILO, CompositeUnit.Type.BYTE), Unit.KILOBYTE)
+                .put(new CompositeUnit(CompositeUnit.Scale.MEGA, CompositeUnit.Type.BYTE), Unit.MEGABYTE)
+                .put(new CompositeUnit(CompositeUnit.Scale.GIGA, CompositeUnit.Type.BYTE), Unit.GIGABYTE)
+                .put(new CompositeUnit(CompositeUnit.Scale.TERA, CompositeUnit.Type.BYTE), Unit.TERABYTE)
+                .put(new CompositeUnit(CompositeUnit.Scale.PETA, CompositeUnit.Type.BYTE), Unit.PETABYTE)
+                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.KELVIN), Unit.KELVIN)
+                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.CELSIUS), Unit.CELCIUS)
+                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.FAHRENHEIT), Unit.FAHRENHEIT)
+
+                .put(new CompositeUnit(null, CompositeUnit.Type.SECOND), Unit.SECOND)
+                .put(new CompositeUnit(null, CompositeUnit.Type.MINUTE), Unit.MINUTE)
+                .put(new CompositeUnit(null, CompositeUnit.Type.HOUR), Unit.HOUR)
+                .put(new CompositeUnit(null, CompositeUnit.Type.DAY), Unit.DAY)
+                .put(new CompositeUnit(null, CompositeUnit.Type.WEEK), Unit.WEEK)
+                .put(new CompositeUnit(null, CompositeUnit.Type.BIT), Unit.BIT)
+                .put(new CompositeUnit(null, CompositeUnit.Type.BYTE), Unit.BYTE)
+                .put(new CompositeUnit(null, CompositeUnit.Type.KELVIN), Unit.KELVIN)
+                .put(new CompositeUnit(null, CompositeUnit.Type.CELSIUS), Unit.CELCIUS)
+                .put(new CompositeUnit(null, CompositeUnit.Type.FAHRENHEIT), Unit.FAHRENHEIT)
+                .build();
     }
 }

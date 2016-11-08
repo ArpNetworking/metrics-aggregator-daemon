@@ -33,7 +33,6 @@ import com.arpnetworking.metrics.mad.model.json.Version2fSteno;
 import com.arpnetworking.metrics.mad.model.json.Version2g;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.arpnetworking.tsdcore.model.CompositeUnit;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
@@ -602,7 +601,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static final Function<Version2g.Sample, Quantity> VERSION_2G_SAMPLE_TO_QUANTITY = sample -> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
-                final CompositeUnit sampleUnit = sample.getUnit2g() != null
+                final Version2g.CompositeUnit sampleUnit = sample.getUnit2g() != null
                         ? Iterables.getFirst(sample.getUnit2g().getNumerators(), null)
                         : null;
 
@@ -635,14 +634,14 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                         Unit.class,
                         EnumerationDeserializerStrategyUsingToUpperCase.newInstance()));
         queryLogParserModule.addDeserializer(
-                CompositeUnit.Type.class,
+                Version2g.CompositeUnit.Type.class,
                 EnumerationDeserializer.newInstance(
-                        CompositeUnit.Type.class,
+                        Version2g.CompositeUnit.Type.class,
                         EnumerationDeserializerStrategyUsingToUpperCase.newInstance()));
         queryLogParserModule.addDeserializer(
-                CompositeUnit.Scale.class,
+                Version2g.CompositeUnit.Scale.class,
                 EnumerationDeserializer.newInstance(
-                        CompositeUnit.Scale.class,
+                        Version2g.CompositeUnit.Scale.class,
                         EnumerationDeserializerStrategyUsingToUpperCase.newInstance()));
         OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
         OBJECT_MAPPER.registerModule(queryLogParserModule);
