@@ -607,7 +607,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
                 return new Quantity.Builder()
                         .setValue(sample.getValue())
-                        .setUnitByComposite(sampleUnit)
+                        .setUnit(Version2g.CompositeUnit.getLegacyUnit(sampleUnit))
                         // TODO(vkoskela): Support compound units in Tsd Aggregator
                         //.setNumerator(sampleNumerator)  // same as sampleUnit above
                         //.setDenominator(sampleDenominator)

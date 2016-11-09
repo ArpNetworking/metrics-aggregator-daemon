@@ -17,7 +17,6 @@ package com.arpnetworking.metrics.mad.model.json;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.tsdcore.model.Unit;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.MatchPattern;
@@ -27,6 +26,7 @@ import org.joda.time.DateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 /**
  * Model for the version 2g query log line.
@@ -660,16 +660,15 @@ public final class Version2g {
         private Scale _scale;
 
         /**
-         * Get the existing unit that maps to the covmmpound unit.
+         * Get the existing <code>Unit</code> that corresponds to the compound unit, or null if the compound unit has no
+         * <code>Unit</code> analogue.
          *
-         * @param compositeUnit
-         * ompoundUnit newer unit format.
-         * @return existing unit which maps to the newer format
+         * @param compositeUnit The <code>CompoundUnit</code> for which to find the existing analogue.
+         * @return The existing <code>Unit</code> to which the <code>CompoundUnit</code> maps.
          */
-        public static Unit getLegacyUnit(final Optional<CompositeUnit> compositeUnit) {
-            return compositeUnit.isPresent()
-                    ? LEGACY_UNIT_MAP.getOrDefault(compositeUnit.get(), null)
-                    : null;
+        @Nullable
+        public static Unit getLegacyUnit(final CompositeUnit compositeUnit) {
+            return LEGACY_UNIT_MAP.getOrDefault(compositeUnit, null);
         }
 
         private static final ImmutableMap<CompositeUnit, Unit> LEGACY_UNIT_MAP = new ImmutableMap.Builder<CompositeUnit, Unit>()
