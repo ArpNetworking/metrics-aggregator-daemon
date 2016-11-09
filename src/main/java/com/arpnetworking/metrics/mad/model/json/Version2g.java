@@ -522,130 +522,119 @@ public final class Version2g {
             /**
              * 10^-24.
              */
-            YOCTO(10 ^ -24),
+            YOCTO,
             /**
              * 10^-21.
              */
-            ZEPTO(10 ^ -21),
+            ZEPTO,
             /**
              * 10^-18.
              */
-            ATTO(10 ^ -18),
+            ATTO,
             /**
              * 10^-15.
              */
-            FEMTO(10 ^ -15),
+            FEMTO,
             /**
              * 10^-12.
              */
-            PICO(10 ^ -12),
+            PICO,
             /**
              * 10^-9.
              */
-            NANO(10 ^ -9),
+            NANO,
             /**
              * 10^-6.
              */
-            MICRO(10 ^ -6),
+            MICRO,
             /**
              * 10^-3.
              */
-            MILLI(10 ^ -3),
+            MILLI,
             /**
              * 10^-2.
              */
-            CENTI(10 ^ -2),
+            CENTI,
             /**
              * 10^-1.
              */
-            DECI(10 ^ -1),
+            DECI,
             /**
              * 1.
              */
-            ONE(1),
+            ONE,
             /**
              * 10.
              */
-            DECA(10),
+            DECA,
             /**
              * 10^2.
              */
-            HECTO(10 ^ 2),
+            HECTO,
             /**
              * 10^3.
              */
-            KILO(10 ^ 3),
+            KILO,
             /**
              * 10^6.
              */
-            MEGA(10 ^ 6),
+            MEGA,
             /**
              * 10^9.
              */
-            GIGA(10 ^ 9),
+            GIGA,
             /**
              * 10^12.
              */
-            TERA(10 ^ 12),
+            TERA,
             /**
              * 10^15.
              */
-            PETA(10 ^ 15),
+            PETA,
             /**
              * 10^18.
              */
-            EXA(10 ^ 18),
+            EXA,
             /**
              * 10^21.
              */
-            ZETTA(10 ^ 21),
+            ZETTA,
             /**
              * 10^24.
              */
-            YOTTA(10 ^ 24),
+            YOTTA,
             /**
-             * 10^27.
+             * 2^10.
              */
-            KIBI(10 ^ 27),
+            KIBI,
             /**
-             * 10^30.
+             * 2^20.
              */
-            MEBI(10 ^ 30),
+            MEBI,
             /**
-             * 10^33.
+             * 2^30.
              */
-            GIBI(10 ^ 33),
+            GIBI,
             /**
-             * 10^36.
+             * 2^40.
              */
-            TEBI(10 ^ 36),
+            TEBI,
             /**
-             * 10^39.
+             * 2^50.
              */
-            PEBI(10 ^ 39),
+            PEBI,
             /**
-             * 10^42.
+             * 2^60.
              */
-            EXBI(10 ^ 42),
+            EXBI,
             /**
-             * 10^45.
+             * 2^70.
              */
-            ZEBI(10 ^ 45),
+            ZEBI,
             /**
-             * 10^48.
+             * 2^80.
              */
-            YOBI(10 ^ 48);
-
-            /**
-             * Constructor for Scale class.
-             *
-             * @param value numerical value of Scale for multiplication
-             */
-            Scale(final long value) {
-                _value = value;
-            }
-
-            private long _value;
+            YOBI;
         }
 
         enum Category {
