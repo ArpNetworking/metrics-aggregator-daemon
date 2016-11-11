@@ -440,13 +440,12 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
         for (final Map.Entry<String, Version2g.Element> entry : elements.entrySet()) {
             final Version2g.Element element = entry.getValue();
-            final List<Quantity> quantities = Lists.newArrayList(
-                    Lists.transform(
+            final List<Quantity> quantities = Lists.transform(
                             element.getValues(),
-                            VERSION_2G_SAMPLE_TO_QUANTITY)
+                            JsonToRecordParser::version2gSampleToQuantity)
                             .stream()
                             .filter(Predicates.notNull()::apply)
-                            .collect(Collectors.toList()));
+                            .collect(Collectors.toList());
             variables.put(
                     entry.getKey(),
                     new DefaultMetric.Builder()
@@ -649,7 +648,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         }
     };
 
-    private static final Function<Version2g.Sample, Quantity> VERSION_2G_SAMPLE_TO_QUANTITY = sample -> {
+    private static Quantity version2gSampleToQuantity(final Version2g.Sample sample) {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
                 final CompositeUnit sampleUnit = sample.getUnit2g() != null
