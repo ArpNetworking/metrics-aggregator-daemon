@@ -16,7 +16,6 @@
 package com.arpnetworking.metrics.mad.model.json;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
-import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.MatchPattern;
@@ -26,7 +25,6 @@ import org.joda.time.DateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 
 /**
  * Model for the version 2g query log line.
@@ -648,53 +646,5 @@ public final class Version2g {
         private Type _type;
         private Scale _scale;
 
-        /**
-         * Get the existing <code>Unit</code> that corresponds to the compound unit, or null if the compound unit has no
-         * <code>Unit</code> analogue.
-         *
-         * @param compositeUnit The <code>CompoundUnit</code> for which to find the existing analogue.
-         * @return The existing <code>Unit</code> to which the <code>CompoundUnit</code> maps.
-         */
-        @Nullable
-        public static Unit getLegacyUnit(final CompositeUnit compositeUnit) {
-            return LEGACY_UNIT_MAP.getOrDefault(compositeUnit, null);
-        }
-
-        private static final ImmutableMap<CompositeUnit, Unit> LEGACY_UNIT_MAP = new ImmutableMap.Builder<CompositeUnit, Unit>()
-                .put(new CompositeUnit(CompositeUnit.Scale.NANO, CompositeUnit.Type.SECOND), Unit.NANOSECOND)
-                .put(new CompositeUnit(CompositeUnit.Scale.MICRO, CompositeUnit.Type.SECOND), Unit.MICROSECOND)
-                .put(new CompositeUnit(CompositeUnit.Scale.MILLI, CompositeUnit.Type.SECOND), Unit.MILLISECOND)
-                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.SECOND), Unit.SECOND)
-                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.MINUTE), Unit.MINUTE)
-                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.HOUR), Unit.HOUR)
-                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.DAY), Unit.DAY)
-                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.WEEK), Unit.WEEK)
-                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.BIT), Unit.BIT)
-                .put(new CompositeUnit(CompositeUnit.Scale.KILO, CompositeUnit.Type.BIT), Unit.KILOBIT)
-                .put(new CompositeUnit(CompositeUnit.Scale.MEGA, CompositeUnit.Type.BIT), Unit.MEGABIT)
-                .put(new CompositeUnit(CompositeUnit.Scale.GIGA, CompositeUnit.Type.BIT), Unit.GIGABIT)
-                .put(new CompositeUnit(CompositeUnit.Scale.TERA, CompositeUnit.Type.BIT), Unit.TERABIT)
-                .put(new CompositeUnit(CompositeUnit.Scale.PETA, CompositeUnit.Type.BIT), Unit.PETABIT)
-                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.BYTE), Unit.BYTE)
-                .put(new CompositeUnit(CompositeUnit.Scale.KILO, CompositeUnit.Type.BYTE), Unit.KILOBYTE)
-                .put(new CompositeUnit(CompositeUnit.Scale.MEGA, CompositeUnit.Type.BYTE), Unit.MEGABYTE)
-                .put(new CompositeUnit(CompositeUnit.Scale.GIGA, CompositeUnit.Type.BYTE), Unit.GIGABYTE)
-                .put(new CompositeUnit(CompositeUnit.Scale.TERA, CompositeUnit.Type.BYTE), Unit.TERABYTE)
-                .put(new CompositeUnit(CompositeUnit.Scale.PETA, CompositeUnit.Type.BYTE), Unit.PETABYTE)
-                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.KELVIN), Unit.KELVIN)
-                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.CELSIUS), Unit.CELCIUS)
-                .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.FAHRENHEIT), Unit.FAHRENHEIT)
-
-                .put(new CompositeUnit(null, CompositeUnit.Type.SECOND), Unit.SECOND)
-                .put(new CompositeUnit(null, CompositeUnit.Type.MINUTE), Unit.MINUTE)
-                .put(new CompositeUnit(null, CompositeUnit.Type.HOUR), Unit.HOUR)
-                .put(new CompositeUnit(null, CompositeUnit.Type.DAY), Unit.DAY)
-                .put(new CompositeUnit(null, CompositeUnit.Type.WEEK), Unit.WEEK)
-                .put(new CompositeUnit(null, CompositeUnit.Type.BIT), Unit.BIT)
-                .put(new CompositeUnit(null, CompositeUnit.Type.BYTE), Unit.BYTE)
-                .put(new CompositeUnit(null, CompositeUnit.Type.KELVIN), Unit.KELVIN)
-                .put(new CompositeUnit(null, CompositeUnit.Type.CELSIUS), Unit.CELCIUS)
-                .put(new CompositeUnit(null, CompositeUnit.Type.FAHRENHEIT), Unit.FAHRENHEIT)
-                .build();
     }
 }

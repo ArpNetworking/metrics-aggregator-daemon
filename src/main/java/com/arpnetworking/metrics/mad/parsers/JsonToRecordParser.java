@@ -31,6 +31,7 @@ import com.arpnetworking.metrics.mad.model.json.Version2e;
 import com.arpnetworking.metrics.mad.model.json.Version2f;
 import com.arpnetworking.metrics.mad.model.json.Version2fSteno;
 import com.arpnetworking.metrics.mad.model.json.Version2g;
+import com.arpnetworking.metrics.mad.model.json.Version2g.CompositeUnit;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.Key;
@@ -64,6 +65,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 /**
  * Implementation of <code>Parser</code> for the JSON metrics formats. The
@@ -295,6 +297,18 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         return defaultDimensions.build();
     }
 
+    /**
+     * Get the existing <code>Unit</code> that corresponds to the compound unit, or null if the compound unit has no
+     * <code>Unit</code> analogue.
+     *
+     * @param compositeUnit The <code>CompoundUnit</code> for which to find the existing analogue.
+     * @return The existing <code>Unit</code> to which the <code>CompoundUnit</code> maps.
+     */
+    @Nullable
+    private static Unit getLegacyUnit(final CompositeUnit compositeUnit) {
+        return LEGACY_UNIT_MAP.getOrDefault(compositeUnit, null);
+    }
+
     private static final String PREFIXED_HOST_KEY = "_host";
     private static final String PREFIXED_SERVICE_KEY = "_service";
     private static final String PREFIXED_CLUSTER_KEY = "_cluster";
@@ -475,6 +489,43 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         _defaultCluster = builder._defaultCluster;
     }
 
+    private static final ImmutableMap<CompositeUnit, Unit> LEGACY_UNIT_MAP = new ImmutableMap.Builder<CompositeUnit, Unit>()
+            .put(new CompositeUnit(CompositeUnit.Scale.NANO, CompositeUnit.Type.SECOND), Unit.NANOSECOND)
+            .put(new CompositeUnit(CompositeUnit.Scale.MICRO, CompositeUnit.Type.SECOND), Unit.MICROSECOND)
+            .put(new CompositeUnit(CompositeUnit.Scale.MILLI, CompositeUnit.Type.SECOND), Unit.MILLISECOND)
+            .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.SECOND), Unit.SECOND)
+            .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.MINUTE), Unit.MINUTE)
+            .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.HOUR), Unit.HOUR)
+            .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.DAY), Unit.DAY)
+            .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.WEEK), Unit.WEEK)
+            .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.BIT), Unit.BIT)
+            .put(new CompositeUnit(CompositeUnit.Scale.KILO, CompositeUnit.Type.BIT), Unit.KILOBIT)
+            .put(new CompositeUnit(CompositeUnit.Scale.MEGA, CompositeUnit.Type.BIT), Unit.MEGABIT)
+            .put(new CompositeUnit(CompositeUnit.Scale.GIGA, CompositeUnit.Type.BIT), Unit.GIGABIT)
+            .put(new CompositeUnit(CompositeUnit.Scale.TERA, CompositeUnit.Type.BIT), Unit.TERABIT)
+            .put(new CompositeUnit(CompositeUnit.Scale.PETA, CompositeUnit.Type.BIT), Unit.PETABIT)
+            .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.BYTE), Unit.BYTE)
+            .put(new CompositeUnit(CompositeUnit.Scale.KILO, CompositeUnit.Type.BYTE), Unit.KILOBYTE)
+            .put(new CompositeUnit(CompositeUnit.Scale.MEGA, CompositeUnit.Type.BYTE), Unit.MEGABYTE)
+            .put(new CompositeUnit(CompositeUnit.Scale.GIGA, CompositeUnit.Type.BYTE), Unit.GIGABYTE)
+            .put(new CompositeUnit(CompositeUnit.Scale.TERA, CompositeUnit.Type.BYTE), Unit.TERABYTE)
+            .put(new CompositeUnit(CompositeUnit.Scale.PETA, CompositeUnit.Type.BYTE), Unit.PETABYTE)
+            .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.KELVIN), Unit.KELVIN)
+            .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.CELSIUS), Unit.CELCIUS)
+            .put(new CompositeUnit(CompositeUnit.Scale.ONE, CompositeUnit.Type.FAHRENHEIT), Unit.FAHRENHEIT)
+
+            .put(new CompositeUnit(null, CompositeUnit.Type.SECOND), Unit.SECOND)
+            .put(new CompositeUnit(null, CompositeUnit.Type.MINUTE), Unit.MINUTE)
+            .put(new CompositeUnit(null, CompositeUnit.Type.HOUR), Unit.HOUR)
+            .put(new CompositeUnit(null, CompositeUnit.Type.DAY), Unit.DAY)
+            .put(new CompositeUnit(null, CompositeUnit.Type.WEEK), Unit.WEEK)
+            .put(new CompositeUnit(null, CompositeUnit.Type.BIT), Unit.BIT)
+            .put(new CompositeUnit(null, CompositeUnit.Type.BYTE), Unit.BYTE)
+            .put(new CompositeUnit(null, CompositeUnit.Type.KELVIN), Unit.KELVIN)
+            .put(new CompositeUnit(null, CompositeUnit.Type.CELSIUS), Unit.CELCIUS)
+            .put(new CompositeUnit(null, CompositeUnit.Type.FAHRENHEIT), Unit.FAHRENHEIT)
+            .build();
+
     private final String _defaultHost;
     private final String _defaultService;
     private final String _defaultCluster;
@@ -601,13 +652,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static final Function<Version2g.Sample, Quantity> VERSION_2G_SAMPLE_TO_QUANTITY = sample -> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
-                final Version2g.CompositeUnit sampleUnit = sample.getUnit2g() != null
+                final CompositeUnit sampleUnit = sample.getUnit2g() != null
                         ? Iterables.getFirst(sample.getUnit2g().getNumerators(), null)
                         : null;
 
                 return new Quantity.Builder()
                         .setValue(sample.getValue())
-                        .setUnit(Version2g.CompositeUnit.getLegacyUnit(sampleUnit))
+                        .setUnit(getLegacyUnit(sampleUnit))
                         // TODO(vkoskela): Support compound units in Tsd Aggregator
                         //.setNumerator(sampleNumerator)  // same as sampleUnit above
                         //.setDenominator(sampleDenominator)
@@ -634,14 +685,14 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                         Unit.class,
                         EnumerationDeserializerStrategyUsingToUpperCase.newInstance()));
         queryLogParserModule.addDeserializer(
-                Version2g.CompositeUnit.Type.class,
+                CompositeUnit.Type.class,
                 EnumerationDeserializer.newInstance(
-                        Version2g.CompositeUnit.Type.class,
+                        CompositeUnit.Type.class,
                         EnumerationDeserializerStrategyUsingToUpperCase.newInstance()));
         queryLogParserModule.addDeserializer(
-                Version2g.CompositeUnit.Scale.class,
+                CompositeUnit.Scale.class,
                 EnumerationDeserializer.newInstance(
-                        Version2g.CompositeUnit.Scale.class,
+                        CompositeUnit.Scale.class,
                         EnumerationDeserializerStrategyUsingToUpperCase.newInstance()));
         OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
         OBJECT_MAPPER.registerModule(queryLogParserModule);
