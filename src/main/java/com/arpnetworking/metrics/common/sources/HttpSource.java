@@ -148,6 +148,7 @@ public class HttpSource extends ActorSource {
                 final Flow<HttpRequest, byte[], NotUsed> getBodyFlow = Flow.<HttpRequest>create()
                         .map(HttpRequest::entity)
                         .flatMapConcat(RequestEntity::getDataBytes)
+                        .reduce(ByteString::concat)
                         .map(ByteString::toArray) // Transform to array form
                         .named("getBody");
 

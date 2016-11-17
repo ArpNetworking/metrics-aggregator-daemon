@@ -38,6 +38,7 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import akka.util.Timeout;
+import com.arpnetworking.metrics.Counter;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.metrics.Timer;
@@ -107,7 +108,9 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     @Override
     public CompletionStage<HttpResponse> apply(final HttpRequest request) {
         final Metrics metrics = _metricsFactory.create();
-        final Timer timer = metrics.createTimer(createTimerName(request));
+        final Timer timer = metrics.createTimer(createMetricName(request, REQUEST_METRIC));
+        final Counter bodySize = metrics.createCounter(createMetricName(request, BODY_SIZE_METRIC));
+        bodySize.increment(request.entity().getContentLengthOption().orElse(0L));
         // TODO(vkoskela): Add a request UUID and include in MDC. [MAI-462]
         LOGGER.trace()
                 .setEvent("http.in.start")
@@ -229,14 +232,16 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                 .exceptionally(throwable -> defaultValue);
     }
 
-    private String createTimerName(final HttpRequest request) {
+    private String createMetricName(final HttpRequest request, final String actionPart) {
         final StringBuilder nameBuilder = new StringBuilder()
-                .append("rest_service/")
+                .append(REST_SERVICE_METRIC_ROOT)
                 .append(request.method().value());
         if (!request.getUri().path().startsWith("/")) {
             nameBuilder.append("/");
         }
         nameBuilder.append(request.getUri().path());
+        nameBuilder.append("/");
+        nameBuilder.append(actionPart);
         return nameBuilder.toString();
     }
 
@@ -259,6 +264,9 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private static final String APP_V1_SOURCE_PREFIX = "/metrics/v1/application";
     private static final String ACTOR_COLLECTD_V1 = "/user/" + CollectdHttpSourceV1.ACTOR_NAME;
     private static final String ACTOR_APP_V1 = "/user/" + ClientHttpSourceV1.ACTOR_NAME;
+    private static final String REST_SERVICE_METRIC_ROOT = "rest_service/";
+    private static final String BODY_SIZE_METRIC = "body_size";
+    private static final String REQUEST_METRIC = "request";
 
     // Ping
     private static final HttpHeader PING_CACHE_CONTROL_HEADER = CacheControl.create(
