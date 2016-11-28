@@ -25,9 +25,12 @@ import akka.http.javadsl.ServerBinding;
 import akka.stream.ActorMaterializer;
 import akka.stream.Materializer;
 import ch.qos.logback.classic.LoggerContext;
+import com.arpnetworking.commons.builder.Builder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.configuration.jackson.DynamicConfiguration;
+import com.arpnetworking.configuration.jackson.HoconFileSource;
 import com.arpnetworking.configuration.jackson.JsonNodeFileSource;
+import com.arpnetworking.configuration.jackson.JsonNodeSource;
 import com.arpnetworking.configuration.triggers.FileTrigger;
 import com.arpnetworking.http.Routes;
 import com.arpnetworking.metrics.MetricsFactory;
@@ -61,6 +64,7 @@ import scala.concurrent.duration.Duration;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
@@ -119,10 +123,7 @@ public final class Main implements Launchable {
             configurator = Optional.of(new Configurator<>(Main::new, AggregatorConfiguration.class));
             configuration = Optional.of(new DynamicConfiguration.Builder()
                     .setObjectMapper(OBJECT_MAPPER)
-                    .addSourceBuilder(
-                            new JsonNodeFileSource.Builder()
-                                    .setObjectMapper(OBJECT_MAPPER)
-                                    .setFile(configurationFile))
+                    .addSourceBuilder(getFileSourceBuilder(configurationFile))
                     .addTrigger(
                             new FileTrigger.Builder()
                                     .setFile(configurationFile)
@@ -310,6 +311,17 @@ public final class Main implements Launchable {
         LOGGER.info().setMessage("Stopping guice").log();
     }
 
+    private static Builder<? extends JsonNodeSource> getFileSourceBuilder(final File configurationFile) {
+        if (configurationFile.getName().toLowerCase(Locale.getDefault()).endsWith(HOCON_FILE_EXTENSION)) {
+            return new HoconFileSource.Builder()
+                    .setObjectMapper(OBJECT_MAPPER)
+                    .setFile(configurationFile);
+        }
+        return new JsonNodeFileSource.Builder()
+                .setObjectMapper(OBJECT_MAPPER)
+                .setFile(configurationFile);
+    }
+
     private final AggregatorConfiguration _configuration;
 
     private volatile PipelinesLaunchable _pipelinesLaunchable;
@@ -324,6 +336,7 @@ public final class Main implements Launchable {
     private static final Duration SHUTDOWN_TIMEOUT = Duration.create(30, TimeUnit.SECONDS);
     private static final Semaphore SHUTDOWN_SEMAPHORE = new Semaphore(0);
     private static final Thread SHUTDOWN_THREAD = new ShutdownThread();
+    private static final String HOCON_FILE_EXTENSION = ".hocon";
 
     private static final class PipelinesLaunchable implements Launchable, Runnable {
 
@@ -386,10 +399,7 @@ public final class Main implements Launchable {
                     new Configurator<>(Pipeline::new, PipelineConfiguration.class);
             final DynamicConfiguration pipelineConfiguration = new DynamicConfiguration.Builder()
                     .setObjectMapper(_objectMapper)
-                    .addSourceBuilder(
-                            new JsonNodeFileSource.Builder()
-                                    .setObjectMapper(_objectMapper)
-                                    .setFile(file))
+                    .addSourceBuilder(getFileSourceBuilder(file))
                     .addTrigger(
                             new FileTrigger.Builder()
                                     .setFile(file)
