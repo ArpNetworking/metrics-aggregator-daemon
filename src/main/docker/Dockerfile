@@ -12,23 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM java:8u92-jre-alpine
+FROM openjdk:8u111-jre-alpine
 
 MAINTAINER arpnetworking
 
 EXPOSE 7090
 WORKDIR /opt/mad
 
-# Logging configuration
-ENV LOGBACK_FILE="/opt/mad/config/logback.xml"
-ENV LOGBACK_CONFIG="-Dlogback.configurationFile=${LOGBACK_FILE}"
-
-# JVM configuration
-ENV ADDITIONAL_JAVA_OPTS=""
-
-# MAD configuration
-ENV ADDITIONAL_APP_PARAMS=""
+# Configuration
+ENV JVM_XMS="64m"
+ENV JVM_XMX="1024m"
+ENV LOGBACK_CONFIG="-Dlogback.configurationFile=/opt/mad/config/logback.xml"
 ENV APP_PARAMS="/opt/mad/config/config.hocon"
+ENV ADDITIONAL_APP_PARAMS=""
+ENV ADDITIONAL_JAVA_OPTS=""
 
 # Build
 RUN mkdir -p /opt/mad/lib/ext && \
@@ -40,4 +37,19 @@ ADD config /opt/mad/config/
 ADD lib /opt/mad/lib/
 
 # Entry point
-CMD JAVA_OPTS="${LOGBACK_CONFIG} ${ADDITIONAL_JAVA_OPTS}" /opt/mad/bin/mad ${APP_PARAMS} ${ADDITIONAL_APP_PARAMS}
+CMD JAVA_OPTS="${LOGBACK_CONFIG} \
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath=/opt/mad/logs/mad.oom.hprof \
+    -XX:+PrintGCDetails \
+    -XX:+PrintGCDateStamps \
+    -Xloggc:logs/mad.gc.log \
+    -XX:NumberOfGCLogFiles=2 \
+    -XX:GCLogFileSize=50M \
+    -XX:+UseGCLogFileRotation \
+    -Xms${JVM_XMS} \
+    -Xmx${JVM_XMX} \
+    -XX:+UseStringDeduplication \
+    -XX:+UseG1GC \
+    -Duser.timezone=UTC \
+    ${ADDITIONAL_JAVA_OPTS}" \
+    /opt/mad/bin/mad ${APP_PARAMS} ${ADDITIONAL_APP_PARAMS}

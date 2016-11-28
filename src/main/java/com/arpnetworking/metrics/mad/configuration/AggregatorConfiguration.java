@@ -16,6 +16,7 @@
 package com.arpnetworking.metrics.mad.configuration;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.http.SupplementalRoutes;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
 import net.sf.oval.constraint.NotEmpty;
@@ -26,6 +27,7 @@ import org.joda.time.Period;
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Representation of TsdAggregator configuration.
@@ -63,6 +65,10 @@ public final class AggregatorConfiguration {
         return _httpStatusPath;
     }
 
+    public Optional<Class<? extends SupplementalRoutes>> getSupplementalHttpRoutesClass() {
+        return _supplementalHttpRoutesClass;
+    }
+
     public Period getJvmMetricsCollectionInterval() {
         return _jvmMetricsCollectionInterval;
     }
@@ -85,6 +91,7 @@ public final class AggregatorConfiguration {
                 .add("HttpPort", _httpPort)
                 .add("HttpHealthCheckPath", _httpHealthCheckPath)
                 .add("HttpStatusPath", _httpStatusPath)
+                .add("SupplementalHttpRoutesClass", _supplementalHttpRoutesClass)
                 .add("AkkaConfiguration", _akkaConfiguration)
                 .add("JvmMetricsCollectorInterval", _jvmMetricsCollectionInterval)
                 .toString();
@@ -98,6 +105,7 @@ public final class AggregatorConfiguration {
         _httpPort = builder._httpPort;
         _httpHealthCheckPath = builder._httpHealthCheckPath;
         _httpStatusPath = builder._httpStatusPath;
+        _supplementalHttpRoutesClass = Optional.ofNullable(builder._supplementalHttpRoutesClass);
         _jvmMetricsCollectionInterval = builder._jvmMetricsCollectionInterval;
         _akkaConfiguration = builder._akkaConfiguration;
     }
@@ -109,6 +117,7 @@ public final class AggregatorConfiguration {
     private final String _httpHealthCheckPath;
     private final String _httpStatusPath;
     private final int _httpPort;
+    private Optional<Class<? extends SupplementalRoutes>> _supplementalHttpRoutesClass;
     private final Period _jvmMetricsCollectionInterval;
     private final Map<String, ?> _akkaConfiguration;
 
@@ -205,6 +214,17 @@ public final class AggregatorConfiguration {
         }
 
         /**
+         * The supplemental routes class. Optional.
+         *
+         * @param value The class of the supplement routes.
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setSupplementalHttpRoutesClass(final Class<? extends SupplementalRoutes> value) {
+            _supplementalHttpRoutesClass = value;
+            return this;
+        }
+
+        /**
          * Period for collecting JVM metrics. Optional. Default is 500 milliseconds.
          *
          * @param value A <code>Period</code> value.
@@ -251,6 +271,7 @@ public final class AggregatorConfiguration {
         @NotNull
         @NotEmpty
         private String _httpStatusPath = "/status";
+        private Class<? extends SupplementalRoutes> _supplementalHttpRoutesClass;
         @NotNull
         private Period _jvmMetricsCollectionInterval = Period.millis(500);
         @NotNull

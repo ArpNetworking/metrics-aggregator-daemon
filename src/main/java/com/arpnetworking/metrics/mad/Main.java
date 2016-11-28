@@ -33,6 +33,7 @@ import com.arpnetworking.configuration.jackson.JsonNodeFileSource;
 import com.arpnetworking.configuration.jackson.JsonNodeSource;
 import com.arpnetworking.configuration.triggers.FileTrigger;
 import com.arpnetworking.http.Routes;
+import com.arpnetworking.http.SupplementalRoutes;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.metrics.impl.ApacheHttpSink;
 import com.arpnetworking.metrics.impl.TsdMetricsFactory;
@@ -47,7 +48,6 @@ import com.arpnetworking.utility.Configurator;
 import com.arpnetworking.utility.Launchable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -62,10 +62,12 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executors;
@@ -116,8 +118,8 @@ public final class Main implements Launchable {
                 .addData("file", args[0])
                 .log();
 
-        Optional<DynamicConfiguration> configuration = Optional.absent();
-        Optional<Configurator<Main, AggregatorConfiguration>> configurator = Optional.absent();
+        Optional<DynamicConfiguration> configuration = Optional.empty();
+        Optional<Configurator<Main, AggregatorConfiguration>> configurator = Optional.empty();
         try {
             final File configurationFile = new File(args[0]);
             configurator = Optional.of(new Configurator<>(Main::new, AggregatorConfiguration.class));
@@ -214,13 +216,28 @@ public final class Main implements Launchable {
         // Create the telemetry connection actor
         actorSystem.actorOf(Props.create(Telemetry.class, injector.getInstance(MetricsFactory.class)), "telemetry");
 
+        // Load supplemental routes
+        final List<SupplementalRoutes> supplementalHttpRoutes = new ArrayList<>();
+        _configuration.getSupplementalHttpRoutesClass().ifPresent(clazz -> {
+                    try {
+                        supplementalHttpRoutes.add(clazz.newInstance());
+                    } catch (final InstantiationException | IllegalAccessException e) {
+                        LOGGER.warn()
+                                .setMessage("Failed to instantiate supplemental http routes")
+                                .addData("supplementalHttpRoutesClass", clazz)
+                                .setThrowable(e)
+                                .log();
+                    }
+                });
+
         // Create and bind Http server
         final Materializer materializer = ActorMaterializer.create(actorSystem);
         final Routes routes = new Routes(
                 actorSystem,
                 injector.getInstance(MetricsFactory.class),
                 _configuration.getHttpHealthCheckPath(),
-                _configuration.getHttpStatusPath());
+                _configuration.getHttpStatusPath(),
+                supplementalHttpRoutes);
         final Http http = Http.get(actorSystem);
         final akka.stream.javadsl.Source<IncomingConnection, CompletionStage<ServerBinding>> binding = http.bind(
                 ConnectHttp.toHost(
