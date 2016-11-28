@@ -28,7 +28,7 @@ ENV ADDITIONAL_JAVA_OPTS=""
 
 # MAD configuration
 ENV ADDITIONAL_APP_PARAMS=""
-ENV APP_PARAMS="/opt/mad/config/config.json"
+ENV APP_PARAMS="/opt/mad/config/config.hocon"
 
 # Build
 RUN mkdir -p /opt/mad/lib/ext && \
