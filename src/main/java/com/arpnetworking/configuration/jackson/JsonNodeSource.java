@@ -16,7 +16,8 @@
 package com.arpnetworking.configuration.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Optional;
+
+import java.util.Optional;
 
 /**
  * Interface for sourcing <code>JsonNode</code> based configuration.

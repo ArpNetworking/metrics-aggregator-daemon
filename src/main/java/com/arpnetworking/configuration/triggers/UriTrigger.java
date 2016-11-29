@@ -21,7 +21,6 @@ import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.google.common.base.Optional;
 import net.sf.oval.constraint.NotNull;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
@@ -39,6 +38,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <code>Trigger</code> implementation based on a uri's last modified date and
@@ -184,8 +184,8 @@ public final class UriTrigger implements Trigger {
         // evaluation. To accomplish this a modified time of -1 and a null hash
         // is used.
         _uri = builder._uri;
-        _previousLastModified = Optional.absent();
-        _previousETag = Optional.absent();
+        _previousLastModified = Optional.empty();
+        _previousETag = Optional.empty();
         _headers = new ArrayList<>(builder._headers);
     }
 

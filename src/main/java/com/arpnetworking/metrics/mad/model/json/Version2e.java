@@ -20,7 +20,6 @@ import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -31,6 +30,7 @@ import org.joda.time.DateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -79,7 +79,7 @@ public final class Version2e {
         _name = builder._name;
         _level = builder._level;
         _data = builder._data;
-        _id = Optional.fromNullable(builder._id);
+        _id = Optional.ofNullable(builder._id);
         _context = ImmutableMap.copyOf(MoreObjects.firstNonNull(builder._context, Collections.<String, String>emptyMap()));
     }
 
@@ -312,7 +312,7 @@ public final class Version2e {
         }
 
         private Sample(final Builder builder) {
-            _unit = Optional.fromNullable(builder._unit);
+            _unit = Optional.ofNullable(builder._unit);
             _value = builder._value;
         }
 

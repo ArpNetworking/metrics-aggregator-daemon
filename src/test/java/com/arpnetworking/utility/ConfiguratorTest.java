@@ -17,9 +17,10 @@ package com.arpnetworking.utility;
 
 import com.arpnetworking.configuration.jackson.JsonNodeLiteralSource;
 import com.arpnetworking.configuration.jackson.StaticConfiguration;
-import com.google.common.base.Optional;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Optional;
 
 /**
  * Tests for the <code>Configurator</code> class.

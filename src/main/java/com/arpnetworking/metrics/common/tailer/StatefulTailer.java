@@ -23,7 +23,6 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.utility.TimerTrigger;
 import com.arpnetworking.utility.Trigger;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import net.sf.oval.constraint.NotNull;
 import org.apache.commons.codec.binary.Hex;
@@ -42,6 +41,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A reimplementation of the Apache Commons IO tailer based on the 2.5 snapshot
@@ -147,7 +147,7 @@ public final class StatefulTailer implements Tailer {
                     // Reset per file state
                     IOUtils.closeQuietly(reader);
                     reader = null;
-                    _hash = Optional.absent();
+                    _hash = Optional.empty();
                 }
             }
         // Clients may elect to kill the stateful tailer on an exception by calling stop, or they
@@ -165,7 +165,7 @@ public final class StatefulTailer implements Tailer {
         } finally {
             IOUtils.closeQuietly(reader);
             reader = null;
-            _hash = Optional.absent();
+            _hash = Optional.empty();
         }
     }
 
@@ -200,8 +200,8 @@ public final class StatefulTailer implements Tailer {
 
     // CHECKSTYLE.OFF: MethodLength - Nothing to refactor here.
     private void readLoop(final SeekableByteChannel reader) throws IOException, InterruptedException {
-        Optional<Long> lastChecked = Optional.absent();
-        Optional<String> currentReaderPrefixHash = Optional.absent();
+        Optional<Long> lastChecked = Optional.empty();
+        Optional<String> currentReaderPrefixHash = Optional.empty();
         int currentReaderPrefixHashLength = 0;
         while (isRunning()) {
             // Obtain properties of file we expect we are reading
@@ -253,7 +253,7 @@ public final class StatefulTailer implements Tailer {
                         // actually got more data in the current file.
 
                         rotate(
-                                Optional.<SeekableByteChannel>absent(),
+                                Optional.<SeekableByteChannel>empty(),
                                 String.format(
                                         "File rotation detected based on length and no new data; file=%s, length=%d, position=%d",
                                         _file,
@@ -277,7 +277,7 @@ public final class StatefulTailer implements Tailer {
                     // the same data at the beginning of each period.
 
                     rotate(
-                            Optional.<SeekableByteChannel>absent(),
+                            Optional.<SeekableByteChannel>empty(),
                             String.format(
                                     "File rotation detected based equal length and position but newer"
                                             + "; file=%s, length=%d, position=%d, lastChecked=%s, attributes=%s",
@@ -304,7 +304,7 @@ public final class StatefulTailer implements Tailer {
                     if (hashesSame.isPresent() && !hashesSame.get()) {
                         // The file rotated with the same length!
                         rotate(
-                                Optional.<SeekableByteChannel>absent(),
+                                Optional.<SeekableByteChannel>empty(),
                                 String.format(
                                         "File rotation detected based on hash; file=%s",
                                         _file));
@@ -447,16 +447,16 @@ public final class StatefulTailer implements Tailer {
                     .addData("size", appliedLength)
                     .log();
 
-            return Optional.of(Objects.equals(_hash.or(prefixHash).orNull(), filePrefixHash.orNull()));
+            return Optional.of(Objects.equals(_hash.orElse(prefixHash.orElse(null)), filePrefixHash.orElse(null)));
         } catch (final IOException e) {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
     private Optional<String> computeHash(final SeekableByteChannel reader, final int hashSize) throws IOException {
         // Don't hash empty data sets
         if (hashSize <= 0) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         // Validate sufficient data to compute the hash
@@ -469,7 +469,7 @@ public final class StatefulTailer implements Tailer {
                     .addData("hashSize", hashSize)
                     .addData("readerSize", reader.size())
                     .log();
-            return Optional.absent();
+            return Optional.empty();
         }
 
         // Read the data to hash
@@ -482,7 +482,7 @@ public final class StatefulTailer implements Tailer {
                         .setMessage("Unexpected end of file reached")
                         .addData("totalBytesRead", totalBytesRead)
                         .log();
-                return Optional.absent();
+                return Optional.empty();
             }
             totalBytesRead += bytesRead;
         }
@@ -533,7 +533,7 @@ public final class StatefulTailer implements Tailer {
         }
 
         _initialPosition = builder._initialPosition;
-        _maximumOffsetOnResume = Optional.fromNullable(builder._maximumOffsetOnResume);
+        _maximumOffsetOnResume = Optional.ofNullable(builder._maximumOffsetOnResume);
         _listener.initialize(this);
     }
 
@@ -553,7 +553,7 @@ public final class StatefulTailer implements Tailer {
     private final Trigger _trigger;
 
     private volatile boolean _isRunning = true;
-    private Optional<String> _hash = Optional.absent();
+    private Optional<String> _hash = Optional.empty();
 
     private static final int REQUIRED_BYTES_FOR_HASH = 512;
     private static final int INITIAL_BUFFER_SIZE = 65536;

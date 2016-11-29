@@ -20,13 +20,13 @@ import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
-import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -71,12 +71,12 @@ public final class MeanStatistic extends BaseStatistic {
             return ZERO;
         }
         double sum = 0;
-        Optional<Unit> unit = Optional.absent();
+        Optional<Unit> unit = Optional.empty();
         for (final Quantity sample : orderedValues) {
             sum += sample.getValue();
-            unit = unit.or(sample.getUnit());
+            unit = Optional.ofNullable(unit.orElse(sample.getUnit().orElse(null)));
         }
-        return new Quantity.Builder().setValue(sum / orderedValues.size()).setUnit(unit.orNull()).build();
+        return new Quantity.Builder().setValue(sum / orderedValues.size()).setUnit(unit.orElse(null)).build();
     }
 
     /**
@@ -86,16 +86,16 @@ public final class MeanStatistic extends BaseStatistic {
     public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
         double weighted = 0D;
         int count = 0;
-        Optional<Unit> unit = Optional.absent();
+        Optional<Unit> unit = Optional.empty();
         for (final AggregatedData aggregation : aggregations) {
             final double populationSize = aggregation.getPopulationSize();
             weighted += aggregation.getValue().getValue() * populationSize;
             count += populationSize;
-            unit = unit.or(aggregation.getValue().getUnit());
+            unit = Optional.ofNullable(unit.orElse(aggregation.getValue().getUnit().orElse(null)));
         }
         return new Quantity.Builder()
                 .setValue(weighted / count)
-                .setUnit(unit.orNull())
+                .setUnit(unit.orElse(null))
                 .build();
     }
 

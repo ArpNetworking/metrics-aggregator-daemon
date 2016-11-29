@@ -20,12 +20,12 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import net.sf.oval.constraint.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * <code>JsonNode</code> based configuration sourced from a file.
@@ -81,7 +81,7 @@ public final class JsonNodeFileSource extends BaseJsonNodeSource {
                     .addData("file", _file)
                     .log();
         }
-        _jsonNode = Optional.fromNullable(jsonNode);
+        _jsonNode = Optional.ofNullable(jsonNode);
     }
 
     private final File _file;

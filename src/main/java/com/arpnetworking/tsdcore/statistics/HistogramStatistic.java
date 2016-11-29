@@ -20,11 +20,11 @@ import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
-import com.google.common.base.Optional;
 import net.sf.oval.constraint.NotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -110,7 +110,7 @@ public final class HistogramStatistic extends BaseStatistic {
                 _histogram.recordValue(quantity.getValue());
             }
 
-            _unit = _unit.or(quantityUnit);
+            _unit = Optional.ofNullable(_unit.orElse(quantityUnit.orElse(null)));
             return this;
         }
 
@@ -127,7 +127,7 @@ public final class HistogramStatistic extends BaseStatistic {
                 _histogram.add(calculatedValue.getData().getHistogramSnapshot());
             }
 
-            _unit = _unit.or(unit);
+            _unit = Optional.ofNullable(_unit.orElse(unit.orElse(null)));
             return this;
         }
 
@@ -166,11 +166,11 @@ public final class HistogramStatistic extends BaseStatistic {
             final HistogramSnapshot snapshot = _histogram.getSnapshot();
             return new Quantity.Builder()
                     .setValue(snapshot.getValueAtPercentile(percentile))
-                    .setUnit(_unit.orNull())
+                    .setUnit(_unit.orElse(null))
                     .build();
         }
 
-        private Optional<Unit> _unit = Optional.absent();
+        private Optional<Unit> _unit = Optional.empty();
         private final Histogram _histogram = new Histogram();
     }
 
@@ -259,7 +259,7 @@ public final class HistogramStatistic extends BaseStatistic {
             }
 
             @NotNull
-            private Optional<Unit> _unit = Optional.absent();
+            private Optional<Unit> _unit = Optional.empty();
             @NotNull
             private HistogramSnapshot _histogramSnapshot;
         }

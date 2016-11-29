@@ -19,14 +19,15 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nullable;
 
 /**
@@ -108,7 +109,7 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
         }
         return new Quantity(
                 _value * otherQuantity._value,
-                _unit.or(otherQuantity._unit));
+                Optional.ofNullable(_unit.orElse(otherQuantity._unit.orElse(null))));
     }
 
     /**
@@ -124,7 +125,7 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
             throw new UnsupportedOperationException("Compount units not supported yet");
         }
         if (_unit.equals(otherQuantity._unit)) {
-            return new Quantity(_value / otherQuantity._value, Optional.absent());
+            return new Quantity(_value / otherQuantity._value, Optional.empty());
         }
         return new Quantity(
                 _value / otherQuantity._value,
@@ -245,7 +246,7 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
         // This is a 2-pass operation:
         // First pass is to grab the smallest unit in the samples
         // Second pass is to convert everything to that unit
-        Optional<Unit> smallestUnit = Optional.absent();
+        Optional<Unit> smallestUnit = Optional.empty();
         for (final Quantity quantity : quantities) {
             if (!smallestUnit.isPresent()) {
                 smallestUnit = quantity.getUnit();
@@ -265,7 +266,7 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
     }
 
     private Quantity(final Builder builder) {
-        this(builder._value, Optional.fromNullable(builder._unit));
+        this(builder._value, Optional.ofNullable(builder._unit));
     }
 
     private Quantity(final double value, final Optional<Unit> unit) {
@@ -273,6 +274,7 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
         _unit = unit;
     }
 
+    @SuppressFBWarnings("SE_BAD_FIELD")
     private final Optional<Unit> _unit;
     private final double _value;
 

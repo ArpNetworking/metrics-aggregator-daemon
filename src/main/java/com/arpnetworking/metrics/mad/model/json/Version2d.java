@@ -19,7 +19,6 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -32,6 +31,7 @@ import org.joda.time.DateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -168,7 +168,7 @@ public final class Version2d {
         }
 
         private Sample(final Builder builder) {
-            _unit = Optional.fromNullable(builder._unit);
+            _unit = Optional.ofNullable(builder._unit);
             _value = builder._value;
         }
 

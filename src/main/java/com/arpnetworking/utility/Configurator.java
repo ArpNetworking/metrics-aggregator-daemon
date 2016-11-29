@@ -19,7 +19,8 @@ import com.arpnetworking.configuration.Configuration;
 import com.arpnetworking.configuration.Listener;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
-import com.google.common.base.Optional;
+
+import java.util.Optional;
 
 /**
  * Manages configuration and reconfiguration of a <code>Launchable</code> instance
@@ -87,7 +88,7 @@ public class Configurator<T extends Launchable, S> implements Listener, Launchab
     public synchronized void shutdown() {
         if (_launchable.isPresent()) {
             _launchable.get().shutdown();
-            _launchable = Optional.absent();
+            _launchable = Optional.empty();
         }
     }
 
@@ -128,7 +129,7 @@ public class Configurator<T extends Launchable, S> implements Listener, Launchab
     private final ConfiguredLaunchableFactory<T, S> _factory;
     private final Class<? extends S> _configurationClass;
 
-    private Optional<T> _launchable = Optional.absent();
-    private Optional<S> _configuration = Optional.absent();
-    private Optional<S> _offeredConfiguration = Optional.absent();
+    private Optional<T> _launchable = Optional.empty();
+    private Optional<S> _configuration = Optional.empty();
+    private Optional<S> _offeredConfiguration = Optional.empty();
 }

@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Test;
@@ -25,6 +24,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Tests for {@link StatisticFactory}.
