@@ -60,6 +60,7 @@ import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -80,16 +81,19 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
      * @param metricsFactory Instance of <code>MetricsFactory</code>.
      * @param healthCheckPath The path for the health check.
      * @param statusPath The path for the status.
+     * @param supplementalRoutes List of supplemental routes in priority order.
      */
     public Routes(
             final ActorSystem actorSystem,
             final MetricsFactory metricsFactory,
             final String healthCheckPath,
-            final String statusPath) {
+            final String statusPath,
+            final List<SupplementalRoutes> supplementalRoutes) {
         _actorSystem = actorSystem;
         _metricsFactory = metricsFactory;
         _healthCheckPath = healthCheckPath;
         _statusPath = statusPath;
+        _supplementalRoutes = supplementalRoutes;
     }
 
     /**
@@ -169,6 +173,25 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
             }
         }
 
+        for (final SupplementalRoutes supplementalRoutes : _supplementalRoutes) {
+            try {
+                final Optional<CompletionStage<HttpResponse>> supplmentalRouteFuture =
+                        supplementalRoutes.apply(request);
+                if (supplmentalRouteFuture.isPresent()) {
+                    return supplmentalRouteFuture.get();
+                }
+                // CHECKSTYLE.OFF: IllegalCatch - Akka's functional interface declares Exception thrown
+            } catch (final Exception e) {
+                // CHECKSTYLE.ON: IllegalCatch
+                LOGGER.warn()
+                        .setMessage("Supplemental routes threw an exception")
+                        .addData("supplementalRoutes", supplementalRoutes)
+                        .setThrowable(e)
+                        .log();
+                break;
+            }
+        }
+
         return CompletableFuture.completedFuture(HttpResponse.create().withStatus(404));
     }
 
@@ -213,11 +236,10 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                         return channel;
                     });
 
-            final CompletionStage<HttpResponse> response = CompletableFuture.completedFuture(
+            return CompletableFuture.completedFuture(
                     lowLevelUpgradeToWebSocketHeader.handleMessagesWith(
                             inChannel,
                             outChannel));
-            return response;
         }
         return CompletableFuture.completedFuture(HttpResponse.create().withStatus(StatusCodes.BAD_REQUEST));
     }
@@ -251,6 +273,8 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private final MetricsFactory _metricsFactory;
     private final String _healthCheckPath;
     private final String _statusPath;
+    @SuppressFBWarnings("SE_BAD_FIELD")
+    private final List<SupplementalRoutes> _supplementalRoutes;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Routes.class);
 
@@ -279,7 +303,6 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private static final String STATUS_JSON;
 
     private static final ContentType JSON_CONTENT_TYPE = ContentTypes.APPLICATION_JSON;
-    private static final ContentType TEXT_CONTENT_TYPE = ContentTypes.APPLICATION_JSON;
 
     private static final long serialVersionUID = 4336082511110058019L;
 
