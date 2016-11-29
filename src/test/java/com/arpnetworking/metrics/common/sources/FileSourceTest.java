@@ -442,7 +442,8 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.millis(INTERVAL))
+                        .setLineProcessorThreads(1),
                 _logger);
 
         source.attach(_observer);
@@ -508,7 +509,8 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.millis(interval))
+                        .setLineProcessorThreads(1),
                 _logger);
 
         source.attach(_observer);
@@ -569,7 +571,8 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.millis(INTERVAL))
+                        .setLineProcessorThreads(1),
                 _logger);
 
         source.attach(_observer);
@@ -646,7 +649,8 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.millis(interval))
+                        .setLineProcessorThreads(1),
                 _logger);
 
         source.attach(_observer);
@@ -712,7 +716,8 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.millis(INTERVAL))
+                        .setLineProcessorThreads(1),
                 _logger);
 
         source.attach(_observer);
@@ -782,7 +787,8 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.millis(INTERVAL))
+                        .setLineProcessorThreads(1),
                 _logger);
 
         source.attach(_observer);

@@ -36,9 +36,11 @@ import org.joda.time.Duration;
 import org.joda.time.Period;
 
 import java.nio.file.Path;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Produce instances of <code>T</code>from a file. Supports rotating files
@@ -56,6 +58,9 @@ public final class FileSource<T> extends BaseSource {
     @Override
     public void start() {
         _tailerExecutor.execute(_tailer);
+        for (int i = 0; i < _lineProcessorThreads; i++) {
+            _lineProcessorExecutor.execute(new LineQueueRunner<>(_lineProcessingStopped, _parser, this, _lineQueue));
+        }
     }
 
     /**
@@ -65,11 +70,21 @@ public final class FileSource<T> extends BaseSource {
     public void stop() {
         _tailer.stop();
         _tailerExecutor.shutdown();
+        _lineProcessingStopped.set(true);
+        _lineProcessorExecutor.shutdownNow();
         try {
             _tailerExecutor.awaitTermination(10, TimeUnit.SECONDS);
         } catch (final InterruptedException e) {
             LOGGER.warn()
                     .setMessage("Unable to shutdown tailer executor")
+                    .setThrowable(e)
+                    .log();
+        }
+        try {
+            _lineProcessorExecutor.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            LOGGER.warn()
+                    .setMessage("Unable to shutdown line processor executor")
                     .setThrowable(e)
                     .log();
         }
@@ -114,19 +129,34 @@ public final class FileSource<T> extends BaseSource {
             positionStore = new FilePositionStore.Builder().setFile(builder._stateFile).build();
         }
 
+        _lineQueue = new ArrayBlockingQueue<>(builder._lineQueueMaxSize);
+
+        final LogTailerListener logTailerListener = new LogTailerListener();
+
         _tailer = new StatefulTailer.Builder()
                 .setFile(builder._sourceFile)
-                .setListener(new LogTailerListener())
+                .setListener(logTailerListener)
                 .setReadInterval(builder._interval)
                 .setPositionStore(positionStore)
                 .setInitialPosition(builder._initialPosition)
                 .build();
         _tailerExecutor = Executors.newSingleThreadExecutor((runnable) -> new Thread(runnable, "FileSourceTailer"));
+
+        _lineProcessorThreads = builder._lineProcessorThreads;
+        _lineProcessorExecutor =
+                Executors.newFixedThreadPool(_lineProcessorThreads, runnable -> new Thread(runnable, "FileSourceLineProcessor"));
+
+
     }
+
 
     private final Parser<T, byte[]> _parser;
     private final Tailer _tailer;
     private final ExecutorService _tailerExecutor;
+    private final ExecutorService _lineProcessorExecutor;
+    private final AtomicBoolean _lineProcessingStopped = new AtomicBoolean(false);
+    private final int _lineProcessorThreads;
+    private ArrayBlockingQueue<byte[]> _lineQueue;
     private final Logger _logger;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSource.class);
@@ -174,17 +204,16 @@ public final class FileSource<T> extends BaseSource {
 
         @Override
         public void handle(final byte[] line) {
-            final T record;
             try {
-                record = _parser.parse(line);
-            } catch (final ParsingException e) {
+                _lineQueue.put(line);
+            } catch (final InterruptedException e) {
                 _logger.error()
-                        .setMessage("Failed to parse data")
+                        .setMessage("FileSource tailer thread interrupted while waiting to write line to queue")
+                        .addData("source", FileSource.this)
                         .setThrowable(e)
                         .log();
-                return;
+                e.printStackTrace();
             }
-            FileSource.this.notify(record);
         }
 
         @Override
@@ -225,6 +254,71 @@ public final class FileSource<T> extends BaseSource {
         }
 
         private Optional<DateTime> _lastFileNotFoundWarning = Optional.absent();
+
+    }
+
+    private static final class LineQueueRunner<T> implements Runnable {
+
+        private LineQueueRunner(
+                final AtomicBoolean lineProcessingStopped,
+                final Parser<T, byte[]> parser,
+                final FileSource<T> fileSource,
+                final ArrayBlockingQueue<byte[]> queue) {
+            _lineProcessingStopped = lineProcessingStopped;
+            _parser = parser;
+            _fileSource = fileSource;
+            _queue = queue;
+        }
+
+        @Override
+        public void run() {
+            while (!_lineProcessingStopped.get()) {
+                final byte[] line;
+                try {
+                    line = _queue.take();
+                } catch (final InterruptedException e) {
+                    LOGGER.info()
+                            .setMessage("Thread interrupted while waiting for query log line.")
+                            .log();
+                    continue;
+                }
+                try {
+                    final T record;
+                    try {
+                        record = _parser.parse(line);
+                    } catch (final ParsingException e) {
+                        LOGGER.error()
+                                .setMessage("Failed to parse data")
+                                .setThrowable(e)
+                                .log();
+                        continue;
+                    }
+                    _fileSource.notify(record);
+                    // CHECKSTYLE.OFF: IllegalCatch - Prevent thread from being killed
+                } catch (final RuntimeException e) {
+                    // CHECKSTYLE.ON: IllegalCatch
+                    LOGGER.error()
+                            .setMessage("Caught exception while processing query log line.")
+                            .setThrowable(e)
+                            .addData("logLine", line)
+                            .log();
+                    // CHECKSTYLE.OFF: IllegalCatch - Prevent thread from being killed
+                } catch (final Throwable e) {
+                    // CHECKSTYLE.ON: IllegalCatch
+                    LOGGER.error()
+                            .setMessage("Caught critical exception while processing query log line.")
+                            .setThrowable(e)
+                            .addData("logLine", line)
+                            .log();
+                    return;
+                }
+            }
+        }
+
+        private final ArrayBlockingQueue<byte[]> _queue;
+        private final AtomicBoolean _lineProcessingStopped;
+        private final Parser<T, byte[]> _parser;
+        private final FileSource<T> _fileSource;
     }
 
     /**
@@ -301,6 +395,31 @@ public final class FileSource<T> extends BaseSource {
         }
 
         /**
+         * Sets the number of threads to be used to process lines read from the file. Optional.
+         * Default is Runtime.getRuntime().availableProcessors().
+         *
+         * @param value The number of threads to be used.
+         * @return This instance of <code>Builder</code>.
+         */
+        public final Builder<T> setLineProcessorThreads(final int value) {
+            _lineProcessorThreads = value;
+            return this;
+        }
+
+        /**
+         * Sets the maximum size of the queue of lines to be stored in memory before processing. Optional.
+         * Reading of lines from file will block if the queue is full.
+         * Default is Runtime.getRuntime().availableProcessors() * 2.
+         *
+         * @param value The maximum number of unprocessed lines to store in memory.
+         * @return This instance of <code>Builder</code>.
+         */
+        public final Builder<T> setLineQueueMaxSize(final int value) {
+            _lineQueueMaxSize = value;
+            return this;
+        }
+
+        /**
          * {@inheritDoc}
          */
         @Override
@@ -318,5 +437,7 @@ public final class FileSource<T> extends BaseSource {
         private Path _stateFile;
         @NotNull
         private InitialPosition _initialPosition = InitialPosition.START;
+        private int _lineProcessorThreads = Runtime.getRuntime().availableProcessors();
+        private int _lineQueueMaxSize = Runtime.getRuntime().availableProcessors() * 2;
     }
 }
