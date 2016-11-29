@@ -24,7 +24,6 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.Min;
@@ -39,6 +38,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -57,7 +57,7 @@ public final class FilePositionStore implements PositionStore {
     public Optional<Long> getPosition(final String identifier) {
         final Descriptor descriptor = _state.get(identifier);
         if (descriptor == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of(descriptor.getPosition());
     }

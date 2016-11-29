@@ -15,13 +15,13 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Tests for the Quantity class.
@@ -256,7 +256,7 @@ public class QuantityTest {
                 .build();
         final Quantity converted = quantity.convertTo(Unit.SECOND);
         Assert.assertEquals(60, converted.getValue(), 0.00001);
-        Assert.assertEquals(Unit.SECOND, converted.getUnit().orNull());
+        Assert.assertEquals(Unit.SECOND, converted.getUnit().orElse(null));
     }
 
     @Test
@@ -286,7 +286,7 @@ public class QuantityTest {
                 .build();
         final Quantity converted = quantity.convertTo(Optional.of(Unit.SECOND));
         Assert.assertEquals(60, converted.getValue(), 0.00001);
-        Assert.assertEquals(Unit.SECOND, converted.getUnit().orNull());
+        Assert.assertEquals(Unit.SECOND, converted.getUnit().orElse(null));
     }
 
     @Test
@@ -332,7 +332,7 @@ public class QuantityTest {
                 .build();
         final Quantity result = quantity1.add(quantity2);
         Assert.assertEquals(5010.0d, result.getValue(), 0.00001);
-        Assert.assertEquals(Unit.MILLISECOND, result.getUnit().orNull());
+        Assert.assertEquals(Unit.MILLISECOND, result.getUnit().orElse(null));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -384,7 +384,7 @@ public class QuantityTest {
                 .build();
         final Quantity result = quantity1.subtract(quantity2);
         Assert.assertEquals(4990.0d, result.getValue(), 0.00001);
-        Assert.assertEquals(Unit.MILLISECOND, result.getUnit().orNull());
+        Assert.assertEquals(Unit.MILLISECOND, result.getUnit().orElse(null));
     }
 
     @Test(expected = IllegalArgumentException.class)

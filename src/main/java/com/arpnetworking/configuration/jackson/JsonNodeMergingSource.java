@@ -21,13 +21,13 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.sf.oval.constraint.NotNull;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Json based configuration sourced by merging zero or more <code>JsonSource</code>
@@ -109,7 +109,7 @@ public final class JsonNodeMergingSource implements JsonNodeSource {
     }
 
     private JsonNodeMergingSource(final Builder builder) {
-        Optional<JsonNode> mergedNode = Optional.absent();
+        Optional<JsonNode> mergedNode = Optional.empty();
         for (final JsonNodeSource source : builder._sources) {
             final Optional<JsonNode> sourceNode = source.getValue();
             if (sourceNode.isPresent()) {

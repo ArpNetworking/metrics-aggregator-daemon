@@ -15,10 +15,10 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Specifies the unit on a counter variable.
@@ -236,7 +236,7 @@ public enum Unit {
     public static Optional<Unit> getSmallerUnit(final Optional<Unit> unitA, final Optional<Unit> unitB) {
         assertSameType(unitA, unitB);
         if (!unitA.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of(unitA.get().getSmallerUnit(unitB.get()));
     }

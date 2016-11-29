@@ -27,7 +27,6 @@ import com.arpnetworking.tsdcore.model.Unit;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
-import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -47,6 +46,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
 
@@ -282,7 +282,7 @@ public class BucketTest {
     private static final class AbsentStatisticCacheLoader extends CacheLoader<String, Optional<ImmutableSet<Statistic>>> {
         @Override
         public Optional<ImmutableSet<Statistic>> load(@Nullable final String key) throws Exception {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

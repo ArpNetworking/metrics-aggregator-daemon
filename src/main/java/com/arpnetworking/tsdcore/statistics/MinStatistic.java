@@ -19,11 +19,11 @@ import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -63,7 +63,7 @@ public final class MinStatistic extends BaseStatistic {
      */
     @Override
     public Quantity calculate(final List<Quantity> unorderedValues) {
-        Optional<Quantity> min = Optional.absent();
+        Optional<Quantity> min = Optional.empty();
         for (final Quantity sample : unorderedValues) {
             if (min.isPresent()) {
                 if (sample.compareTo(min.get()) < 0) {
@@ -78,7 +78,7 @@ public final class MinStatistic extends BaseStatistic {
 
     @Override
     public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
-        Optional<Quantity> min = Optional.absent();
+        Optional<Quantity> min = Optional.empty();
         for (final AggregatedData datum : aggregations) {
             if (min.isPresent()) {
                 if (datum.getValue().compareTo(min.get()) < 0) {
@@ -147,10 +147,10 @@ public final class MinStatistic extends BaseStatistic {
         @Override
         public CalculatedValue<Void> calculate(final Map<Statistic, Calculator<?>> dependencies) {
             return new CalculatedValue.Builder<Void>()
-                    .setValue(_min.orNull())
+                    .setValue(_min.orElse(null))
                     .build();
         }
 
-        private Optional<Quantity> _min = Optional.absent();
+        private Optional<Quantity> _min = Optional.empty();
     }
 }

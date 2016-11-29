@@ -17,7 +17,6 @@ package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.utility.InterfaceDatabase;
 import com.arpnetworking.utility.ReflectionsDatabase;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -29,6 +28,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -60,7 +60,7 @@ public class StatisticFactory {
      * @return A new <code>Statistic</code>.
      */
     public Optional<Statistic> tryGetStatistic(final String name) {
-        return Optional.fromNullable(STATISTICS_BY_NAME_AND_ALIAS.get(name));
+        return Optional.ofNullable(STATISTICS_BY_NAME_AND_ALIAS.get(name));
     }
 
     /**
@@ -81,7 +81,7 @@ public class StatisticFactory {
      */
     @Deprecated
     public Optional<Statistic> createStatistic(final String statistic) {
-        return Optional.fromNullable(STATISTICS_BY_NAME_AND_ALIAS.get(statistic));
+        return Optional.ofNullable(STATISTICS_BY_NAME_AND_ALIAS.get(statistic));
     }
 
     private static void checkedPut(final Map<String, Statistic> map, final Statistic statistic, final String key) {

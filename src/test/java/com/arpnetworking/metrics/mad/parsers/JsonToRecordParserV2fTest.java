@@ -21,7 +21,6 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
-import com.google.common.base.Optional;
 import com.google.common.io.Resources;
 import org.hamcrest.Matchers;
 import org.joda.time.DateTime;
@@ -30,6 +29,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Tests for the 2f version of the query log format.
@@ -384,7 +384,7 @@ public class JsonToRecordParserV2fTest {
     }
 
     private static void assertValue(final Quantity quantity, final double value) {
-        assertValue(quantity, value, Optional.<Unit>absent());
+        assertValue(quantity, value, Optional.<Unit>empty());
     }
 
     private static void assertValue(final Quantity quantity, final double value, final Unit unit) {

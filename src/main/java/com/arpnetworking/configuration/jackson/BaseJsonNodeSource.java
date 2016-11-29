@@ -21,9 +21,9 @@ import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 import net.sf.oval.constraint.NotNull;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -62,14 +62,14 @@ public abstract class BaseJsonNodeSource implements JsonNodeSource {
      * @return The <code>Optional</code> <code>JsonNode</code> instance.
      */
     protected static Optional<JsonNode> getValue(final Optional<JsonNode> node, final String... keys) {
-        JsonNode jsonNode = node.orNull();
+        JsonNode jsonNode = node.orElse(null);
         for (final String key : keys) {
             if (jsonNode == null) {
                 break;
             }
             jsonNode = jsonNode.get(key);
         }
-        return Optional.fromNullable(jsonNode);
+        return Optional.ofNullable(jsonNode);
     }
 
     /**

@@ -32,7 +32,6 @@ import com.arpnetworking.tsdcore.statistics.Accumulator;
 import com.arpnetworking.tsdcore.statistics.Calculator;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMultimap;
@@ -47,6 +46,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -263,7 +263,7 @@ import java.util.function.BiFunction;
             // - Check the set of statistics to see if the calculator should be published
             // - Still need both sets of statistics in order to create new set of calculators
             final Map<Statistic, Calculator<?>> dependencies = Maps.newHashMap();
-            Optional<Calculator<?>> countStatisticCalculator = Optional.absent();
+            Optional<Calculator<?>> countStatisticCalculator = Optional.empty();
             for (final Calculator<?> calculator : calculators) {
                 if (COUNT_STATISTIC.equals(calculator.getStatistic())) {
                     countStatisticCalculator = Optional.of(calculator);
