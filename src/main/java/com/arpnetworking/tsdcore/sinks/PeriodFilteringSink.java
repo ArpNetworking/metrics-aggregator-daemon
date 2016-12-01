@@ -18,7 +18,6 @@ package com.arpnetworking.tsdcore.sinks;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -27,6 +26,7 @@ import net.sf.oval.constraint.NotNull;
 import org.joda.time.Period;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -100,8 +100,8 @@ public final class PeriodFilteringSink extends BaseSink {
                 });
         _exclude = Sets.newConcurrentHashSet(builder._exclude);
         _include = Sets.newConcurrentHashSet(builder._include);
-        _excludeLessThan = Optional.fromNullable(builder._excludeLessThan);
-        _excludeGreaterThan = Optional.fromNullable(builder._excludeGreaterThan);
+        _excludeLessThan = Optional.ofNullable(builder._excludeLessThan);
+        _excludeGreaterThan = Optional.ofNullable(builder._excludeGreaterThan);
         _sink = builder._sink;
     }
 

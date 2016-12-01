@@ -22,7 +22,6 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -32,6 +31,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -169,7 +169,7 @@ public final class DirectoryTrigger implements Trigger {
     private final Set<String> _fileNames;
     private final List<Pattern> _fileNamePatterns;
 
-    private Optional<Boolean> _exists = Optional.absent();
+    private Optional<Boolean> _exists = Optional.empty();
     private final Map<String, FileTrigger> _evaluationFileTriggers = Maps.newHashMap();
 
     private static final File[] EMPTY_FILE_ARRAY = new File[0];

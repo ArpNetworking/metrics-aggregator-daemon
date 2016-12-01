@@ -1,0 +1,17 @@
+monitoringCluster="mad"
+logDirectory="logs"
+pipelinesDirectory="/opt/mad/config/pipelines"
+httpHost="0.0.0.0"
+httpPort=7090
+httpHealthCheckPath="/ping"
+httpStatusPath="/status"
+jvmMetricsCollectionInterval="PT.5S"
+akkaConfiguration {
+  akka {
+    loggers = [ "akka.event.slf4j.Slf4jLogger" ]
+    loglevel="DEBUG"
+    stdout-loglevel="DEBUG"
+    logging-filter="akka.event.slf4j.Slf4jLoggingFilter"
+    actor.debug.unhandled="on"
+  }
+}

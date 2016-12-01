@@ -38,6 +38,7 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import akka.util.Timeout;
+import com.arpnetworking.metrics.Counter;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.metrics.Timer;
@@ -59,6 +60,7 @@ import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -79,16 +81,19 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
      * @param metricsFactory Instance of <code>MetricsFactory</code>.
      * @param healthCheckPath The path for the health check.
      * @param statusPath The path for the status.
+     * @param supplementalRoutes List of supplemental routes in priority order.
      */
     public Routes(
             final ActorSystem actorSystem,
             final MetricsFactory metricsFactory,
             final String healthCheckPath,
-            final String statusPath) {
+            final String statusPath,
+            final List<SupplementalRoutes> supplementalRoutes) {
         _actorSystem = actorSystem;
         _metricsFactory = metricsFactory;
         _healthCheckPath = healthCheckPath;
         _statusPath = statusPath;
+        _supplementalRoutes = supplementalRoutes;
     }
 
     /**
@@ -107,7 +112,9 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     @Override
     public CompletionStage<HttpResponse> apply(final HttpRequest request) {
         final Metrics metrics = _metricsFactory.create();
-        final Timer timer = metrics.createTimer(createTimerName(request));
+        final Timer timer = metrics.createTimer(createMetricName(request, REQUEST_METRIC));
+        final Counter bodySize = metrics.createCounter(createMetricName(request, BODY_SIZE_METRIC));
+        bodySize.increment(request.entity().getContentLengthOption().orElse(0L));
         // TODO(vkoskela): Add a request UUID and include in MDC. [MAI-462]
         LOGGER.trace()
                 .setEvent("http.in.start")
@@ -166,6 +173,25 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
             }
         }
 
+        for (final SupplementalRoutes supplementalRoutes : _supplementalRoutes) {
+            try {
+                final Optional<CompletionStage<HttpResponse>> supplmentalRouteFuture =
+                        supplementalRoutes.apply(request);
+                if (supplmentalRouteFuture.isPresent()) {
+                    return supplmentalRouteFuture.get();
+                }
+                // CHECKSTYLE.OFF: IllegalCatch - Akka's functional interface declares Exception thrown
+            } catch (final Exception e) {
+                // CHECKSTYLE.ON: IllegalCatch
+                LOGGER.warn()
+                        .setMessage("Supplemental routes threw an exception")
+                        .addData("supplementalRoutes", supplementalRoutes)
+                        .setThrowable(e)
+                        .log();
+                break;
+            }
+        }
+
         return CompletableFuture.completedFuture(HttpResponse.create().withStatus(404));
     }
 
@@ -210,11 +236,10 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                         return channel;
                     });
 
-            final CompletionStage<HttpResponse> response = CompletableFuture.completedFuture(
+            return CompletableFuture.completedFuture(
                     lowLevelUpgradeToWebSocketHeader.handleMessagesWith(
                             inChannel,
                             outChannel));
-            return response;
         }
         return CompletableFuture.completedFuture(HttpResponse.create().withStatus(StatusCodes.BAD_REQUEST));
     }
@@ -229,14 +254,16 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                 .exceptionally(throwable -> defaultValue);
     }
 
-    private String createTimerName(final HttpRequest request) {
+    private String createMetricName(final HttpRequest request, final String actionPart) {
         final StringBuilder nameBuilder = new StringBuilder()
-                .append("rest_service/")
+                .append(REST_SERVICE_METRIC_ROOT)
                 .append(request.method().value());
         if (!request.getUri().path().startsWith("/")) {
             nameBuilder.append("/");
         }
         nameBuilder.append(request.getUri().path());
+        nameBuilder.append("/");
+        nameBuilder.append(actionPart);
         return nameBuilder.toString();
     }
 
@@ -246,6 +273,8 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private final MetricsFactory _metricsFactory;
     private final String _healthCheckPath;
     private final String _statusPath;
+    @SuppressFBWarnings("SE_BAD_FIELD")
+    private final List<SupplementalRoutes> _supplementalRoutes;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Routes.class);
 
@@ -259,6 +288,9 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private static final String APP_V1_SOURCE_PREFIX = "/metrics/v1/application";
     private static final String ACTOR_COLLECTD_V1 = "/user/" + CollectdHttpSourceV1.ACTOR_NAME;
     private static final String ACTOR_APP_V1 = "/user/" + ClientHttpSourceV1.ACTOR_NAME;
+    private static final String REST_SERVICE_METRIC_ROOT = "rest_service/";
+    private static final String BODY_SIZE_METRIC = "body_size";
+    private static final String REQUEST_METRIC = "request";
 
     // Ping
     private static final HttpHeader PING_CACHE_CONTROL_HEADER = CacheControl.create(
@@ -271,7 +303,6 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private static final String STATUS_JSON;
 
     private static final ContentType JSON_CONTENT_TYPE = ContentTypes.APPLICATION_JSON;
-    private static final ContentType TEXT_CONTENT_TYPE = ContentTypes.APPLICATION_JSON;
 
     private static final long serialVersionUID = 4336082511110058019L;
 

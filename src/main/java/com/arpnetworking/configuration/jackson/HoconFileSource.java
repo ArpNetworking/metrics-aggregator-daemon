@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Groupon.com
+ * Copyright 2016 Inscope Metrics Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,25 @@ package com.arpnetworking.configuration.jackson;
 
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
+import com.arpnetworking.steno.Logger;
+import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Throwables;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigRenderOptions;
 import net.sf.oval.constraint.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
 /**
- * <code>JsonNode</code> based configuration sourced from a literal string.
+ * Typesafe config based configuration sourced from a file and mapped to a <code>JsonNode</code>.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
-public final class JsonNodeLiteralSource extends BaseJsonNodeSource {
+public final class HoconFileSource extends BaseJsonNodeSource {
 
     /**
      * {@inheritDoc}
@@ -47,7 +53,7 @@ public final class JsonNodeLiteralSource extends BaseJsonNodeSource {
     public Object toLogValue() {
         return LogValueMapFactory.builder(this)
                 .put("super", super.toLogValue())
-                .put("source", _source)
+                .put("file", _file)
                 .put("jsonNode", _jsonNode)
                 .build();
     }
@@ -56,42 +62,58 @@ public final class JsonNodeLiteralSource extends BaseJsonNodeSource {
         return _jsonNode;
     }
 
-    private JsonNodeLiteralSource(final Builder builder) {
+    private HoconFileSource(final Builder builder) {
         super(builder);
-        _source = builder._source;
+        _file = builder._file;
 
         JsonNode jsonNode = null;
-        try {
-            jsonNode = _objectMapper.readTree(_source);
-        } catch (final IOException e) {
-            throw Throwables.propagate(e);
+        if (_file.canRead()) {
+            try {
+                final Config config = ConfigFactory.parseFile(_file);
+                final String hoconAsJson = config.resolve().root().render(ConfigRenderOptions.concise());
+                jsonNode = _objectMapper.readTree(hoconAsJson);
+            } catch (final IOException e) {
+                throw Throwables.propagate(e);
+            }
+        } else if (builder._file.exists()) {
+            LOGGER.warn()
+                    .setMessage("Cannot read file")
+                    .addData("file", _file)
+                    .log();
+        } else {
+            LOGGER.debug()
+                    .setMessage("File does not exist")
+                    .addData("file", _file)
+                    .log();
         }
         _jsonNode = Optional.ofNullable(jsonNode);
     }
 
-    private final String _source;
+    private final File _file;
     private final Optional<JsonNode> _jsonNode;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HoconFileSource.class);
+
     /**
-     * Builder for <code>JsonNodeLiteralSource</code>.
+     * Builder for <code>HoconFileSource</code>.
      */
-    public static final class Builder extends BaseJsonNodeSource.Builder<Builder, JsonNodeLiteralSource> {
+    public static final class Builder extends BaseJsonNodeSource.Builder<Builder, HoconFileSource> {
 
         /**
          * Public constructor.
          */
         public Builder() {
-            super(JsonNodeLiteralSource::new);
+            super(HoconFileSource::new);
         }
 
         /**
-         * Set the source.
+         * Set the source <code>File</code>.
          *
-         * @param value The source.
+         * @param value The source <code>File</code>.
          * @return This <code>Builder</code> instance.
          */
-        public Builder setSource(final String value) {
-            _source = value;
+        public Builder setFile(final File value) {
+            _file = value;
             return this;
         }
 
@@ -104,6 +126,6 @@ public final class JsonNodeLiteralSource extends BaseJsonNodeSource {
         }
 
         @NotNull
-        private String _source;
+        private File _file;
     }
 }

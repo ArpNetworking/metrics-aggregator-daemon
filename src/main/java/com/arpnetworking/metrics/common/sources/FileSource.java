@@ -28,7 +28,6 @@ import com.arpnetworking.metrics.common.tailer.TailerListener;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.google.common.base.Optional;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.DateTime;
@@ -36,6 +35,7 @@ import org.joda.time.Duration;
 import org.joda.time.Period;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -224,7 +224,7 @@ public final class FileSource<T> extends BaseSource {
             }
         }
 
-        private Optional<DateTime> _lastFileNotFoundWarning = Optional.absent();
+        private Optional<DateTime> _lastFileNotFoundWarning = Optional.empty();
     }
 
     /**

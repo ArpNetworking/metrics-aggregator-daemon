@@ -28,7 +28,7 @@
   <packaging>jar</packaging>
   <name>Metrics Aggregator Daemon</name>
   <description>Aggregates samples published by metrics client libraries and writes to destinations.</description>
-  <version>1.1.1-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
 
   <licenses>
     <license>
@@ -110,7 +110,7 @@
     <scala.java.compat.version>0.7.0</scala.java.compat.version>
     <scala.library.version>2.11.7</scala.library.version>
     <slf4j.version>1.7.12</slf4j.version>
-    <typesafe.config.version>1.2.1</typesafe.config.version>
+    <typesafe.config.version>1.3.1</typesafe.config.version>
     <vertx.core.version>2.1.6</vertx.core.version>
     <wiremock.version>1.57</wiremock.version>
 
@@ -124,7 +124,7 @@
 
     <!-- Code Coverage -->
     <jacoco.check.line.coverage>0.50</jacoco.check.line.coverage>
-    <jacoco.check.branch.coverage>0.50</jacoco.check.branch.coverage>
+    <jacoco.check.branch.coverage>0.49</jacoco.check.branch.coverage>
 
     <!-- JVM Debug -->
     <debugJavaOptions />

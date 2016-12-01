@@ -18,7 +18,6 @@ package com.arpnetworking.metrics.common.tailer;
 
 import com.arpnetworking.utility.ManualSingleThreadedTrigger;
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.joda.time.Duration;
 import org.junit.Before;
@@ -36,6 +35,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,7 +56,7 @@ public class StatefulTailerTest {
         _file = Files.createTempFile(_directory, "", "");
         Files.deleteIfExists(_file);
 
-        Mockito.when(_positionStore.getPosition(Mockito.anyString())).thenReturn(Optional.<Long>absent());
+        Mockito.when(_positionStore.getPosition(Mockito.anyString())).thenReturn(Optional.<Long>empty());
         _readTrigger = new ManualSingleThreadedTrigger();
 
         final StatefulTailer.Builder builder = new StatefulTailer.Builder()

@@ -24,11 +24,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.google.common.base.Optional;
 import net.sf.oval.constraint.NotNull;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -46,9 +46,9 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
     public Optional<String> getProperty(final String name) {
         final Optional<JsonNode> jsonNode = getJsonSource().getValue(name.split("\\."));
         if (jsonNode.isPresent()) {
-            return Optional.fromNullable(jsonNode.get().asText());
+            return Optional.ofNullable(jsonNode.get().asText());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -58,10 +58,10 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
     public <T> Optional<T> getPropertyAs(final String name, final Class<? extends T> clazz) throws IllegalArgumentException {
         final Optional<String> property = getProperty(name);
         if (!property.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         try {
-            return Optional.fromNullable(_objectMapper.readValue(property.get(), clazz));
+            return Optional.ofNullable(_objectMapper.readValue(property.get(), clazz));
         } catch (final IOException e) {
             throw new IllegalArgumentException(
                     String.format(
@@ -80,10 +80,10 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
     public <T> Optional<T> getAs(final Class<? extends T> clazz) throws IllegalArgumentException {
         final Optional<JsonNode> property = getJsonSource().getValue();
         if (!property.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         try {
-            return Optional.fromNullable(_objectMapper.treeToValue(property.get(), clazz));
+            return Optional.ofNullable(_objectMapper.treeToValue(property.get(), clazz));
         } catch (final JsonProcessingException e) {
             throw new IllegalArgumentException(
                     String.format(
@@ -101,12 +101,12 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
     public <T> Optional<T> getPropertyAs(final String name, final Type type) throws IllegalArgumentException {
         final Optional<String> property = getProperty(name);
         if (!property.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         try {
             final TypeFactory typeFactory = _objectMapper.getTypeFactory();
             @SuppressWarnings("unchecked")
-            final Optional<T> value = Optional.fromNullable((T) _objectMapper.readValue(
+            final Optional<T> value = Optional.ofNullable((T) _objectMapper.readValue(
                     property.get(),
                     typeFactory.constructType(type)));
             return value;
@@ -128,12 +128,12 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
     public <T> Optional<T> getAs(final Type type) throws IllegalArgumentException {
         final Optional<JsonNode> property = getJsonSource().getValue();
         if (!property.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         try {
             final TypeFactory typeFactory = _objectMapper.getTypeFactory();
             @SuppressWarnings("unchecked")
-            final Optional<T> value = Optional.fromNullable((T) _objectMapper.readValue(
+            final Optional<T> value = Optional.ofNullable((T) _objectMapper.readValue(
                     _objectMapper.treeAsTokens(property.get()), typeFactory.constructType(type)));
             return value;
         } catch (final IOException e) {

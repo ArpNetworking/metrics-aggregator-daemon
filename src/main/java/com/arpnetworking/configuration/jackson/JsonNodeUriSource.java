@@ -18,7 +18,6 @@ package com.arpnetworking.configuration.jackson;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import net.sf.oval.constraint.NotNull;
 import org.apache.http.Header;
@@ -34,6 +33,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <code>JsonNode</code> based configuration sourced from a file.
@@ -97,7 +97,7 @@ public final class JsonNodeUriSource extends BaseJsonNodeSource {
                 request.releaseConnection();
             }
         }
-        _jsonNode = Optional.fromNullable(jsonNode);
+        _jsonNode = Optional.ofNullable(jsonNode);
     }
 
     private final URI _uri;

@@ -19,11 +19,11 @@ import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -63,7 +63,7 @@ public final class MaxStatistic extends BaseStatistic {
      */
     @Override
     public Quantity calculate(final List<Quantity> unorderedValues) {
-        Optional<Quantity> max = Optional.absent();
+        Optional<Quantity> max = Optional.empty();
         for (final Quantity sample : unorderedValues) {
             if (max.isPresent()) {
                 if (sample.compareTo(max.get()) > 0) {
@@ -78,7 +78,7 @@ public final class MaxStatistic extends BaseStatistic {
 
     @Override
     public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
-        Optional<Quantity> max = Optional.absent();
+        Optional<Quantity> max = Optional.empty();
         for (final AggregatedData datum : aggregations) {
             if (max.isPresent()) {
                 if (datum.getValue().compareTo(max.get()) > 0) {
@@ -148,10 +148,10 @@ public final class MaxStatistic extends BaseStatistic {
         @Override
         public CalculatedValue<Void> calculate(final Map<Statistic, Calculator<?>> dependencies) {
             return new CalculatedValue.Builder<Void>()
-                    .setValue(_max.orNull())
+                    .setValue(_max.orElse(null))
                     .build();
         }
 
-        private Optional<Quantity> _max = Optional.absent();
+        private Optional<Quantity> _max = Optional.empty();
     }
 }

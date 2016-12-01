@@ -24,10 +24,10 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.sinks.MultiSink;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.utility.Launchable;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -96,7 +96,7 @@ public final class Pipeline implements Launchable {
         for (final Source source : _sources) {
             source.stop();
         }
-        final Optional<Aggregator> aggregator = Optional.fromNullable(_aggregator.getAndSet(null));
+        final Optional<Aggregator> aggregator = Optional.ofNullable(_aggregator.getAndSet(null));
         if (aggregator.isPresent()) {
             aggregator.get().shutdown();
         }

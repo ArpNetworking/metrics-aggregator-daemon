@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Groupon.com
+ * Copyright 2016 Inscope Metrics Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.configuration.jackson;
+package com.arpnetworking.http;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import akka.http.javadsl.model.HttpRequest;
+import akka.http.javadsl.model.HttpResponse;
+import akka.japi.function.Function;
 
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 
 /**
- * Interface for sourcing <code>JsonNode</code> based configuration.
+ * Supplemental http server routes.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
-public interface JsonNodeSource {
+public interface SupplementalRoutes extends Function<HttpRequest, Optional<CompletionStage<HttpResponse>>> {
 
-    /**
-     * Retrieve the <code>JsonNode</code> by looking up the sequence of keys or
-     * return <code>Optional.absent()</code> if any key in the sequence does
-     * not exist.
-     *
-     * @param keys The sequence of keys to look-up to find the value.
-     * @return The <code>JsonNode</code> representing the value.
-     */
-    Optional<JsonNode> getValue(String... keys);
+    // Intentionally empty.
 }

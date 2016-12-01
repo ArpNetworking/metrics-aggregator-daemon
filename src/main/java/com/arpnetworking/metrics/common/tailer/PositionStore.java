@@ -15,9 +15,8 @@
  */
 package com.arpnetworking.metrics.common.tailer;
 
-import com.google.common.base.Optional;
-
 import java.io.Closeable;
+import java.util.Optional;
 
 /**
  * Interface to storage for tracking the read position in a file.

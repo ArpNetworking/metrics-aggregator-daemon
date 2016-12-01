@@ -15,10 +15,9 @@
  */
 package com.arpnetworking.configuration;
 
-import com.google.common.base.Optional;
-
 import java.lang.reflect.Type;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * Interface for classes which provide configuration.

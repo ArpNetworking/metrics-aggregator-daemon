@@ -46,7 +46,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -63,6 +62,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -94,10 +94,10 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         }
 
         // If it's JSON extract the version and parse accordingly
-        final Optional<JsonNode> dataNode = Optional.fromNullable(jsonNode.get(DATA_KEY));
-        Optional<JsonNode> versionNode = Optional.fromNullable(jsonNode.get(VERSION_KEY));
+        final Optional<JsonNode> dataNode = Optional.ofNullable(jsonNode.get(DATA_KEY));
+        Optional<JsonNode> versionNode = Optional.ofNullable(jsonNode.get(VERSION_KEY));
         if (dataNode.isPresent()) {
-            final Optional<JsonNode> dataVersionNode = Optional.fromNullable(dataNode.get().get(VERSION_KEY));
+            final Optional<JsonNode> dataVersionNode = Optional.ofNullable(dataNode.get().get(VERSION_KEY));
             if (dataVersionNode.isPresent()) {
                 versionNode = dataVersionNode;
             }
@@ -563,7 +563,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
             if (Double.isFinite(sample.getValue())) {
                 return new Quantity.Builder()
                         .setValue(sample.getValue())
-                        .setUnit(sample.getUnit().orNull())
+                        .setUnit(sample.getUnit().orElse(null))
                         .build();
             } else {
                 // TODO(barp): Create a counter for invalid metrics [AINT-680]
@@ -584,7 +584,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
             if (Double.isFinite(sample.getValue())) {
                 return new Quantity.Builder()
                         .setValue(sample.getValue())
-                        .setUnit(sample.getUnit().orNull())
+                        .setUnit(sample.getUnit().orElse(null))
                         .build();
             } else {
                 // TODO(barp): Create a counter for invalid metrics [AINT-680]

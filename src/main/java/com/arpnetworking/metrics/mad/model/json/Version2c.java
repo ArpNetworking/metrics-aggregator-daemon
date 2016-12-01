@@ -18,7 +18,6 @@ package com.arpnetworking.metrics.mad.model.json;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
@@ -28,6 +27,7 @@ import net.sf.oval.constraint.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -169,8 +169,8 @@ public final class Version2c {
         }
 
         private Annotations(final Annotations.Builder builder) {
-            _initTimestamp = Optional.fromNullable(builder._initTimestamp);
-            _finalTimestamp = Optional.fromNullable(builder._finalTimestamp);
+            _initTimestamp = Optional.ofNullable(builder._initTimestamp);
+            _finalTimestamp = Optional.ofNullable(builder._finalTimestamp);
             _otherAnnotations = ImmutableMap.copyOf(builder._otherAnnotations);
         }
 

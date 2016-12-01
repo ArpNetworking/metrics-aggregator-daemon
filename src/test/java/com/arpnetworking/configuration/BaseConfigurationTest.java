@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.configuration;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,6 +23,7 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * Tests for the <code>BaseConfiguration</code> class.
@@ -540,7 +540,7 @@ public class BaseConfigurationTest {
 
         @Override
         public Optional<String> getProperty(final String name) {
-            return Optional.fromNullable(_configuration.get(name));
+            return Optional.ofNullable(_configuration.get(name));
         }
 
         @Override
@@ -548,12 +548,12 @@ public class BaseConfigurationTest {
         public <T> Optional<T> getPropertyAs(final String name, final Class<? extends T> clazz) throws IllegalArgumentException {
             final Object value = _configuration.get(name);
             if (value == null) {
-                return Optional.absent();
+                return Optional.empty();
             }
             if (!clazz.isInstance(value)) {
                 throw new IllegalArgumentException("Cannot convert to: " + clazz);
             }
-            return Optional.fromNullable((T) value);
+            return Optional.of((T) value);
         }
 
         @Override
@@ -566,7 +566,7 @@ public class BaseConfigurationTest {
         @SuppressWarnings("unchecked")
         public <T> Optional<T> getAs(final Class<? extends T> clazz) throws IllegalArgumentException {
             if (_configuration == null) {
-                return Optional.absent();
+                return Optional.empty();
             }
             if (!clazz.isInstance(_configuration)) {
                 throw new IllegalArgumentException("Cannot convert to: " + clazz);

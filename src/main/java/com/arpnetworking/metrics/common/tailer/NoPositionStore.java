@@ -15,9 +15,8 @@
  */
 package com.arpnetworking.metrics.common.tailer;
 
-import com.google.common.base.Optional;
-
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * A <code>PositionStore</code> that always returns absent.
@@ -30,7 +29,7 @@ public class NoPositionStore implements PositionStore {
      */
     @Override
     public Optional<Long> getPosition(final String identifier) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**

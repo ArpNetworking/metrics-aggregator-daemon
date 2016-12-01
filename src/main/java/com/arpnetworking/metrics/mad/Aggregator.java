@@ -28,7 +28,6 @@ import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.utility.Launchable;
-import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -43,6 +42,7 @@ import org.joda.time.Period;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -221,7 +221,7 @@ public final class Aggregator implements Observer, Launchable {
                                         return Optional.of(statistics);
                                     }
                                 }
-                                return Optional.absent();
+                                return Optional.empty();
                             }
                         });
         _cachedDependentStatistics = CacheBuilder
@@ -235,7 +235,7 @@ public final class Aggregator implements Observer, Launchable {
                                 if (statistics.isPresent()) {
                                    return Optional.of(computeDependentStatistics(statistics.get()));
                                 } else {
-                                   return Optional.absent();
+                                   return Optional.empty();
                                 }
                            }
                         });

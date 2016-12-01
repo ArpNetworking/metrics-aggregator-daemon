@@ -20,10 +20,10 @@ import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
-import com.google.common.base.Optional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Takes the sum of the entries. Use <code>StatisticFactory</code> for construction.
@@ -55,12 +55,12 @@ public final class SumStatistic extends BaseStatistic {
     @Override
     public Quantity calculate(final List<Quantity> unorderedValues) {
         double sum = 0d;
-        Optional<Unit> unit = Optional.absent();
+        Optional<Unit> unit = Optional.empty();
         for (final Quantity sample : unorderedValues) {
             sum += sample.getValue();
-            unit = unit.or(sample.getUnit());
+            unit = Optional.ofNullable(unit.orElse(sample.getUnit().orElse(null)));
         }
-        return new Quantity.Builder().setValue(sum).setUnit(unit.orNull()).build();
+        return new Quantity.Builder().setValue(sum).setUnit(unit.orElse(null)).build();
     }
 
     /**
@@ -69,12 +69,12 @@ public final class SumStatistic extends BaseStatistic {
     @Override
     public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
         double sum = 0;
-        Optional<Unit> unit = Optional.absent();
+        Optional<Unit> unit = Optional.empty();
         for (final AggregatedData aggregation : aggregations) {
             sum += aggregation.getValue().getValue();
-            unit = unit.or(aggregation.getValue().getUnit());
+            unit = Optional.ofNullable(unit.orElse(aggregation.getValue().getUnit().orElse(null)));
         }
-        return new Quantity.Builder().setValue(sum).setUnit(unit.orNull()).build();
+        return new Quantity.Builder().setValue(sum).setUnit(unit.orElse(null)).build();
     }
 
     private SumStatistic() { }
@@ -124,10 +124,10 @@ public final class SumStatistic extends BaseStatistic {
         @Override
         public CalculatedValue<Void> calculate(final Map<Statistic, Calculator<?>> dependencies) {
             return new CalculatedValue.Builder<Void>()
-                    .setValue(_sum.orNull())
+                    .setValue(_sum.orElse(null))
                     .build();
         }
 
-        private Optional<Quantity> _sum = Optional.absent();
+        private Optional<Quantity> _sum = Optional.empty();
     }
 }
