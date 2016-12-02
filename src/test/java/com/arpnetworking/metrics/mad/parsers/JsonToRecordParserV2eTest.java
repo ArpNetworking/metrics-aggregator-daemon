@@ -43,11 +43,13 @@ public class JsonToRecordParserV2eTest {
     public void testParse() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2eTest/testParse.json");
         Assert.assertNotNull(record);
-        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
-
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertNotNull(record.getAnnotations());
+        Assert.assertEquals(3, record.getDimensions().size());
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertThat(variables, Matchers.hasKey("t1"));
@@ -82,12 +84,12 @@ public class JsonToRecordParserV2eTest {
     public void testEmpty() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2eTest/testEmpty.json");
         Assert.assertNotNull(record);
-
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertEquals(3, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
+        Assert.assertNotNull(record.getAnnotations());
+        Assert.assertEquals(3, record.getDimensions().size());
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
         Assert.assertTrue(record.getMetrics().isEmpty());
     }
 
@@ -113,12 +115,12 @@ public class JsonToRecordParserV2eTest {
     public void testEmptyValues() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2eTest/testEmptyValues.json");
         Assert.assertNotNull(record);
-
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertEquals(3, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
+        Assert.assertNotNull(record.getAnnotations());
+        Assert.assertEquals(3, record.getDimensions().size());
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertEquals(3, variables.size());
@@ -140,12 +142,14 @@ public class JsonToRecordParserV2eTest {
     public void testNaNValues() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2eTest/testNaNValues.json");
         Assert.assertNotNull(record);
-
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertEquals(3, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
+
+        Assert.assertNotNull(record.getAnnotations());
+
+        Assert.assertEquals(3, record.getDimensions().size());
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertEquals(3, variables.size());

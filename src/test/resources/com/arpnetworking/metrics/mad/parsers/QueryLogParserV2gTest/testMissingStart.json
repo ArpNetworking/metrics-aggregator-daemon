@@ -1,0 +1,14 @@
+{
+    "version": "2g",
+    "id": "6be33313-bb39-423a-a928-1d0cc0da60a9",
+    "end": "2014-03-24T12:15:41.010Z",
+    "dimensions": {
+        "service": "MyService",
+        "cluster": "MyCluster",
+        "host": "MyHost"
+    },
+    "annotations": {},
+    "timers": {},
+    "gauges": {},
+    "counters": {}
+}

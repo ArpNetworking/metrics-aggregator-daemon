@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Groupon.com
+ * Copyright 2016 Groupon.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,30 +32,27 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Tests for the 2f version of the query log format.
+ * Tests for the 2g version of the query log format.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ryan Ascheman (rascheman at groupon dot com)
  */
-public class JsonToRecordParserV2fStenoTest {
+public class JsonToRecordParserV2gTest {
 
     @Test
     public void testParse() throws ParsingException, IOException {
         // TODO(vkoskela): Test compound units [MAI-679]
 
-        final Record record = parseRecord("QueryLogParserV2fStenoTest/testParse.json");
+        final Record record = parseRecord("QueryLogParserV2gTest/testParse.json");
         Assert.assertNotNull(record);
-        Assert.assertEquals(3, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get("_" + Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get("_" + Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get("_" + Key.CLUSTER_DIMENSION_KEY));
-        Assert.assertEquals(3, record.getDimensions().size());
-        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
-        Assert.assertEquals("oRw59PrARvatGNC7fiWw4A", record.getId());
-        Assert.assertFalse(record.getId().isEmpty());
-
+        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+
+        Assert.assertEquals("bar", record.getAnnotations().get("foo"));
+
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("US", record.getDimensions().get("region"));
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertThat(variables, Matchers.hasKey("t1"));
@@ -88,14 +85,13 @@ public class JsonToRecordParserV2fStenoTest {
 
     @Test
     public void testEmpty() throws ParsingException, IOException {
-        final Record record = parseRecord("QueryLogParserV2fStenoTest/testEmpty.json");
+        final Record record = parseRecord("QueryLogParserV2gTest/testEmpty.json");
         Assert.assertNotNull(record);
-
+        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertEquals(3, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get("_" + Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get("_" + Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get("_" + Key.CLUSTER_DIMENSION_KEY));
+
+        Assert.assertTrue(record.getAnnotations().isEmpty());
+
         Assert.assertEquals(3, record.getDimensions().size());
         Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
         Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
@@ -103,90 +99,113 @@ public class JsonToRecordParserV2fStenoTest {
         Assert.assertTrue(record.getMetrics().isEmpty());
     }
 
-    @Test(expected = ParsingException.class)
-    public void testContainerMissingContext() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerMissingContext.json");
+    @Test 
+    public void testPresentDimensions() throws ParsingException, IOException {
+        final Record record = parseRecord("QueryLogParserV2gTest/testPresentDimensions.json");
+        Assert.assertNotNull(record);
+        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
+        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+
+        Assert.assertTrue(record.getAnnotations().isEmpty());
+
+        Assert.assertNotNull(record.getDimensions());
+        Assert.assertEquals(5, record.getDimensions().size());
+        Assert.assertEquals("DimVal1", record.getDimensions().get("Dim1"));
+        Assert.assertEquals("DimVal2", record.getDimensions().get("Dim2"));
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
+    }
+
+    @Test
+    public void testEmptyDimensions() throws ParsingException, IOException {
+        final Record record = parseRecord("QueryLogParserV2gTest/testEmptyDimensions.json");
+        Assert.assertNotNull(record);
+        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
+        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+
+        Assert.assertTrue(record.getAnnotations().isEmpty());
+        Assert.assertTrue(record.getDimensions().isEmpty());
     }
 
     @Test(expected = ParsingException.class)
-    public void testContainerNullContext() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerNullContext.json");
+    public void testMissingDimensions() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testMissingDimensions.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testContainerMissingHost() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerMissingHost.json");
+    public void testMissingId() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testMissingId.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testContainerNullHost() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerNullHost.json");
+    public void testMissingStart() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testMissingStart.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testContainerEmptyHost() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerEmptyHost.json");
+    public void testMissingEnd() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testMissingEnd.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testContainerNullId() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerNullId.json");
+    public void testEmptyId() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testEmptyId.json");
     }
 
     @Test(expected = ParsingException.class)
-    public void testContainerMissingId() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerMissingId.json");
+    public void testEmptyDate() throws ParsingException, IOException {
+        parseRecord("QueryLogParserV2gTest/testEmptyDate.json");
     }
 
     @Test
     public void testNullCounters() throws ParsingException, IOException {
-        final Record record = parseRecord("QueryLogParserV2fStenoTest/testNullCounters.json");
+        final Record record = parseRecord("QueryLogParserV2gTest/testNullCounters.json");
         Assert.assertNotNull(record);
     }
 
     @Test
     public void testNullTimers() throws ParsingException, IOException {
-        final Record record = parseRecord("QueryLogParserV2fStenoTest/testNullTimers.json");
+        final Record record = parseRecord("QueryLogParserV2gTest/testNullTimers.json");
         Assert.assertNotNull(record);
     }
 
     @Test
     public void testNullGauges() throws ParsingException, IOException {
-        final Record record = parseRecord("QueryLogParserV2fStenoTest/testNullGauges.json");
+        final Record record = parseRecord("QueryLogParserV2gTest/testNullGauges.json");
         Assert.assertNotNull(record);
     }
 
     @Test
     public void testMissingCounters() throws ParsingException, IOException {
-        final Record record = parseRecord("QueryLogParserV2fStenoTest/testMissingCounters.json");
+        final Record record = parseRecord("QueryLogParserV2gTest/testMissingCounters.json");
         Assert.assertNotNull(record);
         Assert.assertTrue(record.getMetrics().isEmpty());
     }
 
     @Test
     public void testMissingTimers() throws ParsingException, IOException {
-        final Record record = parseRecord("QueryLogParserV2fStenoTest/testMissingTimers.json");
+        final Record record = parseRecord("QueryLogParserV2gTest/testMissingTimers.json");
         Assert.assertNotNull(record);
         Assert.assertTrue(record.getMetrics().isEmpty());
     }
 
     @Test
     public void testMissingGauges() throws ParsingException, IOException {
-        final Record record = parseRecord("QueryLogParserV2fStenoTest/testMissingGauges.json");
+        final Record record = parseRecord("QueryLogParserV2gTest/testMissingGauges.json");
         Assert.assertNotNull(record);
         Assert.assertTrue(record.getMetrics().isEmpty());
     }
 
     @Test
     public void testEmptyValues() throws ParsingException, IOException {
-        final Record record = parseRecord("QueryLogParserV2fStenoTest/testEmptyValues.json");
+        final Record record = parseRecord("QueryLogParserV2gTest/testEmptyValues.json");
         Assert.assertNotNull(record);
-
+        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertEquals(3, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get("_" + Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get("_" + Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get("_" + Key.CLUSTER_DIMENSION_KEY));
+
+        Assert.assertTrue(record.getAnnotations().isEmpty());
+
         Assert.assertEquals(3, record.getDimensions().size());
         Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
         Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
@@ -210,240 +229,169 @@ public class JsonToRecordParserV2fStenoTest {
 
     @Test
     public void testUpperCaseVersion() throws ParsingException, IOException {
-        final Record record = parseRecord("QueryLogParserV2fStenoTest/testUpperCaseVersion.json");
+        final Record record = parseRecord("QueryLogParserV2gTest/testUpperCaseVersion.json");
         Assert.assertNotNull(record);
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerMissingData() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerMissingData.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerMissingLevel() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerMissingLevel.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerMissingName() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerMissingName.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerMissingTime() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerMissingTime.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerNullData() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerNullData.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerNullLevel() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerNullLevel.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerNullName() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerNullName.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerNullTime() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerNullTime.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerBadData() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerBadData.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerBadLevel() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerBadLevel.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerBadName() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerBadName.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerBadTime() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerBadTime.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerBadContext() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerBadContext.json");
-    }
-
-    @Test(expected = ParsingException.class)
-    public void testContainerContextBadHost() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testContainerContextBadHost.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadCounters() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadCounters.json");
+        parseRecord("QueryLogParserV2gTest/testBadCounters.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadTimers() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadTimers.json");
+        parseRecord("QueryLogParserV2gTest/testBadTimers.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadGauges() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadGauges.json");
+        parseRecord("QueryLogParserV2gTest/testBadGauges.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testMissingGaugeValues() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testMissingGaugeValues.json");
+        parseRecord("QueryLogParserV2gTest/testMissingGaugeValues.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testMissingTimerValues() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testMissingTimerValues.json");
+        parseRecord("QueryLogParserV2gTest/testMissingTimerValues.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testMissingCounterValues() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testMissingCounterValues.json");
+        parseRecord("QueryLogParserV2gTest/testMissingCounterValues.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testNullGaugeValues() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testNullGaugeValues.json");
+        parseRecord("QueryLogParserV2gTest/testNullGaugeValues.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testNullTimerValues() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testNullTimerValues.json");
+        parseRecord("QueryLogParserV2gTest/testNullTimerValues.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testNullCounterValues() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testNullCounterValues.json");
+        parseRecord("QueryLogParserV2gTest/testNullCounterValues.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadGaugeValues() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadGaugeValues.json");
+        parseRecord("QueryLogParserV2gTest/testBadGaugeValues.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadTimerValues() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadTimerValues.json");
+        parseRecord("QueryLogParserV2gTest/testBadTimerValues.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadCounterValues() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadCounterValues.json");
+        parseRecord("QueryLogParserV2gTest/testBadCounterValues.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testMissingCounterValuesValue() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testMissingCounterValuesValue.json");
+        parseRecord("QueryLogParserV2gTest/testMissingCounterValuesValue.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testMissingGaugeValuesValue() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testMissingGaugeValuesValue.json");
+        parseRecord("QueryLogParserV2gTest/testMissingGaugeValuesValue.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testMissingTimerValuesValue() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testMissingTimerValuesValue.json");
+        parseRecord("QueryLogParserV2gTest/testMissingTimerValuesValue.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadTimerValuesValue() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadTimerValuesValue.json");
+        parseRecord("QueryLogParserV2gTest/testBadTimerValuesValue.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadGaugeValuesValue() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadGaugeValuesValue.json");
+        parseRecord("QueryLogParserV2gTest/testBadGaugeValuesValue.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadCounterValuesValue() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadCounterValuesValue.json");
+        parseRecord("QueryLogParserV2gTest/testBadCounterValuesValue.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadCounterValuesValueNumeratorUnits() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadCounterValuesValueNumeratorUnits.json");
+        parseRecord("QueryLogParserV2gTest/testBadCounterValuesValueNumeratorUnits.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadCounterValuesValueDenominatorUnits() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadCounterValuesValueDenominatorUnits.json");
+        parseRecord("QueryLogParserV2gTest/testBadCounterValuesValueDenominatorUnits.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadGaugeValuesValueNumeratorUnits() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadGaugeValuesValueNumeratorUnits.json");
+        parseRecord("QueryLogParserV2gTest/testBadGaugeValuesValueNumeratorUnits.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadGaugeValuesValueDenominatorUnits() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadGaugeValuesValueDenominatorUnits.json");
+        parseRecord("QueryLogParserV2gTest/testBadGaugeValuesValueDenominatorUnits.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadTimerValuesValueNumeratorUnits() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadTimerValuesValueNumeratorUnits.json");
+        parseRecord("QueryLogParserV2gTest/testBadTimerValuesValueNumeratorUnits.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadTimerValuesValueDenominatorUnits() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadTimerValuesValueDenominatorUnits.json");
+        parseRecord("QueryLogParserV2gTest/testBadTimerValuesValueDenominatorUnits.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadCounterValuesValueNumeratorUnitsName() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadCounterValuesValueNumeratorUnitsName.json");
+        parseRecord("QueryLogParserV2gTest/testBadCounterValuesValueNumeratorUnitsName.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadCounterValuesValueDenominatorUnitsName() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadCounterValuesValueDenominatorUnitsName.json");
+        parseRecord("QueryLogParserV2gTest/testBadCounterValuesValueDenominatorUnitsName.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadGaugeValuesValueNumeratorUnitsName() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadGaugeValuesValueNumeratorUnitsName.json");
+        parseRecord("QueryLogParserV2gTest/testBadGaugeValuesValueNumeratorUnitsName.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadGaugeValuesValueDenominatorUnitsName() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadGaugeValuesValueDenominatorUnitsName.json");
+        parseRecord("QueryLogParserV2gTest/testBadGaugeValuesValueDenominatorUnitsName.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadTimerValuesValueNumeratorUnitsName() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadTimerValuesValueNumeratorUnitsName.json");
+        parseRecord("QueryLogParserV2gTest/testBadTimerValuesValueNumeratorUnitsName.json");
     }
 
     @Test(expected = ParsingException.class)
     public void testBadTimerValuesValueDenominatorUnitsName() throws ParsingException, IOException {
-        parseRecord("QueryLogParserV2fStenoTest/testBadTimerValuesValueDenominatorUnitsName.json");
+        parseRecord("QueryLogParserV2gTest/testBadTimerValuesValueDenominatorUnitsName.json");
     }
 
     @Test
     public void testNaNValues() throws ParsingException, IOException {
-        final Record record = parseRecord("QueryLogParserV2fStenoTest/testNaNValues.json");
+        final Record record = parseRecord("QueryLogParserV2gTest/testNaNValues.json");
         Assert.assertNotNull(record);
-
+        Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
         Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
-        Assert.assertEquals(3, record.getAnnotations().size());
-        Assert.assertEquals("MyHost", record.getAnnotations().get("_" + Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getAnnotations().get("_" + Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getAnnotations().get("_" + Key.CLUSTER_DIMENSION_KEY));
+
+        Assert.assertTrue(record.getAnnotations().isEmpty());
+
         Assert.assertEquals(3, record.getDimensions().size());
         Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
         Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
@@ -466,7 +414,7 @@ public class JsonToRecordParserV2fStenoTest {
     }
 
     private static void assertValue(final Quantity quantity, final double value) {
-        assertValue(quantity, value, Optional.<Unit>empty());
+        assertValue(quantity, value, Optional.empty());
     }
 
     private static void assertValue(final Quantity quantity, final double value, final Unit unit) {
@@ -486,7 +434,6 @@ public class JsonToRecordParserV2fStenoTest {
     private static Record parseRecord(final String fileName) throws ParsingException, IOException {
         return new JsonToRecordParser.Builder()
                 .build()
-                .parse(Resources.toByteArray(Resources.getResource(
-                        JsonToRecordParserV2fStenoTest.class, fileName)));
+                .parse(Resources.toByteArray(Resources.getResource(JsonToRecordParserV2gTest.class, fileName)));
     }
 }

@@ -63,7 +63,7 @@ public final class TestBeanFactory {
                                 createMetric()))
                 .setTime(new DateTime())
                 .setId(UUID.randomUUID().toString())
-                .setAnnotations(
+                .setDimensions(
                         ImmutableMap.of(
                                 Key.HOST_DIMENSION_KEY, "MyHost",
                                 Key.SERVICE_DIMENSION_KEY, "MyService",

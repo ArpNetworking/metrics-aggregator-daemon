@@ -115,7 +115,7 @@ public class BucketTest {
         _bucket.add(
                 new DefaultRecord.Builder()
                         .setTime(START.plus(Duration.standardSeconds(10)))
-                        .setAnnotations(
+                        .setDimensions(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "MyHost",
                                         Key.SERVICE_DIMENSION_KEY, "MyService",
@@ -235,7 +235,7 @@ public class BucketTest {
         _bucket.add(
                 new DefaultRecord.Builder()
                         .setTime(START.plus(Duration.standardSeconds(offset)))
-                        .setAnnotations(
+                        .setDimensions(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "MyHost",
                                         Key.SERVICE_DIMENSION_KEY, "MyService",

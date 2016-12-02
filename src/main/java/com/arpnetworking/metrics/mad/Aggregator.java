@@ -54,6 +54,7 @@ import java.util.regex.Pattern;
  * This class is thread safe.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ryan Ascheman (rascheman at groupon dot com)
  */
 // NOTE: The _periodWorkerExecutor is accessed both in synchronized lifecycle methods like launch() and shutdown() but
 // also non-synchronized methods like notify(). Access to _periodWorkerExecutor does not need to be synchronized.
@@ -113,8 +114,9 @@ public final class Aggregator implements Observer, Launchable {
                     .log();
             return;
         }
+
         final Record record = (Record) event;
-        final Key key = new DefaultKey(createDimensions(record));
+        final Key key = new DefaultKey(record.getDimensions());
         LOGGER.trace()
                 .setMessage("Processing record")
                 .addData("record", record)
@@ -147,15 +149,6 @@ public final class Aggregator implements Observer, Launchable {
     @Override
     public String toString() {
         return toLogValue().toString();
-    }
-
-    private ImmutableMap<String, String> createDimensions(final Record record) {
-        // TODO(ville): Promote user specified annotations to dimensions.
-        final ImmutableMap.Builder<String, String> dimensionBuilder = ImmutableMap.builder();
-        dimensionBuilder.put(Key.HOST_DIMENSION_KEY, record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
-        dimensionBuilder.put(Key.SERVICE_DIMENSION_KEY, record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
-        dimensionBuilder.put(Key.CLUSTER_DIMENSION_KEY, record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
-        return dimensionBuilder.build();
     }
 
     private List<PeriodWorker> createPeriodWorkers(final Key key) {

@@ -87,7 +87,8 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                 final DefaultRecord.Builder builder = new DefaultRecord.Builder()
                         .setId(UUID.randomUUID().toString())
                         .setTime(record.getTime())
-                        .setAnnotations(ImmutableMap.copyOf(metricTags));
+                        .setAnnotations(ImmutableMap.copyOf(metricTags))
+                        .setDimensions(ImmutableMap.copyOf(metricTags));
 
                 final String plugin = record.getPlugin();
                 final String pluginInstance = record.getPluginInstance();
