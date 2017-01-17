@@ -552,10 +552,8 @@ import java.util.function.BiFunction;
          * @return Steno log compatible representation.
          */
         @LogValue
-        @Override
         public Object toLogValue() {
             return LogValueMapFactory.builder(this)
-                    .put("_super", super.toLogValue())
                     .put("sink", _sink)
                     .put("key", _key)
                     .put("start", _start)

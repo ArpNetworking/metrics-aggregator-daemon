@@ -20,9 +20,9 @@ import akka.NotUsed;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.http.javadsl.model.HttpHeader;
+import akka.http.javadsl.model.HttpRequest;
 import akka.http.javadsl.model.HttpResponse;
-import akka.http.scaladsl.model.HttpRequest;
-import akka.http.scaladsl.model.RequestEntity;
+import akka.http.javadsl.model.RequestEntity;
 import akka.japi.Pair;
 import akka.stream.ActorMaterializer;
 import akka.stream.ActorMaterializerSettings;
@@ -104,7 +104,7 @@ public class HttpSource extends ActorSource {
             if (message instanceof RequestReply) {
                 final RequestReply requestReply = (RequestReply) message;
                 // TODO(barp): Fix the ugly HttpRequest cast here due to java vs scala dsl
-                akka.stream.javadsl.Source.single((HttpRequest) requestReply.getRequest())
+                akka.stream.javadsl.Source.single(requestReply.getRequest())
                         .via(_processGraph)
                         .toMat(_sink, Keep.right())
                         .run(_materializer)
@@ -132,7 +132,7 @@ public class HttpSource extends ActorSource {
         /**
          * Constructor.
          *
-         * @param source The {@link CollectdHttpSourceV1} to send notifications through.
+         * @param source The {@link HttpSource} to send notifications through.
          */
         /* package private */ Actor(final HttpSource source) {
             _parser = source._parser;

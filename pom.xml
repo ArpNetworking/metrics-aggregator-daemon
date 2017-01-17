@@ -75,7 +75,7 @@
     <akka.http.version>2.4.2</akka.http.version>
     <apache.httpclient.version>4.5.1</apache.httpclient.version>
     <apache.httpcore.version>4.4.3</apache.httpcore.version>
-    <arpnetworking.commons.version>1.7.1</arpnetworking.commons.version>
+    <arpnetworking.commons.version>1.9.0</arpnetworking.commons.version>
     <aspectjrt.version>1.8.9</aspectjrt.version>
     <cglib.version>3.2.1</cglib.version>
     <client.protocol.version>0.9.3</client.protocol.version>
@@ -97,8 +97,8 @@
     <logback.steno.version>1.16.0</logback.steno.version>
     <log4j.over.slf4j.version>1.7.12</log4j.over.slf4j.version>
     <metrics.aggregator.protocol.version>1.0.3</metrics.aggregator.protocol.version>
-    <metrics.client.version>0.4.5</metrics.client.version>
-    <metrics.client.http.version>0.1.1</metrics.client.http.version>
+    <metrics.client.version>0.6.0</metrics.client.version>
+    <metrics.client.http.version>0.6.0</metrics.client.http.version>
     <metrics.generator.version>1.1.0</metrics.generator.version>
     <metrics.jvm.extra.version>0.4.2</metrics.jvm.extra.version>
     <mockito.version>1.10.19</mockito.version>
@@ -414,8 +414,8 @@
       <version>${metrics.client.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.arpnetworking.metrics</groupId>
-      <artifactId>sink-http-apache</artifactId>
+      <groupId>com.arpnetworking.metrics.extras</groupId>
+      <artifactId>apache-http-sink-extra</artifactId>
       <version>${metrics.client.http.version}</version>
     </dependency>
     <dependency>

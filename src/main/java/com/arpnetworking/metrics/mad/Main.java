@@ -62,6 +62,7 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -219,16 +220,16 @@ public final class Main implements Launchable {
         // Load supplemental routes
         final List<SupplementalRoutes> supplementalHttpRoutes = new ArrayList<>();
         _configuration.getSupplementalHttpRoutesClass().ifPresent(clazz -> {
-                    try {
-                        supplementalHttpRoutes.add(clazz.newInstance());
-                    } catch (final InstantiationException | IllegalAccessException e) {
-                        LOGGER.warn()
-                                .setMessage("Failed to instantiate supplemental http routes")
-                                .addData("supplementalHttpRoutesClass", clazz)
-                                .setThrowable(e)
-                                .log();
-                    }
-                });
+                try {
+                    supplementalHttpRoutes.add(clazz.newInstance());
+                } catch (final InstantiationException | IllegalAccessException e) {
+                    LOGGER.warn()
+                            .setMessage("Failed to instantiate supplemental http routes")
+                            .addData("supplementalHttpRoutesClass", clazz)
+                            .setThrowable(e)
+                            .log();
+                }
+        });
 
         // Create and bind Http server
         final Materializer materializer = ActorMaterializer.create(actorSystem);
@@ -269,7 +270,7 @@ public final class Main implements Launchable {
 
         // Instantiate the metrics factory
         final String sinkHost = "0.0.0.0".equals(_configuration.getHttpHost()) ? "localhost" : _configuration.getHttpHost();
-        final String sinkUrl = "http://" + sinkHost + ":" + _configuration.getHttpPort() + "/metrics/v1/application";
+        final URI sinkUrl = URI.create("http://" + sinkHost + ":" + _configuration.getHttpPort() + "/metrics/v1/application");
         final MetricsFactory metricsFactory = new TsdMetricsFactory.Builder()
                 .setClusterName(_configuration.getMonitoringCluster())
                 .setServiceName("mad")

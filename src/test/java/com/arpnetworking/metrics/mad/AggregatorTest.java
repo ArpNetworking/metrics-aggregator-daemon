@@ -15,6 +15,8 @@
  */
 package com.arpnetworking.metrics.mad;
 
+import com.arpnetworking.commons.observer.Observable;
+import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.test.TestBeanFactory;
@@ -81,7 +83,7 @@ public class AggregatorTest {
 
         // Send data to aggregator
         _aggregator.notify(
-                null,
+                OBSERVABLE,
                 new DefaultRecord.Builder()
                         .setMetrics(ImmutableMap.of(
                                 "MyMetric",
@@ -131,7 +133,7 @@ public class AggregatorTest {
         final DateTime start = DateTime.parse("2015-02-05T00:00:00Z");
 
         _aggregator.notify(
-                null,
+                OBSERVABLE,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
                         .setDimensions(
@@ -148,7 +150,7 @@ public class AggregatorTest {
                         .build());
 
         _aggregator.notify(
-                null,
+                OBSERVABLE,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
                         .setDimensions(
@@ -211,7 +213,7 @@ public class AggregatorTest {
         final DateTime start = DateTime.parse("2015-02-05T00:00:00Z");
 
         _aggregator.notify(
-                null,
+                OBSERVABLE,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
                         .setDimensions(
@@ -228,7 +230,7 @@ public class AggregatorTest {
                         .build());
 
         _aggregator.notify(
-                null,
+                OBSERVABLE,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
                         .setDimensions(
@@ -291,7 +293,7 @@ public class AggregatorTest {
         final DateTime start = DateTime.parse("2015-02-05T00:00:00Z");
 
         _aggregator.notify(
-                null,
+                OBSERVABLE,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
                         .setDimensions(
@@ -308,7 +310,7 @@ public class AggregatorTest {
                         .build());
 
         _aggregator.notify(
-                null,
+                OBSERVABLE,
                 TestBeanFactory.createRecordBuilder()
                         .setTime(start)
                         .setDimensions(
@@ -401,4 +403,11 @@ public class AggregatorTest {
 
     private static final Quantity ONE = new Quantity.Builder().setValue(1.0).build();
     private static final Quantity TWO = new Quantity.Builder().setValue(2.0).build();
+    private static final Observable OBSERVABLE = new Observable() {
+        @Override
+        public void attach(final Observer observer) { }
+
+        @Override
+        public void detach(final Observer observer) { }
+    };
 }
