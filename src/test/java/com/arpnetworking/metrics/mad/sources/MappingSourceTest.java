@@ -94,7 +94,7 @@ public class MappingSourceTest {
         new MappingSource.MappingObserver(
                 mappingSource,
                 Collections.<Pattern, List<String>>emptyMap())
-                .notify(null, "Not a Record");
+                .notify(OBSERVABLE, "Not a Record");
         Mockito.verifyZeroInteractions(_mockSource);
     }
 
@@ -361,4 +361,14 @@ public class MappingSourceTest {
     private Observer _mockObserver;
     private Source _mockSource;
     private MappingSource.Builder _mappingSourceBuilder;
+
+    private static final Observable OBSERVABLE = new Observable() {
+        @Override
+        public void attach(final Observer observer) {
+        }
+
+        @Override
+        public void detach(final Observer observer) {
+        }
+    };
 }
