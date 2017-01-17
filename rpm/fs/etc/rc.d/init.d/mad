@@ -7,7 +7,7 @@
 #   statistics on data and forwards them to upstream aggregation \
 #   services
 # processname: mad
-# config: /opt/mad/config/config.json
+# config: /opt/mad/config/config.hocon
 # pidfile: /var/run/mad/mad.pid
 
 # Source function library.
@@ -17,14 +17,36 @@ user="mad"
 prog="mad"
 dir="/opt/mad"
 log_dir="$dir/logs"
-config="/opt/mad/config/config.json"
-logging_config="-Dlogback.configurationFile=/opt/mad/config/logback.xml"
 exec="/opt/mad/bin/mad"
 pid_file="/var/run/mad/mad.pid"
+export CONFIG_FILE="/opt/mad/config/config.hocon"
 export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which java))))"
-export JAVA_OPTS="$logging_config"
+export JVM_XMS="64m"
+export JVM_XMX="1024m"
+export LOGBACK_CONFIG="-Dlogback.configurationFile=/opt/mad/config/logback.xml"
+export ADDITIONAL_JAVA_OPTS=""
+export APP_PARAMS="${CONFIG_FILE}"
+export ADDITIONAL_APP_PARAMS=""
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
+
+if [ -z "$JAVA_OPTS" ]; then
+    export JAVA_OPTS="${LOGBACK_CONFIG}\
+        -XX:+HeapDumpOnOutOfMemoryError \
+        -XX:HeapDumpPath=/opt/mad/logs/mad.oom.hprof \
+        -XX:+PrintGCDetails \
+        -XX:+PrintGCDateStamps \
+        -Xloggc:logs/mad.gc.log \
+        -XX:NumberOfGCLogFiles=2 \
+        -XX:GCLogFileSize=50M \
+        -XX:+UseGCLogFileRotation \
+        -Xms${JVM_XMS} \
+        -Xmx${JVM_XMX} \
+        -XX:+UseStringDeduplication \
+        -XX:+UseG1GC \
+        -Duser.timezone=UTC \
+        ${ADDITIONAL_JAVA_OPTS}"
+fi
 
 lockfile=/var/lock/subsys/$prog
 
@@ -41,13 +63,13 @@ is_running() {
 }
 
 start() {
-    [ -f $config ] || exit 6
+    [ -f $CONFIG_FILE ] || exit 6
     echo -n $"Starting $prog: "
     if is_running; then
-        warning "$name: already running"
+        warning "$prog: already running"
     else
         cd "$dir"
-        su "$user" -s /bin/sh -c "nice $exec $config >> $log_dir/system.out 2>&1 & echo \$! > $pid_file"
+        su "$user" -s /bin/sh -c "nice $exec ${APP_PARAMS} ${ADDITIONAL_APP_PARAMS} >> $log_dir/system.out 2>&1 & echo \$! > $pid_file"
         if ! is_running; then
             failure "$prog did not start"
             retval=1
@@ -77,7 +99,7 @@ stop() {
         if is_running; then
             warning
             echo
-            echo -n "Killing $name: "
+            echo -n "Killing $prog: "
             kill -9 `get_pid`
             for i in {1..10}
             do
@@ -105,7 +127,7 @@ stop() {
     else
         warning
         echo
-        echo "$name: not running"
+        echo "$prog: not running"
         if [ -f "$pid_file" ]; then
             rm "$pid_file"
         fi
