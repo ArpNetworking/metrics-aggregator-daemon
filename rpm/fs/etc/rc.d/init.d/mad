@@ -7,7 +7,7 @@
 #   statistics on data and forwards them to upstream aggregation \
 #   services
 # processname: mad
-# config: /opt/mad/config/config.hocon
+# config: /opt/mad/config/config.conf
 # pidfile: /var/run/mad/mad.pid
 
 # Source function library.
@@ -19,7 +19,7 @@ dir="/opt/mad"
 log_dir="$dir/logs"
 exec="/opt/mad/bin/mad"
 pid_file="/var/run/mad/mad.pid"
-export CONFIG_FILE="/opt/mad/config/config.hocon"
+export CONFIG_FILE="/opt/mad/config/config.conf"
 export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which java))))"
 export JVM_XMS="64m"
 export JVM_XMX="1024m"

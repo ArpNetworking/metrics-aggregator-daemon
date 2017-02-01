@@ -60,7 +60,7 @@ public class HoconFileSourceTest {
 
     @Test
     public void testValidHocon() throws IOException {
-        final File file = new File("./target/tmp/filter/HoconFileSourceTest/testValidHocon.hocon");
+        final File file = new File("./target/tmp/filter/HoconFileSourceTest/testValidHocon.conf");
         Files.write(file.toPath(), "foo:\"bar\"".getBytes(Charsets.UTF_8));
         final HoconFileSource source = new HoconFileSource.Builder()
                 .setFile(file)
