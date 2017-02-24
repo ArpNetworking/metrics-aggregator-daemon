@@ -71,8 +71,8 @@
 
   <properties>
     <!--Dependency versions-->
-    <akka.version>2.4.2</akka.version>
-    <akka.http.version>2.4.2</akka.http.version>
+    <akka.version>2.4.17</akka.version>
+    <akka.http.version>2.4.11.1</akka.http.version>
     <apache.httpclient.version>4.5.1</apache.httpclient.version>
     <apache.httpcore.version>4.4.3</apache.httpcore.version>
     <arpnetworking.commons.version>1.9.0</arpnetworking.commons.version>
