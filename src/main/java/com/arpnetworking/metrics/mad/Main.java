@@ -221,7 +221,7 @@ public final class Main implements Launchable {
         final List<SupplementalRoutes> supplementalHttpRoutes = new ArrayList<>();
         _configuration.getSupplementalHttpRoutesClass().ifPresent(clazz -> {
                 try {
-                    supplementalHttpRoutes.add(clazz.newInstance());
+                    supplementalHttpRoutes.add(injector.getInstance(clazz));
                 } catch (final InstantiationException | IllegalAccessException e) {
                     LOGGER.warn()
                             .setMessage("Failed to instantiate supplemental http routes")
