@@ -105,7 +105,7 @@
     <oval.version>1.86</oval.version>
     <performance.test.version>1.1.0</performance.test.version>
     <protobuf.version>3.0.2</protobuf.version>
-    <reflections.version>0.9.10</reflections.version>
+    <reflections.version>0.9.11</reflections.version>
     <scala.version>2.11</scala.version>
     <scala.java.compat.version>0.7.0</scala.java.compat.version>
     <scala.library.version>2.11.7</scala.library.version>
