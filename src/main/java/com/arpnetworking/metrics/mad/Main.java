@@ -273,8 +273,11 @@ public final class Main implements Launchable {
                                         .build()))
                 .build();
 
+        final AppShutdown shutdown = new AppShutdown();
+        _guiceAppShutdown = shutdown;
+
         // Instantiate Guice
-        return Guice.createInjector(new MainModule(actorSystem, metricsFactory));
+        return Guice.createInjector(new MainModule(actorSystem, metricsFactory, shutdown));
     }
 
     private ActorSystem launchAkka() {
@@ -319,6 +322,9 @@ public final class Main implements Launchable {
 
     private void shutdownGuice() {
         LOGGER.info().setMessage("Stopping guice").log();
+        if (_guiceAppShutdown != null) {
+            _guiceAppShutdown.shutdown();
+        }
     }
 
     private static Builder<? extends JsonNodeSource> getFileSourceBuilder(final File configurationFile) {
@@ -338,6 +344,7 @@ public final class Main implements Launchable {
     private volatile ScheduledExecutorService _jvmMetricsCollector;
 
     private volatile ActorSystem _actorSystem;
+    private volatile AppShutdown _guiceAppShutdown;
 
     private static final Long INITIAL_DELAY_IN_MILLIS = 0L;
     private static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
@@ -480,18 +487,21 @@ public final class Main implements Launchable {
 
     private static final class MainModule extends AbstractModule {
 
-        MainModule(final ActorSystem actorSystem, final MetricsFactory metricsFactory) {
+        MainModule(final ActorSystem actorSystem, final MetricsFactory metricsFactory, final AppShutdown shutdown) {
             this._actorSystem = actorSystem;
             this._metricsFactory = metricsFactory;
+            this._shutdown = shutdown;
         }
 
         @Override
         public void configure() {
             bind(ActorSystem.class).toInstance(_actorSystem);
             bind(MetricsFactory.class).toInstance(_metricsFactory);
+            bind(LifecycleRegistration.class).toInstance(_shutdown);
         }
 
         private final ActorSystem _actorSystem;
         private final MetricsFactory _metricsFactory;
+        private final AppShutdown _shutdown;
     }
 }
