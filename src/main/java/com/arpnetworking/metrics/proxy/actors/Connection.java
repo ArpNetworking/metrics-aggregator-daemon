@@ -16,17 +16,14 @@
 package com.arpnetworking.metrics.proxy.actors;
 
 import akka.actor.ActorRef;
-import akka.actor.Cancellable;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import akka.dispatch.ExecutionContexts;
 import akka.http.javadsl.model.ws.Message;
 import akka.http.javadsl.model.ws.TextMessage;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.LogValue;
-import com.arpnetworking.metrics.Metrics;
-import com.arpnetworking.metrics.MetricsFactory;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.proxy.models.messages.Command;
 import com.arpnetworking.metrics.proxy.models.messages.Connect;
 import com.arpnetworking.metrics.proxy.models.protocol.MessageProcessorsFactory;
@@ -38,10 +35,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import scala.concurrent.duration.FiniteDuration;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Actor class to hold the state for a single connection.
@@ -52,37 +47,29 @@ public class Connection extends UntypedActor {
     /**
      * Public constructor.
      *
-     * @param metricsFactory Instance of <code>MetricsFactory</code>.
+     * @param metrics Instance of <code>PeriodicMetrics</code>.
      * @param processorsFactory Factory for producing the protocol's <code>MessagesProcessor</code>
      */
     public Connection(
-            final MetricsFactory metricsFactory,
+            final PeriodicMetrics metrics,
             final MessageProcessorsFactory processorsFactory) {
-        _metricsFactory = metricsFactory;
-        _instrument = context().system().scheduler().schedule(
-                new FiniteDuration(0, TimeUnit.SECONDS), // Initial delay
-                new FiniteDuration(500, TimeUnit.MILLISECONDS), // Interval
-                getSelf(),
-                "instrument",
-                ExecutionContexts.global(),
-                getSelf());
-        _messageProcessors = processorsFactory.create(this);
-        _metrics = createMetrics();
+        _metrics = metrics;
+        _messageProcessors = processorsFactory.create(this, metrics);
     }
 
     /**
      * Factory for creating a <code>Props</code> with strong typing.
      *
-     * @param metricsFactory Instance of <code>MetricsFactory</code>.
+     * @param metrics Instance of <code>PeriodicMetrics</code>.
      * @param messageProcessorsFactory Factory to create a <code>Metrics</code> object.
      * @return a new Props object to create a <code>ConnectionContext</code>.
      */
     public static Props props(
-            final MetricsFactory metricsFactory,
+            final PeriodicMetrics metrics,
             final MessageProcessorsFactory messageProcessorsFactory) {
         return Props.create(
                 Connection.class,
-                metricsFactory,
+                metrics,
                 messageProcessorsFactory);
     }
 
@@ -97,10 +84,7 @@ public class Connection extends UntypedActor {
                 .addData("data", message)
                 .addData("channel", _channel)
                 .log();
-        if ("instrument".equals(message)) {
-            periodicInstrumentation();
-            return;
-        } else if (message instanceof Connect) {
+        if (message instanceof Connect) {
             final Connect connect = (Connect) message;
             _telemetry = connect.getTelemetry();
             _channel = connect.getChannel();
@@ -142,9 +126,9 @@ public class Connection extends UntypedActor {
             }
         }
         if (!messageProcessed) {
-            _metrics.incrementCounter(UNKNOWN_COUNTER);
+            _metrics.recordCounter(UNKNOWN_COUNTER, 1);
             if (message instanceof Command) {
-                _metrics.incrementCounter(UNKONOWN_COMMAND_COUNTER);
+                _metrics.recordCounter(UNKNOWN_COMMAND_COUNTER, 1);
                 LOGGER.warn()
                         .setMessage("Unable to process message")
                         .addData("reason", "unsupported command")
@@ -153,7 +137,7 @@ public class Connection extends UntypedActor {
                         .log();
                 unhandled(message);
             } else {
-                _metrics.incrementCounter("Actors/Connection/UNKNOWN");
+                _metrics.recordCounter("Actors/Connection/UNKNOWN", 1);
                 LOGGER.warn()
                         .setMessage("Unable to process message")
                         .addData("reason", "unsupported message")
@@ -163,15 +147,6 @@ public class Connection extends UntypedActor {
                 unhandled(message);
             }
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void postStop() throws Exception {
-        _instrument.cancel();
-        super.postStop();
     }
 
     /**
@@ -236,32 +211,14 @@ public class Connection extends UntypedActor {
         return toLogValue().toString();
     }
 
-    private Metrics createMetrics() {
-        final Metrics metrics = _metricsFactory.create();
-        metrics.resetCounter(UNKONOWN_COMMAND_COUNTER);
-        metrics.resetCounter(UNKNOWN_COUNTER);
-        for (final MessagesProcessor messageProcessor : _messageProcessors) {
-            messageProcessor.initializeMetrics(metrics);
-        }
-        return metrics;
-    }
-
-    private void periodicInstrumentation() {
-        _metrics.close();
-        _metrics = createMetrics();
-    }
-
     private ActorRef _telemetry;
     private ActorRef _channel;
 
-    private final MetricsFactory _metricsFactory;
-    private final Cancellable _instrument;
+    private final PeriodicMetrics _metrics;
     private final List<MessagesProcessor> _messageProcessors;
 
-    private Metrics _metrics;
-
     private static final String METRICS_PREFIX = "actors/connection/";
-    private static final String UNKONOWN_COMMAND_COUNTER = METRICS_PREFIX + "command/UNKNOWN";
+    private static final String UNKNOWN_COMMAND_COUNTER = METRICS_PREFIX + "command/UNKNOWN";
     private static final String UNKNOWN_COUNTER = METRICS_PREFIX + "UNKNOWN";
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();

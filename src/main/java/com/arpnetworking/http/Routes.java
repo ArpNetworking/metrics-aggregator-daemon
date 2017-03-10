@@ -38,12 +38,10 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import akka.util.Timeout;
-import com.arpnetworking.metrics.Counter;
-import com.arpnetworking.metrics.Metrics;
-import com.arpnetworking.metrics.MetricsFactory;
-import com.arpnetworking.metrics.Timer;
+import com.arpnetworking.metrics.Units;
 import com.arpnetworking.metrics.common.sources.ClientHttpSourceV1;
 import com.arpnetworking.metrics.common.sources.CollectdHttpSourceV1;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.actors.Status;
 import com.arpnetworking.metrics.proxy.actors.Connection;
 import com.arpnetworking.metrics.proxy.models.messages.Connect;
@@ -54,6 +52,7 @@ import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.base.Charsets;
+import com.google.common.base.Stopwatch;
 import com.google.common.io.Resources;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import scala.compat.java8.FutureConverters;
@@ -78,19 +77,19 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
      * Public constructor.
      *
      * @param actorSystem Instance of <code>ActorSystem</code>.
-     * @param metricsFactory Instance of <code>MetricsFactory</code>.
+     * @param metrics Instance of <code>PeriodicMetrics</code>.
      * @param healthCheckPath The path for the health check.
      * @param statusPath The path for the status.
      * @param supplementalRoutes List of supplemental routes in priority order.
      */
     public Routes(
             final ActorSystem actorSystem,
-            final MetricsFactory metricsFactory,
+            final PeriodicMetrics metrics,
             final String healthCheckPath,
             final String statusPath,
             final List<SupplementalRoutes> supplementalRoutes) {
         _actorSystem = actorSystem;
-        _metricsFactory = metricsFactory;
+        _metrics = metrics;
         _healthCheckPath = healthCheckPath;
         _statusPath = statusPath;
         _supplementalRoutes = supplementalRoutes;
@@ -111,10 +110,8 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
      */
     @Override
     public CompletionStage<HttpResponse> apply(final HttpRequest request) {
-        final Metrics metrics = _metricsFactory.create();
-        final Timer timer = metrics.createTimer(createMetricName(request, REQUEST_METRIC));
-        final Counter bodySize = metrics.createCounter(createMetricName(request, BODY_SIZE_METRIC));
-        bodySize.increment(request.entity().getContentLengthOption().orElse(0L));
+        final Stopwatch requestTimer = Stopwatch.createStarted();
+        _metrics.recordCounter(createMetricName(request, BODY_SIZE_METRIC), request.entity().getContentLengthOption().orElse(0L));
         // TODO(vkoskela): Add a request UUID and include in MDC. [MAI-462]
         LOGGER.trace()
                 .setEvent("http.in.start")
@@ -124,8 +121,11 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                 .log();
         return process(request).<HttpResponse>whenComplete(
                 (response, failure) -> {
-                    timer.close();
-                    metrics.close();
+                    requestTimer.stop();
+                    _metrics.recordTimer(
+                            createMetricName(request, REQUEST_METRIC),
+                            requestTimer.elapsed(TimeUnit.NANOSECONDS),
+                            Optional.of(Units.NANOSECOND));
                     final LogBuilder log = LOGGER.trace()
                             .setEvent("http.in")
                             .addData("method", request.method())
@@ -217,7 +217,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
             final akka.http.impl.engine.ws.UpgradeToWebSocketLowLevel lowLevelUpgradeToWebSocketHeader =
                     (akka.http.impl.engine.ws.UpgradeToWebSocketLowLevel) upgradeToWebSocketHeader.get();
 
-            final ActorRef connection = _actorSystem.actorOf(Connection.props(_metricsFactory, messageProcessorsFactory));
+            final ActorRef connection = _actorSystem.actorOf(Connection.props(_metrics, messageProcessorsFactory));
             final Sink<Message, ?> inChannel = Sink.actorRef(connection, PoisonPill.getInstance());
             final Source<Message, ActorRef> outChannel = Source.<Message>actorRef(TELEMETRY_BUFFER_SIZE, OverflowStrategy.dropBuffer())
                     .<ActorRef>mapMaterializedValue(channel -> {
@@ -270,7 +270,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     @SuppressFBWarnings("SE_BAD_FIELD")
     private final ActorSystem _actorSystem;
     @SuppressFBWarnings("SE_BAD_FIELD")
-    private final MetricsFactory _metricsFactory;
+    private final PeriodicMetrics _metrics;
     private final String _healthCheckPath;
     private final String _statusPath;
     @SuppressFBWarnings("SE_BAD_FIELD")

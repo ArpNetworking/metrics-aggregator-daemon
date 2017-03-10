@@ -17,7 +17,7 @@ package com.arpnetworking.metrics.proxy.models.protocol.v2;
 
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.LogValue;
-import com.arpnetworking.metrics.Metrics;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.proxy.actors.Connection;
 import com.arpnetworking.metrics.proxy.models.messages.Command;
 import com.arpnetworking.metrics.proxy.models.messages.MetricReport;
@@ -48,9 +48,11 @@ public class MetricMessagesProcessor implements MessagesProcessor {
      * Public constructor.
      *
      * @param connection ConnectionContext where processing takes place
+     * @param metrics {@link PeriodicMetrics} instance to record metrics to
      */
-    public MetricMessagesProcessor(final Connection connection) {
+    public MetricMessagesProcessor(final Connection connection, final PeriodicMetrics metrics) {
         _connection = connection;
+        _metrics = metrics;
     }
 
     /**
@@ -68,7 +70,7 @@ public class MetricMessagesProcessor implements MessagesProcessor {
                     _connection.getTelemetry().tell(new MetricsListRequest(), _connection.getSelf());
                     break;
                 case COMMAND_SUBSCRIBE_METRIC: {
-                    _metrics.incrementCounter(SUBSCRIBE_COUNTER);
+                    _metrics.recordCounter(SUBSCRIBE_COUNTER, 1);
                     final String service = commandNode.get("service").asText();
                     final String metric = commandNode.get("metric").asText();
                     final String statistic = commandNode.get("statistic").asText();
@@ -76,7 +78,7 @@ public class MetricMessagesProcessor implements MessagesProcessor {
                     break;
                 }
                 case COMMAND_UNSUBSCRIBE_METRIC: {
-                    _metrics.incrementCounter(UNSUBSCRIBE_COUNTER);
+                    _metrics.recordCounter(UNSUBSCRIBE_COUNTER, 1);
                     final String service = commandNode.get("service").asText();
                     final String metric = commandNode.get("metric").asText();
                     final String statistic = commandNode.get("statistic").asText();
@@ -88,34 +90,21 @@ public class MetricMessagesProcessor implements MessagesProcessor {
             }
         } else if (message instanceof NewMetric) {
             //TODO(barp): Map with a POJO mapper [MAI-184]
-            _metrics.incrementCounter(NEW_METRIC_COUNTER);
+            _metrics.recordCounter(NEW_METRIC_COUNTER, 1);
             final NewMetric newMetric = (NewMetric) message;
             processNewMetric(newMetric);
         } else if (message instanceof MetricReport) {
-            _metrics.incrementCounter(REPORT_COUNTER);
+            _metrics.recordCounter(REPORT_COUNTER, 1);
             final MetricReport report = (MetricReport) message;
             processMetricReport(report);
         } else if (message instanceof MetricsList) {
-            _metrics.incrementCounter(METRICS_LIST_COUNTER);
+            _metrics.recordCounter(METRICS_LIST_COUNTER, 1);
             final MetricsList metricsList = (MetricsList) message;
             processMetricsList(metricsList);
         } else {
             return false;
         }
         return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initializeMetrics(final Metrics metrics) {
-        _metrics = metrics;
-        metrics.resetCounter(METRICS_LIST_COUNTER);
-        metrics.resetCounter(REPORT_COUNTER);
-        metrics.resetCounter(NEW_METRIC_COUNTER);
-        metrics.resetCounter(UNSUBSCRIBE_COUNTER);
-        metrics.resetCounter(SUBSCRIBE_COUNTER);
     }
 
     /**
@@ -249,7 +238,7 @@ public class MetricMessagesProcessor implements MessagesProcessor {
 
     private final Map<String, Map<String, Set<String>>> _subscriptions = Maps.newHashMap();
     private final Connection _connection;
-    private Metrics _metrics;
+    private PeriodicMetrics _metrics;
 
     private static final String COMMAND_METRICS_LIST = "metricsList";
     private static final String COMMAND_REPORT_METRIC = "reportMetric";
