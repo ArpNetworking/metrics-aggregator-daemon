@@ -17,7 +17,7 @@ package com.arpnetworking.metrics.proxy.models.protocol.v2;
 
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.LogValue;
-import com.arpnetworking.metrics.Metrics;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.proxy.actors.Connection;
 import com.arpnetworking.metrics.proxy.models.messages.Command;
 import com.arpnetworking.metrics.proxy.models.messages.LogLine;
@@ -55,9 +55,11 @@ public class LogMessagesProcessor implements MessagesProcessor {
      * Public constructor.
      *
      * @param connection ConnectionContext where processing takes place
+     * @param metrics {@link PeriodicMetrics} instance to record metrics to
      */
-    public LogMessagesProcessor(final Connection connection) {
+    public LogMessagesProcessor(final Connection connection, final PeriodicMetrics metrics) {
         _connection = connection;
+        _metrics = metrics;
     }
 
     /**
@@ -72,18 +74,18 @@ public class LogMessagesProcessor implements MessagesProcessor {
             final String commandString = commandNode.get("command").asText();
             switch (commandString) {
                 case COMMAND_GET_LOGS:
-                    _metrics.incrementCounter(GET_LOGS_COUNTER);
+                    _metrics.recordCounter(GET_LOGS_COUNTER, 1);
                     _connection.getTelemetry().tell(new LogsListRequest(), _connection.getSelf());
                     break;
                 case COMMAND_SUBSCRIBE_LOG: {
-                    _metrics.incrementCounter(SUBSCRIBE_COUNTER);
+                    _metrics.recordCounter(SUBSCRIBE_COUNTER, 1);
                     final Path log = Paths.get(commandNode.get("log").asText());
                     final ArrayNode regexes = commandNode.withArray("regexes");
                     subscribe(log, regexes);
                     break;
                 }
                 case COMMAND_UNSUBSCRIBE_LOG: {
-                    _metrics.incrementCounter(UNSUBSCRIBE_COUNTER);
+                    _metrics.recordCounter(UNSUBSCRIBE_COUNTER, 1);
                     final Path log = Paths.get(commandNode.get("log").asText());
                     final ArrayNode regexes = commandNode.withArray("regexes");
                     unsubscribe(log, regexes);
@@ -109,20 +111,6 @@ public class LogMessagesProcessor implements MessagesProcessor {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initializeMetrics(final Metrics metrics) {
-        _metrics = metrics;
-        _metrics.resetCounter(GET_LOGS_COUNTER);
-        _metrics.resetCounter(SUBSCRIBE_COUNTER);
-        _metrics.resetCounter(UNSUBSCRIBE_COUNTER);
-        _metrics.resetCounter(LOG_REPORT_COUNTER);
-        _metrics.resetCounter(NEW_LOG_COUNTER);
-        _metrics.resetCounter(LOGS_LIST_COUNTER);
-    }
-
-    /**
      * Generate a Steno log compatible representation.
      *
      * @return Steno log compatible representation.
@@ -144,12 +132,12 @@ public class LogMessagesProcessor implements MessagesProcessor {
     }
 
     private void processLogsList(final LogsList logsList) {
-        _metrics.incrementCounter(LOGS_LIST_COUNTER);
+        _metrics.recordCounter(LOGS_LIST_COUNTER, 1);
         _connection.sendCommand(COMMAND_LOGS_LIST, OBJECT_MAPPER.convertValue(logsList, ObjectNode.class));
     }
 
     private void processLogReport(final LogLine rawReport) {
-        _metrics.incrementCounter(LOG_LINE_COUNTER);
+        _metrics.recordCounter(LOG_LINE_COUNTER, 1);
         final Path logFile = rawReport.getFile();
 
         final Set<String> regexes = _logsSubscriptions.get(logFile);
@@ -191,7 +179,7 @@ public class LogMessagesProcessor implements MessagesProcessor {
     }
 
     private void processNewLog(final NewLog newLog) {
-        _metrics.incrementCounter(NEW_LOG_COUNTER);
+        _metrics.recordCounter(NEW_LOG_COUNTER, 1);
         _connection.sendCommand(COMMAND_NEW_LOG, OBJECT_MAPPER.convertValue(newLog, ObjectNode.class));
     }
 
@@ -226,7 +214,7 @@ public class LogMessagesProcessor implements MessagesProcessor {
 
     private final Map<Path, Set<String>> _logsSubscriptions = Maps.newHashMap();
     private final Connection _connection;
-    private Metrics _metrics;
+    private PeriodicMetrics _metrics;
 
     private static final Map<String, Pattern> PATTERNS_MAP = Maps.newHashMap();
     private static final String COMMAND_GET_LOGS = "getLogs";

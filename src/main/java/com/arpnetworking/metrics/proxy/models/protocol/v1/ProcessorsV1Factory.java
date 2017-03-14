@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.proxy.models.protocol.v1;
 
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.proxy.actors.Connection;
 import com.arpnetworking.metrics.proxy.models.protocol.MessageProcessorsFactory;
 import com.arpnetworking.metrics.proxy.models.protocol.MessagesProcessor;
@@ -32,10 +33,10 @@ public class ProcessorsV1Factory implements MessageProcessorsFactory {
      * {@inheritDoc}
      */
     @Override
-    public List<MessagesProcessor> create(final Connection connection) {
+    public List<MessagesProcessor> create(final Connection connection, final PeriodicMetrics metrics) {
         return Lists.newArrayList(
-                new HeartbeatMessagesProcessor(connection),
+                new HeartbeatMessagesProcessor(connection, metrics),
                 new LogMessagesDroppingProcessor(),
-                new MetricMessagesProcessor(connection));
+                new MetricMessagesProcessor(connection, metrics));
     }
 }

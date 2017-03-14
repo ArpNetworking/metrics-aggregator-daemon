@@ -16,6 +16,7 @@
 
 package com.arpnetworking.metrics.proxy.models.protocol;
 
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.proxy.actors.Connection;
 
 import java.util.List;
@@ -31,7 +32,8 @@ public interface MessageProcessorsFactory {
      * Create a list of <code>MessagesProcessor</code> that define a protocol.
      *
      * @param connection the connection context to use for message processing
+     * @param metrics {@link PeriodicMetrics} instance to record metrics to
      * @return a list of <code>MessagesProcessor</code>
      */
-    List<MessagesProcessor> create(final Connection connection);
+    List<MessagesProcessor> create(final Connection connection, final PeriodicMetrics metrics);
 }

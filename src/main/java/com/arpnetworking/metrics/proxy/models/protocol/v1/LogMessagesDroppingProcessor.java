@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.metrics.proxy.models.protocol.v1;
 
-import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.proxy.models.messages.LogLine;
 import com.arpnetworking.metrics.proxy.models.messages.LogsList;
 import com.arpnetworking.metrics.proxy.models.messages.NewLog;
@@ -39,12 +38,4 @@ public class LogMessagesDroppingProcessor implements MessagesProcessor {
                 || message instanceof NewLog
                 || message instanceof LogsList;
     }
-
-    /**
-     * Initializes Processor-owned periodic metrics counters to zero.
-     *
-     * @param metrics Metrics to reset counts in.
-     */
-    @Override
-    public void initializeMetrics(final Metrics metrics) { }
 }

@@ -16,7 +16,7 @@
 package com.arpnetworking.metrics.proxy.models.protocol.v1;
 
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
-import com.arpnetworking.metrics.Metrics;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.proxy.actors.Connection;
 import com.arpnetworking.metrics.proxy.models.messages.Command;
 import com.arpnetworking.metrics.proxy.models.protocol.MessagesProcessor;
@@ -32,9 +32,11 @@ public class HeartbeatMessagesProcessor implements MessagesProcessor {
      * Public constructor.
      *
      * @param connection ConnectionContext where processing takes place
+     * @param metrics {@link PeriodicMetrics} instance to record metrics to
      */
-    public HeartbeatMessagesProcessor(final Connection connection) {
+    public HeartbeatMessagesProcessor(final Connection connection, final PeriodicMetrics metrics) {
         _connection = connection;
+        _metrics = metrics;
     }
 
     /**
@@ -43,12 +45,12 @@ public class HeartbeatMessagesProcessor implements MessagesProcessor {
     @Override
     public boolean handleMessage(final Object message) {
         if (message instanceof Command) {
-            _metrics.incrementCounter(HEARTBEAT_COUNTER);
             //TODO(barp): Map with a POJO mapper [MAI-184]
             final Command command = (Command) message;
             final ObjectNode commandNode = (ObjectNode) command.getCommand();
             final String commandString = commandNode.get("command").asText();
             if (COMMAND_HEARTBEAT.equals(commandString)) {
+                _metrics.recordCounter(HEARTBEAT_COUNTER, 1);
                 _connection.send(OK_RESPONSE);
                 return true;
             }
@@ -56,16 +58,7 @@ public class HeartbeatMessagesProcessor implements MessagesProcessor {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initializeMetrics(final Metrics metrics) {
-        _metrics = metrics;
-        metrics.resetCounter(HEARTBEAT_COUNTER);
-    }
-
-    private Metrics _metrics;
+    private PeriodicMetrics _metrics;
     private final Connection _connection;
 
     private static final String COMMAND_HEARTBEAT = "heartbeat";

@@ -37,6 +37,8 @@ import com.arpnetworking.http.SupplementalRoutes;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.metrics.impl.ApacheHttpSink;
 import com.arpnetworking.metrics.impl.TsdMetricsFactory;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
+import com.arpnetworking.metrics.incubator.impl.TsdPeriodicMetrics;
 import com.arpnetworking.metrics.jvm.JvmMetricsRunnable;
 import com.arpnetworking.metrics.mad.actors.Status;
 import com.arpnetworking.metrics.mad.configuration.AggregatorConfiguration;
@@ -55,8 +57,10 @@ import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Provides;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -70,6 +74,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -227,7 +232,7 @@ public final class Main implements Launchable {
         final Materializer materializer = ActorMaterializer.create(actorSystem);
         final Routes routes = new Routes(
                 actorSystem,
-                injector.getInstance(MetricsFactory.class),
+                injector.getInstance(PeriodicMetrics.class),
                 _configuration.getHttpHealthCheckPath(),
                 _configuration.getHttpStatusPath(),
                 supplementalHttpRoutes);
@@ -498,6 +503,26 @@ public final class Main implements Launchable {
             bind(ActorSystem.class).toInstance(_actorSystem);
             bind(MetricsFactory.class).toInstance(_metricsFactory);
             bind(LifecycleRegistration.class).toInstance(_shutdown);
+        }
+
+        @Provides
+        @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
+        private PeriodicMetrics providePeriodicMetrics(
+                final MetricsFactory metricsFactory,
+                final LifecycleRegistration lifecycle) {
+            final TsdPeriodicMetrics periodicMetrics = new TsdPeriodicMetrics.Builder()
+                    .setMetricsFactory(metricsFactory)
+                    .build();
+            final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(
+                    r -> new Thread(r, "PeriodicMetricsCloser"));
+            executor.scheduleAtFixedRate(periodicMetrics, 500, 500, TimeUnit.MILLISECONDS);
+
+            // Register to shutdown the executor when the Guice stack is shutdown.
+            lifecycle.registerShutdown(() -> {
+                executor.shutdown();
+                return CompletableFuture.completedFuture(null);
+            });
+            return periodicMetrics;
         }
 
         private final ActorSystem _actorSystem;

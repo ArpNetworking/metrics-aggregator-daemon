@@ -16,8 +16,6 @@
 
 package com.arpnetworking.metrics.proxy.models.protocol;
 
-import com.arpnetworking.metrics.Metrics;
-
 /**
  * Defines simple interface for a message processor.
  *
@@ -31,11 +29,4 @@ public interface MessagesProcessor {
      * @return true if the message was processed, otherwise false
      */
     boolean handleMessage(final Object message);
-
-    /**
-     * Initializes Processor-owned periodic metrics counters to zero.
-     *
-     * @param metrics Metrics to reset counts in.
-     */
-    void initializeMetrics(final Metrics metrics);
 }

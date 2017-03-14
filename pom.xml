@@ -99,6 +99,7 @@
     <metrics.aggregator.protocol.version>1.0.3</metrics.aggregator.protocol.version>
     <metrics.client.version>0.6.0</metrics.client.version>
     <metrics.client.http.version>0.6.0</metrics.client.http.version>
+    <metrics.client.incubator.version>0.6.0</metrics.client.incubator.version>
     <metrics.generator.version>1.1.0</metrics.generator.version>
     <metrics.jvm.extra.version>0.4.2</metrics.jvm.extra.version>
     <mockito.version>1.10.19</mockito.version>
@@ -417,6 +418,11 @@
       <groupId>com.arpnetworking.metrics.extras</groupId>
       <artifactId>apache-http-sink-extra</artifactId>
       <version>${metrics.client.http.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.arpnetworking.metrics.extras</groupId>
+      <artifactId>incubator-extra</artifactId>
+      <version>${metrics.client.incubator.version}</version>
     </dependency>
     <dependency>
       <groupId>com.arpnetworking.metrics.extras</groupId>
