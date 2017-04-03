@@ -19,7 +19,7 @@ package com.arpnetworking.metrics.common.tailer;
  * Based on the Apache <code>TailerListener</code> but uses a <code>Tailer</code>
  * interface instead of a class for improved extensibility.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public interface TailerListener {
 

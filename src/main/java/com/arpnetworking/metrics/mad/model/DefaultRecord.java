@@ -27,48 +27,33 @@ import org.joda.time.DateTime;
 /**
  * Default implementation of the <code>Record</code> interface.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  * @author Ryan Ascheman (rascheman at groupon dot com)
  */
 @Loggable
 public final class DefaultRecord implements Record {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getId() {
         return _id;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public DateTime getTime() {
         return _time;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ImmutableMap<String, ? extends Metric> getMetrics() {
         return _metrics;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ImmutableMap<String, String> getAnnotations() {
         return _annotations;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ImmutableMap<String, String> getDimensions() {
         return _dimensions;
@@ -91,17 +76,11 @@ public final class DefaultRecord implements Record {
         return Objects.equal(getId(), otherRecord.getId());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         return Objects.hashCode(getId());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

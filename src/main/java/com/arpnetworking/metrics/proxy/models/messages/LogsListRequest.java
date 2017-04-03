@@ -31,9 +31,6 @@ public final class LogsListRequest {
      */
     public LogsListRequest() { }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

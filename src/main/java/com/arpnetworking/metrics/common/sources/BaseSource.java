@@ -33,17 +33,11 @@ import java.util.function.Function;
  */
 public abstract class BaseSource implements Source {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void attach(final Observer observer) {
         _observable.attach(observer);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void detach(final Observer observer) {
         _observable.detach(observer);
@@ -78,9 +72,6 @@ public abstract class BaseSource implements Source {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

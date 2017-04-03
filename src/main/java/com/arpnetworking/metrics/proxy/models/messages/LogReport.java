@@ -67,9 +67,6 @@ public final class LogReport {
         return _matchingRegexes;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

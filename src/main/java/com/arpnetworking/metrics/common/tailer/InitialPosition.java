@@ -24,16 +24,13 @@ import java.nio.channels.SeekableByteChannel;
 /**
  * Represents the initial position for a tailer.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public enum InitialPosition {
     /**
      * Start at the beginning of a file.
      */
     START {
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public long get(final SeekableByteChannel channel) {
             return 0L;
@@ -43,9 +40,6 @@ public enum InitialPosition {
      * Start at the end of a file.
      */
     END {
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public long get(final SeekableByteChannel channel) {
             try {

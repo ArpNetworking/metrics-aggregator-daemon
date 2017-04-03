@@ -84,9 +84,6 @@ public final class LogLine {
         // CHECKSTYLE.ON: IllegalInstantiation
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

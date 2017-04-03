@@ -23,7 +23,7 @@ import com.google.common.base.MoreObjects;
 /**
  * Akka message to hold new connection data.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
@@ -53,9 +53,6 @@ public final class Connect {
         return _channel;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

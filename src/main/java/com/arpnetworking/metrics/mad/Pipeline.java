@@ -123,9 +123,6 @@ public final class Pipeline implements Launchable {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

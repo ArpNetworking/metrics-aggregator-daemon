@@ -64,9 +64,6 @@ import java.util.concurrent.atomic.LongAccumulator;
  */
 public final class PeriodicStatisticsSink extends BaseSink {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void recordAggregateData(final PeriodicData periodicData) {
         LOGGER.debug()
@@ -109,9 +106,6 @@ public final class PeriodicStatisticsSink extends BaseSink {
         _age.accumulate(now - periodicData.getStart().plus(periodicData.getPeriod()).getMillis());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() {
         try {
@@ -221,9 +215,6 @@ public final class PeriodicStatisticsSink extends BaseSink {
 
     private final class MetricsLogger implements Runnable {
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void run() {
             final Metrics oldMetrics = _metrics.getAndSet(createMetrics());
@@ -269,9 +260,6 @@ public final class PeriodicStatisticsSink extends BaseSink {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected Builder self() {
             return this;

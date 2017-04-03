@@ -72,9 +72,6 @@ public final class LogScanner extends UntypedActor {
                 self());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onReceive(final Object message) throws Exception {
         if ("tick".equals(message)) {
@@ -124,9 +121,6 @@ public final class LogScanner extends UntypedActor {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

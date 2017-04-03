@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>1.0.27</version>
+    <version>1.0.29</version>
     <relativePath />
   </parent>
 
@@ -43,9 +43,9 @@
     <developer>
       <id>barp</id>
       <name>Brandon Arp</name>
-      <email>brandonarp@gmail.com</email>
-      <organization>ArpNetworking</organization>
-      <organizationUrl>http://www.arpnetworking.com</organizationUrl>
+      <email>brandon.arp@inscopemetrics.com</email>
+      <organization>Inscope Metrics</organization>
+      <organizationUrl>http://www.inscopemetrics.com</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>

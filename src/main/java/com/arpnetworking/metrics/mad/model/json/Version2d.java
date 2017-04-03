@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 /**
  * Model for the version 2d query log line.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @Loggable
 public final class Version2d {

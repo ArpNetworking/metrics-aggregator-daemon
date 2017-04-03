@@ -42,17 +42,11 @@ import java.util.Optional;
  */
 public final class JsonNodeUriSource extends BaseJsonNodeSource {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<JsonNode> getValue(final String... keys) {
         return getValue(getJsonNode(), keys);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @LogValue
     @Override
     public Object toLogValue() {
@@ -63,9 +57,7 @@ public final class JsonNodeUriSource extends BaseJsonNodeSource {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public String toString() {
         return toLogValue().toString();
     }
@@ -169,9 +161,6 @@ public final class JsonNodeUriSource extends BaseJsonNodeSource {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected Builder self() {
             return this;

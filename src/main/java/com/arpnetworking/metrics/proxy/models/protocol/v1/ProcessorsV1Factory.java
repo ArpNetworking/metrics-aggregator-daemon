@@ -26,12 +26,9 @@ import java.util.List;
 /**
  * Factory for creating all the processors needed to process a v1 message.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public class ProcessorsV1Factory implements MessageProcessorsFactory {
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<MessagesProcessor> create(final Connection connection, final PeriodicMetrics metrics) {
         return Lists.newArrayList(

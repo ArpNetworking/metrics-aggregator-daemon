@@ -22,7 +22,7 @@ import org.joda.time.Duration;
 /**
  * A {@link Trigger} that waits a set amount of time then fires.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public class TimerTrigger implements Trigger {
 
@@ -35,9 +35,6 @@ public class TimerTrigger implements Trigger {
         _duration = duration;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void waitOnTrigger() throws InterruptedException {
         Thread.sleep(_duration.getMillis());
@@ -55,9 +52,6 @@ public class TimerTrigger implements Trigger {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

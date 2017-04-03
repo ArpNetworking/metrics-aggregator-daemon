@@ -33,7 +33,7 @@ import java.util.Set;
 /**
  * Base class for percentile based statistics.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public abstract class TPStatistic extends BaseStatistic implements OrderedStatistic {
 
@@ -46,50 +46,32 @@ public abstract class TPStatistic extends BaseStatistic implements OrderedStatis
         return _percentile;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return _defaultName;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<String> getAliases() {
         return Collections.unmodifiableSet(_aliases);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Calculator<Void> createCalculator() {
         return new PercentileCalculator(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<Statistic> getDependencies() {
         return DEPENDENCIES.get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculate(final List<Quantity> orderedValues) {
         final int index = (int) (Math.ceil((_percentile / 100.0) * (orderedValues.size() - 1)));
         return orderedValues.get(index);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
         throw new UnsupportedOperationException("Unsupported operation: calculateAggregations(List<AggregatedData>)");
@@ -138,9 +120,6 @@ public abstract class TPStatistic extends BaseStatistic implements OrderedStatis
             super(statistic);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public CalculatedValue<Void> calculate(final Map<Statistic, Calculator<?>> dependencies) {
             final HistogramStatistic.HistogramAccumulator calculator =
@@ -150,17 +129,11 @@ public abstract class TPStatistic extends BaseStatistic implements OrderedStatis
                             .build();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public int hashCode() {
             return Objects.hash(getClass(), getStatistic());
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public boolean equals(final Object other) {
             if (this == other) {

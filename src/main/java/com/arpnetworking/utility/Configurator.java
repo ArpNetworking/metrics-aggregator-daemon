@@ -46,17 +46,11 @@ public class Configurator<T extends Launchable, S> implements Listener, Launchab
         _configurationClass = configurationClass;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void offerConfiguration(final Configuration configuration) throws Exception {
         _offeredConfiguration = configuration.getAs(_configurationClass);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @SuppressWarnings("unchecked")
     @Override
     public synchronized void applyConfiguration() {
@@ -71,9 +65,6 @@ public class Configurator<T extends Launchable, S> implements Listener, Launchab
         launch();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void launch() {
         if (_launchable.isPresent()) {
@@ -81,9 +72,6 @@ public class Configurator<T extends Launchable, S> implements Listener, Launchab
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void shutdown() {
         if (_launchable.isPresent()) {
@@ -105,9 +93,6 @@ public class Configurator<T extends Launchable, S> implements Listener, Launchab
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

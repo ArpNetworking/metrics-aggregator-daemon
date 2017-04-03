@@ -29,41 +29,26 @@ import java.util.Objects;
 @Loggable
 public final class DefaultKey implements Key {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ImmutableMap<String, String> getParameters() {
         return _dimensions;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getCluster() {
         return _dimensions.get(CLUSTER_DIMENSION_KEY);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getService() {
         return _dimensions.get(SERVICE_DIMENSION_KEY);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getHost() {
         return _dimensions.get(HOST_DIMENSION_KEY);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object other) {
         if (this == other) {
@@ -78,17 +63,11 @@ public final class DefaultKey implements Key {
         return Objects.equals(getParameters(), otherKey.getParameters());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         return Objects.hash(_dimensions);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

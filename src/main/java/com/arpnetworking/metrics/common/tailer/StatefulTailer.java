@@ -51,22 +51,16 @@ import java.util.Optional;
  * new feature is the <code>PositionStore</code> which is used to checkpoint
  * the offset in the tailed file as identified by a hash of the file prefix.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class StatefulTailer implements Tailer {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void stop() {
         _isRunning = false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void run() {
         Thread.currentThread().setUncaughtExceptionHandler(
@@ -99,9 +93,6 @@ public final class StatefulTailer implements Tailer {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();
@@ -600,7 +591,7 @@ public final class StatefulTailer implements Tailer {
     /**
      * Implementation of builder pattern for <code>StatefulTailer</code>.
      *
-     * @author Brandon Arp (brandonarp at gmail dot com)
+     * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
      */
     public static class Builder extends OvalBuilder<StatefulTailer> {
 

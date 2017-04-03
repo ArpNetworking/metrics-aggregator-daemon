@@ -29,9 +29,6 @@ import java.util.List;
  */
 public final class StaticConfiguration extends BaseJacksonConfiguration {
 
-    /**
-     * {@inheritDoc}
-     */
     @LogValue
     @Override
     public Object toLogValue() {
@@ -41,9 +38,6 @@ public final class StaticConfiguration extends BaseJacksonConfiguration {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected JsonNodeSource getJsonSource() {
         return _source;
@@ -97,9 +91,6 @@ public final class StaticConfiguration extends BaseJacksonConfiguration {
             return self();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected Builder self() {
             return this;

@@ -31,29 +31,20 @@ import java.util.List;
 /**
  * A variable and data to describe the input to a statistic calculator.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public final class DefaultMetric implements Metric {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public MetricType getType() {
         return _type;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<Quantity> getValues() {
         return _values;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object other) {
         if (this == other) {
@@ -69,17 +60,11 @@ public final class DefaultMetric implements Metric {
                 && Objects.equal(getValues(), otherMetric.getValues());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         return Objects.hashCode(getType(), getValues());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

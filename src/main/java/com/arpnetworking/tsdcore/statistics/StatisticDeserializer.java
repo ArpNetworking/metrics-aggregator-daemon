@@ -37,9 +37,6 @@ public class StatisticDeserializer extends JsonDeserializer<Statistic> {
         return new StatisticDeserializer();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Statistic deserialize(final JsonParser parser, final DeserializationContext context) throws IOException {
         final String statisticNameOrAlias = parser.getValueAsString();

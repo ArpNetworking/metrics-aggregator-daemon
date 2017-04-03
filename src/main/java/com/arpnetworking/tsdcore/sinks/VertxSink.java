@@ -74,12 +74,9 @@ import java.util.function.Function;
  *     consumeLoop.
  * </p>
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public abstract class VertxSink extends BaseSink {
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() {
         dispatch(

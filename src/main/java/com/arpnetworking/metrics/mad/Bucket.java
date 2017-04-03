@@ -217,9 +217,6 @@ import java.util.function.BiFunction;
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();
@@ -567,9 +564,6 @@ import java.util.function.BiFunction;
                     .build();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String toString() {
             return toLogValue().toString();

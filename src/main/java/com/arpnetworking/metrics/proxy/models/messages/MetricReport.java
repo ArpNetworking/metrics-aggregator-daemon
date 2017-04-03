@@ -23,7 +23,7 @@ import org.joda.time.DateTime;
 /**
  * Message class to hold data about a metric that should be sent to clients.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @Loggable
 public final class MetricReport {
@@ -77,9 +77,6 @@ public final class MetricReport {
         return _periodStart;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

@@ -33,41 +33,26 @@ import java.util.Set;
 @Loggable
 public final class ExpressionStatistic extends BaseStatistic {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return "expression";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Accumulator<Void> createCalculator() {
         throw new UnsupportedOperationException("Calculation of ExpressionStatistic instances is not supported");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<Statistic> getDependencies() {
         throw new UnsupportedOperationException("Calculation of ExpressionStatistic instances is not supported");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculate(final List<Quantity> unorderedValues) {
         throw new UnsupportedOperationException("Calculation of ExpressionStatistic instances is not supported");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
         throw new UnsupportedOperationException("Calculation of ExpressionStatistic instances is not supported");

@@ -25,7 +25,7 @@ import org.junit.Test;
 /**
  * Tests for query line parsing.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public class LineDataTest {
 

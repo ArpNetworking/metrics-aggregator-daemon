@@ -31,9 +31,6 @@ import java.util.function.Function;
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
 public abstract class ActorSource extends BaseSource {
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void start() {
         if (_actor == null) {
@@ -41,9 +38,6 @@ public abstract class ActorSource extends BaseSource {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void stop() {
         if (_actor != null) {
@@ -80,7 +74,7 @@ public abstract class ActorSource extends BaseSource {
      *
      * @param <B> type of the builder
      * @param <S> type of the object to be built
-     * @author Brandon Arp (brandonarp at gmail dot com)
+     * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
      */
     public abstract static class Builder<B extends Builder<B, S>, S extends Source> extends BaseSource.Builder<B, S> {
         /**

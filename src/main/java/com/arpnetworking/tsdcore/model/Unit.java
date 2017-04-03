@@ -23,7 +23,7 @@ import java.util.Optional;
 /**
  * Specifies the unit on a counter variable.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public enum Unit {
     /***************************************************************************

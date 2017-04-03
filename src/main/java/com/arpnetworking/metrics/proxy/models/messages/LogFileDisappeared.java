@@ -46,9 +46,6 @@ public final class LogFileDisappeared {
         return _file;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

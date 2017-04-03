@@ -25,7 +25,7 @@ import java.util.Set;
 /**
  * Interface for a statistic calculator.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public interface Statistic extends Serializable {
 

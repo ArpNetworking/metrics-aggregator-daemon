@@ -41,17 +41,11 @@ import java.util.regex.Pattern;
  */
 public final class JsonNodeDirectorySource extends BaseJsonNodeSource {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<JsonNode> getValue(final String... keys) {
         return getValue(getJsonNode(), keys);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @LogValue
     @Override
     public Object toLogValue() {
@@ -198,9 +192,6 @@ public final class JsonNodeDirectorySource extends BaseJsonNodeSource {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected Builder self() {
             return this;

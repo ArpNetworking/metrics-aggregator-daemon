@@ -22,7 +22,7 @@ import com.google.common.base.Function;
 /**
  * Test helper to provide a callback for a sink.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public class ListeningSink implements Sink {
     /**
@@ -34,9 +34,6 @@ public class ListeningSink implements Sink {
         _callback = callback;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void recordAggregateData(final PeriodicData periodicData) {
         if (_callback != null) {
@@ -44,9 +41,6 @@ public class ListeningSink implements Sink {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() {
     }

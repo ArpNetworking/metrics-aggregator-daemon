@@ -50,17 +50,11 @@ import java.util.concurrent.TimeUnit;
  */
 public final class FileSource<T> extends BaseSource {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void start() {
         _tailerExecutor.execute(_tailer);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void stop() {
         _tailer.stop();
@@ -89,9 +83,6 @@ public final class FileSource<T> extends BaseSource {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();
@@ -300,9 +291,6 @@ public final class FileSource<T> extends BaseSource {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected Builder<T> self() {
             return this;

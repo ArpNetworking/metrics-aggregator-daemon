@@ -31,9 +31,6 @@ import java.util.Optional;
  */
 public abstract class BaseConfiguration implements Configuration {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getProperty(final String name, final String defaultValue) {
         final Optional<String> optional = getProperty(name);
@@ -43,9 +40,6 @@ public abstract class BaseConfiguration implements Configuration {
         return defaultValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getRequiredProperty(final String name) throws NoSuchElementException {
         final Optional<String> optional = getProperty(name);
@@ -56,171 +50,114 @@ public abstract class BaseConfiguration implements Configuration {
                 String.format("Required configuration property does not exist; name=%s", name));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<Boolean> getPropertyAsBoolean(final String name) {
         final Optional<String> property = getProperty(name);
         return property.isPresent() ? Optional.of(Boolean.parseBoolean(property.get())) : Optional.<Boolean>empty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean getPropertyAsBoolean(final String name, final boolean defaultValue) {
         final Optional<Boolean> property = getPropertyAsBoolean(name);
         return property.orElse(defaultValue);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean getRequiredPropertyAsBoolean(final String name) throws NoSuchElementException {
         final String property = getRequiredProperty(name);
         return Boolean.parseBoolean(property);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<Integer> getPropertyAsInteger(final String name) throws NumberFormatException {
         final Optional<String> property = getProperty(name);
         return property.isPresent() ? Optional.of(Integer.parseInt(property.get())) : Optional.<Integer>empty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getPropertyAsInteger(final String name, final int defaultValue) throws NumberFormatException {
         final Optional<Integer> property = getPropertyAsInteger(name);
         return property.orElse(defaultValue);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getRequiredPropertyAsInteger(final String name) throws NoSuchElementException, NumberFormatException {
         final String property = getRequiredProperty(name);
         return Integer.parseInt(property);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<Long> getPropertyAsLong(final String name) throws NumberFormatException {
         final Optional<String> property = getProperty(name);
         return property.isPresent() ? Optional.of(Long.parseLong(property.get())) : Optional.<Long>empty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long getPropertyAsLong(final String name, final long defaultValue) throws NumberFormatException {
         final Optional<Long> property = getPropertyAsLong(name);
         return property.orElse(defaultValue);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long getRequiredPropertyAsLong(final String name) throws NoSuchElementException, NumberFormatException {
         final String property = getRequiredProperty(name);
         return Long.parseLong(property);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<Double> getPropertyAsDouble(final String name) throws NumberFormatException {
         final Optional<String> property = getProperty(name);
         return property.isPresent() ? Optional.of(Double.parseDouble(property.get())) : Optional.<Double>empty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public double getPropertyAsDouble(final String name, final double defaultValue) throws NumberFormatException {
         final Optional<Double> property = getPropertyAsDouble(name);
         return property.orElse(defaultValue);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public double getRequiredPropertyAsDouble(final String name) throws NoSuchElementException, NumberFormatException {
         final String property = getRequiredProperty(name);
         return Double.parseDouble(property);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<Float> getPropertyAsFloat(final String name) throws NumberFormatException {
         final Optional<String> property = getProperty(name);
         return property.isPresent() ? Optional.of(Float.parseFloat(property.get())) : Optional.<Float>empty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public float getPropertyAsFloat(final String name, final float defaultValue) throws NumberFormatException {
         final Optional<Float> property = getPropertyAsFloat(name);
         return property.orElse(defaultValue);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public float getRequiredPropertyAsFloat(final String name) throws NoSuchElementException, NumberFormatException {
         final String property = getRequiredProperty(name);
         return Float.parseFloat(property);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<Short> getPropertyAsShort(final String name) throws NumberFormatException {
         final Optional<String> property = getProperty(name);
         return property.isPresent() ? Optional.of(Short.valueOf(property.get())) : Optional.<Short>empty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public short getPropertyAsShort(final String name, final short defaultValue) throws NumberFormatException {
         final Optional<Short> property = getPropertyAsShort(name);
         return property.isPresent() ? property.get().shortValue() : defaultValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public short getRequiredPropertyAsShort(final String name) throws NoSuchElementException, NumberFormatException {
         final String property = getRequiredProperty(name);
         return Short.parseShort(property);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T getPropertyAs(final String name, final Class<? extends T> clazz, final T defaultValue)
             throws IllegalArgumentException {
@@ -228,9 +165,6 @@ public abstract class BaseConfiguration implements Configuration {
         return property.isPresent() ? property.get() : defaultValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T getRequiredPropertyAs(final String name, final Class<? extends T> clazz)
             throws NoSuchElementException, IllegalArgumentException {
@@ -242,18 +176,12 @@ public abstract class BaseConfiguration implements Configuration {
         return property.get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T getAs(final Class<? extends T> clazz, final T defaultValue) throws IllegalArgumentException {
         final Optional<T> property = getAs(clazz);
         return property.isPresent() ? property.get() : defaultValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T getRequiredAs(final Class<? extends T> clazz) throws NoSuchElementException, IllegalArgumentException {
         final Optional<T> property = getAs(clazz);
@@ -263,9 +191,6 @@ public abstract class BaseConfiguration implements Configuration {
         return property.get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T getPropertyAs(final String name, final Type type, final T defaultValue)
             throws IllegalArgumentException {
@@ -273,9 +198,6 @@ public abstract class BaseConfiguration implements Configuration {
         return property.isPresent() ? property.get() : defaultValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T getRequiredPropertyAs(final String name, final Type type)
             throws NoSuchElementException, IllegalArgumentException {
@@ -287,18 +209,12 @@ public abstract class BaseConfiguration implements Configuration {
         return property.get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T getAs(final Type type, final T defaultValue) throws IllegalArgumentException {
         final Optional<T> property = getAs(type);
         return property.isPresent() ? property.get() : defaultValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T getRequiredAs(final Type type) throws NoSuchElementException, IllegalArgumentException {
         final Optional<T> property = getAs(type);
@@ -318,9 +234,6 @@ public abstract class BaseConfiguration implements Configuration {
         return LogReferenceOnly.of(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

@@ -53,9 +53,6 @@ public final class ClientHttpSourceV1 extends HttpSource {
             setParser(new ProtobufToRecordParser());
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected Builder self() {
             return this;

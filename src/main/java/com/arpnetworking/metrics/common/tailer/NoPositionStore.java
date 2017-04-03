@@ -21,28 +21,19 @@ import java.util.Optional;
 /**
  * A <code>PositionStore</code> that always returns absent.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public class NoPositionStore implements PositionStore {
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<Long> getPosition(final String identifier) {
         return Optional.empty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setPosition(final String identifier, final long position) {
         // No need to do anything
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() throws IOException {
         // No need to do anything

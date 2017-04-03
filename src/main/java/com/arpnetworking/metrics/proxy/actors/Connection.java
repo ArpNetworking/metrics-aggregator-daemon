@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * Actor class to hold the state for a single connection.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public class Connection extends UntypedActor {
     /**
@@ -73,9 +73,6 @@ public class Connection extends UntypedActor {
                 messageProcessorsFactory);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onReceive(final Object message) throws Exception {
         LOGGER.trace()
@@ -203,9 +200,6 @@ public class Connection extends UntypedActor {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

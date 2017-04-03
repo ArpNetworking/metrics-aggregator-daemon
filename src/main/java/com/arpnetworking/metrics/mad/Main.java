@@ -84,7 +84,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Class containing entry point for Metrics Data Aggregator (MAD).
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class Main implements Launchable {
@@ -165,9 +165,6 @@ public final class Main implements Launchable {
         _configuration = configuration;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void launch() {
         _actorSystem = launchAkka();
@@ -177,9 +174,6 @@ public final class Main implements Launchable {
         launchJvmMetricsCollector(injector);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void shutdown() {
         shutdownJvmMetricsCollector();

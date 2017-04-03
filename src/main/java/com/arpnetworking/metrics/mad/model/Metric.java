@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Interface for a type of collected data .
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public interface Metric {
 

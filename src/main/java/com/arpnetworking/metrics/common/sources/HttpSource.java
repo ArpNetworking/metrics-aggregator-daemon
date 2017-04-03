@@ -62,9 +62,6 @@ import java.util.function.Function;
  */
 public class HttpSource extends ActorSource {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Props createProps() {
         return Actor.props(this);
@@ -96,9 +93,6 @@ public class HttpSource extends ActorSource {
             return Props.create(Actor.class, source);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void onReceive(final Object message) throws Exception {
             if (message instanceof RequestReply) {

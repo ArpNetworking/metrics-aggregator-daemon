@@ -36,9 +36,6 @@ import java.util.Map;
  */
 public final class TelemetrySink extends BaseSink {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void recordAggregateData(final PeriodicData periodicData) {
         for (final Map.Entry<String, AggregatedData> entry : periodicData.getData().entries()) {
@@ -57,9 +54,6 @@ public final class TelemetrySink extends BaseSink {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() {
         // Nothing to do.
@@ -122,9 +116,6 @@ public final class TelemetrySink extends BaseSink {
             return self();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected Builder self() {
             return this;

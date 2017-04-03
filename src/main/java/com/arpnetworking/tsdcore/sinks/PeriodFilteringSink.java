@@ -38,9 +38,6 @@ import java.util.Set;
  */
 public final class PeriodFilteringSink extends BaseSink {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void recordAggregateData(final PeriodicData periodicData) {
         if (_cachedFilterResult.getUnchecked(periodicData.getPeriod())) {
@@ -48,9 +45,6 @@ public final class PeriodFilteringSink extends BaseSink {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() {
         _sink.close();
@@ -182,9 +176,6 @@ public final class PeriodFilteringSink extends BaseSink {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected Builder self() {
             return this;

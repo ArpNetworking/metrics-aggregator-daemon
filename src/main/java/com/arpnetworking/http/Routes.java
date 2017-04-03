@@ -105,9 +105,6 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                 .mapAsync(1, this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public CompletionStage<HttpResponse> apply(final HttpRequest request) {
         final Stopwatch requestTimer = Stopwatch.createStarted();

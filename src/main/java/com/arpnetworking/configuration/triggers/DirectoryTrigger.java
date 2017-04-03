@@ -50,9 +50,6 @@ import java.util.regex.Pattern;
  */
 public final class DirectoryTrigger implements Trigger {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean evaluateAndReset() {
         final boolean exists = _directory.exists() && _directory.isDirectory();
@@ -151,9 +148,6 @@ public final class DirectoryTrigger implements Trigger {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

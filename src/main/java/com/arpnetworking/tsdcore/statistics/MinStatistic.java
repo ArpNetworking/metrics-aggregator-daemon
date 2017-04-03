@@ -29,38 +29,26 @@ import java.util.Set;
 /**
  * Min statistic (e.g. top 0th percentile). Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @Loggable
 public final class MinStatistic extends BaseStatistic {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return "min";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<String> getAliases() {
         return ALIASES;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Calculator<Void> createCalculator() {
         return new MinAccumulator(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculate(final List<Quantity> unorderedValues) {
         Optional<Quantity> min = Optional.empty();
@@ -118,9 +106,6 @@ public final class MinStatistic extends BaseStatistic {
             super(statistic);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Accumulator<Void> accumulate(final Quantity quantity) {
             if (_min.isPresent()) {
@@ -133,17 +118,11 @@ public final class MinStatistic extends BaseStatistic {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Accumulator<Void> accumulate(final CalculatedValue<Void> calculatedValue) {
             return accumulate(calculatedValue.getValue());
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public CalculatedValue<Void> calculate(final Map<Statistic, Calculator<?>> dependencies) {
             return new CalculatedValue.Builder<Void>()

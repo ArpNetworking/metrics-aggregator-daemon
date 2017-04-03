@@ -48,7 +48,7 @@ import java.util.List;
  * Perf tests that cover reading from a file and computing the aggregates
  * from it.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @RunWith(Parameterized.class)
 @BenchmarkOptions(callgc = true, benchmarkRounds = 1, warmupRounds = 0)

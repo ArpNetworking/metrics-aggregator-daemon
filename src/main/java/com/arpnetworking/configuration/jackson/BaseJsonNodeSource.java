@@ -45,9 +45,6 @@ public abstract class BaseJsonNodeSource implements JsonNodeSource {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

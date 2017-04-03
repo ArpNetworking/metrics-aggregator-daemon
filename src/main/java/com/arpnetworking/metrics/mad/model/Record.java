@@ -22,7 +22,7 @@ import org.joda.time.DateTime;
  * The interface to a record. Records consistent of a timestamp, any number of
  * named metrics, annotations (arbitrary key-value pairs) and dimensions (arbitrary key-value pairs).
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  * @author Ryan Ascheman (rascheman at groupon dot com)
  */

@@ -51,9 +51,6 @@ import java.util.Optional;
  */
 public final class UriTrigger implements Trigger {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean evaluateAndReset() {
         HttpGet request = null;
@@ -169,9 +166,6 @@ public final class UriTrigger implements Trigger {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();
