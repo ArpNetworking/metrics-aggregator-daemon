@@ -24,9 +24,6 @@ import akka.actor.UntypedActor;
  */
 public class Status extends UntypedActor {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onReceive(final Object message) throws Exception {
         if (IS_HEALTHY.equals(message)) {

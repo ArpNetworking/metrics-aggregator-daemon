@@ -21,7 +21,7 @@ import java.util.Optional;
 /**
  * Interface to storage for tracking the read position in a file.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public interface PositionStore extends Closeable {
 

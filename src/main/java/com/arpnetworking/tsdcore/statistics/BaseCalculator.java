@@ -24,25 +24,16 @@ package com.arpnetworking.tsdcore.statistics;
  */
 public abstract class BaseCalculator<T> implements Calculator<T> {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Statistic getStatistic() {
         return _statistic;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object o) {
         return this == o || (o != null && getClass().equals(o.getClass()));

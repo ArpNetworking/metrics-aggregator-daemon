@@ -46,17 +46,11 @@ public class Reconfigurator<T extends Relaunchable<? super S>, S> implements Lis
         _configurationClass = configurationClass;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void offerConfiguration(final Configuration configuration) throws Exception {
         _offeredConfiguration = configuration.getAs(_configurationClass);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void applyConfiguration() {
         // Swap configurations
@@ -77,9 +71,6 @@ public class Reconfigurator<T extends Relaunchable<? super S>, S> implements Lis
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

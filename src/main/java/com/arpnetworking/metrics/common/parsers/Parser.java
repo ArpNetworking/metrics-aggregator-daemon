@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * @param <T> The data type of the result.
  * @param <D> The type of the entity to parse.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.CLASS,

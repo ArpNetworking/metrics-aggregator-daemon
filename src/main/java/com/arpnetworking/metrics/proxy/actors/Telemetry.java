@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
  * Actor responsible for holding the set of connected websockets and publishing
  * metrics to them.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  * @author Mohammed Kamel (mkamel at groupon dot com)
  */
 public class Telemetry extends UntypedActor {
@@ -75,9 +75,6 @@ public class Telemetry extends UntypedActor {
                 getSelf());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onReceive(final Object message) throws Exception {
         LOGGER.trace()
@@ -115,9 +112,6 @@ public class Telemetry extends UntypedActor {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void postStop() throws Exception {
         _instrument.cancel();
@@ -138,9 +132,6 @@ public class Telemetry extends UntypedActor {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

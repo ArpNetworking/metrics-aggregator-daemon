@@ -61,9 +61,6 @@ import java.util.regex.Pattern;
 @SuppressFBWarnings("IS2_INCONSISTENT_SYNC")
 public final class Aggregator implements Observer, Launchable {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void launch() {
         LOGGER.debug()
@@ -77,9 +74,6 @@ public final class Aggregator implements Observer, Launchable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void shutdown() {
         LOGGER.debug()
@@ -102,9 +96,6 @@ public final class Aggregator implements Observer, Launchable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void notify(final Observable observable, final Object event) {
         if (!(event instanceof Record)) {
@@ -143,9 +134,6 @@ public final class Aggregator implements Observer, Launchable {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

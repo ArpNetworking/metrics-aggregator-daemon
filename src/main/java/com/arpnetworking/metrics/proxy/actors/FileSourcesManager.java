@@ -59,9 +59,6 @@ public final class FileSourcesManager extends UntypedActor {
         _streamContextActor = streamContextActor;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onReceive(final Object message) throws Exception {
         LOGGER.trace()
@@ -100,9 +97,6 @@ public final class FileSourcesManager extends UntypedActor {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();
@@ -164,9 +158,6 @@ public final class FileSourcesManager extends UntypedActor {
             _messageSender = messageSender;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void notify(final Observable observable, final Object event) {
             final LogLine logLine = (LogLine) event;
@@ -186,9 +177,6 @@ public final class FileSourcesManager extends UntypedActor {
                     .build();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String toString() {
             return toLogValue().toString();

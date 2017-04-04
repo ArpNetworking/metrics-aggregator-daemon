@@ -109,9 +109,6 @@ public final class PipelineConfiguration {
         return _statistics;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

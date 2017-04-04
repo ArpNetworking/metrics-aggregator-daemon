@@ -59,9 +59,6 @@ import java.util.concurrent.LinkedBlockingDeque;
         _recordQueue.add(record);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void run() {
         Thread.currentThread().setUncaughtExceptionHandler(
@@ -130,9 +127,6 @@ import java.util.concurrent.LinkedBlockingDeque;
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

@@ -38,9 +38,6 @@ public final class ReflectionsDatabase implements InterfaceDatabase, AnnotationD
         return new ReflectionsDatabase(REFLECTIONS);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<Class<?>> findClassesWithAnnotation(final Class<? extends Annotation> annotationClass) {
         if (!annotationClass.isAnnotation()) {
@@ -49,9 +46,6 @@ public final class ReflectionsDatabase implements InterfaceDatabase, AnnotationD
         return _reflections.getTypesAnnotatedWith(annotationClass);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> Set<Class<? extends T>> findClassesWithInterface(final Class<T> interfaceClass) {
         if (!interfaceClass.isInterface()) {
@@ -72,9 +66,6 @@ public final class ReflectionsDatabase implements InterfaceDatabase, AnnotationD
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

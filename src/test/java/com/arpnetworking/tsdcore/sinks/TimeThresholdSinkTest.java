@@ -33,7 +33,7 @@ import java.util.Collections;
 /**
  * Tests for the {@link TimeThresholdSink}.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public class TimeThresholdSinkTest {
     @Before

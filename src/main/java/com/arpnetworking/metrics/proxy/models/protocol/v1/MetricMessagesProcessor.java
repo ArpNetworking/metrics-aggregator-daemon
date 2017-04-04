@@ -41,7 +41,7 @@ import java.util.Set;
 /**
  * Processes metrics-based messages.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public class MetricMessagesProcessor implements MessagesProcessor {
     /**
@@ -55,9 +55,6 @@ public class MetricMessagesProcessor implements MessagesProcessor {
         _metrics = metrics;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean handleMessage(final Object message) {
         if (message instanceof Command) {
@@ -121,9 +118,6 @@ public class MetricMessagesProcessor implements MessagesProcessor {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

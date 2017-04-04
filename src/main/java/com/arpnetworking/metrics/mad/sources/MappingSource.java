@@ -53,17 +53,11 @@ import java.util.regex.Pattern;
  */
 public final class MappingSource extends BaseSource {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void start() {
         _source.start();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void stop() {
         _source.stop();
@@ -82,9 +76,6 @@ public final class MappingSource extends BaseSource {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();
@@ -266,9 +257,6 @@ public final class MappingSource extends BaseSource {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected Builder self() {
             return this;

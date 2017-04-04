@@ -43,9 +43,6 @@ public final class LogsList {
         return _logs;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

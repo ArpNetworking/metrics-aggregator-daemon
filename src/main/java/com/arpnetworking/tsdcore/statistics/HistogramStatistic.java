@@ -37,33 +37,21 @@ import java.util.TreeMap;
  */
 public final class HistogramStatistic extends BaseStatistic {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return "histogram";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Accumulator<HistogramSupportingData> createCalculator() {
         return new HistogramAccumulator(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculate(final List<Quantity> values) {
         throw new UnsupportedOperationException("Unsupported operation: calculate(List<Quantity>)");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
         throw new UnsupportedOperationException("Unsupported operation: calculateAggregations(List<AggregatedData>)");
@@ -92,9 +80,6 @@ public final class HistogramStatistic extends BaseStatistic {
             super(statistic);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Accumulator<HistogramSupportingData> accumulate(final Quantity quantity) {
             // TODO(barp): Convert to canonical unit. [NEXT]
@@ -114,9 +99,6 @@ public final class HistogramStatistic extends BaseStatistic {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Accumulator<HistogramSupportingData> accumulate(final CalculatedValue<HistogramSupportingData> calculatedValue) {
             final Optional<Unit> unit = calculatedValue.getData().getUnit();
@@ -140,9 +122,6 @@ public final class HistogramStatistic extends BaseStatistic {
             }
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public CalculatedValue<HistogramSupportingData> calculate(final Map<Statistic, Calculator<?>> dependencies) {
             return new CalculatedValue.Builder<HistogramSupportingData>()
@@ -177,7 +156,7 @@ public final class HistogramStatistic extends BaseStatistic {
     /**
      * Supporting data based on a histogram.
      *
-     * @author Brandon Arp (brandonarp at gmail dot com)
+     * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
      */
     public static final class HistogramSupportingData {
         /**
@@ -226,7 +205,7 @@ public final class HistogramStatistic extends BaseStatistic {
         /**
          * Implementation of the builder pattern for a {@link HistogramSupportingData}.
          *
-         * @author Brandon Arp (brandonarp at gmail dot com)
+         * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
          */
         public static class Builder extends OvalBuilder<HistogramSupportingData> {
             /**
@@ -318,7 +297,7 @@ public final class HistogramStatistic extends BaseStatistic {
     /**
      * Represents a snapshot of immutable histogram data.
      *
-     * @author Brandon Arp (brandonarp at gmail dot com)
+     * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
      */
     public static final class HistogramSnapshot {
         private HistogramSnapshot(final TreeMap<Double, Integer> data, final int entriesCount) {

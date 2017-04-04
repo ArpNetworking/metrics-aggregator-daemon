@@ -28,7 +28,7 @@ import java.io.Serializable;
  * Serves as a data class for storing data for aggregated values after
  * computation.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class AggregatedData implements Serializable {
@@ -53,9 +53,6 @@ public final class AggregatedData implements Serializable {
         return _supportingData;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object object) {
         if (this == object) {
@@ -74,9 +71,6 @@ public final class AggregatedData implements Serializable {
                 && Objects.equal(_supportingData, other._supportingData);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         return Objects.hashCode(
@@ -87,9 +81,6 @@ public final class AggregatedData implements Serializable {
                 getSupportingData());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();
@@ -200,9 +191,6 @@ public final class AggregatedData implements Serializable {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public AggregatedData build() {
             if (_statistic == null) {

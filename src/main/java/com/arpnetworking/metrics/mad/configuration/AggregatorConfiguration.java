@@ -77,9 +77,6 @@ public final class AggregatorConfiguration {
         return Collections.unmodifiableMap(_akkaConfiguration);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

@@ -37,9 +37,6 @@ import java.util.Optional;
  */
 public final class JsonNodeMergingSource implements JsonNodeSource {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<JsonNode> getValue(final String... keys) {
         return BaseJsonNodeSource.getValue(getJsonNode(), keys);
@@ -57,9 +54,6 @@ public final class JsonNodeMergingSource implements JsonNodeSource {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

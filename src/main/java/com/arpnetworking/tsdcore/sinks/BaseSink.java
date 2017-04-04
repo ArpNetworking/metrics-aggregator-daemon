@@ -51,9 +51,6 @@ public abstract class BaseSink implements Sink {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

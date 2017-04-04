@@ -28,30 +28,21 @@ import java.util.Optional;
 /**
  * Takes the sum of the entries. Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @Loggable
 public final class SumStatistic extends BaseStatistic {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return "sum";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Calculator<Void> createCalculator() {
         return new SumAccumulator(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculate(final List<Quantity> unorderedValues) {
         double sum = 0d;
@@ -63,9 +54,6 @@ public final class SumStatistic extends BaseStatistic {
         return new Quantity.Builder().setValue(sum).setUnit(unit.orElse(null)).build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
         double sum = 0;
@@ -97,9 +85,6 @@ public final class SumStatistic extends BaseStatistic {
             super(statistic);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Accumulator<Void> accumulate(final Quantity quantity) {
             if (_sum.isPresent()) {
@@ -110,17 +95,11 @@ public final class SumStatistic extends BaseStatistic {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Accumulator<Void> accumulate(final CalculatedValue<Void> calculatedValue) {
             return accumulate(calculatedValue.getValue());
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public CalculatedValue<Void> calculate(final Map<Statistic, Calculator<?>> dependencies) {
             return new CalculatedValue.Builder<Void>()

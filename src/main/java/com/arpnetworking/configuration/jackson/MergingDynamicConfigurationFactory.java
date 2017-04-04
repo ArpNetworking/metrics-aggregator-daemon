@@ -31,9 +31,6 @@ import java.util.List;
  */
 public final class MergingDynamicConfigurationFactory implements DynamicConfigurationFactory {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public DynamicConfiguration create(
             final DynamicConfiguration.Builder builder,
@@ -42,9 +39,6 @@ public final class MergingDynamicConfigurationFactory implements DynamicConfigur
         return builder.build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void update(
             final DynamicConfiguration.Builder builder,
@@ -67,9 +61,6 @@ public final class MergingDynamicConfigurationFactory implements DynamicConfigur
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

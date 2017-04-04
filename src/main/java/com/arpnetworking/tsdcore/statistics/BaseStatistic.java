@@ -23,45 +23,30 @@ import java.util.Set;
 /**
  * A statistic base class.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public abstract class BaseStatistic implements Statistic {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<String> getAliases() {
         return Collections.emptySet();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<Statistic> getDependencies() {
         return Collections.emptySet();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object o) {
         return this == o || (o != null && getClass().equals(o.getClass()));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

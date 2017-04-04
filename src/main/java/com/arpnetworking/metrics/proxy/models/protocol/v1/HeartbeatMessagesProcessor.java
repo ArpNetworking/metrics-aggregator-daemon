@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
  * Processes heartbeat messages.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public class HeartbeatMessagesProcessor implements MessagesProcessor {
     /**
@@ -39,9 +39,6 @@ public class HeartbeatMessagesProcessor implements MessagesProcessor {
         _metrics = metrics;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean handleMessage(final Object message) {
         if (message instanceof Command) {

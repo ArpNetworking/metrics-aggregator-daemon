@@ -37,9 +37,6 @@ public final class NewLog {
         _log = log;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

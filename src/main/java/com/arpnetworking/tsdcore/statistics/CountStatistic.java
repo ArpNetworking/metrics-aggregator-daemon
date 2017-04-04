@@ -28,46 +28,31 @@ import java.util.Set;
 /**
  * Counts the entries. Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @Loggable
 public final class CountStatistic extends BaseStatistic {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return "count";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<String> getAliases() {
         return Collections.singleton("n");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Calculator<Void> createCalculator() {
         return new CountAccumulator(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculate(final List<Quantity> unorderedValues) {
         return new Quantity.Builder().setValue((double) unorderedValues.size()).build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
         double count = 0;
@@ -97,27 +82,18 @@ public final class CountStatistic extends BaseStatistic {
             super(statistic);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Accumulator<Void> accumulate(final Quantity quantity) {
             ++_count;
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Accumulator<Void> accumulate(final CalculatedValue<Void> calculatedValue) {
             _count += calculatedValue.getValue().getValue();
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public CalculatedValue<Void> calculate(final Map<Statistic, Calculator<?>> dependencies) {
             return new CalculatedValue.Builder<Void>()

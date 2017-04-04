@@ -50,9 +50,6 @@ import java.util.concurrent.ConcurrentMap;
  */
 public final class FilePositionStore implements PositionStore {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<Long> getPosition(final String identifier) {
         final Descriptor descriptor = _state.get(identifier);
@@ -62,9 +59,6 @@ public final class FilePositionStore implements PositionStore {
         return Optional.of(descriptor.getPosition());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setPosition(final String identifier, final long position) {
         final Descriptor descriptor = _state.putIfAbsent(
@@ -84,9 +78,6 @@ public final class FilePositionStore implements PositionStore {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() {
         flush();
@@ -108,9 +99,6 @@ public final class FilePositionStore implements PositionStore {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

@@ -32,38 +32,26 @@ import java.util.Set;
 /**
  * Takes the mean of the entries. Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @Loggable
 public final class MeanStatistic extends BaseStatistic {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return "mean";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Calculator<Void> createCalculator() {
         return new MeanCalculator(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<Statistic> getDependencies() {
         return DEPENDENCIES.get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculate(final List<Quantity> orderedValues) {
         // TODO(vkoskela): Statistic calculation should be allowed to either fail or not return a quantity. [MAI-?]
@@ -79,9 +67,6 @@ public final class MeanStatistic extends BaseStatistic {
         return new Quantity.Builder().setValue(sum / orderedValues.size()).setUnit(unit.orElse(null)).build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
         double weighted = 0D;
@@ -127,9 +112,6 @@ public final class MeanStatistic extends BaseStatistic {
             super(statistic);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public CalculatedValue<Void> calculate(final Map<Statistic, Calculator<?>> dependencies) {
             final CalculatedValue<?> sum = dependencies.get(SUM_STATISTIC.get()).calculate(dependencies);

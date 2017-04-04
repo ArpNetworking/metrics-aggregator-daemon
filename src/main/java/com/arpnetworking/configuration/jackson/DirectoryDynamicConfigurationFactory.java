@@ -34,9 +34,6 @@ import java.util.stream.Collectors;
  */
 public final class DirectoryDynamicConfigurationFactory implements DynamicConfigurationFactory {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public DynamicConfiguration create(
             final DynamicConfiguration.Builder builder,
@@ -45,9 +42,6 @@ public final class DirectoryDynamicConfigurationFactory implements DynamicConfig
         return builder.build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void update(
             final DynamicConfiguration.Builder builder,
@@ -84,9 +78,6 @@ public final class DirectoryDynamicConfigurationFactory implements DynamicConfig
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();

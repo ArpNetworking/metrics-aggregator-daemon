@@ -22,7 +22,7 @@ import com.google.common.base.MoreObjects;
 /**
  * Message class to inform clients of a new metric.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @Loggable
 public final class NewMetric {
@@ -51,9 +51,6 @@ public final class NewMetric {
         return _statistic;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

@@ -43,9 +43,6 @@ import javax.annotation.Nullable;
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public class ProtobufToRecordParser implements Parser<List<Record>, HttpRequest> {
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<Record> parse(final HttpRequest data) throws ParsingException {
         try {

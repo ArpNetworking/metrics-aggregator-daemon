@@ -39,9 +39,6 @@ import java.util.function.Function;
  */
 public abstract class BaseJacksonConfiguration extends com.arpnetworking.configuration.BaseConfiguration {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<String> getProperty(final String name) {
         final Optional<JsonNode> jsonNode = getJsonSource().getValue(name.split("\\."));
@@ -51,9 +48,6 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
         return Optional.empty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> Optional<T> getPropertyAs(final String name, final Class<? extends T> clazz) throws IllegalArgumentException {
         final Optional<String> property = getProperty(name);
@@ -73,9 +67,6 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> Optional<T> getAs(final Class<? extends T> clazz) throws IllegalArgumentException {
         final Optional<JsonNode> property = getJsonSource().getValue();
@@ -94,9 +85,6 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> Optional<T> getPropertyAs(final String name, final Type type) throws IllegalArgumentException {
         final Optional<String> property = getProperty(name);
@@ -121,9 +109,6 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> Optional<T> getAs(final Type type) throws IllegalArgumentException {
         final Optional<JsonNode> property = getJsonSource().getValue();
@@ -146,9 +131,6 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @LogValue
     @Override
     public Object toLogValue() {

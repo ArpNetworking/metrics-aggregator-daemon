@@ -36,12 +36,9 @@ import java.util.Map;
 /**
  * Publisher to send data to an upstream aggregation server.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public final class AggregationServerSink extends VertxSink {
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void recordAggregateData(final PeriodicData periodicData) {
         LOGGER.debug()
@@ -188,9 +185,6 @@ public final class AggregationServerSink extends VertxSink {
             setServerPort(7065);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected Builder self() {
             return this;

@@ -28,7 +28,7 @@ import java.nio.file.Path;
 /**
  * Represents raw log lines read from a file.
  *
- * @author Brandon Arp (brandonarp at gmail dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public class LogLineParser implements Parser<LogLine, byte[]> {
 
@@ -41,9 +41,6 @@ public class LogLineParser implements Parser<LogLine, byte[]> {
         _logFile = logFile;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public LogLine parse(final byte[] data) throws IllegalArgumentException {
         if (null == data) {
@@ -66,9 +63,6 @@ public class LogLineParser implements Parser<LogLine, byte[]> {
                 .build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return toLogValue().toString();
