@@ -32,7 +32,6 @@ import com.arpnetworking.tsdcore.statistics.Accumulator;
 import com.arpnetworking.tsdcore.statistics.Calculator;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
-import com.google.common.base.Throwables;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -130,14 +129,14 @@ import java.util.function.BiFunction;
             try {
                 specifiedStatistics = _specifiedStatisticsCache.get(name);
             } catch (final ExecutionException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
             if (specifiedStatistics.isPresent()) {
                 final Optional<ImmutableSet<Statistic>> dependentStatistics;
                 try {
                     dependentStatistics = _dependentStatisticsCache.get(name);
                 } catch (final ExecutionException e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
                 calculators = getOrCreateCalculators(
                         name,
@@ -231,7 +230,7 @@ import java.util.function.BiFunction;
             try {
                 stats = specifiedStatistics.get(metric);
             } catch (final ExecutionException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
             return stats.isPresent() && stats.get().contains(statistic);
         }, data);

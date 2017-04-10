@@ -16,7 +16,6 @@
 package com.arpnetworking.utility.test;
 
 import com.arpnetworking.commons.builder.Builder;
-import com.google.common.base.Throwables;
 
 import org.junit.Assert;
 
@@ -84,7 +83,7 @@ public final class BuildableEqualsAndHashCodeTester {
 
                 } catch (final SecurityException | IllegalAccessException
                         | IllegalArgumentException | InvocationTargetException e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
         }

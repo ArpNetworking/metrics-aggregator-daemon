@@ -24,7 +24,6 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
@@ -141,7 +140,7 @@ public final class FilePositionStore implements PositionStore {
                     .addData("file", _file)
                     .log();
         } catch (final IOException ioe) {
-            throw Throwables.propagate(ioe);
+            throw new RuntimeException(ioe);
         } finally {
             _lastFlush = now;
         }

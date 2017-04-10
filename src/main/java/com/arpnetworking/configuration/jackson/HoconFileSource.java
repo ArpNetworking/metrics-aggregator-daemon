@@ -20,7 +20,6 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Throwables;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
@@ -73,7 +72,7 @@ public final class HoconFileSource extends BaseJsonNodeSource {
                 final String hoconAsJson = config.resolve().root().render(ConfigRenderOptions.concise());
                 jsonNode = _objectMapper.readTree(hoconAsJson);
             } catch (final IOException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         } else if (builder._file.exists()) {
             LOGGER.warn()

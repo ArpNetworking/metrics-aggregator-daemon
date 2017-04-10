@@ -25,12 +25,12 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.fasterxml.jackson.annotation.JacksonInject;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -113,7 +113,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
             _executor.awaitTermination(EXECUTOR_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
         } catch (final InterruptedException e) {
             Thread.interrupted();
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
         flushMetrics(_metrics.get());
     }
@@ -162,7 +162,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
 
     private Set<String> createConcurrentSet(final Set<String> existingSet) {
         final int initialCapacity = (int) (existingSet.size() / 0.75);
-        return Sets.newSetFromMap(new ConcurrentHashMap<>(initialCapacity));
+        return Collections.newSetFromMap(new ConcurrentHashMap<>(initialCapacity));
     }
 
     // NOTE: Package private for testing
@@ -204,9 +204,9 @@ public final class PeriodicStatisticsSink extends BaseSink {
     private final LongAccumulator _metricSamples = new LongAccumulator((x, y) -> x + y, 0);
     private final AtomicLong _aggregatedData = new AtomicLong(0);
     private final AtomicReference<Set<String>> _uniqueMetrics = new AtomicReference<>(
-            Sets.newSetFromMap(Maps.<String, Boolean>newConcurrentMap()));
+            Collections.newSetFromMap(Maps.<String, Boolean>newConcurrentMap()));
     private final AtomicReference<Set<String>> _uniqueStatistics = new AtomicReference<>(
-            Sets.newSetFromMap(Maps.<String, Boolean>newConcurrentMap()));
+            Collections.newSetFromMap(Maps.<String, Boolean>newConcurrentMap()));
 
     private final ScheduledExecutorService _executor;
 

@@ -18,7 +18,6 @@ package com.arpnetworking.configuration.jackson;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Throwables;
 import net.sf.oval.constraint.NotNull;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -83,7 +82,7 @@ public final class JsonNodeUriSource extends BaseJsonNodeSource {
             final HttpResponse response = CLIENT.execute(request);
             jsonNode = _objectMapper.readTree(response.getEntity().getContent());
         } catch (final IOException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         } finally {
             if (request != null) {
                 request.releaseConnection();

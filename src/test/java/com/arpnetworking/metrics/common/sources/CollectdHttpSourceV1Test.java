@@ -26,7 +26,6 @@ import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.test.TestBeanFactory;
 import com.google.common.base.Charsets;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Before;
@@ -122,7 +121,7 @@ public final class CollectdHttpSourceV1Test extends BaseActorSourceTest {
         try {
             return future.get(10000, TimeUnit.MILLISECONDS);
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 

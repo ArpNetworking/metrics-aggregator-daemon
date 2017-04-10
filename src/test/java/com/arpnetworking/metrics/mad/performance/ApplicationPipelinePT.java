@@ -19,7 +19,6 @@ import com.arpnetworking.metrics.generator.util.TestFileGenerator;
 import com.arpnetworking.test.junitbenchmarks.JsonBenchmarkConsumer;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.math3.random.MersenneTwister;
@@ -65,7 +64,7 @@ public class ApplicationPipelinePT extends FilePerfTestBase {
             try {
                 Files.createDirectories(parent);
             } catch (final IOException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         }
 

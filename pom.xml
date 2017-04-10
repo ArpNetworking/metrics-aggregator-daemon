@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>1.0.29</version>
+    <version>1.0.30</version>
     <relativePath />
   </parent>
 
@@ -83,7 +83,7 @@
     <commons.io.version>2.4</commons.io.version>
     <commons.math3.version>3.3</commons.math3.version>
     <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
-    <guava.version>18.0</guava.version>
+    <guava.version>21.0</guava.version>
     <guice.version>4.0</guice.version>
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <jackson.version>2.7.3</jackson.version>
@@ -434,6 +434,13 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>${guava.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Temporary: see https://github.com/google/guava/issues/2721 -->
+      <groupId>com.google.errorprone</groupId>
+      <artifactId>error_prone_annotations</artifactId>
+      <version>2.0.15</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
