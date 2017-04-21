@@ -50,7 +50,6 @@ import com.arpnetworking.utility.Configurator;
 import com.arpnetworking.utility.Launchable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -143,7 +142,7 @@ public final class Main implements Launchable {
             // Wait for application shutdown
             SHUTDOWN_SEMAPHORE.acquire();
         } catch (final InterruptedException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         } finally {
             if (configurator.isPresent()) {
                 configurator.get().shutdown();
@@ -473,7 +472,7 @@ public final class Main implements Launchable {
                             .log();
                 }
             } catch (final InterruptedException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             } finally {
                 LOGGER.info()
                         .setMessage("Shutdown complete")

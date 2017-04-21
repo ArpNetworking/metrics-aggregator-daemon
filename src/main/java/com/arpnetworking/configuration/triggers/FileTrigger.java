@@ -21,7 +21,6 @@ import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.google.common.base.Throwables;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
 
@@ -128,7 +127,7 @@ public final class FileTrigger implements Trigger {
         try {
             _md5 = MessageDigest.getInstance("MD5");
         } catch (final NoSuchAlgorithmException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 

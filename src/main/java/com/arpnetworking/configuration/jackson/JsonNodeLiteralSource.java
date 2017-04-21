@@ -18,7 +18,6 @@ package com.arpnetworking.configuration.jackson;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Throwables;
 import net.sf.oval.constraint.NotNull;
 
 import java.io.IOException;
@@ -58,7 +57,7 @@ public final class JsonNodeLiteralSource extends BaseJsonNodeSource {
         try {
             jsonNode = _objectMapper.readTree(_source);
         } catch (final IOException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
         _jsonNode = Optional.ofNullable(jsonNode);
     }

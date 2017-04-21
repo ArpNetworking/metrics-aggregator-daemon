@@ -23,7 +23,6 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.utility.TimerTrigger;
 import com.arpnetworking.utility.Trigger;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Throwables;
 import net.sf.oval.constraint.NotNull;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
@@ -520,7 +519,7 @@ public final class StatefulTailer implements Tailer {
         try {
             _md5 = MessageDigest.getInstance("MD5");
         } catch (final NoSuchAlgorithmException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
 
         _initialPosition = builder._initialPosition;

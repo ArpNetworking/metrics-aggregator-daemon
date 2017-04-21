@@ -20,7 +20,6 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Throwables;
 import net.sf.oval.constraint.NotNull;
 
 import java.io.File;
@@ -62,7 +61,7 @@ public final class JsonNodeFileSource extends BaseJsonNodeSource {
             try {
                 jsonNode = _objectMapper.readTree(_file);
             } catch (final IOException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         } else if (builder._file.exists()) {
             LOGGER.warn()

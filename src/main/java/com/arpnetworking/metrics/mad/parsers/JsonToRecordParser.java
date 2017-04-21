@@ -47,7 +47,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -699,7 +698,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
             // Application will fail to start if the host name can not be determined.
             localHostName = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (final UnknownHostException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
         LOCAL_HOST_NAME = localHostName;
     }
