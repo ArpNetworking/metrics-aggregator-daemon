@@ -48,6 +48,7 @@ public final class TelemetrySink extends BaseSink {
                         datum.getStatistic().getName(),
                         metricName,
                         datum.getValue().getValue(),
+                        datum.getValue().getUnit(),
                         periodicData.getStart());
                 _telemetryActor.tell(metricReport, ActorRef.noSender());
             }

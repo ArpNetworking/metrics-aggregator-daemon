@@ -15,11 +15,7 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
-import com.arpnetworking.tsdcore.model.AggregatedData;
-import com.arpnetworking.tsdcore.model.Quantity;
-
 import java.io.Serializable;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -56,31 +52,4 @@ public interface Statistic extends Serializable {
      * @return The <code>Set</code> of <code>Statistic</code> dependencies.
      */
     Set<Statistic> getDependencies();
-
-    /**
-     * Compute the statistic from the <code>list</code> of <code>Quantity</code>
-     * instances. By default the <code>List</code> of samples is not assumed to
-     * be in any particular order. However, any <code>Statistic</code> subclass
-     * may implement the marker interface <code>OrderedStatistic</code>
-     * indicating a requirement to be provided with samples that are sorted from
-     * smallest to largest. In all cases the samples are required to be unified
-     * into the same unit (or no unit).
-     *
-     * @param values <code>List</code> of samples <code>Quantity</code> instances.
-     * @return Computed statistic <code>Quantity</code> instance.
-     */
-    Quantity calculate(List<Quantity> values);
-
-    /**
-     * Compute the statistic from the <code>List</code> of <code>AggregatedData</code>
-     * instances. By default the <code>List</code> of samples is not assumed to be in
-     * any particular order. However, any <code>Statistic</code> subclass may implement
-     * the marker interface <code>OrderedStatistic</code> indicating a requirement to
-     * be provided with samples that are sorted from smallest to largest. In all cases
-     * the samples are required to be unified into the same unit (or no unit).
-     *
-     * @param aggregations Aggregations to combine.
-     * @return Computed statistic value.
-     */
-    Quantity calculateAggregations(List<AggregatedData> aggregations);
 }

@@ -16,12 +16,10 @@
 package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.logback.annotations.Loggable;
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.Sets;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -47,36 +45,6 @@ public final class MinStatistic extends BaseStatistic {
     @Override
     public Calculator<Void> createCalculator() {
         return new MinAccumulator(this);
-    }
-
-    @Override
-    public Quantity calculate(final List<Quantity> unorderedValues) {
-        Optional<Quantity> min = Optional.empty();
-        for (final Quantity sample : unorderedValues) {
-            if (min.isPresent()) {
-                if (sample.compareTo(min.get()) < 0) {
-                    min = Optional.of(sample);
-                }
-            } else {
-                min = Optional.of(sample);
-            }
-        }
-        return min.get();
-    }
-
-    @Override
-    public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
-        Optional<Quantity> min = Optional.empty();
-        for (final AggregatedData datum : aggregations) {
-            if (min.isPresent()) {
-                if (datum.getValue().compareTo(min.get()) < 0) {
-                    min = Optional.of(datum.getValue());
-                }
-            } else {
-                min = Optional.of(datum.getValue());
-            }
-        }
-        return min.get();
     }
 
     private MinStatistic() { }
@@ -108,8 +76,11 @@ public final class MinStatistic extends BaseStatistic {
 
         @Override
         public Accumulator<Void> accumulate(final Quantity quantity) {
+            // Assert: that under the new Quantity normalization the units should always be the same.
+            assertUnit(_min.map(Quantity::getUnit).orElse(Optional.empty()), quantity.getUnit(), _min.isPresent());
+
             if (_min.isPresent()) {
-                if (quantity.compareTo(_min.get()) < 0) {
+                if (quantity.getValue() < _min.get().getValue()) {
                     _min = Optional.of(quantity);
                 }
             } else {

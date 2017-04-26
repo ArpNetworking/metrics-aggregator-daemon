@@ -101,6 +101,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                     }
                     final String metricName = computeMetricName(plugin, pluginInstance, type, typeInstance, sample.getDsName());
                     final MetricType metricType = mapDsType(sample.getDsType());
+                    // TODO(ville): Support units and normalize
                     final Metric metric = new DefaultMetric.Builder()
                             .setType(metricType)
                             .setValues(Collections.singletonList(

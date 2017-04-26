@@ -15,12 +15,9 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
-import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -30,8 +27,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Tests for the MeanStatistic class.
@@ -49,29 +44,6 @@ public class MeanStatisticTest {
     public void testGetName() {
         final Statistic stat = MEAN_STATISTIC;
         Assert.assertThat(stat.getName(), Matchers.equalTo("mean"));
-    }
-
-    @Test
-    public void testCalculate() {
-        final Statistic stat = MEAN_STATISTIC;
-        final List<Double> doubleVals = Lists.newArrayList(12d, 20d, 7d);
-        final List<Quantity> vals = TestBeanFactory.createSamples(doubleVals);
-        final Quantity calculated = stat.calculate(vals);
-        Assert.assertThat(
-                calculated,
-                Matchers.equalTo(
-                        new Quantity.Builder()
-                                .setValue(13.0)
-                                .setUnit(Unit.MILLISECOND)
-                                .build()));
-    }
-
-    @Test
-    public void testCalculateWithNoEntries() {
-        final Statistic stat = MEAN_STATISTIC;
-        final List<Quantity> vals = Collections.emptyList();
-        final Quantity calculated = stat.calculate(vals);
-        Assert.assertThat(calculated, Matchers.equalTo(new Quantity.Builder().setValue(0.0).build()));
     }
 
     @Test

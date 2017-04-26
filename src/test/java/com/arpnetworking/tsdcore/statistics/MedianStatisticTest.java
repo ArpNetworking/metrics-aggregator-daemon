@@ -15,18 +15,12 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
-import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
-import com.google.common.collect.Lists;
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Tests the MedianStatistic class.
@@ -46,24 +40,6 @@ public class MedianStatisticTest {
         Assert.assertEquals(2, statistic.getAliases().size());
         Assert.assertTrue(statistic.getAliases().contains("tp50"));
         Assert.assertTrue(statistic.getAliases().contains("p50"));
-    }
-
-    @Test
-    public void testMedianStat() {
-        final Statistic tp = MEDIAN_STATISTIC;
-        final ArrayList<Double> vList = Lists.newArrayList();
-        for (int x = 0; x < 100; ++x) {
-            vList.add((double) x);
-        }
-        final List<Quantity> vals = TestBeanFactory.createSamples(vList);
-        final Quantity calculated = tp.calculate(vals);
-        Assert.assertThat(
-                calculated,
-                Matchers.equalTo(
-                        new Quantity.Builder()
-                                .setValue(50.0)
-                                .setUnit(Unit.MILLISECOND)
-                                .build()));
     }
 
     @Test

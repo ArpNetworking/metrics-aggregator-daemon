@@ -15,9 +15,12 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.base.MoreObjects;
 
 import java.util.Collections;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -55,6 +58,30 @@ public abstract class BaseStatistic implements Statistic {
                 .add("name", getName())
                 .add("aliases", getAliases())
                 .toString();
+    }
+
+    /**
+     * Assert that the new unit is compatible with the existing unit.
+     *
+     * @param newUnit the new unit under consideration
+     * @param existingUnit the unit encountered previously
+     * @param hasData whether data has been processed
+     */
+    protected static void assertUnit(
+            final Optional<Unit> newUnit,
+            final Optional<Unit> existingUnit,
+            final boolean hasData) {
+        // If there's no data then the new unit is compatible regardless of what it is
+        if (!hasData) {
+            return;
+        }
+        // Otherwise the two units need to be the same
+        if (!Objects.equals(newUnit, existingUnit)) {
+            throw new IllegalStateException(String.format(
+                    "Units must both be the same; newUnit=%s, existingUnit=%s",
+                    newUnit,
+                    existingUnit));
+        }
     }
 
     private static final long serialVersionUID = -1334453626232464982L;

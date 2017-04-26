@@ -108,7 +108,10 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     @Override
     public CompletionStage<HttpResponse> apply(final HttpRequest request) {
         final Stopwatch requestTimer = Stopwatch.createStarted();
-        _metrics.recordCounter(createMetricName(request, BODY_SIZE_METRIC), request.entity().getContentLengthOption().orElse(0L));
+        _metrics.recordGauge(
+                createMetricName(request, BODY_SIZE_METRIC),
+                request.entity().getContentLengthOption().orElse(0L),
+                Optional.of(Units.BYTE));
         // TODO(vkoskela): Add a request UUID and include in MDC. [MAI-462]
         LOGGER.trace()
                 .setEvent("http.in.start")

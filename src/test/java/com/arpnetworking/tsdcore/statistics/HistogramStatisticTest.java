@@ -104,19 +104,6 @@ public class HistogramStatisticTest {
         Assert.assertEquals(2000d, histogram.getValueAtPercentile(99.9d), 1d);
     }
 
-    @Test
-    public void histogramQuantityConversion() {
-        final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator = HISTOGRAM_STATISTIC.createCalculator();
-        accumulator.accumulate(new Quantity.Builder().setValue((double) 1).setUnit(Unit.SECOND).build());
-        accumulator.accumulate(new Quantity.Builder().setValue((double) 1000).setUnit(Unit.MILLISECOND).build());
-
-        final CalculatedValue<HistogramStatistic.HistogramSupportingData> value = accumulator.calculate(Collections.emptyMap());
-        final HistogramStatistic.HistogramSupportingData supportingData = value.getData();
-        final HistogramStatistic.HistogramSnapshot histogram = supportingData.getHistogramSnapshot();
-        Assert.assertEquals(2, histogram.getEntriesCount());
-        Assert.assertEquals(1, histogram.getValues().size());
-    }
-
     @Test(expected = IllegalStateException.class)
     public void histogramQuantityInvalidConversion() {
         final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator = HISTOGRAM_STATISTIC.createCalculator();
@@ -131,67 +118,10 @@ public class HistogramStatisticTest {
     }
 
     @Test
-    public void histogramAccumulateMultipleHistogramConversion() {
-        final Accumulator<HistogramStatistic.HistogramSupportingData> merged = HISTOGRAM_STATISTIC.createCalculator();
-
-        final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator1 = HISTOGRAM_STATISTIC.createCalculator();
-        for (int x = 1; x <= 100; ++x) {
-            accumulator1.accumulate(new Quantity.Builder().setValue((double) x).setUnit(Unit.SECOND).build());
-        }
-
-        final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator2 = HISTOGRAM_STATISTIC.createCalculator();
-        for (int x = 1; x <= 100; ++x) {
-            accumulator2.accumulate(new Quantity.Builder().setValue((double) 1000 * x).setUnit(Unit.MILLISECOND).build());
-        }
-
-        merged.accumulate(accumulator1.calculate(Collections.emptyMap()));
-        merged.accumulate(accumulator2.calculate(Collections.emptyMap()));
-
-        final CalculatedValue<HistogramStatistic.HistogramSupportingData> value = merged.calculate(Collections.emptyMap());
-        final HistogramStatistic.HistogramSupportingData supportingData = value.getData();
-        final HistogramStatistic.HistogramSnapshot histogram = supportingData.getHistogramSnapshot();
-        for (final Map.Entry<Double, Integer> entry : histogram.getValues()) {
-
-            Assert.assertTrue(entry.getKey() <= 100);
-        }
-
-        Assert.assertEquals(200, histogram.getEntriesCount());
-    }
-
-    @Test
-    public void histogramUnitConversion() {
-        final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator = HISTOGRAM_STATISTIC.createCalculator();
-        for (int x = 1; x <= 100; ++x) {
-            accumulator.accumulate(new Quantity.Builder().setValue((double) x * 1000).setUnit(Unit.MILLISECOND).build());
-        }
-
-        final CalculatedValue<HistogramStatistic.HistogramSupportingData> value = accumulator.calculate(Collections.emptyMap());
-        final HistogramStatistic.HistogramSupportingData supportingData = value.getData();
-        HistogramStatistic.HistogramSnapshot histogram = supportingData.getHistogramSnapshot();
-        for (final Map.Entry<Double, Integer> entry : histogram.getValues()) {
-            final int val = entry.getKey().intValue();
-            if (val < 990) {
-                Assert.fail("shouldn't see a key this small");
-            }
-        }
-
-        final HistogramStatistic.HistogramSupportingData converted = supportingData.toUnit(Unit.SECOND);
-        histogram = converted.getHistogramSnapshot();
-        for (final Map.Entry<Double, Integer> entry : histogram.getValues()) {
-            final int val = entry.getKey().intValue();
-            if (val > 100) {
-                Assert.fail("shouldn't see a key this large after unit conversion");
-            }
-        }
-
-        Assert.assertEquals(99.5d, histogram.getValueAtPercentile(99.9d), 1d);
-    }
-
-    @Test
     public void histogramEnds() {
         final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator = HISTOGRAM_STATISTIC.createCalculator();
-        accumulator.accumulate(new Quantity.Builder().setValue((double) 10).setUnit(Unit.MILLISECOND).build());
-        accumulator.accumulate(new Quantity.Builder().setValue((double) 50).setUnit(Unit.MILLISECOND).build());
+        accumulator.accumulate(new Quantity.Builder().setValue((double) 10).setUnit(Unit.SECOND).build());
+        accumulator.accumulate(new Quantity.Builder().setValue((double) 50).setUnit(Unit.SECOND).build());
 
         final CalculatedValue<HistogramStatistic.HistogramSupportingData> value = accumulator.calculate(Collections.emptyMap());
         final HistogramStatistic.HistogramSupportingData supportingData = value.getData();

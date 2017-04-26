@@ -57,13 +57,13 @@ public class JsonToRecordParserV2dTest {
         final Metric fooVar = variables.get("foo");
         Assert.assertEquals(4, fooVar.getValues().size());
         Assert.assertTrue(fooVar.getValues().get(0).getUnit().isPresent());
-        Assert.assertEquals(Unit.MILLISECOND, fooVar.getValues().get(0).getUnit().get());
+        Assert.assertEquals(Unit.SECOND, fooVar.getValues().get(0).getUnit().get());
 
         Assert.assertThat(variables, Matchers.hasKey("mem"));
         final Metric memVar = variables.get("mem");
         Assert.assertEquals(3, memVar.getValues().size());
         Assert.assertTrue(memVar.getValues().get(0).getUnit().isPresent());
-        Assert.assertEquals(Unit.GIGABYTE, memVar.getValues().get(0).getUnit().get());
+        Assert.assertEquals(Unit.BYTE, memVar.getValues().get(0).getUnit().get());
 
         Assert.assertThat(variables, Matchers.hasKey("dbQueries"));
         final Metric queriesVar = variables.get("dbQueries");

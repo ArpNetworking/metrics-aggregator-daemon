@@ -16,12 +16,10 @@
 package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.logback.annotations.Loggable;
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.Sets;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +28,7 @@ import java.util.Set;
  * Max statistic (e.g. top 100th percentile). Use <code>StatisticFactory</code> for construction.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class MaxStatistic extends BaseStatistic {
@@ -47,36 +46,6 @@ public final class MaxStatistic extends BaseStatistic {
     @Override
     public Calculator<Void> createCalculator() {
         return new MaxAccumulator(this);
-    }
-
-    @Override
-    public Quantity calculate(final List<Quantity> unorderedValues) {
-        Optional<Quantity> max = Optional.empty();
-        for (final Quantity sample : unorderedValues) {
-            if (max.isPresent()) {
-                if (sample.compareTo(max.get()) > 0) {
-                    max = Optional.of(sample);
-                }
-            } else {
-                max = Optional.of(sample);
-            }
-        }
-        return max.get();
-    }
-
-    @Override
-    public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
-        Optional<Quantity> max = Optional.empty();
-        for (final AggregatedData datum : aggregations) {
-            if (max.isPresent()) {
-                if (datum.getValue().compareTo(max.get()) > 0) {
-                    max = Optional.of(datum.getValue());
-                }
-            } else {
-                max = Optional.of(datum.getValue());
-            }
-        }
-        return max.get();
     }
 
     private MaxStatistic() { }
@@ -109,8 +78,11 @@ public final class MaxStatistic extends BaseStatistic {
 
         @Override
         public Accumulator<Void> accumulate(final Quantity quantity) {
+            // Assert: that under the new Quantity normalization the units should always be the same.
+            assertUnit(_max.map(Quantity::getUnit).orElse(Optional.empty()), quantity.getUnit(), _max.isPresent());
+
             if (_max.isPresent()) {
-                if (quantity.compareTo(_max.get()) > 0) {
+                if (quantity.getValue() > _max.get().getValue()) {
                     _max = Optional.of(quantity);
                 }
             } else {

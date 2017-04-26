@@ -15,12 +15,9 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
-import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.Lists;
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,20 +34,6 @@ public class MinStatisticTest {
     @Test
     public void testName() {
         Assert.assertEquals("min", MIN_STATISTIC.getName());
-    }
-
-    @Test
-    public void testStat() {
-        final Statistic tp0 = MIN_STATISTIC;
-        final List<Quantity> vals = TestBeanFactory.createSamples(ONE_TO_FIVE);
-        final Quantity calculated = tp0.calculate(vals);
-        Assert.assertThat(
-                calculated,
-                Matchers.equalTo(
-                        new Quantity.Builder()
-                                .setValue(1.0)
-                                .setUnit(Unit.MILLISECOND)
-                                .build()));
     }
 
     @Test

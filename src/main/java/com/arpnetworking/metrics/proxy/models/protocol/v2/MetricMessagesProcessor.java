@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -166,8 +167,16 @@ public class MetricMessagesProcessor implements MessagesProcessor {
         event.put("timestamp", report.getPeriodStart().getMillis());
         event.put("statistic", report.getStatistic());
         event.put("data", report.getValue());
+        event.set("numeratorUnits", createUnitArrayNode(report.getNumeratorUnits()));
+        event.set("denominatorUnits", createUnitArrayNode(report.getDenominatorUnits()));
 
         _connection.sendCommand(COMMAND_REPORT_METRIC, event);
+    }
+
+    private ArrayNode createUnitArrayNode(final ImmutableList<String> units) {
+        final ArrayNode unitArrayNode = new ArrayNode(OBJECT_MAPPER.getNodeFactory());
+        units.forEach(unitArrayNode::add);
+        return unitArrayNode;
     }
 
     private void processMetricsList(final MetricsList metricsList) {
