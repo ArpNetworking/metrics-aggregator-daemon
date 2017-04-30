@@ -16,23 +16,20 @@
 package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.logback.annotations.Loggable;
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 /**
  * Takes the mean of the entries. Use <code>StatisticFactory</code> for construction.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class MeanStatistic extends BaseStatistic {
@@ -50,38 +47,6 @@ public final class MeanStatistic extends BaseStatistic {
     @Override
     public Set<Statistic> getDependencies() {
         return DEPENDENCIES.get();
-    }
-
-    @Override
-    public Quantity calculate(final List<Quantity> orderedValues) {
-        // TODO(vkoskela): Statistic calculation should be allowed to either fail or not return a quantity. [MAI-?]
-        if (orderedValues.size() == 0) {
-            return ZERO;
-        }
-        double sum = 0;
-        Optional<Unit> unit = Optional.empty();
-        for (final Quantity sample : orderedValues) {
-            sum += sample.getValue();
-            unit = Optional.ofNullable(unit.orElse(sample.getUnit().orElse(null)));
-        }
-        return new Quantity.Builder().setValue(sum / orderedValues.size()).setUnit(unit.orElse(null)).build();
-    }
-
-    @Override
-    public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
-        double weighted = 0D;
-        int count = 0;
-        Optional<Unit> unit = Optional.empty();
-        for (final AggregatedData aggregation : aggregations) {
-            final double populationSize = aggregation.getPopulationSize();
-            weighted += aggregation.getValue().getValue() * populationSize;
-            count += populationSize;
-            unit = Optional.ofNullable(unit.orElse(aggregation.getValue().getUnit().orElse(null)));
-        }
-        return new Quantity.Builder()
-                .setValue(weighted / count)
-                .setUnit(unit.orElse(null))
-                .build();
     }
 
     private MeanStatistic() { }

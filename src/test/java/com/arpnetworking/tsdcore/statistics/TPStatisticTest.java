@@ -15,17 +15,13 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
-import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.Lists;
 
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,57 +38,6 @@ public class TPStatisticTest {
         Assert.assertEquals("tp95", TP95_STATISTIC.getName());
         Assert.assertEquals("tp99", TP99_STATISTIC.getName());
         Assert.assertEquals("tp99.9", TP99P9_STATISTIC.getName());
-    }
-
-    @Test
-    public void testTP99StatSmallSet() {
-        final Statistic tp = TP99_STATISTIC;
-        final List<Double> doubleVals = Lists.newArrayList(ONE_TO_FIVE);
-        final List<Quantity> vals = TestBeanFactory.createSamples(doubleVals);
-        final Quantity calculated = tp.calculate(vals);
-        Assert.assertThat(
-                calculated,
-                Matchers.equalTo(
-                        new Quantity.Builder()
-                                .setValue(5.0)
-                                .setUnit(Unit.MILLISECOND)
-                                .build()));
-    }
-
-    @Test
-    public void testTP99Stat() {
-        final Statistic tp = TP99_STATISTIC;
-        final ArrayList<Double> vList = Lists.newArrayList();
-        for (int x = 0; x < 100; ++x) {
-            vList.add((double) x);
-        }
-        final List<Quantity> vals = TestBeanFactory.createSamples(vList);
-        final Quantity calculated = tp.calculate(vals);
-        Assert.assertThat(
-                calculated,
-                Matchers.equalTo(
-                        new Quantity.Builder()
-                                .setUnit(Unit.MILLISECOND)
-                                .setValue(99.0)
-                                .build()));
-    }
-
-    @Test
-    public void testTP999Stat() {
-        final Statistic tp = TP99P9_STATISTIC;
-        final ArrayList<Double> vList = Lists.newArrayList();
-        for (int x = 0; x < 10000; ++x) {
-            vList.add((double) x);
-        }
-        final List<Quantity> vals = TestBeanFactory.createSamples(vList);
-        final Quantity calculated = tp.calculate(vals);
-        Assert.assertThat(
-                calculated,
-                Matchers.equalTo(
-                        new Quantity.Builder()
-                                .setValue(9990.0)
-                                .setUnit(Unit.MILLISECOND)
-                                .build()));
     }
 
     @Test

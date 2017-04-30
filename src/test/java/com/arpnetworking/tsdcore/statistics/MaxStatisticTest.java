@@ -15,12 +15,9 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
-import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.Lists;
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,21 +34,6 @@ public class MaxStatisticTest {
     @Test
     public void testName() {
         Assert.assertEquals("max", MAX_STATISTIC.getName());
-    }
-
-    @Test
-    public void testStat() {
-        final Statistic tp100 = MAX_STATISTIC;
-        final List<Double> doubleVals = Lists.newArrayList(ONE_TO_FIVE);
-        final List<Quantity> vals = TestBeanFactory.createSamples(doubleVals);
-        final Quantity calculated = tp100.calculate(vals);
-        Assert.assertThat(
-                calculated,
-                Matchers.equalTo(
-                        new Quantity.Builder()
-                                .setValue(5.0)
-                                .setUnit(Unit.MILLISECOND)
-                                .build()));
     }
 
     @Test

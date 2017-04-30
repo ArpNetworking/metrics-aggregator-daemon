@@ -62,8 +62,8 @@ public class JsonToRecordParserV2fTest {
         final Metric t1 = variables.get("t1");
         Assert.assertEquals(4, t1.getValues().size());
         assertValue(t1.getValues().get(0), 1d, Unit.SECOND);
-        assertValue(t1.getValues().get(1), 2d, Unit.MILLISECOND);
-        assertValue(t1.getValues().get(2), 0d, Unit.MILLISECOND);
+        assertValue(t1.getValues().get(1), 0.002d, Unit.SECOND);
+        assertValue(t1.getValues().get(2), 0d, Unit.SECOND);
         assertValue(t1.getValues().get(3), 4d, Unit.SECOND);
 
         Assert.assertThat(variables, Matchers.hasKey("t2"));
@@ -76,7 +76,7 @@ public class JsonToRecordParserV2fTest {
         Assert.assertThat(variables, Matchers.hasKey("g1"));
         final Metric g1 = variables.get("g1");
         Assert.assertEquals(3, g1.getValues().size());
-        assertValue(g1.getValues().get(0), 1.2d, Unit.GIGABYTE);
+        assertValue(g1.getValues().get(0), 1.2E9d, Unit.BYTE);
         assertValue(g1.getValues().get(1), 1.1d);
         assertValue(g1.getValues().get(2), 0.8d, Unit.SECOND);
 

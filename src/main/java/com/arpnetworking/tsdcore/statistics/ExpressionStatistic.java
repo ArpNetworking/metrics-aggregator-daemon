@@ -16,10 +16,7 @@
 package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.logback.annotations.Loggable;
-import com.arpnetworking.tsdcore.model.AggregatedData;
-import com.arpnetworking.tsdcore.model.Quantity;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -45,16 +42,6 @@ public final class ExpressionStatistic extends BaseStatistic {
 
     @Override
     public Set<Statistic> getDependencies() {
-        throw new UnsupportedOperationException("Calculation of ExpressionStatistic instances is not supported");
-    }
-
-    @Override
-    public Quantity calculate(final List<Quantity> unorderedValues) {
-        throw new UnsupportedOperationException("Calculation of ExpressionStatistic instances is not supported");
-    }
-
-    @Override
-    public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
         throw new UnsupportedOperationException("Calculation of ExpressionStatistic instances is not supported");
     }
 

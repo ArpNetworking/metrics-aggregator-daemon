@@ -81,9 +81,9 @@ public class UnitTest {
 
     @Test
     public void testUnitTypeValues() {
-        for (final Unit.Type type : Unit.Type.values()) {
+        for (final Type type : Type.values()) {
             final String typeAsString = type.name();
-            final Unit.Type actualType = Unit.Type.valueOf(typeAsString);
+            final Type actualType = Type.valueOf(typeAsString);
             Assert.assertSame(type, actualType);
         }
     }

@@ -16,13 +16,11 @@
 package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
 import net.sf.oval.constraint.NotNull;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -45,16 +43,6 @@ public final class HistogramStatistic extends BaseStatistic {
     @Override
     public Accumulator<HistogramSupportingData> createCalculator() {
         return new HistogramAccumulator(this);
-    }
-
-    @Override
-    public Quantity calculate(final List<Quantity> values) {
-        throw new UnsupportedOperationException("Unsupported operation: calculate(List<Quantity>)");
-    }
-
-    @Override
-    public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
-        throw new UnsupportedOperationException("Unsupported operation: calculateAggregations(List<AggregatedData>)");
     }
 
     private HistogramStatistic() { }
@@ -82,44 +70,24 @@ public final class HistogramStatistic extends BaseStatistic {
 
         @Override
         public Accumulator<HistogramSupportingData> accumulate(final Quantity quantity) {
-            // TODO(barp): Convert to canonical unit. [NEXT]
-            final Optional<Unit> quantityUnit = quantity.getUnit();
-            checkUnit(quantityUnit);
-            if (_unit.isPresent() && !_unit.equals(quantityUnit)) {
-                _histogram.recordValue(
-                        new Quantity.Builder()
-                                .setUnit(_unit.get())
-                                .setValue(_unit.get().convert(quantity.getValue(), quantityUnit.get()))
-                                .build().getValue());
-            } else {
-                _histogram.recordValue(quantity.getValue());
-            }
+            // Assert: that under the new Quantity normalization the units should always be the same.
+            assertUnit(_unit, quantity.getUnit(), _histogram._entriesCount > 0);
 
-            _unit = Optional.ofNullable(_unit.orElse(quantityUnit.orElse(null)));
+            _histogram.recordValue(quantity.getValue());
+            _unit = Optional.ofNullable(_unit.orElse(quantity.getUnit().orElse(null)));
+
             return this;
         }
 
         @Override
         public Accumulator<HistogramSupportingData> accumulate(final CalculatedValue<HistogramSupportingData> calculatedValue) {
-            final Optional<Unit> unit = calculatedValue.getData().getUnit();
-            checkUnit(unit);
-            if (_unit.isPresent() && !_unit.equals(unit)) {
-                _histogram.add(calculatedValue.getData().toUnit(_unit.get()).getHistogramSnapshot());
-            } else {
-                _histogram.add(calculatedValue.getData().getHistogramSnapshot());
-            }
+            // Assert: that under the new Quantity normalization the units should always be the same.
+            assertUnit(_unit, calculatedValue.getData().getUnit(), _histogram._entriesCount > 0);
 
-            _unit = Optional.ofNullable(_unit.orElse(unit.orElse(null)));
+            _histogram.add(calculatedValue.getData().getHistogramSnapshot());
+            _unit = Optional.ofNullable(_unit.orElse(calculatedValue.getData().getUnit().orElse(null)));
+
             return this;
-        }
-
-        private void checkUnit(final Optional<Unit> unit) {
-            if (_unit.isPresent() != unit.isPresent() && _histogram._entriesCount > 0) {
-                throw new IllegalStateException(String.format(
-                        "Units must both be present or absent; histogramUnit=%s, otherUnit=%s",
-                        _unit,
-                        unit));
-            }
         }
 
         @Override

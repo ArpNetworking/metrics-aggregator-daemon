@@ -15,13 +15,8 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import com.google.common.collect.ImmutableList;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Tests for the Quantity class.
@@ -33,7 +28,7 @@ public class QuantityTest {
     @Test
     public void testConstructor() {
         final double expectedValue = 1.23f;
-        final Unit expectedUnit = Unit.GIGABYTE;
+        final Unit expectedUnit = Unit.BYTE;
         final Quantity sample = new Quantity.Builder()
                 .setValue(expectedValue)
                 .setUnit(expectedUnit)
@@ -176,139 +171,6 @@ public class QuantityTest {
     }
 
     @Test
-    public void testUnify() {
-        final List<Quantity> unified = Quantity.unify(
-                ImmutableList.of(
-                        new Quantity.Builder()
-                                .setValue(120.0)
-                                .setUnit(Unit.MINUTE)
-                                .build(),
-                        new Quantity.Builder()
-                                .setValue(1.0)
-                                .setUnit(Unit.HOUR)
-                                .build(),
-                        new Quantity.Builder()
-                                .setValue(1800.0)
-                                .setUnit(Unit.SECOND)
-                                .build()));
-        Assert.assertEquals(
-                ImmutableList.of(
-                        new Quantity.Builder()
-                                .setValue(7200.0)
-                                .setUnit(Unit.SECOND)
-                                .build(),
-                        new Quantity.Builder()
-                                .setValue(3600.0)
-                                .setUnit(Unit.SECOND)
-                                .build(),
-                        new Quantity.Builder()
-                                .setValue(1800.0)
-                                .setUnit(Unit.SECOND)
-                                .build()),
-                unified);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testUnifyMissingAfter() {
-        Quantity.unify(
-                ImmutableList.of(
-                        new Quantity.Builder()
-                                .setValue(60.0)
-                                .setUnit(Unit.MINUTE)
-                                .build(),
-                        new Quantity.Builder()
-                                .setValue(1.0)
-                                .build()));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testUnifyMissingBefore() {
-        Quantity.unify(
-                ImmutableList.of(
-                        new Quantity.Builder()
-                                .setValue(60.0)
-                                .build(),
-                        new Quantity.Builder()
-                                .setValue(1.0)
-                                .setUnit(Unit.HOUR)
-                                .build()));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testUnifyMismatchedTypes() {
-        Quantity.unify(
-                ImmutableList.of(
-                        new Quantity.Builder()
-                                .setValue(60.0)
-                                .setUnit(Unit.BYTE)
-                                .build(),
-                        new Quantity.Builder()
-                                .setValue(1.0)
-                                .setUnit(Unit.SECOND)
-                                .build()));
-    }
-
-    @Test
-    public void testConvertUnits() {
-        final Quantity quantity = new Quantity.Builder()
-                .setValue(60000.0)
-                .setUnit(Unit.MILLISECOND)
-                .build();
-        final Quantity converted = quantity.convertTo(Unit.SECOND);
-        Assert.assertEquals(60, converted.getValue(), 0.00001);
-        Assert.assertEquals(Unit.SECOND, converted.getUnit().orElse(null));
-    }
-
-    @Test
-    public void testConvertUnitIdentity() {
-        final Quantity quantity = new Quantity.Builder()
-                .setValue(60000.0)
-                .setUnit(Unit.MILLISECOND)
-                .build();
-        final Quantity converted = quantity.convertTo(Unit.MILLISECOND);
-        Assert.assertSame(quantity, converted);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_INFERRED")
-    public void testConvertUnitMissing() {
-        final Quantity quantity = new Quantity.Builder()
-                .setValue(60000.0)
-                .build();
-        quantity.convertTo(Unit.MILLISECOND);
-    }
-
-    @Test
-    public void testConvertUnitsOptional() {
-        final Quantity quantity = new Quantity.Builder()
-                .setValue(60000.0)
-                .setUnit(Unit.MILLISECOND)
-                .build();
-        final Quantity converted = quantity.convertTo(Optional.of(Unit.SECOND));
-        Assert.assertEquals(60, converted.getValue(), 0.00001);
-        Assert.assertEquals(Unit.SECOND, converted.getUnit().orElse(null));
-    }
-
-    @Test
-    public void testConvertUnitIdentityOptional() {
-        final Quantity quantity = new Quantity.Builder()
-                .setValue(60000.0)
-                .setUnit(Unit.MILLISECOND)
-                .build();
-        final Quantity converted = quantity.convertTo(Optional.of(Unit.MILLISECOND));
-        Assert.assertSame(quantity, converted);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_INFERRED")
-    public void testConvertUnitMissingOptional() {
-        final Quantity quantity = new Quantity.Builder()
-                .setValue(60000.0)
-                .build();
-        quantity.convertTo(Optional.of(Unit.MILLISECOND));
-    }
-
-    @Test
     public void testAddQuantities() {
         final Quantity quantity1 = new Quantity.Builder()
                 .setValue(5.0)
@@ -331,8 +193,8 @@ public class QuantityTest {
                 .setUnit(Unit.MILLISECOND)
                 .build();
         final Quantity result = quantity1.add(quantity2);
-        Assert.assertEquals(5010.0d, result.getValue(), 0.00001);
-        Assert.assertEquals(Unit.MILLISECOND, result.getUnit().orElse(null));
+        Assert.assertEquals(5.01d, result.getValue(), 0.00001);
+        Assert.assertEquals(Unit.SECOND, result.getUnit().orElse(null));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -383,8 +245,8 @@ public class QuantityTest {
                 .setUnit(Unit.MILLISECOND)
                 .build();
         final Quantity result = quantity1.subtract(quantity2);
-        Assert.assertEquals(4990.0d, result.getValue(), 0.00001);
-        Assert.assertEquals(Unit.MILLISECOND, result.getUnit().orElse(null));
+        Assert.assertEquals(4.99d, result.getValue(), 0.00001);
+        Assert.assertEquals(Unit.SECOND, result.getUnit().orElse(null));
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -24,6 +24,7 @@ import java.util.Optional;
  * Specifies the unit on a counter variable.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public enum Unit {
     /***************************************************************************
@@ -169,15 +170,13 @@ public enum Unit {
         }
     };
 
-    /* package private */enum Type {
-        TIME,
-        DATA_SIZE,
-        TEMPERATURE
-    }
-
     Unit(final long scale, final Type type) {
         _scale = scale;
         _type = type;
+    }
+
+    public Type getType() {
+        return _type;
     }
 
     /**

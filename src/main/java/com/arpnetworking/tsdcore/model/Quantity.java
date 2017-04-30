@@ -17,18 +17,13 @@ package com.arpnetworking.tsdcore.model;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
-import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nullable;
 
 /**
  * Represents a sample.
@@ -61,7 +56,7 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
                     this,
                     otherQuantity));
         }
-        if (_unit.equals(otherQuantity._unit)) {
+        if (Objects.equals(_unit, otherQuantity._unit)) {
             return new Quantity(_value + otherQuantity._value, _unit);
         }
         final Unit smallerUnit = _unit.get().getSmallerUnit(otherQuantity.getUnit().get());
@@ -86,7 +81,7 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
                     this,
                     otherQuantity));
         }
-        if (_unit.equals(otherQuantity._unit)) {
+        if (Objects.equals(_unit, otherQuantity._unit)) {
             return new Quantity(_value - otherQuantity._value, _unit);
         }
         final Unit smallerUnit = _unit.get().getSmallerUnit(otherQuantity.getUnit().get());
@@ -122,9 +117,9 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
     public Quantity divide(final Quantity otherQuantity) {
         // TODO(vkoskela): Support division by quantity with unit [2F].
         if (otherQuantity._unit.isPresent()) {
-            throw new UnsupportedOperationException("Compount units not supported yet");
+            throw new UnsupportedOperationException("Compound units not supported yet");
         }
-        if (_unit.equals(otherQuantity._unit)) {
+        if (Objects.equals(_unit, otherQuantity._unit)) {
             return new Quantity(_value / otherQuantity._value, Optional.empty());
         }
         return new Quantity(
@@ -132,63 +127,13 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
                 _unit);
     }
 
-    /**
-     * Convert this <code>Quantity</code> to one in the specified unit. This
-     * <code>Quantity</code> must also have a <code>Unit</code> and it must
-     * be in the same domain as the provided unit.
-     *
-     * @param unit <code>Unit</code> to convert to.
-     * @return <code>Quantity</code> in specified unit.
-     */
-    public Quantity convertTo(final Unit unit) {
-        if (!_unit.isPresent()) {
-            throw new IllegalStateException(String.format(
-                    "Cannot convert a quantity without a unit; this=%s",
-                    this));
-        }
-        if (_unit.get().equals(unit)) {
-            return this;
-        }
-        return new Quantity(
-                unit.convert(_value, _unit.get()),
-                Optional.of(unit));
-    }
-
-    /**
-     * Convert this <code>Quantity</code> to one in the specified optional unit.
-     * Either this <code>Quantity</code> also has a <code>Unit</code> in the
-     * same domain as the provided unit or both units are absent.
-     *
-     * @param unit <code>Optional</code> <code>Unit</code> to convert to.
-     * @return <code>Quantity</code> in specified unit.
-     */
-    public Quantity convertTo(final Optional<Unit> unit) {
-        if (_unit.isPresent() != unit.isPresent()) {
-            throw new IllegalStateException(String.format(
-                    "Units must both be present or absent; quantity=%s unit=%s",
-                    this,
-                    unit));
-        }
-        if (_unit.equals(unit)) {
-            return this;
-        }
-        return new Quantity(
-                unit.get().convert(_value, _unit.get()),
-                unit);
-    }
-
     @Override
     public int compareTo(final Quantity other) {
         if (other._unit.equals(_unit)) {
             return Double.compare(_value, other._value);
-        } else if (other._unit.isPresent() && _unit.isPresent()) {
-            final Unit smallerUnit = _unit.get().getSmallerUnit(other._unit.get());
-            final double convertedValue = smallerUnit.convert(_value, _unit.get());
-            final double otherConvertedValue = smallerUnit.convert(other._value, other._unit.get());
-            return Double.compare(convertedValue, otherConvertedValue);
         }
         throw new IllegalArgumentException(String.format(
-                "Cannot compare a quantity with a unit to a quantity without a unit; this=%s, other=%s",
+                "Cannot compare mismatched units; this=%s, other=%s",
                 this,
                 other));
     }
@@ -222,37 +167,6 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
                 .toString();
     }
 
-    /**
-     * Ensures all <code>Quantity</code> instances have the same (including no)
-     * <code>Unit</code>.
-     *
-     * @param quantities <code>Quantity</code> instances to convert.
-     * @return <code>List</code> of <code>Quantity</code> instances with the
-     * same <code>Unit</code> (or no <code>Unit</code>).
-     */
-    public static List<Quantity> unify(final Collection<Quantity> quantities) {
-        // This is a 2-pass operation:
-        // First pass is to grab the smallest unit in the samples
-        // Second pass is to convert everything to that unit
-        Optional<Unit> smallestUnit = Optional.empty();
-        for (final Quantity quantity : quantities) {
-            if (!smallestUnit.isPresent()) {
-                smallestUnit = quantity.getUnit();
-            } else if (quantity.getUnit().isPresent()
-                    && !smallestUnit.get().getSmallerUnit(quantity.getUnit().get()).equals(smallestUnit.get())) {
-                smallestUnit = quantity.getUnit();
-            }
-        }
-
-        final List<Quantity> convertedSamples = Lists.newArrayListWithExpectedSize(quantities.size());
-        final Function<Quantity, Quantity> converter = SampleConverter.to(smallestUnit);
-        for (final Quantity quantity : quantities) {
-            convertedSamples.add(converter.apply(quantity));
-        }
-
-        return convertedSamples;
-    }
-
     private Quantity(final Builder builder) {
         this(builder._value, Optional.ofNullable(builder._unit));
     }
@@ -268,37 +182,6 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
 
     private static final long serialVersionUID = -6339526234042605516L;
 
-    private static final class SampleConverter implements Function<Quantity, Quantity> {
-
-        public static Function<Quantity, Quantity> to(final Optional<Unit> unit) {
-            if (unit.isPresent()) {
-                return new SampleConverter(unit.get());
-            }
-            return (q) -> q;
-        }
-
-        @Override
-        @Nullable
-        public Quantity apply(@Nullable final Quantity quantity) {
-            if (quantity == null) {
-                return null;
-            }
-            if (!quantity.getUnit().isPresent()) {
-                throw new IllegalArgumentException(String.format("Cannot convert a quantity without unit; sample=%s", quantity));
-            }
-            return new Quantity.Builder()
-                    .setValue(_unit.convert(quantity.getValue(), quantity.getUnit().get()))
-                    .setUnit(_unit)
-                    .build();
-        }
-
-        private SampleConverter(final Unit convertTo) {
-            _unit = convertTo;
-        }
-
-        private final Unit _unit;
-    }
-
     /**
      * <code>Builder</code> implementation for <code>Quantity</code>.
      */
@@ -309,6 +192,17 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
          */
         public Builder() {
             super((java.util.function.Function<Builder, Quantity>) Quantity::new);
+        }
+
+        /**
+         * Public constructor.
+         *
+         * @param quantity the <code>Quantity</code> to initialize from
+         */
+        public Builder(final Quantity quantity) {
+            super((java.util.function.Function<Builder, Quantity>) Quantity::new);
+            _value = quantity._value;
+            _unit = quantity._unit.orElse(null);
         }
 
         /**
@@ -335,10 +229,19 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
 
         @Override
         public Quantity build() {
-            if (_value == null) {
-                throw new IllegalStateException("value cannot be null");
-            }
+            normalize();
             return new Quantity(this);
+        }
+
+        private Builder normalize() {
+            if (_value != null && _unit != null) {
+                final Unit defaultUnit = _unit.getType().getDefaultUnit();
+                if (!Objects.equals(_unit, defaultUnit)) {
+                    _value = defaultUnit.convert(_value, _unit);
+                    _unit = defaultUnit;
+                }
+            }
+            return this;
         }
 
         @NotNull

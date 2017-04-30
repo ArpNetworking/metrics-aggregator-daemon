@@ -15,9 +15,7 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
@@ -25,7 +23,6 @@ import com.google.common.collect.Sets;
 
 import java.text.DecimalFormat;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -64,17 +61,6 @@ public abstract class TPStatistic extends BaseStatistic implements OrderedStatis
     @Override
     public Set<Statistic> getDependencies() {
         return DEPENDENCIES.get();
-    }
-
-    @Override
-    public Quantity calculate(final List<Quantity> orderedValues) {
-        final int index = (int) (Math.ceil((_percentile / 100.0) * (orderedValues.size() - 1)));
-        return orderedValues.get(index);
-    }
-
-    @Override
-    public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
-        throw new UnsupportedOperationException("Unsupported operation: calculateAggregations(List<AggregatedData>)");
     }
 
     /**

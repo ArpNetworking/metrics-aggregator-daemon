@@ -17,8 +17,12 @@
 package com.arpnetworking.metrics.proxy.models.messages;
 
 import com.arpnetworking.logback.annotations.Loggable;
+import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import org.joda.time.DateTime;
+
+import java.util.Optional;
 
 /**
  * Message class to hold data about a metric that should be sent to clients.
@@ -36,6 +40,7 @@ public final class MetricReport {
      * @param statistic name of the statistic
      * @param metric name of the metric
      * @param value value
+     * @param unit unit
      * @param periodStart start of the period
      */
     public MetricReport(
@@ -44,12 +49,14 @@ public final class MetricReport {
             final String statistic,
             final String metric,
             final double value,
+            final Optional<Unit> unit,
             final DateTime periodStart) {
         _service = service;
         _host = host;
         _statistic = statistic;
         _metric = metric;
         _value = value;
+        _numeratorUnits = unit.map(Unit::toString).map(ImmutableList::of).orElse(ImmutableList.of());
         _periodStart = periodStart;
     }
 
@@ -73,6 +80,14 @@ public final class MetricReport {
         return _value;
     }
 
+    public ImmutableList<String> getNumeratorUnits() {
+        return _numeratorUnits;
+    }
+
+    public ImmutableList<String> getDenominatorUnits() {
+        return _denominatorUnits;
+    }
+
     public DateTime getPeriodStart() {
         return _periodStart;
     }
@@ -87,6 +102,8 @@ public final class MetricReport {
                 .add("Statistic", _statistic)
                 .add("Metric", _metric)
                 .add("Value", _value)
+                .add("NumeratorUnit", _numeratorUnits)
+                .add("DenominatorUnit", _denominatorUnits)
                 .add("PeriodStart", _periodStart)
                 .toString();
     }
@@ -96,5 +113,7 @@ public final class MetricReport {
     private final String _statistic;
     private final String _metric;
     private final double _value;
+    private final ImmutableList<String> _numeratorUnits;
+    private final ImmutableList<String> _denominatorUnits = ImmutableList.of();
     private final DateTime _periodStart;
 }

@@ -105,9 +105,13 @@ For example:
     "serviceName": "MyApplication",
     "sources":
     [
+        {                                                                 
+            "type": "com.arpnetworking.metrics.common.sources.ClientHttpSourceV1
+            "name": "my_application_http_source"                                   
+        },
         {
             "type": "com.arpnetworking.metrics.common.sources.FileSource",
-            "name": "my_application_source",
+            "name": "my_application_file_source",
             "filePath": "/var/log/my-application-query.log",
             "parser": {
                 "type": "com.arpnetworking.metrics.mad.parsers.QueryLogParser"

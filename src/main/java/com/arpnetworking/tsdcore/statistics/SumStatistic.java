@@ -16,12 +16,9 @@
 package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.logback.annotations.Loggable;
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,6 +26,7 @@ import java.util.Optional;
  * Takes the sum of the entries. Use <code>StatisticFactory</code> for construction.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
 public final class SumStatistic extends BaseStatistic {
@@ -41,28 +39,6 @@ public final class SumStatistic extends BaseStatistic {
     @Override
     public Calculator<Void> createCalculator() {
         return new SumAccumulator(this);
-    }
-
-    @Override
-    public Quantity calculate(final List<Quantity> unorderedValues) {
-        double sum = 0d;
-        Optional<Unit> unit = Optional.empty();
-        for (final Quantity sample : unorderedValues) {
-            sum += sample.getValue();
-            unit = Optional.ofNullable(unit.orElse(sample.getUnit().orElse(null)));
-        }
-        return new Quantity.Builder().setValue(sum).setUnit(unit.orElse(null)).build();
-    }
-
-    @Override
-    public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
-        double sum = 0;
-        Optional<Unit> unit = Optional.empty();
-        for (final AggregatedData aggregation : aggregations) {
-            sum += aggregation.getValue().getValue();
-            unit = Optional.ofNullable(unit.orElse(aggregation.getValue().getUnit().orElse(null)));
-        }
-        return new Quantity.Builder().setValue(sum).setUnit(unit.orElse(null)).build();
     }
 
     private SumStatistic() { }
@@ -87,6 +63,9 @@ public final class SumStatistic extends BaseStatistic {
 
         @Override
         public Accumulator<Void> accumulate(final Quantity quantity) {
+            // Assert: that under the new Quantity normalization the units should always be the same.
+            assertUnit(_sum.map(Quantity::getUnit).orElse(Optional.empty()), quantity.getUnit(), _sum.isPresent());
+
             if (_sum.isPresent()) {
                 _sum = Optional.of(_sum.get().add(quantity));
             } else {

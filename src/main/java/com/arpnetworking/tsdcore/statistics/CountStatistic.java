@@ -16,12 +16,10 @@
 package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.logback.annotations.Loggable;
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,20 +44,6 @@ public final class CountStatistic extends BaseStatistic {
     @Override
     public Calculator<Void> createCalculator() {
         return new CountAccumulator(this);
-    }
-
-    @Override
-    public Quantity calculate(final List<Quantity> unorderedValues) {
-        return new Quantity.Builder().setValue((double) unorderedValues.size()).build();
-    }
-
-    @Override
-    public Quantity calculateAggregations(final List<AggregatedData> aggregations) {
-        double count = 0;
-        for (final AggregatedData aggregation : aggregations) {
-            count += aggregation.getValue().getValue();
-        }
-        return new Quantity.Builder().setValue(count).build();
     }
 
     private CountStatistic() { }
