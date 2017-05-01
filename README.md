@@ -106,7 +106,7 @@ For example:
     "sources":
     [
         {                                                                 
-            "type": "com.arpnetworking.metrics.common.sources.ClientHttpSourceV1
+            "type": "com.arpnetworking.metrics.common.sources.ClientHttpSourceV1",
             "name": "my_application_http_source"                                   
         },
         {
