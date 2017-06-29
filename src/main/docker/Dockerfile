@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:8u121-jre-alpine
+FROM openjdk:8u131-jre-alpine
 
 MAINTAINER arpnetworking
 
