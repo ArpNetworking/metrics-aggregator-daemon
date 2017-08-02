@@ -265,7 +265,7 @@ public final class PipelineConfiguration {
         @NotNull
         @NotEmpty
         private Set<Statistic> _timerStatistics = Sets.<Statistic>newHashSet(
-                STATISTIC_FACTORY.getStatistic("mean"),
+                STATISTIC_FACTORY.getStatistic("median"),
                 STATISTIC_FACTORY.getStatistic("tp90"),
                 STATISTIC_FACTORY.getStatistic("tp99"),
                 STATISTIC_FACTORY.getStatistic("mean"),
