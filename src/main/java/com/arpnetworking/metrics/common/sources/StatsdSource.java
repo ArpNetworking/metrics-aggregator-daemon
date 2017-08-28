@@ -94,12 +94,14 @@ public final class StatsdSource extends ActorSource {
                 _isReady = true;
             } else if (message instanceof Udp.Received) {
                 final Udp.Received updReceived = (Udp.Received) message;
-                LOGGER.debug()
+                LOGGER.trace()
                         .setMessage("Statsd received datagram")
                         .addData("bytes", updReceived.data().size())
                         .log();
 
                 try {
+                    // NOTE: The parsing occurs in the actor itself which can become a bottleneck
+                    // if there are more records to be parsed then a single thread can handle.
                     final List<Record> records = PARSER.parse(updReceived.data().toByteBuffer());
                     records.forEach(_sink::notify);
                 } catch (final ParserException e) {
