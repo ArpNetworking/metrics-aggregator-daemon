@@ -111,6 +111,7 @@
     <scala.java.compat.version>0.7.0</scala.java.compat.version>
     <scala.library.version>2.11.7</scala.library.version>
     <slf4j.version>1.7.12</slf4j.version>
+    <statsd.client.timgroup>3.0.1</statsd.client.timgroup>
     <typesafe.config.version>1.3.1</typesafe.config.version>
     <vertx.core.version>2.1.6</vertx.core.version>
     <wiremock.version>1.57</wiremock.version>
@@ -671,6 +672,12 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
       <version>${commons.math3.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.timgroup</groupId>
+      <artifactId>java-statsd-client</artifactId>
+      <version>${statsd.client.timgroup}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

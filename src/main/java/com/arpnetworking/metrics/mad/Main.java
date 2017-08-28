@@ -144,12 +144,8 @@ public final class Main implements Launchable {
         } catch (final InterruptedException e) {
             throw new RuntimeException(e);
         } finally {
-            if (configurator.isPresent()) {
-                configurator.get().shutdown();
-            }
-            if (configuration.isPresent()) {
-                configuration.get().shutdown();
-            }
+            configurator.ifPresent(Configurator::shutdown);
+            configuration.ifPresent(DynamicConfiguration::shutdown);
             // Notify the shutdown that we're done
             SHUTDOWN_SEMAPHORE.release();
         }
