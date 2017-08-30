@@ -129,7 +129,7 @@
 
     <!-- JVM Debug -->
     <debugJavaOptions />
-    <debugJavaPort>9000</debugJavaPort>
+    <debugJavaPort>9001</debugJavaPort>
   </properties>
   <build>
     <resources>
