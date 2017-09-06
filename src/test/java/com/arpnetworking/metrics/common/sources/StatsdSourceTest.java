@@ -34,7 +34,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import scala.concurrent.duration.Duration;
@@ -92,14 +91,16 @@ public final class StatsdSourceTest {
             // Send metrics using statsd over udp
             final StatsDClient statsdClient = new NonBlockingStatsDClient("StatsdSourceTest.test", "localhost", 1234);
             statsdClient.count("counter1", 3);
+            statsdClient.count("counter2", 2);
             statsdClient.stop();
 
             // Captor observation of the resulting records
-            Mockito.verify(observer, Mockito.timeout(1000)).notify(
-                    Matchers.same(statsdSource),
+            Mockito.verify(observer, Mockito.timeout(1000).times(2)).notify(
+                    Mockito.same(statsdSource),
                     _recordCaptor.capture());
 
             // Verify the captured records
+            Assert.assertEquals(2, _recordCaptor.getAllValues().size());
             assertRecordEquality(
                     new DefaultRecord.Builder()
                             .setTime(DateTime.now())
@@ -114,7 +115,22 @@ public final class StatsdSourceTest {
                                                             .build()))
                                             .build()))
                             .build(),
-                    _recordCaptor.getValue());
+                    _recordCaptor.getAllValues().get(0));
+            assertRecordEquality(
+                    new DefaultRecord.Builder()
+                            .setTime(DateTime.now())
+                            .setId(UUID.randomUUID().toString())
+                            .setMetrics(ImmutableMap.of(
+                                    "StatsdSourceTest.test.counter2",
+                                    new DefaultMetric.Builder()
+                                            .setType(MetricType.COUNTER)
+                                            .setValues(Collections.singletonList(
+                                                    new Quantity.Builder()
+                                                            .setValue(2d)
+                                                            .build()))
+                                            .build()))
+                            .build(),
+                    _recordCaptor.getAllValues().get(1));
         }};
         // CHECKSTYLE.ON: AnonInnerLength
     }
