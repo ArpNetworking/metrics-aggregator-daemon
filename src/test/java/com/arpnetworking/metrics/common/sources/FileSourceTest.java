@@ -66,8 +66,8 @@ public class FileSourceTest {
         Mockito.when(_logger.warn()).thenReturn(_logBuilder);
         Mockito.when(_logger.error()).thenReturn(_logBuilder);
         Mockito.when(_logBuilder.setMessage(Mockito.anyString())).thenReturn(_logBuilder);
-        Mockito.when(_logBuilder.addData(Mockito.anyString(), Mockito.anyString())).thenReturn(_logBuilder);
-        Mockito.when(_logBuilder.addContext(Mockito.anyString(), Mockito.anyString())).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.addData(Mockito.anyString(), Mockito.any())).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.addContext(Mockito.anyString(), Mockito.any())).thenReturn(_logBuilder);
         Mockito.when(_logBuilder.setEvent(Mockito.anyString())).thenReturn(_logBuilder);
         Mockito.when(_logBuilder.setThrowable(Mockito.any(Throwable.class))).thenReturn(_logBuilder);
     }
