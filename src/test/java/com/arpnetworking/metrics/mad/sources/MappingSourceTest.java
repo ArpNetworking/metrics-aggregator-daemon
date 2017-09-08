@@ -27,7 +27,6 @@ import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

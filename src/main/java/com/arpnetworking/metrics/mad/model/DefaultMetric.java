@@ -23,7 +23,6 @@ import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-
 import net.sf.oval.constraint.NotNull;
 
 import java.util.List;

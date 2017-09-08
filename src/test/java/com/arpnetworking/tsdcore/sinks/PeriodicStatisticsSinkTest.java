@@ -18,7 +18,6 @@ package com.arpnetworking.tsdcore.sinks;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.test.TestBeanFactory;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

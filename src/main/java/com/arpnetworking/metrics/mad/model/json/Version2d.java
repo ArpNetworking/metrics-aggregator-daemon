@@ -22,10 +22,8 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-
 import net.sf.oval.constraint.MatchPattern;
 import net.sf.oval.constraint.NotNull;
-
 import org.joda.time.DateTime;
 
 import java.util.Collections;

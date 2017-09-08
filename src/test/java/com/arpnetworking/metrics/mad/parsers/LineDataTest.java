@@ -18,7 +18,6 @@ package com.arpnetworking.metrics.mad.parsers;
 
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.google.common.base.Charsets;
-
 import org.junit.Assert;
 import org.junit.Test;
 

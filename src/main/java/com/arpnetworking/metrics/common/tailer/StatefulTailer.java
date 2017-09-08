@@ -425,7 +425,7 @@ public final class StatefulTailer implements Tailer {
         } else {
             appliedLength = prefixLength;
         }
-        try (final SeekableByteChannel reader = Files.newByteChannel(_file, StandardOpenOption.READ)) {
+        try (SeekableByteChannel reader = Files.newByteChannel(_file, StandardOpenOption.READ)) {
             final Optional<String> filePrefixHash = computeHash(
                     reader,
                     appliedLength);

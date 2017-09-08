@@ -19,7 +19,6 @@ import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.arpnetworking.utility.test.BuildableEqualsAndHashCodeTester;
-
 import org.junit.Assert;
 import org.junit.Test;
 

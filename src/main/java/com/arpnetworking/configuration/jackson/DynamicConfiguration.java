@@ -64,7 +64,7 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
                 .setMessage("Launching")
                 .addData("component", this)
                 .log();
-        _triggerEvaluatorExecutor = Executors.newSingleThreadExecutor((runnable) -> new Thread(runnable, "DynamicConfigTriggerEvaluator"));
+        _triggerEvaluatorExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "DynamicConfigTriggerEvaluator"));
         _triggerEvaluatorExecutor.execute(_triggerEvaluator);
     }
 

@@ -189,7 +189,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
 
     @SuppressWarnings("unused") // Invoked reflectively from Builder
     private PeriodicStatisticsSink(final Builder builder) {
-        this(builder, Executors.newSingleThreadScheduledExecutor((runnable) -> new Thread(runnable, "PeriodStatisticsSink")));
+        this(builder, Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "PeriodStatisticsSink")));
     }
 
     private final MetricsFactory _metricsFactory;

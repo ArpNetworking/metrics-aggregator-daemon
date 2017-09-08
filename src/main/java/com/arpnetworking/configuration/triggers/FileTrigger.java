@@ -100,7 +100,7 @@ public final class FileTrigger implements Trigger {
 
     @SuppressFBWarnings("PZLA_PREFER_ZERO_LENGTH_ARRAYS")
     private byte[] createHash(final File file) {
-        try (final FileInputStream inputStream = new FileInputStream(file)) {
+        try (FileInputStream inputStream = new FileInputStream(file)) {
             final byte[] bytesBuffer = new byte[1024];
             int bytesRead = -1;
             _md5.reset();
