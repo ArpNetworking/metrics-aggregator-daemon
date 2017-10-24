@@ -64,6 +64,11 @@ public final class StatsdSource extends ActorSource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatsdSource.class);
     private static final Parser<List<Record>, ByteBuffer> PARSER = new StatsdToRecordParser();
+    
+    /**
+     * Name of the actor created to receive the Statsd datagrams.
+     */
+    public static final String ACTOR_NAME = "statsd";
 
     /**
      * Internal actor to process requests.
@@ -161,6 +166,7 @@ public final class StatsdSource extends ActorSource {
          */
         public Builder() {
             super(StatsdSource::new);
+            setActorName(ACTOR_NAME);
         }
 
         /**
