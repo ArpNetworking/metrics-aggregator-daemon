@@ -51,7 +51,7 @@ public class ParsingException extends Exception {
         return _offendingData;
     }
 
-    // TODO(barp): change this into a List or similar struture to ensure no modifications
+    // TODO(barp): change this into a List or similar structure to ensure no modifications
     private final byte[] _offendingData;
 
     private static final long serialVersionUID = 1L;
