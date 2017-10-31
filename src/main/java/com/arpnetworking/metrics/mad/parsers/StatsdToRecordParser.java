@@ -24,7 +24,9 @@ import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -77,38 +79,43 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
     public List<Record> parse(final ByteBuffer datagram) throws ParsingException {
         // CHECKSTYLE.OFF: IllegalInstantiation - This is the recommended way
         final String datagramAsString = new String(datagram.array(), Charsets.UTF_8);
-        // CHECKSTYLE.ON: IllegalInstantiation
-        final Matcher matcher = STATSD_PATTERN.matcher(datagramAsString);
-        if (!matcher.matches()) {
-            throw new ParsingException("Invalid statsd datagram", datagram.array());
+        final ImmutableList.Builder<Record> recordListBuilder = ImmutableList.builder();
+        for (final String line : LINE_SPLITTER.split(datagramAsString)) {
+            // CHECKSTYLE.ON: IllegalInstantiation
+            final Matcher matcher = STATSD_PATTERN.matcher(line);
+            if (!matcher.matches()) {
+                throw new ParsingException("Invalid statsd line", line.getBytes(Charsets.UTF_8));
+            }
+
+            // Parse the name
+            final String name = parseName(datagram, matcher.group("NAME"));
+
+            // Parse the _metricType
+            final StatsdType type = parseStatsdType(datagram, matcher.group("TYPE"));
+
+            // Parse the value
+            final Number value = parseValue(datagram, matcher.group("VALUE"), type);
+
+            // Parse the value
+            final Optional<Double> sampleRate = parseSampleRate(datagram, matcher.group("SAMPLERATE"), type);
+
+            // Parse the tags
+            final ImmutableMap<String, String> annotations = parseTags(matcher.group("TAGS"));
+
+            // Enforce sampling
+            if (sampleRate.isPresent() && sampleRate.get().compareTo(1.0) != 0) {
+                if (sampleRate.get().compareTo(0.0) == 0) {
+                    return Collections.emptyList();
+                }
+                if (Double.compare(_randomSupplier.get().nextDouble(), sampleRate.get()) > 0) {
+                    return Collections.emptyList();
+                }
+            }
+
+            recordListBuilder.add(createRecord(name, value, type, annotations));
         }
 
-        // Parse the name
-        final String name = parseName(datagram, matcher.group("NAME"));
-
-        // Parse the _metricType
-        final StatsdType type = parseStatsdType(datagram, matcher.group("TYPE"));
-
-        // Parse the value
-        final Number value = parseValue(datagram, matcher.group("VALUE"), type);
-
-        // Parse the value
-        final Optional<Double> sampleRate = parseSampleRate(datagram, matcher.group("SAMPLERATE"), type);
-
-        // Parse the tags
-        final ImmutableMap<String, String> annotations = parseTags(matcher.group("TAGS"));
-
-        // Enforce sampling
-        if (sampleRate.isPresent() && sampleRate.get().compareTo(1.0) != 0) {
-            if (sampleRate.get().compareTo(0.0) == 0) {
-                return Collections.emptyList();
-            }
-            if (Double.compare(_randomSupplier.get().nextDouble(), sampleRate.get()) > 0) {
-                return Collections.emptyList();
-            }
-        }
-
-        return Collections.singletonList(createRecord(name, value, type, annotations));
+        return recordListBuilder.build();
     }
 
     private StatsdType parseStatsdType(final ByteBuffer datagram, final @Nullable String statsdTypeAsString) throws ParsingException {
@@ -225,6 +232,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
             StatsdType.COUNTER,
             StatsdType.HISTOGRAM,
             StatsdType.TIMER);
+    private static final Splitter LINE_SPLITTER = Splitter.on('\n').omitEmptyStrings();
     private static final ThreadLocal<NumberFormat> NUMBER_FORMAT = ThreadLocal.withInitial(NumberFormat::getInstance);
     private static final Pattern STATSD_PATTERN = Pattern.compile(
             "^(?<NAME>[^:@|]+):(?<VALUE>[^|]+)\\|(?<TYPE>[^|]+)(\\|@(?<SAMPLERATE>[^|]+))?(\\|#(?<TAGS>.+))?$");

@@ -356,6 +356,7 @@
                 <ports>
                   <port>${debugJavaPort}:${debugJavaPort}</port>
                   <port>7090:7090</port>
+                  <port>8125:8125/udp</port>
                 </ports>
                 <volumes>
                   <bind>

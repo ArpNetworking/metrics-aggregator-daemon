@@ -64,7 +64,7 @@ public final class StatsdSource extends ActorSource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatsdSource.class);
     private static final Parser<List<Record>, ByteBuffer> PARSER = new StatsdToRecordParser();
-    
+
     /**
      * Name of the actor created to receive the Statsd datagrams.
      */
@@ -90,18 +90,20 @@ public final class StatsdSource extends ActorSource {
                 getSender().tell(_isReady, getSelf());
             } else if (message instanceof Udp.Bound) {
                 final Udp.Bound updBound = (Udp.Bound) message;
-                LOGGER.debug()
+                _socket = getSender();
+                _isReady = true;
+                LOGGER.info()
                         .setMessage("Statsd server binding complete")
                         .addData("address", updBound.localAddress().getAddress().getHostAddress())
                         .addData("port", updBound.localAddress().getPort())
+                        .addData("socket", _socket)
                         .log();
-                _socket = getSender();
-                _isReady = true;
             } else if (message instanceof Udp.Received) {
                 final Udp.Received updReceived = (Udp.Received) message;
                 LOGGER.trace()
                         .setMessage("Statsd received datagram")
                         .addData("bytes", updReceived.data().size())
+                        .addData("socket", _socket)
                         .log();
 
                 try {
@@ -112,14 +114,23 @@ public final class StatsdSource extends ActorSource {
                 } catch (final ParserException e) {
                     BAD_REQUEST_LOGGER.warn()
                             .setMessage("Error handling statsd datagram")
+                            .addData("socket", _socket)
                             .setThrowable(e)
                             .log();
                 }
 
             } else if (Objects.equals(message, UdpMessage.unbind())) {
+                LOGGER.debug()
+                        .setMessage("Statsd unbind")
+                        .addData("socket", _socket)
+                        .log();
                 _socket.tell(message, getSelf());
 
             } else if (message instanceof Udp.Unbound) {
+                LOGGER.debug()
+                        .setMessage("Statsd unbound")
+                        .addData("socket", _socket)
+                        .log();
                 getContext().stop(getSelf());
 
             } else {
