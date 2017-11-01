@@ -242,7 +242,7 @@
               <attach>true</attach>
               <tarLongFileMode>posix</tarLongFileMode>
               <descriptors>
-                <descripto>src/main/assembly/bin.xml</descripto>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
