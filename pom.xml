@@ -239,7 +239,7 @@
             </goals>
             <configuration>
               <appendAssemblyId>true</appendAssemblyId>
-              <attach>true</attach>
+              <attach>false</attach>
               <tarLongFileMode>posix</tarLongFileMode>
               <descriptors>
                 <descriptor>src/main/assembly/bin.xml</descriptor>

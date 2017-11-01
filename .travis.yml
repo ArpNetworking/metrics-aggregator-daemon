@@ -28,7 +28,9 @@ deploy:
   provider: releases
   api_key:
     secure: bxSKQTLliVNH8RQ77oYi28EF/+z+aJ6Ihc5eOCITYEooUaBsBFdWeHBIkNReKKZvbbE5DllwnwxzhO/X2L58yt2M57tCUE/XsuAacpcKzRJZatxZ5g449vVObBSJKL/CvqC90L6GolL9X9aSZ2GSSdmbOFaQEyzLoD3Eld+mBw5MZettCzH1MCtybkxXCZG0vY7N9KuPWECjWZEU0AryWIRmP/KImeYFgkPOy88QjYz9R97teEcTSjEYrdDpprzzwCmKQEBhu3Hc8BG4SnWgVgd17OLDx4rvAtuDD8ZYu0HZn6ydhOJAomzKJwTq79IzrRuyvEhzaYfmBV/396OVCM/fy8RCWuuWGPG6OjRfBggZJd3OutVu0hg6RDJU+ki9MmLIo5/XdHvwaVkd1okwNCI8or2vXHYIUeANB3VNQGHviv0rHYD3OLT+U9UiXALVAmf18owj7+ZO3rdZBWQFVq+OprdU4fVCuLRwnLKo9AjARBq2AD9/DirKnt12xk9Kae4In2NNOxcK9PY9Jajmz3SS5ergpSz6iwM+05ZIbJQXN+CFnRSfXxdtRZbqcpZAI+V/syPYq8RI/S6xLNiJwd1Y9xEeKeMUapa9dCDFXPwfNOoTE9YHAM81i2E9UQqAqpzMWB9CbT9IQI2PcJawqy83dmdQE+o+gm/SMIDQCeA=
-  file: target/rpm/metrics-aggregator-daemon/RPMS/noarch/metrics-aggregator-daemon*.rpm
+  file:
+    - target/rpm/metrics-aggregator-daemon/RPMS/noarch/metrics-aggregator-daemon*.rpm
+    - target/metrics-aggregator-daemon*-bin.tgz
   file_glob: true
   skip_cleanup: true
   on:
