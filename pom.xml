@@ -231,6 +231,21 @@
               </descriptors>
             </configuration>
           </execution>
+          <execution>
+            <id>app-tgz</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <appendAssemblyId>true</appendAssemblyId>
+              <attach>true</attach>
+              <tarLongFileMode>posix</tarLongFileMode>
+              <descriptors>
+                <descripto>src/main/assembly/bin.xml</descripto>
+              </descriptors>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -290,7 +305,7 @@
           </dependency>
         </dependencies>
       </plugin>
-      <plugin>
+      <!-- plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
         <version>${docker.maven.plugin.version}</version>
@@ -369,7 +384,6 @@
                     <method>GET</method>
                     <status>200</status>
                   </http>
-                  <!-- NOTE: The service is _really_ slow to start-up under native docker -->
                   <time>150000</time>
                   <kill>1000</kill>
                 </wait>
@@ -377,7 +391,7 @@
             </image>
           </images>
         </configuration>
-      </plugin>
+      </plugin -->
     </plugins>
   </build>
 
