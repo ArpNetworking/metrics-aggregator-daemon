@@ -21,11 +21,11 @@ import akka.actor.UntypedActor;
 import akka.io.Udp;
 import akka.io.UdpMessage;
 import com.arpnetworking.metrics.common.parsers.Parser;
+import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.parsers.StatsdToRecordParser;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import jdk.nashorn.internal.runtime.ParserException;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
@@ -111,7 +111,7 @@ public final class StatsdSource extends ActorSource {
                     // if there are more records to be parsed then a single thread can handle.
                     final List<Record> records = PARSER.parse(updReceived.data().toByteBuffer());
                     records.forEach(_sink::notify);
-                } catch (final ParserException e) {
+                } catch (final ParsingException e) {
                     BAD_REQUEST_LOGGER.warn()
                             .setMessage("Error handling statsd datagram")
                             .addData("socket", _socket)

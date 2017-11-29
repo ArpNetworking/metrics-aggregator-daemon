@@ -1,0 +1,13 @@
+{
+  "fields":{
+    "foo.t1":123,
+    "bar.t2":1.23
+  },
+  "name":"",
+  "tags":{
+    "cluster":"MyCluster",
+    "service":"MyService",
+    "host":"MyHost"
+  },
+  "timestamp":1458229140
+}

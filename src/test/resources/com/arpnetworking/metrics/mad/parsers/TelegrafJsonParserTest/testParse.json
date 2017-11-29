@@ -1,0 +1,18 @@
+{
+  "fields":{
+    "t1":123,
+    "t2":1.23,
+    "g1":246,
+    "g2":2.46,
+    "c1":1
+  },
+  "name":"MyName",
+  "tags":{
+    "cluster":"MyCluster",
+    "service":"MyService",
+    "host":"MyHost",
+    "region":"US",
+    "foo":"bar"
+  },
+  "timestamp":1458229140
+}
