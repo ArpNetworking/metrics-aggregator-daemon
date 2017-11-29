@@ -96,7 +96,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
             // Parse the value
             final Number value = parseValue(datagram, matcher.group("VALUE"), type);
 
-            // Parse the value
+            // Parse the sample rate
             final Optional<Double> sampleRate = parseSampleRate(datagram, matcher.group("SAMPLERATE"), type);
 
             // Parse the tags

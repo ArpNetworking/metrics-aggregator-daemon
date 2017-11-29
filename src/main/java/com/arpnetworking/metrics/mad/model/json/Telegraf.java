@@ -32,7 +32,7 @@ import net.sf.oval.constraint.NotNull;
 @Loggable
 public final class Telegraf {
 
-    public ImmutableMap<String, Number> getFields() {
+    public ImmutableMap<String, String> getFields() {
         return _fields;
     }
 
@@ -57,7 +57,7 @@ public final class Telegraf {
 
     private final ImmutableMap<String, String> _tags;
     private final long _timestamp;
-    private final ImmutableMap<String, Number> _fields;
+    private final ImmutableMap<String, String> _fields;
     private final String _name;
 
     /**
@@ -99,7 +99,7 @@ public final class Telegraf {
          * @param value the fields
          * @return This builder
          */
-        public Builder setFields(final ImmutableMap<String, Number> value) {
+        public Builder setFields(final ImmutableMap<String, String> value) {
             _fields = value;
             return this;
         }
@@ -121,7 +121,7 @@ public final class Telegraf {
         @NotNull
         private Long _timestamp;
         @NotNull
-        private ImmutableMap<String, Number> _fields = ImmutableMap.of();
+        private ImmutableMap<String, String> _fields = ImmutableMap.of();
         @NotNull
         private String _name;
     }

@@ -1,0 +1,1 @@
+foo.bar;cluster=MyCluster;service=MyService;host=MyHost;region=US;foo=bar 1.23 1458229140

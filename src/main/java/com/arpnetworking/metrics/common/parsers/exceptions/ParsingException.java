@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.common.parsers.exceptions;
 
+import com.arpnetworking.logback.annotations.Loggable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
@@ -23,6 +24,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
+@Loggable
 public class ParsingException extends Exception {
     /**
      * Public constructor with a description.
