@@ -36,40 +36,93 @@ import org.joda.time.DateTimeZone;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
- * Parses Telegraf JSON data as a {@link Record}. As defined here.
+ * Parses Telegraf JSON data as a {@link Record}. As defined here:
  *
  * https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md#json
+ *
+ * Sample MAD configuration:
+ * <pre>
+ * {
+ *   type="com.arpnetworking.metrics.mad.sources.MappingSource"
+ *   name="telegraftcp_mapping_source"
+ *   findAndReplace={
+ *     "\\."=["/"]
+ *   }
+ *   source={
+ *     type="com.arpnetworking.metrics.common.sources.TcpLineSource"
+ *     actorName="telegraf-tcp-source"
+ *     name="telegraftcp_source"
+ *     host="0.0.0.0"
+ *     port="8094"
+ *     parser={
+ *       type="com.arpnetworking.metrics.mad.parsers.TelegrafJsonToRecordParser"
+ *       timestampUnit="NANOSECONDS"
+ *     }
+ *   }
+ * }
+ * </pre>
+ *
+ * Sample Telegraf configuration:
+ * <pre>
+ * [agent]
+ * interval="1s"
+ * flush_interval="1s"
+ * round_interval=true
+ * omit_hostname=false
+ *
+ * [global_tags]
+ * service="telegraf"
+ * cluster="telegraf_local"
+ *
+ * [[outputs.socket_writer]]
+ * address = "tcp://127.0.0.1:8094"
+ * data_format = "json"
+ * json_timestamp_units = "1ns"
+ * keep_alive_period = "5m"
+ *
+ * [[inputs.cpu]]
+ * percpu = true
+ * totalcpu = true
+ * collect_cpu_time = false
+ * report_active = false
+ * </pre>
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public final class TelegrafJsonToRecordParser implements Parser<List<Record>, ByteBuffer> {
 
     /**
-     * Parses a telegraf JSON datagram.
+     * Parses a telegraf JSON record.
      *
-     * @param data a telegraph JSON blob
+     * @param record a telegraph JSON record
      * @return A list of {@link DefaultRecord.Builder}
      * @throws ParsingException if the data is not parsable as telegraf JSON
      */
-    public List<Record> parse(final ByteBuffer data) throws ParsingException {
+    public List<Record> parse(final ByteBuffer record) throws ParsingException {
         try {
-            final Telegraf telegraf = OBJECT_MAPPER.readValue(data.array(), Telegraf.class);
+            final Telegraf telegraf = OBJECT_MAPPER.readValue(record.array(), Telegraf.class);
             final ImmutableMap.Builder<String, Metric> metrics = ImmutableMap.builder();
-            for (final Map.Entry<String, Number> entry : telegraf.getFields().entrySet()) {
-                metrics.put(
-                        telegraf.getName().isEmpty() ? entry.getKey() : telegraf.getName() + "." + entry.getKey(),
-                        new DefaultMetric.Builder()
-                                .setType(MetricType.TIMER)
-                                .setValues(Collections.singletonList(
-                                        new Quantity.Builder()
-                                                .setValue(entry.getValue().doubleValue())
-                                                .build()))
-                                .build());
+            for (final Map.Entry<String, String> entry : telegraf.getFields().entrySet()) {
+                final @Nullable Double value = parseValue(entry.getValue());
+                if (value != null) {
+                    metrics.put(
+                            telegraf.getName().isEmpty() ? entry.getKey() : telegraf.getName() + "." + entry.getKey(),
+                            new DefaultMetric.Builder()
+                                    .setType(MetricType.TIMER)
+                                    .setValues(Collections.singletonList(
+                                            new Quantity.Builder()
+                                                    .setValue(value)
+                                                    .build()))
+                                    .build());
+                }
             }
             final DateTime timestamp = _timestampUnit.create(telegraf.getTimestamp());
             return Collections.singletonList(
@@ -80,8 +133,21 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
                             .setTime(timestamp)
                             .build());
         } catch (final IOException e) {
-            throw new ParsingException("Invalid json", data.array(), e);
+            throw new ParsingException("Invalid json", record.array(), e);
         }
+    }
+
+    private @Nullable Double parseValue(final String value) {
+        try {
+            return NUMBER_FORMAT.get().parse(value).doubleValue();
+        } catch (final ParseException e) {
+            if ("true".equalsIgnoreCase(value)) {
+                return 1d;
+            } else if ("false".equalsIgnoreCase(value)) {
+                return 0d;
+            }
+        }
+        return null;
     }
 
     private TelegrafJsonToRecordParser(final Builder builder) {
@@ -91,6 +157,7 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
     private final TimestampUnit _timestampUnit;
 
     private static final UuidFactory UUID_FACTORY = new SplittableRandomUuidFactory();
+    private static final ThreadLocal<NumberFormat> NUMBER_FORMAT = ThreadLocal.withInitial(NumberFormat::getInstance);
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
 
     /**

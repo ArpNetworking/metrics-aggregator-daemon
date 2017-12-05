@@ -264,7 +264,7 @@ public final class PipelineConfiguration {
         private Set<Period> _periods = Sets.newHashSet(Period.seconds(1), Period.minutes(1));
         @NotNull
         @NotEmpty
-        private Set<Statistic> _timerStatistics = Sets.<Statistic>newHashSet(
+        private Set<Statistic> _timerStatistics = Sets.newHashSet(
                 STATISTIC_FACTORY.getStatistic("median"),
                 STATISTIC_FACTORY.getStatistic("tp90"),
                 STATISTIC_FACTORY.getStatistic("tp99"),
@@ -272,13 +272,13 @@ public final class PipelineConfiguration {
                 STATISTIC_FACTORY.getStatistic("count"));
         @NotNull
         @NotEmpty
-        private Set<Statistic> _counterStatistics = Sets.<Statistic>newHashSet(
+        private Set<Statistic> _counterStatistics = Sets.newHashSet(
                 STATISTIC_FACTORY.getStatistic("mean"),
                 STATISTIC_FACTORY.getStatistic("sum"),
                 STATISTIC_FACTORY.getStatistic("count"));
         @NotNull
         @NotEmpty
-        private Set<Statistic> _gaugeStatistics = Sets.<Statistic>newHashSet(
+        private Set<Statistic> _gaugeStatistics = Sets.newHashSet(
                 STATISTIC_FACTORY.getStatistic("min"),
                 STATISTIC_FACTORY.getStatistic("max"),
                 STATISTIC_FACTORY.getStatistic("mean"));
