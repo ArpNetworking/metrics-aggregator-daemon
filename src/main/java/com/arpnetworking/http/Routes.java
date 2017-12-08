@@ -53,13 +53,14 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.base.Charsets;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -87,7 +88,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
             final PeriodicMetrics metrics,
             final String healthCheckPath,
             final String statusPath,
-            final List<SupplementalRoutes> supplementalRoutes) {
+            final ImmutableList<SupplementalRoutes> supplementalRoutes) {
         _actorSystem = actorSystem;
         _metrics = metrics;
         _healthCheckPath = healthCheckPath;
@@ -126,6 +127,14 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                             createMetricName(request, REQUEST_METRIC),
                             requestTimer.elapsed(TimeUnit.NANOSECONDS),
                             Optional.of(Units.NANOSECOND));
+
+                    final int responseStatusClass = response.status().intValue() / 100;
+                    for (final int i : STATUS_CLASSES) {
+                        _metrics.recordCounter(
+                                createMetricName(request, String.format("%s/%dxx", STATUS_METRIC, i)),
+                                responseStatusClass == i ? 1 : 0);
+                    }
+
                     final LogBuilder log = LOGGER.trace()
                             .setEvent("http.in")
                             .addData("method", request.method())
@@ -141,12 +150,12 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
 
     private CompletionStage<HttpResponse> process(final HttpRequest request) {
         final String path = request.getUri().path();
-        if (HttpMethods.GET.equals(request.method())) {
-            if (TELEMETRY_STREAM_V1_PATH.equals(path)) {
+        if (Objects.equals(HttpMethods.GET, request.method())) {
+            if (Objects.equals(TELEMETRY_STREAM_V1_PATH, path)) {
                 return getHttpResponseForTelemetry(request, TELEMETRY_V1_FACTORY);
-            } else if (TELEMETRY_STREAM_V2_PATH.equals(path)) {
+            } else if (Objects.equals(TELEMETRY_STREAM_V2_PATH, path)) {
                 return getHttpResponseForTelemetry(request, TELEMETRY_V2_FACTORY);
-            } else if (_healthCheckPath.equals(path)) {
+            } else if (Objects.equals(_healthCheckPath, path)) {
                 return ask("/user/status", Status.IS_HEALTHY, Boolean.FALSE)
                         .thenApply(
                                 isHealthy -> HttpResponse.create()
@@ -159,16 +168,16 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                                                         "{\"status\":\""
                                                                 + (isHealthy ? HEALTHY_STATE : UNHEALTHY_STATE)
                                                                 + "\"}")));
-            } else if (_statusPath.equals(path)) {
+            } else if (Objects.equals(_statusPath, path)) {
                 return CompletableFuture.completedFuture(
                         HttpResponse.create()
                                 .withStatus(StatusCodes.OK)
                                 .withEntity(JSON_CONTENT_TYPE, ByteString.fromString(STATUS_JSON)));
             }
-        } else if (HttpMethods.POST.equals(request.method())) {
-            if (path.equals(COLLECTD_V1_SOURCE_PREFIX)) {
+        } else if (Objects.equals(HttpMethods.POST, request.method())) {
+            if (Objects.equals(path, COLLECTD_V1_SOURCE_PREFIX)) {
                 return dispatchHttpRequest(request, ACTOR_COLLECTD_V1);
-            } else if (path.equals(APP_V1_SOURCE_PREFIX)) {
+            } else if (Objects.equals(path, APP_V1_SOURCE_PREFIX)) {
                 return dispatchHttpRequest(request, ACTOR_APP_V1);
             }
         }
@@ -274,7 +283,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private final String _healthCheckPath;
     private final String _statusPath;
     @SuppressFBWarnings("SE_BAD_FIELD")
-    private final List<SupplementalRoutes> _supplementalRoutes;
+    private final ImmutableList<SupplementalRoutes> _supplementalRoutes;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Routes.class);
 
@@ -291,6 +300,8 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private static final String REST_SERVICE_METRIC_ROOT = "rest_service/";
     private static final String BODY_SIZE_METRIC = "body_size";
     private static final String REQUEST_METRIC = "request";
+    private static final String STATUS_METRIC = "status";
+    private static final ImmutableList<Integer> STATUS_CLASSES = ImmutableList.of(2, 3, 4, 5);
 
     // Ping
     private static final HttpHeader PING_CACHE_CONTROL_HEADER = CacheControl.create(
