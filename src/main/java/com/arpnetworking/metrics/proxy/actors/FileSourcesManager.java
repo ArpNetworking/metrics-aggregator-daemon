@@ -16,8 +16,8 @@
 
 package com.arpnetworking.metrics.proxy.actors;
 
+import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
@@ -39,13 +39,12 @@ import org.joda.time.Duration;
 import java.nio.file.Path;
 import java.util.Map;
 
-
 /**
  * Actor for handling messages related to live log reporting.
  *
  * @author Mohammed Kamel (mkamel at groupon dot com)
  */
-public final class FileSourcesManager extends UntypedActor {
+public final class FileSourcesManager extends AbstractActor {
     //TODO(barp): Add metrics to this class [MAI-406]
 
     /**
@@ -59,28 +58,23 @@ public final class FileSourcesManager extends UntypedActor {
         _streamContextActor = streamContextActor;
     }
 
-    @Override
-    public void onReceive(final Object message) throws Exception {
-        LOGGER.trace()
-                .setMessage("Received message")
-                .addData("actor", self())
-                .addData("data", message)
-                .log();
-
-        if (message instanceof LogFileAppeared) {
-            final LogFileAppeared logFileAppeared = (LogFileAppeared) message;
-            addSource(logFileAppeared.getFile());
-        } else if (message instanceof LogFileDisappeared) {
-            final LogFileDisappeared logFileDisappeared = (LogFileDisappeared) message;
-            removeSource(logFileDisappeared.getFile());
-        } else {
-            LOGGER.warn()
-                    .setMessage("Unsupported message")
-                    .addData("actor", self())
-                    .addData("data", message)
-                    .log();
-            unhandled(message);
-        }
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(LogFileAppeared.class, message -> {
+                    addSource(message.getFile());
+                })
+                .match(LogFileDisappeared.class, message -> {
+                    removeSource(message.getFile());
+                })
+                .matchAny(message -> {
+                    LOGGER.warn()
+                            .setMessage("Unsupported message")
+                            .addData("actor", self())
+                            .addData("data", message)
+                            .log();
+                    unhandled(message);
+                })
+                .build();
     }
 
     /**

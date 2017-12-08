@@ -15,10 +15,10 @@
  */
 package com.arpnetworking.metrics.proxy.actors;
 
+import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Terminated;
-import akka.actor.UntypedActor;
 import akka.dispatch.ExecutionContexts;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.Metrics;
@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  * @author Mohammed Kamel (mkamel at groupon dot com)
  */
-public class Telemetry extends UntypedActor {
+public class Telemetry extends AbstractActor {
 
     /**
      * Public constructor.
@@ -76,40 +76,27 @@ public class Telemetry extends UntypedActor {
     }
 
     @Override
-    public void onReceive(final Object message) throws Exception {
-        LOGGER.trace()
-                .setMessage("Received message")
-                .addData("actor", self())
-                .addData("data", message)
-                .log();
-
-        if ("instrument".equals(message)) {
-            periodicInstrumentation();
-        } else if (message instanceof Connect) {
-            executeConnect((Connect) message);
-        } else if (message instanceof MetricReport) {
-            executeMetricReport((MetricReport) message);
-        } else if (message instanceof LogLine) {
-            executeLogLine((LogLine) message);
-        } else if (message instanceof MetricsListRequest) {
-            executeMetricsListRequest();
-        } else if (message instanceof LogsListRequest) {
-            executeLogsListRequest();
-        } else if (message instanceof LogFileAppeared) {
-            executeLogAdded((LogFileAppeared) message);
-        } else if (message instanceof LogFileDisappeared) {
-            executeLogRemoved((LogFileDisappeared) message);
-        } else if (message instanceof Terminated) {
-            executeQuit((Terminated) message);
-        } else {
-            _metrics.incrementCounter(UNKNOWN_COUNTER);
-            LOGGER.warn()
-                    .setMessage("Unsupported message")
-                    .addData("actor", self())
-                    .addData("data", message)
-                    .log();
-            unhandled(message);
-        }
+    public Receive createReceive() {
+        return receiveBuilder()
+                .matchEquals("instrument", message -> periodicInstrumentation())
+                .match(Connect.class, this::executeConnect)
+                .match(MetricReport.class, this::executeMetricReport)
+                .match(LogLine.class, this::executeLogLine)
+                .match(MetricsListRequest.class, ignored -> executeMetricsListRequest())
+                .match(LogsListRequest.class, ignored -> executeLogsListRequest())
+                .match(LogFileAppeared.class, this::executeLogAdded)
+                .match(LogFileDisappeared.class, this::executeLogRemoved)
+                .match(Terminated.class, this::executeQuit)
+                .matchAny(message -> {
+                    _metrics.incrementCounter(UNKNOWN_COUNTER);
+                    LOGGER.warn()
+                            .setMessage("Unsupported message")
+                            .addData("actor", self())
+                            .addData("data", message)
+                            .log();
+                    unhandled(message);
+                })
+                .build();
     }
 
     @Override

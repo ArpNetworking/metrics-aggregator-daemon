@@ -16,8 +16,8 @@
 
 package com.arpnetworking.metrics.proxy.actors;
 
+import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.proxy.models.messages.LogFileAppeared;
 import com.arpnetworking.metrics.proxy.models.messages.LogFileDisappeared;
@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
-public final class LogScanner extends UntypedActor {
+public final class LogScanner extends AbstractActor {
 
     /**
      * Public constructor.
@@ -73,37 +73,37 @@ public final class LogScanner extends UntypedActor {
     }
 
     @Override
-    public void onReceive(final Object message) throws Exception {
-        if ("tick".equals(message)) {
-            LOGGER.debug()
-                    .setMessage("Searching for created/deleted logs")
-                    .addData("actor", self())
-                    .addData("scanner", this.toString())
-                    .log();
-            for (final Path logFile : _logs) {
-                if (_nonExistingLogs.contains(logFile) && Files.exists(logFile)) {
-                    LOGGER.info()
-                            .setMessage("Log file materialized")
+    public Receive createReceive() {
+        return receiveBuilder()
+                .matchEquals("tick", message -> {
+                    LOGGER.debug()
+                            .setMessage("Searching for created/deleted logs")
                             .addData("actor", self())
-                            .addData("file", logFile)
+                            .addData("scanner", this.toString())
                             .log();
-                    _fileSourceManagerActor.tell(new LogFileAppeared(logFile), getSelf());
-                    _nonExistingLogs.remove(logFile);
-                    _existingLogs.add(logFile);
-                } else if (_existingLogs.contains(logFile) && Files.notExists(logFile)) {
-                    LOGGER.info()
-                            .setMessage("Log file vanished")
-                            .addData("actor", self())
-                            .addData("file", logFile)
-                            .log();
-                    _fileSourceManagerActor.tell(new LogFileDisappeared(logFile), getSelf());
-                    _existingLogs.remove(logFile);
-                    _nonExistingLogs.add(logFile);
-                }
-            }
-        } else {
-            unhandled(message);
-        }
+                    for (final Path logFile : _logs) {
+                        if (_nonExistingLogs.contains(logFile) && Files.exists(logFile)) {
+                            LOGGER.info()
+                                    .setMessage("Log file materialized")
+                                    .addData("actor", self())
+                                    .addData("file", logFile)
+                                    .log();
+                            _fileSourceManagerActor.tell(new LogFileAppeared(logFile), getSelf());
+                            _nonExistingLogs.remove(logFile);
+                            _existingLogs.add(logFile);
+                        } else if (_existingLogs.contains(logFile) && Files.notExists(logFile)) {
+                            LOGGER.info()
+                                    .setMessage("Log file vanished")
+                                    .addData("actor", self())
+                                    .addData("file", logFile)
+                                    .log();
+                            _fileSourceManagerActor.tell(new LogFileDisappeared(logFile), getSelf());
+                            _existingLogs.remove(logFile);
+                            _nonExistingLogs.add(logFile);
+                        }
+                    }
+                })
+                .build();
     }
 
     /**

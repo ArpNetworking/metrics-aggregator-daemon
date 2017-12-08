@@ -15,21 +15,23 @@
  */
 package com.arpnetworking.metrics.mad.actors;
 
-import akka.actor.UntypedActor;
+import akka.actor.AbstractActor;
 
 /**
  * Actor to determine the status of the system.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
-public class Status extends UntypedActor {
+public class Status extends AbstractActor {
 
     @Override
-    public void onReceive(final Object message) throws Exception {
-        if (IS_HEALTHY.equals(message)) {
-            // TODO(vkoskela): Implement a deep health check [MAI-?]
-            getSender().tell(Boolean.TRUE, self());
-        }
+    public Receive createReceive() {
+        return receiveBuilder()
+                .matchEquals(IS_HEALTHY, message -> {
+                    // TODO(vkoskela): Implement a deep health check [MAI-?]
+                    getSender().tell(Boolean.TRUE, self());
+                })
+                .build();
     }
 
     /**
