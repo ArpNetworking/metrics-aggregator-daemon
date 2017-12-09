@@ -66,7 +66,6 @@ import scala.concurrent.duration.Duration;
 
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -212,7 +211,7 @@ public final class Main implements Launchable {
         actorSystem.actorOf(Props.create(Telemetry.class, injector.getInstance(MetricsFactory.class)), "telemetry");
 
         // Load supplemental routes
-        final List<SupplementalRoutes> supplementalHttpRoutes = new ArrayList<>();
+        final ImmutableList.Builder<SupplementalRoutes> supplementalHttpRoutes = ImmutableList.builder();
         _configuration.getSupplementalHttpRoutesClass().ifPresent(clazz -> {
                 supplementalHttpRoutes.add(injector.getInstance(clazz));
         });
@@ -224,7 +223,7 @@ public final class Main implements Launchable {
                 injector.getInstance(PeriodicMetrics.class),
                 _configuration.getHttpHealthCheckPath(),
                 _configuration.getHttpStatusPath(),
-                supplementalHttpRoutes);
+                supplementalHttpRoutes.build());
         final Http http = Http.get(actorSystem);
         final akka.stream.javadsl.Source<IncomingConnection, CompletionStage<ServerBinding>> binding = http.bind(
                 ConnectHttp.toHost(
