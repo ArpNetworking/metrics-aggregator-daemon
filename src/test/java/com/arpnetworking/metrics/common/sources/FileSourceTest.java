@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -66,11 +65,11 @@ public class FileSourceTest {
         Mockito.when(_logger.info()).thenReturn(_logBuilder);
         Mockito.when(_logger.warn()).thenReturn(_logBuilder);
         Mockito.when(_logger.error()).thenReturn(_logBuilder);
-        Mockito.when(_logBuilder.setMessage(Matchers.anyString())).thenReturn(_logBuilder);
-        Mockito.when(_logBuilder.addData(Matchers.anyString(), Matchers.anyString())).thenReturn(_logBuilder);
-        Mockito.when(_logBuilder.addContext(Matchers.anyString(), Matchers.anyString())).thenReturn(_logBuilder);
-        Mockito.when(_logBuilder.setEvent(Matchers.anyString())).thenReturn(_logBuilder);
-        Mockito.when(_logBuilder.setThrowable(Matchers.any(Throwable.class))).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.setMessage(Mockito.anyString())).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.addData(Mockito.anyString(), Mockito.any())).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.addContext(Mockito.anyString(), Mockito.any())).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.setEvent(Mockito.anyString())).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.setThrowable(Mockito.any(Throwable.class))).thenReturn(_logBuilder);
     }
 
     @Test
@@ -473,7 +472,7 @@ public class FileSourceTest {
                 Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
-        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Matchers.eq(source), notifyCapture.capture());
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Mockito.eq(source), notifyCapture.capture());
         final List<Object> notifyValues = notifyCapture.getAllValues();
         Assert.assertEquals(expectedData1, notifyValues.get(0));
         Assert.assertEquals(expectedData2, notifyValues.get(1));
@@ -606,7 +605,7 @@ public class FileSourceTest {
                 Arrays.equals(expectedData3.getBytes(Charsets.UTF_8), parserValues.get(2)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
-        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(3)).notify(Matchers.eq(source), notifyCapture.capture());
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(3)).notify(Mockito.eq(source), notifyCapture.capture());
         final List<Object> notifyValues = notifyCapture.getAllValues();
         Assert.assertEquals(expectedData1, notifyValues.get(0));
         Assert.assertEquals(expectedData2, notifyValues.get(1));
@@ -683,7 +682,7 @@ public class FileSourceTest {
                 Arrays.equals(expectedData3.getBytes(Charsets.UTF_8), parserValues.get(2)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
-        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(3)).notify(Matchers.eq(source), notifyCapture.capture());
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(3)).notify(Mockito.eq(source), notifyCapture.capture());
         final List<Object> notifyValues = notifyCapture.getAllValues();
         Assert.assertEquals(expectedData1, notifyValues.get(0));
         Assert.assertEquals(expectedData2, notifyValues.get(1));
@@ -743,7 +742,7 @@ public class FileSourceTest {
                 Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
-        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Matchers.eq(source), notifyCapture.capture());
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Mockito.eq(source), notifyCapture.capture());
         final List<Object> notifyValues = notifyCapture.getAllValues();
         Assert.assertEquals(expectedData1, notifyValues.get(0));
         Assert.assertEquals(expectedData2, notifyValues.get(1));
@@ -813,7 +812,7 @@ public class FileSourceTest {
                 Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
-        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Matchers.eq(source), notifyCapture.capture());
+        Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Mockito.eq(source), notifyCapture.capture());
         final List<Object> notifyValues = notifyCapture.getAllValues();
         Assert.assertEquals(expectedData1, notifyValues.get(0));
         Assert.assertEquals(expectedData2, notifyValues.get(1));

@@ -34,7 +34,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Source that uses Statsd as input.

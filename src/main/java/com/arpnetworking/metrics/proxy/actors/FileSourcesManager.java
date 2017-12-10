@@ -58,6 +58,7 @@ public final class FileSourcesManager extends AbstractActor {
         _streamContextActor = streamContextActor;
     }
 
+    @Override
     public Receive createReceive() {
         return receiveBuilder()
                 .match(LogFileAppeared.class, message -> {

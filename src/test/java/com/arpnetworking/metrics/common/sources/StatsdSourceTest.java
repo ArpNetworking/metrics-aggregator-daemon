@@ -17,7 +17,7 @@ package com.arpnetworking.metrics.common.sources;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
@@ -34,7 +34,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import scala.concurrent.duration.Duration;
@@ -63,7 +62,7 @@ public final class StatsdSourceTest {
 
     @After
     public void tearDown() {
-        JavaTestKit.shutdownActorSystem(_actorSystem);
+        TestKit.shutdownActorSystem(_actorSystem);
     }
 
     @Test
@@ -78,7 +77,7 @@ public final class StatsdSourceTest {
         statsdSource.attach(observer);
 
         // CHECKSTYLE.OFF: AnonInnerLength - This is the Akka test pattern
-        new JavaTestKit(_actorSystem) {{
+        new TestKit(_actorSystem) {{
             // Deploy the statsd source actor
             final ActorRef statsdSourceActor = _actorSystem.actorOf(StatsdSource.Actor.props(statsdSource));
 
@@ -96,7 +95,7 @@ public final class StatsdSourceTest {
 
             // Captor observation of the resulting records
             Mockito.verify(observer, Mockito.timeout(1000)).notify(
-                    Matchers.same(statsdSource),
+                    Mockito.same(statsdSource),
                     _recordCaptor.capture());
 
             // Verify the captured records

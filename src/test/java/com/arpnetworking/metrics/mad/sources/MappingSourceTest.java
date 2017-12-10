@@ -27,12 +27,10 @@ import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import java.util.Collections;
@@ -61,7 +59,7 @@ public class MappingSourceTest {
     @Test
     public void testAttach() {
         _mappingSourceBuilder.build();
-        Mockito.verify(_mockSource).attach(Matchers.any(Observer.class));
+        Mockito.verify(_mockSource).attach(Mockito.any(Observer.class));
     }
 
     @Test
@@ -122,7 +120,7 @@ public class MappingSourceTest {
         notify(_mockSource, nonMatchingRecord);
 
         final ArgumentCaptor<Record> argument = ArgumentCaptor.forClass(Record.class);
-        Mockito.verify(_mockObserver).notify(Matchers.same(mergingSource), argument.capture());
+        Mockito.verify(_mockObserver).notify(Mockito.same(mergingSource), argument.capture());
         final Record actualRecord = argument.getValue();
 
         Assert.assertTrue(
@@ -158,7 +156,7 @@ public class MappingSourceTest {
         notify(_mockSource, matchingRecord);
 
         final ArgumentCaptor<Record> argument = ArgumentCaptor.forClass(Record.class);
-        Mockito.verify(_mockObserver).notify(Matchers.same(mergingSource), argument.capture());
+        Mockito.verify(_mockObserver).notify(Mockito.same(mergingSource), argument.capture());
         final Record actualRecord = argument.getValue();
 
         final Record expectedRecord = TestBeanFactory.createRecordBuilder()
@@ -206,7 +204,7 @@ public class MappingSourceTest {
         notify(_mockSource, matchingRecord);
 
         final ArgumentCaptor<Record> argument = ArgumentCaptor.forClass(Record.class);
-        Mockito.verify(_mockObserver).notify(Matchers.same(mergingSource), argument.capture());
+        Mockito.verify(_mockObserver).notify(Mockito.same(mergingSource), argument.capture());
         final Record actualRecord = argument.getValue();
 
         final Record expectedRecord1 = TestBeanFactory.createRecordBuilder()
@@ -258,7 +256,7 @@ public class MappingSourceTest {
         notify(_mockSource, matchingRecord);
 
         final ArgumentCaptor<Record> argument = ArgumentCaptor.forClass(Record.class);
-        Mockito.verify(_mockObserver).notify(Matchers.same(mergingSource), argument.capture());
+        Mockito.verify(_mockObserver).notify(Mockito.same(mergingSource), argument.capture());
         final Record actualRecord = argument.getValue();
 
         final Record expectedRecord = TestBeanFactory.createRecordBuilder()
@@ -308,7 +306,7 @@ public class MappingSourceTest {
         notify(_mockSource, matchingRecord);
 
         final ArgumentCaptor<Record> argument = ArgumentCaptor.forClass(Record.class);
-        Mockito.verify(_mockObserver).notify(Matchers.same(mappingSource), argument.capture());
+        Mockito.verify(_mockObserver).notify(Mockito.same(mappingSource), argument.capture());
         final Record actualRecord = argument.getValue();
 
         final Record expectedRecord = TestBeanFactory.createRecordBuilder()
