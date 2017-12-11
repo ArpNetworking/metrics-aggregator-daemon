@@ -63,14 +63,14 @@ public final class CollectdHttpSourceV1Test extends BaseActorSourceTest {
     }
 
     @Test
-    public void testParsesEntity() throws ExecutionException, ParsingException {
+    public void testParsesEntity() throws ParsingException {
         final byte[] entity = "not a json document".getBytes(Charsets.UTF_8);
         Mockito.when(_parser.parse(Mockito.any())).thenThrow(new ParsingException("test exception", new byte[0]));
         dispatchRequest(HttpRequest.create().withEntity(entity).addHeader(RawHeader.create("x-tag-foo", "bar")));
         final ArgumentCaptor<com.arpnetworking.metrics.mad.model.HttpRequest> captor =
                 ArgumentCaptor.forClass(com.arpnetworking.metrics.mad.model.HttpRequest.class);
         Mockito.verify(_parser).parse(captor.capture());
-        Assert.assertArrayEquals(entity, captor.getValue().getBody());
+        Assert.assertArrayEquals(entity, captor.getValue().getBody().toArray());
         Assert.assertEquals("bar", captor.getValue().getHeaders().get("x-tag-foo").toArray()[0]);
     }
 

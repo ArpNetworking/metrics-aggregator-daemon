@@ -15,21 +15,21 @@
  */
 package com.arpnetworking.metrics.mad.model;
 
+import akka.util.ByteString;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Represents a parsable HTTP request.
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
-@SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public final class HttpRequest {
     public Multimap<String, String> getHeaders() {
         return _headers;
     }
 
-    public byte[] getBody() {
+    public ByteString getBody() {
         return _body;
     }
 
@@ -39,12 +39,11 @@ public final class HttpRequest {
      * @param headers The headers.
      * @param body The body of the request.
      */
-    public HttpRequest(final Multimap<String, String> headers, final byte[] body) {
+    public HttpRequest(final ImmutableMultimap<String, String> headers, final ByteString body) {
         _headers = headers;
         _body = body;
     }
 
-    private final Multimap<String, String> _headers;
-    // TODO(barp): change this into a List or similar struture to ensure no modifications
-    private final byte[] _body;
+    private final ImmutableMultimap<String, String> _headers;
+    private final ByteString _body;
 }

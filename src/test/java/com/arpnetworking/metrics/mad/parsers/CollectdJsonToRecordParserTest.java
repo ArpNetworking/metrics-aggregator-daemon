@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
+import akka.util.ByteString;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
@@ -23,7 +24,6 @@ import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.io.Resources;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -107,9 +107,10 @@ public class CollectdJsonToRecordParserTest {
         parseFile("CollectdJsonParserTest/testParseInvalid.json", DEFAULT_HEADERS);
     }
 
-    private static List<Record> parseFile(final String fileName, final Multimap<String, String> headers)
+    private static List<Record> parseFile(final String fileName, final ImmutableMultimap<String, String> headers)
             throws IOException, ParsingException {
-        final byte[] body = Resources.toByteArray(Resources.getResource(CollectdJsonToRecordParser.class, fileName));
+        final ByteString body =
+                ByteString.fromArray(Resources.toByteArray(Resources.getResource(CollectdJsonToRecordParser.class, fileName)));
         return new CollectdJsonToRecordParser().parse(new HttpRequest(headers, body));
     }
 

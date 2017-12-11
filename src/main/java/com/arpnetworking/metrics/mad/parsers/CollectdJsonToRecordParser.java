@@ -78,7 +78,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             }
         }
         try {
-            final List<CollectdRecord> records = OBJECT_MAPPER.readValue(request.getBody(), COLLECTD_RECORD_LIST);
+            final List<CollectdRecord> records = OBJECT_MAPPER.readValue(request.getBody().toArray(), COLLECTD_RECORD_LIST);
             final List<Record> parsedRecords = Lists.newArrayList();
             for (final CollectdRecord record : records) {
                 final Multimap<String, Metric> metrics = HashMultimap.create();
@@ -118,7 +118,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             }
             return parsedRecords;
         } catch (final IOException | ConstraintsViolatedException ex) {
-            throw new ParsingException("Error parsing collectd json", request.getBody(), ex);
+            throw new ParsingException("Error parsing collectd json", request.getBody().toArray(), ex);
         }
     }
 
