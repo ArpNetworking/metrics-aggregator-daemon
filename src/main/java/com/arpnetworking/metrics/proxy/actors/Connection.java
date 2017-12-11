@@ -15,10 +15,10 @@
  */
 package com.arpnetworking.metrics.proxy.actors;
 
+import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
 import akka.http.javadsl.model.ws.Message;
 import akka.http.javadsl.model.ws.TextMessage;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
@@ -43,7 +43,7 @@ import java.util.List;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
-public class Connection extends UntypedActor {
+public class Connection extends AbstractActor {
     /**
      * Public constructor.
      *
@@ -74,76 +74,77 @@ public class Connection extends UntypedActor {
     }
 
     @Override
-    public void onReceive(final Object message) throws Exception {
-        LOGGER.trace()
-                .setMessage("Received message")
-                .addData("actor", self())
-                .addData("data", message)
-                .addData("channel", _channel)
-                .log();
-        if (message instanceof Connect) {
-            final Connect connect = (Connect) message;
-            _telemetry = connect.getTelemetry();
-            _channel = connect.getChannel();
-            return;
-        } else if (message instanceof akka.actor.Status.Failure) {
-            // This message is sent by the incoming stream when there is a failure
-            // in the stream (see akka.stream.javadsl.Sink.scala).
-            LOGGER.info()
-                    .setMessage("Closing stream")
-                    .addData("actor", self())
-                    .addData("data", message)
-                    .log();
-            getSelf().tell(PoisonPill.getInstance(), getSelf());
-            return;
-        }
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(Connect.class, connect -> {
+                    LOGGER.info()
+                            .setMessage("Connected stream")
+                            .addData("actor", self())
+                            .addData("data", connect)
+                            .log();
 
-        if (_channel == null) {
-            LOGGER.warn()
-                    .setMessage("Unable to process message")
-                    .addData("reason", "channel actor not materialized")
-                    .addData("actor", self())
-                    .addData("data", message)
-                    .log();
-            return;
-        }
+                    _telemetry = connect.getTelemetry();
+                    _channel = connect.getChannel();
+                })
+                .match(akka.actor.Status.Failure.class, message -> {
+                    // This message is sent by the incoming stream when there is a failure
+                    // in the stream (see akka.stream.javadsl.Sink.scala).
+                    LOGGER.info()
+                            .setMessage("Closing stream")
+                            .addData("actor", self())
+                            .addData("data", message)
+                            .log();
+                    getSelf().tell(PoisonPill.getInstance(), getSelf());
+                })
+                .matchAny(message -> {
+                    if (_channel == null) {
+                        LOGGER.warn()
+                                .setMessage("Unable to process message")
+                                .addData("reason", "channel actor not materialized")
+                                .addData("actor", self())
+                                .addData("data", message)
+                                .log();
+                        return;
+                    }
 
-        boolean messageProcessed = false;
-        final Object command;
-        if (message instanceof Message) {
-            // TODO(vkoskela): Handle streamed text (e.g. non-strict)
-            command = new Command(OBJECT_MAPPER.readTree(((Message) message).asTextMessage().getStrictText()));
-        } else {
-            command = message;
-        }
-        for (final MessagesProcessor messagesProcessor : _messageProcessors) {
-            messageProcessed = messagesProcessor.handleMessage(command);
-            if (messageProcessed) {
-                break;
-            }
-        }
-        if (!messageProcessed) {
-            _metrics.recordCounter(UNKNOWN_COUNTER, 1);
-            if (message instanceof Command) {
-                _metrics.recordCounter(UNKNOWN_COMMAND_COUNTER, 1);
-                LOGGER.warn()
-                        .setMessage("Unable to process message")
-                        .addData("reason", "unsupported command")
-                        .addData("actor", self())
-                        .addData("data", message)
-                        .log();
-                unhandled(message);
-            } else {
-                _metrics.recordCounter("Actors/Connection/UNKNOWN", 1);
-                LOGGER.warn()
-                        .setMessage("Unable to process message")
-                        .addData("reason", "unsupported message")
-                        .addData("actor", self())
-                        .addData("data", message)
-                        .log();
-                unhandled(message);
-            }
-        }
+                    boolean messageProcessed = false;
+                    final Object command;
+                    if (message instanceof Message) {
+                        // TODO(vkoskela): Handle streamed text (e.g. non-strict)
+                        command = new Command(OBJECT_MAPPER.readTree(((Message) message).asTextMessage().getStrictText()));
+                    } else {
+                        command = message;
+                    }
+                    for (final MessagesProcessor messagesProcessor : _messageProcessors) {
+                        messageProcessed = messagesProcessor.handleMessage(command);
+                        if (messageProcessed) {
+                            break;
+                        }
+                    }
+                    if (!messageProcessed) {
+                        _metrics.recordCounter(UNKNOWN_COUNTER, 1);
+                        if (message instanceof Command) {
+                            _metrics.recordCounter(UNKNOWN_COMMAND_COUNTER, 1);
+                            LOGGER.warn()
+                                    .setMessage("Unable to process message")
+                                    .addData("reason", "unsupported command")
+                                    .addData("actor", self())
+                                    .addData("data", message)
+                                    .log();
+                            unhandled(message);
+                        } else {
+                            _metrics.recordCounter("Actors/Connection/UNKNOWN", 1);
+                            LOGGER.warn()
+                                    .setMessage("Unable to process message")
+                                    .addData("reason", "unsupported message")
+                                    .addData("actor", self())
+                                    .addData("data", message)
+                                    .log();
+                            unhandled(message);
+                        }
+                    }
+                })
+            .build();
     }
 
     /**

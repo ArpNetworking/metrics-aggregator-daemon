@@ -15,9 +15,9 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
+import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
 import akka.io.Udp;
 import akka.io.UdpMessage;
 import com.arpnetworking.metrics.common.parsers.Parser;
@@ -34,7 +34,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Source that uses Statsd as input.
@@ -73,7 +72,7 @@ public final class StatsdSource extends ActorSource {
     /**
      * Internal actor to process requests.
      */
-    /* package private */ static final class Actor extends UntypedActor {
+    /* package private */ static final class Actor extends AbstractActor {
         /**
          * Creates a {@link Props} for this actor.
          *
@@ -85,57 +84,56 @@ public final class StatsdSource extends ActorSource {
         }
 
         @Override
-        public void onReceive(final Object message) throws Exception {
-            if (Objects.equals(IS_READY, message)) {
-                getSender().tell(_isReady, getSelf());
-            } else if (message instanceof Udp.Bound) {
-                final Udp.Bound updBound = (Udp.Bound) message;
-                _socket = getSender();
-                _isReady = true;
-                LOGGER.info()
-                        .setMessage("Statsd server binding complete")
-                        .addData("address", updBound.localAddress().getAddress().getHostAddress())
-                        .addData("port", updBound.localAddress().getPort())
-                        .addData("socket", _socket)
-                        .log();
-            } else if (message instanceof Udp.Received) {
-                final Udp.Received updReceived = (Udp.Received) message;
-                LOGGER.trace()
-                        .setMessage("Statsd received datagram")
-                        .addData("bytes", updReceived.data().size())
-                        .addData("socket", _socket)
-                        .log();
+        public Receive createReceive() {
+            return receiveBuilder()
+                    .matchEquals(IS_READY, message -> {
+                        getSender().tell(_isReady, getSelf());
+                    })
+                    .match(Udp.Bound.class, updBound -> {
+                        _socket = getSender();
+                        _isReady = true;
+                        LOGGER.info()
+                                .setMessage("Statsd server binding complete")
+                                .addData("address", updBound.localAddress().getAddress().getHostAddress())
+                                .addData("port", updBound.localAddress().getPort())
+                                .addData("socket", _socket)
+                                .log();
+                    })
+                    .match(Udp.Received.class, updReceived -> {
+                        LOGGER.trace()
+                                .setMessage("Statsd received datagram")
+                                .addData("bytes", updReceived.data().size())
+                                .addData("socket", _socket)
+                                .log();
 
-                try {
-                    // NOTE: The parsing occurs in the actor itself which can become a bottleneck
-                    // if there are more records to be parsed then a single thread can handle.
-                    final List<Record> records = PARSER.parse(updReceived.data().toByteBuffer());
-                    records.forEach(_sink::notify);
-                } catch (final ParsingException e) {
-                    BAD_REQUEST_LOGGER.warn()
-                            .setMessage("Error handling statsd datagram")
-                            .addData("socket", _socket)
-                            .setThrowable(e)
-                            .log();
-                }
-
-            } else if (Objects.equals(message, UdpMessage.unbind())) {
-                LOGGER.debug()
-                        .setMessage("Statsd unbind")
-                        .addData("socket", _socket)
-                        .log();
-                _socket.tell(message, getSelf());
-
-            } else if (message instanceof Udp.Unbound) {
-                LOGGER.debug()
-                        .setMessage("Statsd unbound")
-                        .addData("socket", _socket)
-                        .log();
-                getContext().stop(getSelf());
-
-            } else {
-                unhandled(message);
-            }
+                        try {
+                            // NOTE: The parsing occurs in the actor itself which can become a bottleneck
+                            // if there are more records to be parsed then a single thread can handle.
+                            final List<Record> records = PARSER.parse(updReceived.data().toByteBuffer());
+                            records.forEach(_sink::notify);
+                        } catch (final ParsingException e) {
+                            BAD_REQUEST_LOGGER.warn()
+                                    .setMessage("Error handling statsd datagram")
+                                    .addData("socket", _socket)
+                                    .setThrowable(e)
+                                    .log();
+                        }
+                    })
+                    .matchEquals(UdpMessage.unbind(), message -> {
+                        LOGGER.debug()
+                                .setMessage("Statsd unbind")
+                                .addData("socket", _socket)
+                                .log();
+                        _socket.tell(message, getSelf());
+                    })
+                    .match(Udp.Unbound.class, message -> {
+                        LOGGER.debug()
+                                .setMessage("Statsd unbound")
+                                .addData("socket", _socket)
+                                .log();
+                        getContext().stop(getSelf());
+                    })
+                    .build();
         }
 
         /**

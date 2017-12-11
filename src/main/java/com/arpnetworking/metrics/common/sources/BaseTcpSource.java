@@ -15,9 +15,9 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
+import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
 import akka.io.Tcp;
 import akka.io.TcpMessage;
 import com.arpnetworking.steno.Logger;
@@ -28,7 +28,6 @@ import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
 
 import java.net.InetSocketAddress;
-import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -60,7 +59,7 @@ public abstract class BaseTcpSource extends ActorSource {
     /**
      * Internal actor to process requests.
      */
-    /* package private */ abstract static class BaseTcpListenerActor extends UntypedActor {
+    /* package private */ abstract static class BaseTcpListenerActor extends AbstractActor {
         /**
          * Creates a {@link Props} for this actor.
          *
@@ -82,40 +81,41 @@ public abstract class BaseTcpSource extends ActorSource {
         }
 
         @Override
-        public void onReceive(final Object message) throws Exception {
-            if (Objects.equals(IS_READY, message)) {
-                getSender().tell(_isReady, getSelf());
-            } else if (message instanceof Tcp.Bound) {
-                final Tcp.Bound tcpBound = (Tcp.Bound) message;
-                _isReady = true;
-                _tcpManager.tell(message, getSelf());
-                LOGGER.info()
-                        .setMessage("Tcp server binding complete")
-                        .addData("name", _sink.getName())
-                        .addData("address", tcpBound.localAddress().getAddress().getHostAddress())
-                        .addData("port", tcpBound.localAddress().getPort())
-                        .log();
-            } else if (message instanceof Tcp.CommandFailed) {
-                getContext().stop(getSelf());
-                LOGGER.warn()
-                        .setMessage("Tcp server bad command")
-                        .addData("name", _sink.getName())
-                        .log();
-            } else if (message instanceof Tcp.Connected) {
-                final Tcp.Connected tcpConnected = (Tcp.Connected) message;
-                _tcpManager.tell(message, getSelf());
-                LOGGER.debug()
-                        .setMessage("Tcp connection established")
-                        .addData("name", _sink.getName())
-                        .addData("remoteAddress", tcpConnected.remoteAddress().getAddress().getHostAddress())
-                        .addData("remotePort", tcpConnected.remoteAddress().getPort())
-                        .log();
+        public Receive createReceive() {
+            return receiveBuilder()
+                    .matchEquals(IS_READY, message -> {
+                        getSender().tell(_isReady, getSelf());
+                    })
+                    .match(Tcp.Bound.class, tcpBound -> {
+                        _isReady = true;
+                        _tcpManager.tell(tcpBound, getSelf());
+                        LOGGER.info()
+                                .setMessage("Tcp server binding complete")
+                                .addData("name", _sink.getName())
+                                .addData("address", tcpBound.localAddress().getAddress().getHostAddress())
+                                .addData("port", tcpBound.localAddress().getPort())
+                                .log();
+                    })
+                    .match(Tcp.CommandFailed.class, failed -> {
+                        getContext().stop(getSelf());
+                        LOGGER.warn()
+                                .setMessage("Tcp server bad command")
+                                .addData("name", _sink.getName())
+                                .log();
+                    })
+                    .match(Tcp.Connected.class, tcpConnected -> {
+                        _tcpManager.tell(tcpConnected, getSelf());
+                        LOGGER.debug()
+                                .setMessage("Tcp connection established")
+                                .addData("name", _sink.getName())
+                                .addData("remoteAddress", tcpConnected.remoteAddress().getAddress().getHostAddress())
+                                .addData("remotePort", tcpConnected.remoteAddress().getPort())
+                                .log();
 
-                final ActorRef handler = createHandler(_sink, tcpConnected);
-                getSender().tell(TcpMessage.register(handler), getSelf());
-            } else {
-                unhandled(message);
-            }
+                        final ActorRef handler = createHandler(_sink, tcpConnected);
+                        getSender().tell(TcpMessage.register(handler), getSelf());
+                    })
+                    .build();
         }
 
         /**

@@ -15,9 +15,9 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
+import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
 import akka.io.Tcp;
 import akka.util.ByteString;
 import akka.util.ByteStringBuilder;
@@ -98,7 +98,7 @@ public final class TcpLineSource extends BaseTcpSource {
     /**
      * Internal actor to processRecords requests.
      */
-    /* package private */ static final class TcpRequestHandlerActor extends UntypedActor {
+    /* package private */ static final class TcpRequestHandlerActor extends AbstractActor {
 
         /* package private */ TcpRequestHandlerActor(
                 final TcpLineSource sink,
@@ -108,41 +108,44 @@ public final class TcpLineSource extends BaseTcpSource {
         }
 
         @Override
-        public void onReceive(final Object message) throws Throwable {
-            if (message instanceof Tcp.Received) {
-                final ByteString data = ((Tcp.Received) message).data();
+        public Receive createReceive() {
+            return receiveBuilder()
+                    .match(Tcp.Received.class, message -> {
+                        final ByteString data = message.data();
 
-                LOGGER.trace()
-                        .setMessage("Tcp data received")
-                        .addData("name", _sink.getName())
-                        .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
-                        .addData("remotePort", _remoteAddress.getPort())
-                        .addData("data", data)
-                        .log();
+                        LOGGER.trace()
+                                .setMessage("Tcp data received")
+                                .addData("name", _sink.getName())
+                                .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
+                                .addData("remotePort", _remoteAddress.getPort())
+                                .addData("data", data)
+                                .log();
 
-                try {
-                    processData(data);
-                    // CHECKSTYLE.OFF: IllegalCatch - Ensure all exceptions are logged (this is top level)
-                } catch (final RuntimeException e) {
-                    // CHECKSTYLE.ON: IllegalCatch
-                    BAD_REQUEST_LOGGER.warn()
-                            .setMessage("Error processing data")
-                            .addData("name", _sink.getName())
-                            .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
-                            .addData("remotePort", _remoteAddress.getPort())
-                            .addData("data", data)
-                            .setThrowable(e)
-                            .log();
-                }
-            } else if (message instanceof Tcp.ConnectionClosed) {
-                getContext().stop(getSelf());
-                LOGGER.debug()
-                        .setMessage("Tcp connection close")
-                        .addData("name", _sink.getName())
-                        .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
-                        .addData("remotePort", _remoteAddress.getPort())
-                        .log();
-            }
+                        try {
+                            processData(data);
+                            // CHECKSTYLE.OFF: IllegalCatch - Ensure all exceptions are logged (this is top level)
+                        } catch (final RuntimeException e) {
+                            // CHECKSTYLE.ON: IllegalCatch
+                            BAD_REQUEST_LOGGER.warn()
+                                    .setMessage("Error processing data")
+                                    .addData("name", _sink.getName())
+                                    .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
+                                    .addData("remotePort", _remoteAddress.getPort())
+                                    .addData("data", data)
+                                    .setThrowable(e)
+                                    .log();
+                        }
+                    })
+                    .match(Tcp.ConnectionClosed.class, message -> {
+                        getContext().stop(getSelf());
+                        LOGGER.debug()
+                                .setMessage("Tcp connection close")
+                                .addData("name", _sink.getName())
+                                .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
+                                .addData("remotePort", _remoteAddress.getPort())
+                                .log();
+                    })
+                    .build();
         }
 
         private void processData(final ByteString data) {
