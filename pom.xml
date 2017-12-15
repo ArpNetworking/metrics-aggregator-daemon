@@ -78,7 +78,7 @@
     <arpnetworking.commons.version>1.9.0</arpnetworking.commons.version>
     <aspectjrt.version>1.8.9</aspectjrt.version>
     <cglib.version>3.2.5</cglib.version>
-    <client.protocol.version>0.9.3</client.protocol.version>
+    <client.protocol.version>0.10.0</client.protocol.version>
     <commons.codec.version>1.10</commons.codec.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.math3.version>3.3</commons.math3.version>
@@ -105,7 +105,7 @@
     <mockito.version>2.12.0</mockito.version>
     <oval.version>1.90</oval.version>
     <performance.test.version>1.1.0</performance.test.version>
-    <protobuf.version>3.0.2</protobuf.version>
+    <protobuf.version>3.4.0</protobuf.version>
     <reflections.version>0.9.11</reflections.version>
     <scala.version>2.11</scala.version>
     <scala.java.compat.version>0.7.0</scala.java.compat.version>

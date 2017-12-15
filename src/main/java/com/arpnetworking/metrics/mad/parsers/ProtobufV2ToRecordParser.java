@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Inscope Metrics, Inc.
+ * Copyright 2017 Inscope Metrics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.inscopemetrics.client.protocol.ClientV1;
+import com.inscopemetrics.client.protocol.ClientV2;
 import net.sf.oval.exception.ConstraintsViolatedException;
 import org.joda.time.DateTime;
 
@@ -42,13 +42,13 @@ import javax.annotation.Nullable;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
-public class ProtobufToRecordParser implements Parser<List<Record>, HttpRequest> {
+public final class ProtobufV2ToRecordParser implements Parser<List<Record>, HttpRequest> {
     @Override
     public List<Record> parse(final HttpRequest data) throws ParsingException {
         try {
-            final ClientV1.RecordSet request = ClientV1.RecordSet.parseFrom(data.getBody());
+            final ClientV2.RecordSet request = ClientV2.RecordSet.parseFrom(data.getBody().asByteBuffer());
             final List<Record> records = Lists.newArrayList();
-            for (final ClientV1.Record record : request.getRecordsList()) {
+            for (final ClientV2.Record record : request.getRecordsList()) {
                 final ByteBuffer byteBuffer = ByteBuffer.wrap(record.getId().toByteArray());
                 final Long high = byteBuffer.getLong();
                 final Long low = byteBuffer.getLong();
@@ -63,13 +63,13 @@ public class ProtobufToRecordParser implements Parser<List<Record>, HttpRequest>
             }
             return records;
         } catch (final InvalidProtocolBufferException e) {
-            throw new ParsingException("Could not create Request message from data", data.getBody(), e);
+            throw new ParsingException("Could not create Request message from data", data.getBody().toArray(), e);
         } catch (final ConstraintsViolatedException | IllegalArgumentException e) {
-            throw new ParsingException("Could not build record", data.getBody(), e);
+            throw new ParsingException("Could not build record", data.getBody().toArray(), e);
         }
     }
 
-    private ImmutableMap<String, ? extends Metric> buildMetrics(final ClientV1.Record record) {
+    private ImmutableMap<String, ? extends Metric> buildMetrics(final ClientV2.Record record) {
         final ImmutableMap.Builder<String, Metric> metrics = ImmutableMap.builder();
         processEntries(metrics, record.getCountersList(), MetricType.COUNTER);
         processEntries(metrics, record.getTimersList(), MetricType.TIMER);
@@ -79,17 +79,17 @@ public class ProtobufToRecordParser implements Parser<List<Record>, HttpRequest>
 
     private void processEntries(
             final ImmutableMap.Builder<String, Metric> metrics,
-            final List<ClientV1.MetricEntry> entries,
+            final List<ClientV2.MetricEntry> entries,
             final MetricType metricType) {
-        for (final ClientV1.MetricEntry metricEntry : entries) {
+        for (final ClientV2.MetricEntry metricEntry : entries) {
             final DefaultMetric.Builder metricBuilder = new DefaultMetric.Builder()
                     .setType(metricType);
             final List<Quantity> quantities = Lists.newArrayListWithExpectedSize(metricEntry.getSamplesCount());
-            for (final ClientV1.DoubleQuantity quantity : metricEntry.getSamplesList()) {
+            for (final ClientV2.Quantity quantity : metricEntry.getSamplesList()) {
                 quantities.add(
                         new Quantity.Builder()
                                 .setUnit(baseUnit(quantity.getUnit()))
-                                .setValue(quantity.getValue())
+                                .setValue(quantity.getDoubleValue())
                                 .build());
             }
 
@@ -99,15 +99,17 @@ public class ProtobufToRecordParser implements Parser<List<Record>, HttpRequest>
     }
 
     @Nullable
-    private Unit baseUnit(final ClientV1.CompoundUnit compoundUnit) {
+    private Unit baseUnit(final ClientV2.CompoundUnit compoundUnit) {
         if (!compoundUnit.getNumeratorList().isEmpty()) {
-            final ClientV1.Unit selectedUnit = compoundUnit.getNumerator(0);
-            if (ClientV1.Unit.Type.UNRECOGNIZED.equals(selectedUnit.getType())) {
+            final ClientV2.Unit selectedUnit = compoundUnit.getNumerator(0);
+            if (ClientV2.Unit.Type.Value.UNRECOGNIZED.equals(selectedUnit.getType())
+                    || ClientV2.Unit.Type.Value.UNKNOWN.equals(selectedUnit.getType())) {
                 return null;
             }
             final String unitName;
-            if (!ClientV1.Unit.Scale.UNIT.equals(selectedUnit.getScale())
-                    && !ClientV1.Unit.Scale.UNRECOGNIZED.equals(selectedUnit.getScale())) {
+            if (!ClientV2.Unit.Scale.Value.UNIT.equals(selectedUnit.getScale())
+                    && !ClientV2.Unit.Scale.Value.UNRECOGNIZED.equals(selectedUnit.getScale())
+                    && !ClientV2.Unit.Scale.Value.UNKNOWN.equals(selectedUnit.getScale())) {
                 unitName = selectedUnit.getScale().name() + selectedUnit.getType().name();
             } else {
                 unitName = selectedUnit.getType().name();
@@ -118,17 +120,17 @@ public class ProtobufToRecordParser implements Parser<List<Record>, HttpRequest>
         return null;
     }
 
-    private ImmutableMap<String, String> buildAnnotations(final ClientV1.Record record) {
+    private ImmutableMap<String, String> buildAnnotations(final ClientV2.Record record) {
         final ImmutableMap.Builder<String, String> annotations = ImmutableMap.builder();
-        for (final ClientV1.AnnotationEntry annotationEntry : record.getAnnotationsList()) {
+        for (final ClientV2.AnnotationEntry annotationEntry : record.getAnnotationsList()) {
             annotations.put(annotationEntry.getName(), annotationEntry.getValue());
         }
         return annotations.build();
     }
 
-    private ImmutableMap<String, String> buildDimensions(final ClientV1.Record record) {
+    private ImmutableMap<String, String> buildDimensions(final ClientV2.Record record) {
         final ImmutableMap.Builder<String, String> dimensions = ImmutableMap.builder();
-        for (final ClientV1.DimensionEntry dimensionEntry : record.getDimensionsList()) {
+        for (final ClientV2.DimensionEntry dimensionEntry : record.getDimensionsList()) {
             dimensions.put(dimensionEntry.getName(), dimensionEntry.getValue());
         }
         return dimensions.build();

@@ -46,7 +46,6 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import net.sf.oval.constraint.NotNull;
 
 import java.time.Duration;
@@ -138,20 +137,19 @@ public class HttpSource extends ActorSource {
             _processGraph = GraphDSL.create(builder -> {
 
                 // Flows
-                final Flow<HttpRequest, byte[], NotUsed> getBodyFlow = Flow.<HttpRequest>create()
+                final Flow<HttpRequest, ByteString, NotUsed> getBodyFlow = Flow.<HttpRequest>create()
                         .map(HttpRequest::entity)
                         .flatMapConcat(RequestEntity::getDataBytes)
                         .reduce(ByteString::concat)
-                        .map(ByteString::toArray) // Transform to array form
                         .named("getBody");
 
-                final Flow<HttpRequest, Multimap<String, String>, NotUsed> getHeadersFlow = Flow.<HttpRequest>create()
+                final Flow<HttpRequest, ImmutableMultimap<String, String>, NotUsed> getHeadersFlow = Flow.<HttpRequest>create()
                         .map(HttpRequest::getHeaders)
                         .map(Actor::createHeaderMultimap) // Transform to array form
                         .named("getHeaders");
 
-                final Flow<Pair<byte[], Multimap<String, String>>, Record, NotUsed> createAndParseFlow =
-                        Flow.<Pair<byte[], Multimap<String, String>>>create()
+                final Flow<Pair<ByteString, ImmutableMultimap<String, String>>, Record, NotUsed> createAndParseFlow =
+                        Flow.<Pair<ByteString, ImmutableMultimap<String, String>>>create()
                                 .map(Actor::mapModel)
                                 .mapConcat(this::parseRecords) // Parse the json string into a record builder
                                 // NOTE: this should be _parser::parse, but aspectj NPEs with that currently
@@ -160,13 +158,13 @@ public class HttpSource extends ActorSource {
                 // Shapes
                 final UniformFanOutShape<HttpRequest, HttpRequest> split = builder.add(Broadcast.create(2));
 
-                final FlowShape<HttpRequest, byte[]> getBody = builder.add(getBodyFlow);
-                final FlowShape<HttpRequest, Multimap<String, String>> getHeaders = builder.add(getHeadersFlow);
+                final FlowShape<HttpRequest, ByteString> getBody = builder.add(getBodyFlow);
+                final FlowShape<HttpRequest, ImmutableMultimap<String, String>> getHeaders = builder.add(getHeadersFlow);
                 final FanInShape2<
-                        byte[],
-                        Multimap<String, String>,
-                        Pair<byte[], Multimap<String, String>>> join = builder.add(Zip.create());
-                final FlowShape<Pair<byte[], Multimap<String, String>>, Record> createRequest =
+                        ByteString,
+                        ImmutableMultimap<String, String>,
+                        Pair<ByteString, ImmutableMultimap<String, String>>> join = builder.add(Zip.create());
+                final FlowShape<Pair<ByteString, ImmutableMultimap<String, String>>, Record> createRequest =
                         builder.add(createAndParseFlow);
 
                 // Wire the shapes
@@ -178,7 +176,7 @@ public class HttpSource extends ActorSource {
             });
         }
 
-        private static Multimap<String, String> createHeaderMultimap(final Iterable<HttpHeader> headers) {
+        private static ImmutableMultimap<String, String> createHeaderMultimap(final Iterable<HttpHeader> headers) {
             final ImmutableMultimap.Builder<String, String> headersBuilder = ImmutableMultimap.builder();
 
             for (final HttpHeader httpHeader : headers) {
@@ -188,7 +186,8 @@ public class HttpSource extends ActorSource {
             return headersBuilder.build();
         }
 
-        private static com.arpnetworking.metrics.mad.model.HttpRequest mapModel(final Pair<byte[], Multimap<String, String>> pair) {
+        private static com.arpnetworking.metrics.mad.model.HttpRequest mapModel(
+                final Pair<ByteString, ImmutableMultimap<String, String>> pair) {
             return new com.arpnetworking.metrics.mad.model.HttpRequest(pair.second(), pair.first());
         }
 
