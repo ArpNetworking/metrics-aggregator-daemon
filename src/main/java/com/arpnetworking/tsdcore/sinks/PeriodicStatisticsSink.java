@@ -25,10 +25,13 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.fasterxml.jackson.annotation.JacksonInject;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
+import org.joda.time.Period;
 
 import java.util.Collections;
 import java.util.Map;
@@ -40,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAccumulator;
+import javax.annotation.Nullable;
 
 /**
  * Aggregates and periodically logs metrics about the aggregated data being
@@ -83,8 +87,8 @@ public final class PeriodicStatisticsSink extends BaseSink {
                     .append(periodicData.getDimensions().getHost()).append(".")
                     .append(periodicData.getDimensions().getService()).append(".")
                     .append(metricName).append(".")
-                    .append(datum.getStatistic()).append(".")
-                    .append(periodicData.getPeriod())
+                    .append(datum.getStatistic().getName()).append(".")
+                    .append(getPeriodAsString(periodicData.getPeriod()))
                     .toString();
 
             final String serviceMetric = new StringBuilder()
@@ -165,6 +169,17 @@ public final class PeriodicStatisticsSink extends BaseSink {
         return Collections.newSetFromMap(new ConcurrentHashMap<>(initialCapacity));
     }
 
+    private static String getPeriodAsString(final Period period) {
+        // TODO(ville): This is the only use of period serialization in MAD (weird, eh?)
+        // However, we should consider generalizing and moving this to commons.
+
+        final @Nullable String periodAsString = CACHED_PERIOD_STRINGS.get(period);
+        if (periodAsString == null) {
+            return period.toString();
+        }
+        return periodAsString;
+    }
+
     // NOTE: Package private for testing
     /* package private */ PeriodicStatisticsSink(final Builder builder, final ScheduledExecutorService executor) {
         super(builder);
@@ -212,6 +227,27 @@ public final class PeriodicStatisticsSink extends BaseSink {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PeriodicStatisticsSink.class);
     private static final int EXECUTOR_TIMEOUT_IN_SECONDS = 30;
+    private static final ImmutableMap<Period, String> CACHED_PERIOD_STRINGS;
+
+    static {
+        final ImmutableSet<Period> periods = ImmutableSet.<Period>builder()
+                .add(Period.seconds(1))
+                .add(Period.minutes(1))
+                .add(Period.minutes(2))
+                .add(Period.minutes(5))
+                .add(Period.minutes(10))
+                .add(Period.minutes(15))
+                .add(Period.hours(1))
+                .add(Period.days(1))
+                .add(Period.months(1))
+                .add(Period.years(1))
+                .build();
+        final ImmutableMap.Builder<Period, String> builder = ImmutableMap.builder();
+        for (final Period period : periods) {
+            builder.put(period, period.toString());
+        }
+        CACHED_PERIOD_STRINGS = builder.build();
+    }
 
     private final class MetricsLogger implements Runnable {
 
