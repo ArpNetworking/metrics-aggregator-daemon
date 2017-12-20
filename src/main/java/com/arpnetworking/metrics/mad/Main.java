@@ -255,7 +255,7 @@ public final class Main implements Launchable {
 
         // Instantiate the metrics factory
         final String sinkHost = "0.0.0.0".equals(_configuration.getHttpHost()) ? "localhost" : _configuration.getHttpHost();
-        final URI sinkUrl = URI.create("http://" + sinkHost + ":" + _configuration.getHttpPort() + "/metrics/v1/application");
+        final URI sinkUrl = URI.create("http://" + sinkHost + ":" + _configuration.getHttpPort() + "/metrics/v2/application");
         final MetricsFactory metricsFactory = new TsdMetricsFactory.Builder()
                 .setClusterName(_configuration.getMonitoringCluster())
                 .setServiceName("mad")

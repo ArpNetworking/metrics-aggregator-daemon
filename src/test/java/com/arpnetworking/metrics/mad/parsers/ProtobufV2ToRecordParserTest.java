@@ -63,7 +63,7 @@ public final class ProtobufV2ToRecordParserTest {
         Assert.assertEquals(time, record.getTime());
 
         final ImmutableMap<String, ? extends Metric> metrics = record.getMetrics();
-        Assert.assertEquals(2, metrics.size());
+        Assert.assertEquals(3, metrics.size());
         final Metric counter = metrics.get("counter1");
         Assert.assertNotNull(counter);
         Assert.assertEquals(1, counter.getValues().size());
@@ -73,6 +73,11 @@ public final class ProtobufV2ToRecordParserTest {
         Assert.assertNotNull(timer);
         Assert.assertEquals(1, timer.getValues().size());
         Assert.assertEquals(new Quantity.Builder().setUnit(Unit.MILLISECOND).setValue(508d).build(), timer.getValues().get(0));
+
+        final Metric longCounter = metrics.get("longCounter1");
+        Assert.assertNotNull(longCounter);
+        Assert.assertEquals(1, longCounter.getValues().size());
+        Assert.assertEquals(new Quantity.Builder().setValue(1d).build(), counter.getValues().get(0));
     }
 
     private static List<Record> parseRecords(final String fileName) throws ParsingException, IOException {
