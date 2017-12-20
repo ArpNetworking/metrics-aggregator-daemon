@@ -86,11 +86,15 @@ public final class ProtobufV2ToRecordParser implements Parser<List<Record>, Http
                     .setType(metricType);
             final List<Quantity> quantities = Lists.newArrayListWithExpectedSize(metricEntry.getSamplesCount());
             for (final ClientV2.Quantity quantity : metricEntry.getSamplesList()) {
-                quantities.add(
-                        new Quantity.Builder()
-                                .setUnit(baseUnit(quantity.getUnit()))
-                                .setValue(quantity.getDoubleValue())
-                                .build());
+                final Quantity.Builder builder = new Quantity.Builder()
+                        .setUnit(baseUnit(quantity.getUnit()));
+                if (quantity.getValueCase().equals(ClientV2.Quantity.ValueCase.DOUBLEVALUE)) {
+                    builder.setValue(quantity.getDoubleValue());
+                } else if (quantity.getValueCase().equals(ClientV2.Quantity.ValueCase.LONGVALUE)) {
+                    builder.setValue(Long.valueOf(quantity.getLongValue()).doubleValue());
+                }
+
+                quantities.add(builder.build());
             }
 
             metricBuilder.setValues(quantities);
