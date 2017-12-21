@@ -26,17 +26,25 @@ import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.proxy.models.messages.Command;
 import com.arpnetworking.metrics.proxy.models.messages.Connect;
+import com.arpnetworking.metrics.proxy.models.messages.MetricReport;
 import com.arpnetworking.metrics.proxy.models.protocol.MessageProcessorsFactory;
 import com.arpnetworking.metrics.proxy.models.protocol.MessagesProcessor;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.tsdcore.model.AggregatedData;
+import com.arpnetworking.tsdcore.model.Key;
+import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Actor class to hold the state for a single connection.
@@ -95,6 +103,9 @@ public class Connection extends AbstractActor {
                             .addData("data", message)
                             .log();
                     getSelf().tell(PoisonPill.getInstance(), getSelf());
+                })
+                .match(PeriodicData.class, message -> {
+                    processPeriodicData(message);
                 })
                 .matchAny(message -> {
                     if (_channel == null) {
@@ -180,6 +191,52 @@ public class Connection extends AbstractActor {
     }
 
     /**
+     * Subscribe the connection to a stream.
+     *
+     * @param service The service to subscribe to.
+     * @param metric The metric to subscribe to.
+     * @param statistic The statistic to subscribe to.
+     */
+    public void subscribe(final String service, final String metric, final String statistic) {
+        if (!_subscriptions.containsKey(service)) {
+            _subscriptions.put(service, Maps.newHashMap());
+        }
+
+        final Map<String, Set<String>> metrics = _subscriptions.get(service);
+        if (!metrics.containsKey(metric)) {
+            metrics.put(metric, Sets.newHashSet());
+        }
+
+        final Set<String> statistics = metrics.get(metric);
+        if (!statistics.contains(statistic)) {
+            statistics.add(statistic);
+        }
+    }
+
+    /**
+     * Unsubscribe the connection from a stream.
+     *
+     * @param service The service to unsubscribe from.
+     * @param metric The metric to unsubscribe from.
+     * @param statistic The statistic to unsubscribe from.
+     */
+    public void unsubscribe(final String service, final String metric, final String statistic) {
+        if (!_subscriptions.containsKey(service)) {
+            return;
+        }
+
+        final Map<String, Set<String>> metrics = _subscriptions.get(service);
+        if (!metrics.containsKey(metric)) {
+            return;
+        }
+
+        final Set<String> statistics = metrics.get(metric);
+        if (statistics.contains(statistic)) {
+            statistics.remove(statistic);
+        }
+    }
+
+    /**
      * Accessor to this Connection's Telemetry actor.
      *
      * @return This Connection's Telemetry actor.
@@ -198,6 +255,7 @@ public class Connection extends AbstractActor {
         return LogValueMapFactory.builder(this)
                 .put("connection", _channel)
                 .put("messageProcessors", _messageProcessors)
+                .put("subscriptions", _subscriptions)
                 .build();
     }
 
@@ -206,11 +264,66 @@ public class Connection extends AbstractActor {
         return toLogValue().toString();
     }
 
+    private void processPeriodicData(final PeriodicData message) {
+        final Key dimensions = message.getDimensions();
+        final String host = dimensions.getHost();
+        final String service = dimensions.getService();
+        final Map<String, Set<String>> metrics = _subscriptions.get(service);
+        if (metrics == null) {
+            LOGGER.trace()
+                    .setMessage("Not sending MetricReport")
+                    .addData("reason", "service not found in subscriptions")
+                    .addData("service", service)
+                    .log();
+            return;
+        }
+
+        for (final Map.Entry<String, AggregatedData> entry : message.getData().entries()) {
+            final String metric = entry.getKey();
+            final AggregatedData datum = entry.getValue();
+
+            final Set<String> stats = metrics.get(metric);
+            if (stats == null) {
+                LOGGER.trace()
+                        .setMessage("Not sending MetricReport")
+                        .addData("reason", "metric not found in subscriptions")
+                        .addData("metric", metric)
+                        .log();
+                continue;
+            }
+
+            final String statisticName = datum.getStatistic().getName();
+            if (!stats.contains(statisticName)) {
+                LOGGER.trace()
+                        .setMessage("Not sending MetricReport")
+                        .addData("reason", "statistic not found in subscriptions")
+                        .addData("statistic", statisticName)
+                        .log();
+                continue;
+            }
+
+            final MetricReport metricReport = new MetricReport(
+                    service,
+                    host,
+                    statisticName,
+                    metric,
+                    datum.getValue().getValue(),
+                    datum.getValue().getUnit(),
+                    message.getStart());
+            for (final MessagesProcessor messagesProcessor : _messageProcessors) {
+                if (messagesProcessor.handleMessage(metricReport)) {
+                    break;
+                }
+            }
+        }
+    }
+
     private ActorRef _telemetry;
     private ActorRef _channel;
 
     private final PeriodicMetrics _metrics;
     private final List<MessagesProcessor> _messageProcessors;
+    private final Map<String, Map<String, Set<String>>> _subscriptions = Maps.newHashMap();
 
     private static final String METRICS_PREFIX = "actors/connection/";
     private static final String UNKNOWN_COMMAND_COUNTER = METRICS_PREFIX + "command/UNKNOWN";

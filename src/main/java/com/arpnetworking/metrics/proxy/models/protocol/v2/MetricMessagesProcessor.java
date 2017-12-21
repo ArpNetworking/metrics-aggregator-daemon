@@ -26,15 +26,11 @@ import com.arpnetworking.metrics.proxy.models.messages.MetricsListRequest;
 import com.arpnetworking.metrics.proxy.models.messages.NewMetric;
 import com.arpnetworking.metrics.proxy.models.protocol.MessagesProcessor;
 import com.arpnetworking.steno.LogValueMapFactory;
-import com.arpnetworking.steno.Logger;
-import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +68,7 @@ public class MetricMessagesProcessor implements MessagesProcessor {
                     final String service = commandNode.get("service").asText();
                     final String metric = commandNode.get("metric").asText();
                     final String statistic = commandNode.get("statistic").asText();
-                    subscribe(service, metric, statistic);
+                    _connection.subscribe(service, metric, statistic);
                     break;
                 }
                 case COMMAND_UNSUBSCRIBE_METRIC: {
@@ -80,7 +76,7 @@ public class MetricMessagesProcessor implements MessagesProcessor {
                     final String service = commandNode.get("service").asText();
                     final String metric = commandNode.get("metric").asText();
                     final String statistic = commandNode.get("statistic").asText();
-                    unsubscribe(service, metric, statistic);
+                    _connection.unsubscribe(service, metric, statistic);
                     break;
                 }
                 default:
@@ -114,7 +110,7 @@ public class MetricMessagesProcessor implements MessagesProcessor {
     public Object toLogValue() {
         // NOTE: Do not log connection context as this creates a circular reference
         return LogValueMapFactory.builder(this)
-                .put("subscriptions", _subscriptions)
+                .put("connection", _connection)
                 .build();
     }
 
@@ -132,33 +128,6 @@ public class MetricMessagesProcessor implements MessagesProcessor {
     }
 
     private void processMetricReport(final MetricReport report) {
-        final Map<String, Set<String>> metrics = _subscriptions.get(report.getService());
-        if (metrics == null) {
-            LOGGER.trace()
-                    .setMessage("Not sending MetricReport")
-                    .addData("reason", "service not found in subscriptions")
-                    .addData("service", report.getService())
-                    .log();
-            return;
-        }
-        final Set<String> stats = metrics.get(report.getMetric());
-        if (stats == null) {
-            LOGGER.trace()
-                    .setMessage("Not sending MetricReport")
-                    .addData("reason", "metric not found in subscriptions")
-                    .addData("metric", report.getMetric())
-                    .log();
-            return;
-        }
-        if (!stats.contains(report.getStatistic())) {
-            LOGGER.trace()
-                    .setMessage("Not sending MetricReport")
-                    .addData("reason", "statistic not found in subscriptions")
-                    .addData("statistic", report.getStatistic())
-                    .log();
-            return;
-        }
-
         //TODO(barp): Map with a POJO mapper [MAI-184]
         final ObjectNode event = new ObjectNode(OBJECT_MAPPER.getNodeFactory());
         event.put("server", report.getHost());
@@ -207,39 +176,6 @@ public class MetricMessagesProcessor implements MessagesProcessor {
         _connection.sendCommand(COMMAND_METRICS_LIST, dataNode);
     }
 
-    private void subscribe(final String service, final String metric, final String statistic) {
-        if (!_subscriptions.containsKey(service)) {
-            _subscriptions.put(service, Maps.<String, Set<String>>newHashMap());
-        }
-
-        final Map<String, Set<String>> metrics = _subscriptions.get(service);
-        if (!metrics.containsKey(metric)) {
-            metrics.put(metric, Sets.<String>newHashSet());
-        }
-
-        final Set<String> statistics = metrics.get(metric);
-        if (!statistics.contains(statistic)) {
-            statistics.add(statistic);
-        }
-    }
-
-    private void unsubscribe(final String service, final String metric, final String statistic) {
-        if (!_subscriptions.containsKey(service)) {
-            return;
-        }
-
-        final Map<String, Set<String>> metrics = _subscriptions.get(service);
-        if (!metrics.containsKey(metric)) {
-            return;
-        }
-
-        final Set<String> statistics = metrics.get(metric);
-        if (statistics.contains(statistic)) {
-            statistics.remove(statistic);
-        }
-    }
-
-    private final Map<String, Map<String, Set<String>>> _subscriptions = Maps.newHashMap();
     private final Connection _connection;
     private PeriodicMetrics _metrics;
 
@@ -258,5 +194,4 @@ public class MetricMessagesProcessor implements MessagesProcessor {
     private static final String SUBSCRIBE_COUNTER = METRICS_PREFIX + "command/subscribe";
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetricMessagesProcessor.class);
 }

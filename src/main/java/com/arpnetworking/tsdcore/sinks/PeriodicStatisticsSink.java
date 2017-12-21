@@ -43,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAccumulator;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
@@ -78,21 +79,29 @@ public final class PeriodicStatisticsSink extends BaseSink {
 
         final long now = System.currentTimeMillis();
         _aggregatedData.addAndGet(periodicData.getData().size());
+
+        final String fqsnPrefix = new StringBuilder()
+                .append(periodicData.getDimensions().getParameters().entrySet().stream()
+                        .map(entry -> entry.getKey() + "=" + entry.getValue())
+                        .collect(Collectors.joining(";")))
+                .append(getPeriodAsString(periodicData.getPeriod()))
+                .toString();
+        final String serviceMetricPrefix = new StringBuilder()
+                .append(periodicData.getDimensions().getService()).append(".")
+                .toString();
+
         final Set<String> uniqueMetrics = Sets.newHashSet();
         for (final Map.Entry<String, AggregatedData> entry : periodicData.getData().entries()) {
             final String metricName = entry.getKey();
             final AggregatedData datum = entry.getValue();
             final String fqsn = new StringBuilder()
-                    .append(periodicData.getDimensions().getCluster()).append(".")
-                    .append(periodicData.getDimensions().getHost()).append(".")
-                    .append(periodicData.getDimensions().getService()).append(".")
+                    .append(fqsnPrefix)
                     .append(metricName).append(".")
                     .append(datum.getStatistic().getName()).append(".")
-                    .append(getPeriodAsString(periodicData.getPeriod()))
                     .toString();
 
             final String serviceMetric = new StringBuilder()
-                    .append(periodicData.getDimensions().getService()).append(".")
+                    .append(serviceMetricPrefix)
                     .append(metricName)
                     .toString();
 

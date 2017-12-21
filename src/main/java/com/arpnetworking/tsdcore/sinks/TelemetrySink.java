@@ -19,15 +19,11 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import com.arpnetworking.logback.annotations.LogValue;
-import com.arpnetworking.metrics.proxy.models.messages.MetricReport;
 import com.arpnetworking.steno.LogValueMapFactory;
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-
-import java.util.Map;
 
 /**
  * A publisher that sends a message to the <code>Telemetry</code> actor.
@@ -38,21 +34,7 @@ public final class TelemetrySink extends BaseSink {
 
     @Override
     public void recordAggregateData(final PeriodicData periodicData) {
-        for (final Map.Entry<String, AggregatedData> entry : periodicData.getData().entries()) {
-            final String metricName = entry.getKey();
-            final AggregatedData datum = entry.getValue();
-            if (datum.isSpecified()) {
-                final MetricReport metricReport = new MetricReport(
-                        periodicData.getDimensions().getService(),
-                        periodicData.getDimensions().getHost(),
-                        datum.getStatistic().getName(),
-                        metricName,
-                        datum.getValue().getValue(),
-                        datum.getValue().getUnit(),
-                        periodicData.getStart());
-                _telemetryActor.tell(metricReport, ActorRef.noSender());
-            }
-        }
+        _telemetryActor.tell(periodicData, ActorRef.noSender());
     }
 
     @Override
