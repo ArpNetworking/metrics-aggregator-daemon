@@ -29,7 +29,6 @@ import com.arpnetworking.metrics.proxy.models.messages.LogFileDisappeared;
 import com.arpnetworking.metrics.proxy.models.messages.LogLine;
 import com.arpnetworking.metrics.proxy.models.messages.LogsList;
 import com.arpnetworking.metrics.proxy.models.messages.LogsListRequest;
-import com.arpnetworking.metrics.proxy.models.messages.MetricReport;
 import com.arpnetworking.metrics.proxy.models.messages.MetricsList;
 import com.arpnetworking.metrics.proxy.models.messages.MetricsListRequest;
 import com.arpnetworking.metrics.proxy.models.messages.NewLog;
@@ -37,6 +36,9 @@ import com.arpnetworking.metrics.proxy.models.messages.NewMetric;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.tsdcore.model.AggregatedData;
+import com.arpnetworking.tsdcore.model.Key;
+import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -79,8 +81,8 @@ public class Telemetry extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .matchEquals("instrument", message -> periodicInstrumentation())
+                .match(PeriodicData.class, this::executePeriodicData)
                 .match(Connect.class, this::executeConnect)
-                .match(MetricReport.class, this::executeMetricReport)
                 .match(LogLine.class, this::executeLogLine)
                 .match(MetricsListRequest.class, ignored -> executeMetricsListRequest())
                 .match(LogsListRequest.class, ignored -> executeLogsListRequest())
@@ -165,13 +167,16 @@ public class Telemetry extends AbstractActor {
                 .log();
     }
 
-    private void executeMetricReport(final MetricReport message) {
-        _metrics.incrementCounter(METRIC_REPORT_COUNTER);
+    private void executePeriodicData(final PeriodicData message) {
+        _metrics.incrementCounter(PERIODIC_DATA_COUNTER);
 
-        // Ensure the metric is in the registry
-        registerMetric(message.getService(), message.getMetric(), message.getStatistic());
+        // Ensure all the metrics are in the registry
+        final Key dimensions = message.getDimensions();
+        for (final Map.Entry<String, AggregatedData> entry : message.getData().entries()) {
+            registerMetric(dimensions.getService(), entry.getKey(), entry.getValue().getStatistic().getName());
+        }
 
-        // Transmit the report to all members
+        // Transmit the data to all members
         broadcast(message);
     }
 
@@ -208,12 +213,12 @@ public class Telemetry extends AbstractActor {
 
     private void registerMetric(final String service, final String metric, final String statistic) {
         if (!_serviceMetrics.containsKey(service)) {
-            _serviceMetrics.put(service, Maps.<String, Set<String>>newHashMap());
+            _serviceMetrics.put(service, Maps.newHashMap());
         }
         final Map<String, Set<String>> serviceMap = _serviceMetrics.get(service);
 
         if (!serviceMap.containsKey(metric)) {
-            serviceMap.put(metric, Sets.<String>newHashSet());
+            serviceMap.put(metric, Sets.newHashSet());
         }
         final Set<String> statistics = serviceMap.get(metric);
 
@@ -245,7 +250,7 @@ public class Telemetry extends AbstractActor {
     private static final String METRIC_PREFIX = "actors/stream/";
     private static final String METRICS_LIST_REQUEST = METRIC_PREFIX + "metrics_list_request";
     private static final String QUIT_COUNTER = METRIC_PREFIX + "quit";
-    private static final String METRIC_REPORT_COUNTER = METRIC_PREFIX + "metric_report";
+    private static final String PERIODIC_DATA_COUNTER = METRIC_PREFIX + "periodic_data";
     private static final String CONNECT_COUNTER = METRIC_PREFIX + "connect";
     private static final String LOG_LINE_COUNTER = METRIC_PREFIX + "log_line";
     private static final String METRICS_LIST_COUNTER = METRIC_PREFIX + "metrics_list";
