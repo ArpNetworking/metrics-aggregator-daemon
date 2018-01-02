@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
@@ -82,23 +83,28 @@ public final class ProtobufV2ToRecordParser implements Parser<List<Record>, Http
             final List<ClientV2.MetricEntry> entries,
             final MetricType metricType) {
         for (final ClientV2.MetricEntry metricEntry : entries) {
-            final DefaultMetric.Builder metricBuilder = new DefaultMetric.Builder()
-                    .setType(metricType);
             final List<Quantity> quantities = Lists.newArrayListWithExpectedSize(metricEntry.getSamplesCount());
             for (final ClientV2.Quantity quantity : metricEntry.getSamplesList()) {
-                final Quantity.Builder builder = new Quantity.Builder()
-                        .setUnit(baseUnit(quantity.getUnit()));
                 if (quantity.getValueCase().equals(ClientV2.Quantity.ValueCase.DOUBLEVALUE)) {
-                    builder.setValue(quantity.getDoubleValue());
+                    quantities.add(
+                            ThreadLocalBuilder.build(
+                                    Quantity.Builder.class,
+                                    b -> b.setUnit(baseUnit(quantity.getUnit()))
+                                            .setValue(quantity.getDoubleValue())));
                 } else if (quantity.getValueCase().equals(ClientV2.Quantity.ValueCase.LONGVALUE)) {
-                    builder.setValue(Long.valueOf(quantity.getLongValue()).doubleValue());
+                    quantities.add(
+                            ThreadLocalBuilder.build(
+                                    Quantity.Builder.class,
+                                    b -> b.setUnit(baseUnit(quantity.getUnit()))
+                                            .setValue((double) quantity.getLongValue())));
                 }
-
-                quantities.add(builder.build());
             }
 
-            metricBuilder.setValues(quantities);
-            metrics.put(metricEntry.getName(), metricBuilder.build());
+            final Metric defaultMetric = ThreadLocalBuilder.build(
+                    DefaultMetric.Builder.class,
+                    b -> b.setType(metricType)
+                            .setValues(quantities));
+            metrics.put(metricEntry.getName(), defaultMetric);
         }
     }
 
