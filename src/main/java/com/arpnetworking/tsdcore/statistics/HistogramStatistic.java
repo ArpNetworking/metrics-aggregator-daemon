@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import javax.annotation.Nullable;
 
 /**
  * Histogram statistic. This is a supporting statistic and does not produce
@@ -92,15 +93,19 @@ public final class HistogramStatistic extends BaseStatistic {
 
         @Override
         public CalculatedValue<HistogramSupportingData> calculate(final Map<Statistic, Calculator<?>> dependencies) {
-            return new CalculatedValue.Builder<HistogramSupportingData>()
-                    .setValue(new Quantity.Builder()
-                            .setValue(1.0)
-                            .build())
-                    .setData(new HistogramSupportingData.Builder()
-                            .setHistogramSnapshot(_histogram.getSnapshot())
-                            .setUnit(_unit)
-                            .build())
-                    .build();
+            return ThreadLocalBuilder.<
+                    CalculatedValue<HistogramSupportingData>,
+                    CalculatedValue.Builder<HistogramSupportingData>>buildGeneric(
+                            CalculatedValue.Builder.class,
+                            b1 -> b1.setValue(
+                                    ThreadLocalBuilder.build(
+                                            Quantity.Builder.class,
+                                            b2 -> b2.setValue(1.0)))
+                                    .setData(
+                                            ThreadLocalBuilder.build(
+                                                    HistogramSupportingData.Builder.class,
+                                                    builder -> builder.setHistogramSnapshot(_histogram.getSnapshot())
+                                                            .setUnit(_unit.orElse(null)))));
         }
 
         /**
@@ -111,10 +116,10 @@ public final class HistogramStatistic extends BaseStatistic {
          */
         public Quantity calculate(final double percentile) {
             final HistogramSnapshot snapshot = _histogram.getSnapshot();
-            return new Quantity.Builder()
-                    .setValue(snapshot.getValueAtPercentile(percentile))
-                    .setUnit(_unit.orElse(null))
-                    .build();
+            return ThreadLocalBuilder.build(
+                    Quantity.Builder.class,
+                    b -> b.setValue(snapshot.getValueAtPercentile(percentile))
+                            .setUnit(_unit.orElse(null)));
         }
 
         private Optional<Unit> _unit = Optional.empty();
@@ -133,7 +138,7 @@ public final class HistogramStatistic extends BaseStatistic {
          * @param builder The builder.
          */
         public HistogramSupportingData(final Builder builder) {
-            _unit = builder._unit;
+            _unit = Optional.ofNullable(builder._unit);
             _histogramSnapshot = builder._histogramSnapshot;
         }
 
@@ -155,10 +160,10 @@ public final class HistogramStatistic extends BaseStatistic {
                     final Double newBucket = newUnit.convert(entry.getKey(), _unit.get());
                     newHistogram.recordValue(newBucket, entry.getValue());
                 }
-                return new HistogramSupportingData.Builder()
-                        .setHistogramSnapshot(newHistogram.getSnapshot())
-                        .setUnit(Optional.of(newUnit))
-                        .build();
+                return ThreadLocalBuilder.build(
+                        HistogramSupportingData.Builder.class,
+                        builder -> builder.setHistogramSnapshot(newHistogram.getSnapshot())
+                                .setUnit(newUnit));
             }
             return this;
         }
@@ -175,7 +180,7 @@ public final class HistogramStatistic extends BaseStatistic {
          *
          * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
          */
-        public static class Builder extends OvalBuilder<HistogramSupportingData> {
+        public static class Builder extends ThreadLocalBuilder<HistogramSupportingData> {
             /**
              * Public constructor.
              */
@@ -200,13 +205,18 @@ public final class HistogramStatistic extends BaseStatistic {
              * @param value the unit
              * @return This {@link Builder} instance.
              */
-            public Builder setUnit(final Optional<Unit> value) {
+            public Builder setUnit(@Nullable final Unit value) {
                 _unit = value;
                 return this;
             }
 
-            @NotNull
-            private Optional<Unit> _unit = Optional.empty();
+            @Override
+            protected void reset() {
+                _unit = null;
+                _histogramSnapshot = null;
+            }
+
+            private Unit _unit;
             @NotNull
             private HistogramSnapshot _histogramSnapshot;
         }

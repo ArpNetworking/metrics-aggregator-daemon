@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
@@ -191,23 +192,22 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
             final Number value,
             final StatsdType type,
             final ImmutableMap<String, String> annotations) {
-        return new DefaultRecord.Builder()
-                .setDimensions(annotations)
-                .setId(UUID.randomUUID().toString())
-                .setMetrics(ImmutableMap.of(
-                        name,
-                        new DefaultMetric.Builder()
-                                .setValues(
-                                        Collections.singletonList(
-                                                new Quantity.Builder()
-                                                        .setValue(value.doubleValue())
-                                                        .setUnit(type.getUnit())
-                                                        .build()))
-                                .setType(type.getMetricType())
-                                .build()
-                ))
-                .setTime(new DateTime(_clock.millis(), DateTimeZone.UTC))
-                .build();
+        return ThreadLocalBuilder.build(
+                DefaultRecord.Builder.class,
+                b1 -> b1.setDimensions(annotations)
+                        .setId(UUID.randomUUID().toString())
+                        .setMetrics(ImmutableMap.of(
+                                name,
+                                ThreadLocalBuilder.build(
+                                        DefaultMetric.Builder.class,
+                                        b2 -> b2.setValues(
+                                                Collections.singletonList(
+                                                        ThreadLocalBuilder.build(
+                                                                Quantity.Builder.class,
+                                                                b3 -> b3.setValue(value.doubleValue())
+                                                                        .setUnit(type.getUnit()))))
+                                        .setType(type.getMetricType()))))
+                        .setTime(new DateTime(_clock.millis(), DateTimeZone.UTC)));
     }
 
     /**

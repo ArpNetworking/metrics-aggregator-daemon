@@ -16,6 +16,7 @@
 package com.arpnetworking.metrics.mad.sources;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
@@ -139,8 +140,9 @@ public final class MappingSource extends BaseSource {
             // Raise the merged record event with this source's observers
             // NOTE: Do not leak instances of MergingMetric since it is mutable
             _source.notify(
-                    new DefaultRecord.Builder()
-                            .setMetrics(
+                    ThreadLocalBuilder.build(
+                            DefaultRecord.Builder.class,
+                            b1 -> b1.setMetrics(
                                     ImmutableMap.copyOf(
                                             Maps.transformEntries(
                                                     mergedMetrics,
@@ -149,11 +151,10 @@ public final class MappingSource extends BaseSource {
                                                                     mergingMetric,
                                                                     new DefaultMetric.Builder())
                                                             .build())))
-                            .setId(record.getId())
-                            .setTime(record.getTime())
-                            .setAnnotations(record.getAnnotations())
-                            .setDimensions(record.getDimensions())
-                            .build());
+                                    .setId(record.getId())
+                                    .setTime(record.getTime())
+                                    .setAnnotations(record.getAnnotations())
+                                    .setDimensions(record.getDimensions())));
         }
 
         private void merge(final Metric metric, final String key, final Map<String, MergingMetric> mergedMetrics) {

@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import net.sf.oval.constraint.NotNull;
 
 /**
@@ -47,7 +47,7 @@ public final class CalculatedValue<T> {
      *
      * @param <T> type of the object to be built
      */
-    public static final class Builder<T> extends OvalBuilder<CalculatedValue<T>> {
+    public static final class Builder<T> extends ThreadLocalBuilder<CalculatedValue<T>> {
 
         /**
          * Public constructor.
@@ -76,6 +76,12 @@ public final class CalculatedValue<T> {
         public Builder<T> setData(final T data) {
             _data = data;
             return this;
+        }
+
+        @Override
+        protected void reset() {
+            _value = null;
+            _data = null;
         }
 
         @NotNull

@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.commons.jackson.databind.EnumerationDeserializer;
 import com.arpnetworking.commons.jackson.databind.EnumerationDeserializerStrategyUsingToUpperCase;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
@@ -145,13 +145,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         dimensionsBuilder.put(Key.SERVICE_DIMENSION_KEY, _defaultService);
         dimensionsBuilder.put(Key.CLUSTER_DIMENSION_KEY, _defaultCluster);
 
-        return new DefaultRecord.Builder()
-                .setMetrics(variables.build())
-                .setId(UUID.randomUUID().toString())
-                .setTime(timestamp)
-                .setAnnotations(ImmutableMap.copyOf(annotations.getOtherAnnotations()))
-                .setDimensions(dimensionsBuilder.build())
-                .build();
+        return ThreadLocalBuilder.build(
+                DefaultRecord.Builder.class,
+                b -> b.setMetrics(variables.build())
+                        .setId(UUID.randomUUID().toString())
+                        .setTime(timestamp)
+                        .setAnnotations(ImmutableMap.copyOf(annotations.getOtherAnnotations()))
+                        .setDimensions(dimensionsBuilder.build()));
     }
 
     // NOTE: Package private for testing
@@ -173,13 +173,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         dimensionsBuilder.put(Key.SERVICE_DIMENSION_KEY, _defaultService);
         dimensionsBuilder.put(Key.CLUSTER_DIMENSION_KEY, _defaultCluster);
 
-        return new DefaultRecord.Builder()
-                .setMetrics(variables.build())
-                .setId(UUID.randomUUID().toString())
-                .setTime(timestamp)
-                .setAnnotations(ImmutableMap.copyOf(annotations.getOtherAnnotations()))
-                .setDimensions(dimensionsBuilder.build())
-                .build();
+        return ThreadLocalBuilder.build(
+                DefaultRecord.Builder.class,
+                b -> b.setMetrics(variables.build())
+                        .setId(UUID.randomUUID().toString())
+                        .setTime(timestamp)
+                        .setAnnotations(ImmutableMap.copyOf(annotations.getOtherAnnotations()))
+                        .setDimensions(dimensionsBuilder.build()));
     }
 
     // NOTE: Package private for testing
@@ -202,13 +202,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         dimensionsBuilder.put(Key.SERVICE_DIMENSION_KEY, _defaultService);
         dimensionsBuilder.put(Key.CLUSTER_DIMENSION_KEY, _defaultCluster);
 
-        return new DefaultRecord.Builder()
-                .setMetrics(variables.build())
-                .setId(UUID.randomUUID().toString())
-                .setTime(timestamp)
-                .setAnnotations(annotations.getOtherAnnotations())
-                .setDimensions(dimensionsBuilder.build())
-                .build();
+        return ThreadLocalBuilder.build(
+                DefaultRecord.Builder.class,
+                b -> b.setMetrics(variables.build())
+                        .setId(UUID.randomUUID().toString())
+                        .setTime(timestamp)
+                        .setAnnotations(annotations.getOtherAnnotations())
+                        .setDimensions(dimensionsBuilder.build()));
     }
 
     // NOTE: Package private for testing
@@ -223,13 +223,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         putVariablesVersion2f(model.getCounters(), MetricType.COUNTER, variables);
         putVariablesVersion2f(model.getGauges(), MetricType.GAUGE, variables);
 
-        return new DefaultRecord.Builder()
-                .setMetrics(variables.build())
-                .setTime(annotations.getEnd())
-                .setId(annotations.getId())
-                .setAnnotations(annotations.getOtherAnnotations())
-                .setDimensions(extractLegacyDimensions(annotations.getOtherAnnotations()))
-                .build();
+        return ThreadLocalBuilder.build(
+                DefaultRecord.Builder.class,
+                b -> b.setMetrics(variables.build())
+                        .setTime(annotations.getEnd())
+                        .setId(annotations.getId())
+                        .setAnnotations(annotations.getOtherAnnotations())
+                        .setDimensions(extractLegacyDimensions(annotations.getOtherAnnotations())));
     }
 
     // NOTE: Package private for testing
@@ -251,13 +251,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         annotationsBuilder.put(PREFIXED_HOST_KEY, context.getHost());
         final ImmutableMap<String, String> flatAnnotations = annotationsBuilder.build();
 
-        return new DefaultRecord.Builder()
-                .setMetrics(variables.build())
-                .setTime(annotations.getEnd())
-                .setId(model.getId())
-                .setAnnotations(flatAnnotations)
-                .setDimensions(extractLegacyDimensions(flatAnnotations))
-                .build();
+        return ThreadLocalBuilder.build(
+                DefaultRecord.Builder.class,
+                b -> b.setMetrics(variables.build())
+                        .setTime(annotations.getEnd())
+                        .setId(model.getId())
+                        .setAnnotations(flatAnnotations)
+                        .setDimensions(extractLegacyDimensions(flatAnnotations)));
     }
 
     // NOTE: Package private for testing
@@ -271,13 +271,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         putVariablesVersion2g(model.getCounters(), MetricType.COUNTER, variables);
         putVariablesVersion2g(model.getGauges(), MetricType.GAUGE, variables);
 
-        return new DefaultRecord.Builder()
-                .setMetrics(variables.build())
-                .setTime(model.getEnd())
-                .setId(model.getId())
-                .setAnnotations(ImmutableMap.copyOf(model.getAnnotations()))
-                .setDimensions(ImmutableMap.copyOf(model.getDimensions()))
-                .build();
+        return ThreadLocalBuilder.build(
+                DefaultRecord.Builder.class,
+                b -> b.setMetrics(variables.build())
+                        .setTime(model.getEnd())
+                        .setId(model.getId())
+                        .setAnnotations(ImmutableMap.copyOf(model.getAnnotations()))
+                        .setDimensions(ImmutableMap.copyOf(model.getDimensions())));
     }
 
     private static ImmutableMap<String, String> extractLegacyDimensions(final Map<String, String> annotations) {
@@ -330,10 +330,10 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                     .collect(Collectors.toList()));
             variables.put(
                     entry.getKey(),
-                    new DefaultMetric.Builder()
-                            .setType(metricKind)
-                            .setValues(quantities)
-                            .build());
+                    ThreadLocalBuilder.build(
+                            DefaultMetric.Builder.class,
+                            b -> b.setType(metricKind)
+                                    .setValues(quantities)));
         }
     }
 
@@ -353,10 +353,10 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                     .collect(Collectors.toList()));
             variables.put(
                     entry.getKey(),
-                    new DefaultMetric.Builder()
-                            .setType(metricKind)
-                            .setValues(quantities)
-                            .build());
+                    ThreadLocalBuilder.build(
+                            DefaultMetric.Builder.class,
+                            b -> b.setType(metricKind)
+                                    .setValues(quantities)));
         }
     }
 
@@ -376,10 +376,10 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                     .collect(Collectors.toList()));
             variables.put(
                     entry.getKey(),
-                    new DefaultMetric.Builder()
-                            .setType(metricKind)
-                            .setValues(quantities)
-                            .build());
+                    ThreadLocalBuilder.build(
+                            DefaultMetric.Builder.class,
+                            b -> b.setType(metricKind)
+                                    .setValues(quantities)));
         }
     }
 
@@ -399,10 +399,10 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                     .collect(Collectors.toList()));
             variables.put(
                     entry.getKey(),
-                    new DefaultMetric.Builder()
-                            .setType(metricKind)
-                            .setValues(quantities)
-                            .build());
+                    ThreadLocalBuilder.build(
+                            DefaultMetric.Builder.class,
+                            b -> b.setType(metricKind)
+                                    .setValues(quantities)));
         }
     }
 
@@ -422,10 +422,10 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                     .collect(Collectors.toList()));
             variables.put(
                     entry.getKey(),
-                    new DefaultMetric.Builder()
-                            .setType(metricKind)
-                            .setValues(quantities)
-                            .build());
+                    ThreadLocalBuilder.build(
+                            DefaultMetric.Builder.class,
+                            b -> b.setType(metricKind)
+                                    .setValues(quantities)));
         }
     }
 
@@ -444,10 +444,10 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                             .collect(Collectors.toList());
             variables.put(
                     entry.getKey(),
-                    new DefaultMetric.Builder()
-                            .setType(metricKind)
-                            .setValues(quantities)
-                            .build());
+                    ThreadLocalBuilder.build(
+                            DefaultMetric.Builder.class,
+                            b -> b.setType(metricKind)
+                                    .setValues(quantities)));
         }
     }
 
@@ -536,7 +536,9 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
             try {
                 final double value = Double.parseDouble(sample);
                 if (Double.isFinite(value)) {
-                    return new Quantity.Builder().setValue(value).build();
+                    return ThreadLocalBuilder.build(
+                            Quantity.Builder.class,
+                            b -> b.setValue(value));
                 } else {
                     // TODO(barp): Create a counter for invalid metrics [AINT-680]
                     INVALID_SAMPLE_LOGGER
@@ -557,10 +559,10 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static final Function<Version2d.Sample, Quantity> VERSION_2D_SAMPLE_TO_QUANTITY = sample -> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
-                return new Quantity.Builder()
-                        .setValue(sample.getValue())
-                        .setUnit(sample.getUnit().orElse(null))
-                        .build();
+                return ThreadLocalBuilder.build(
+                        Quantity.Builder.class,
+                        b -> b.setValue(sample.getValue())
+                                .setUnit(sample.getUnit().orElse(null)));
             } else {
                 // TODO(barp): Create a counter for invalid metrics [AINT-680]
                 INVALID_SAMPLE_LOGGER
@@ -578,10 +580,10 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static final Function<Version2e.Sample, Quantity> VERSION_2E_SAMPLE_TO_QUANTITY = sample -> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
-                return new Quantity.Builder()
-                        .setValue(sample.getValue())
-                        .setUnit(sample.getUnit().orElse(null))
-                        .build();
+                return ThreadLocalBuilder.build(
+                        Quantity.Builder.class,
+                        b -> b.setValue(sample.getValue())
+                                .setUnit(sample.getUnit().orElse(null)));
             } else {
                 // TODO(barp): Create a counter for invalid metrics [AINT-680]
                 INVALID_SAMPLE_LOGGER
@@ -599,13 +601,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static final Function<Version2f.Sample, Quantity> VERSION_2F_SAMPLE_TO_QUANTITY = sample -> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
-                return new Quantity.Builder()
-                        .setValue(sample.getValue())
-                        .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))
+                return ThreadLocalBuilder.build(
+                        Quantity.Builder.class,
+                        b -> b.setValue(sample.getValue())
+                                .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null)));
                         // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
                         //.setNumeratorUnits(sample.getUnitNumerators())
                         //.setDenominatorUnits(sample.getUnitDenominators())
-                        .build();
             } else {
                 // TODO(barp): Create a counter for invalid metrics [AINT-680]
                 INVALID_SAMPLE_LOGGER
@@ -623,13 +625,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static final Function<Version2fSteno.Sample, Quantity> VERSION_2F_STENO_SAMPLE_TO_QUANTITY = sample -> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
-                return new Quantity.Builder()
-                        .setValue(sample.getValue())
-                        .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))
-                                // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
+                return ThreadLocalBuilder.build(
+                        Quantity.Builder.class,
+                        b -> b.setValue(sample.getValue())
+                                .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null)));
+                        // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
                         //.setNumeratorUnits(sample.getUnitNumerators())
                         //.setDenominatorUnits(sample.getUnitDenominators())
-                        .build();
             } else {
                 // TODO(barp): Create a counter for invalid metrics [AINT-680]
                 INVALID_SAMPLE_LOGGER
@@ -651,13 +653,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                         ? Iterables.getFirst(sample.getUnit2g().getNumerators(), null)
                         : null;
 
-                return new Quantity.Builder()
-                        .setValue(sample.getValue())
-                        .setUnit(getLegacyUnit(sampleUnit))
-                        // TODO(vkoskela): Support compound units in Tsd Aggregator
-                        //.setNumerator(sampleNumerator)  // same as sampleUnit above
-                        //.setDenominator(sampleDenominator)
-                        .build();
+                return ThreadLocalBuilder.build(
+                        Quantity.Builder.class,
+                        b -> b.setValue(sample.getValue())
+                                .setUnit(getLegacyUnit(sampleUnit)));
+                // TODO(vkoskela): Support compound units in Tsd Aggregator
+                //.setNumerator(sampleNumerator)  // same as sampleUnit above
+                //.setDenominator(sampleDenominator)
             } else {
                 // TODO(barp): Create a counter for invalid metrics
                 INVALID_SAMPLE_LOGGER
@@ -706,7 +708,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     /**
      * Implementation of <code>Builder</code> for {@link JsonToRecordParser}.
      */
-    public static final class Builder extends OvalBuilder<JsonToRecordParser> {
+    public static final class Builder extends ThreadLocalBuilder<JsonToRecordParser> {
 
         /**
          * Public constructor.
@@ -746,6 +748,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         public Builder setDefaultCluster(final String value) {
             _defaultCluster = value;
             return this;
+        }
+
+        @Override
+        protected void reset() {
+            _defaultHost = LOCAL_HOST_NAME;
+            _defaultService = null;
+            _defaultCluster = null;
         }
 
         // NOTE: There are no constraints on these values as they are only

@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -100,7 +100,7 @@ public final class PeriodicData {
     /**
      * <code>Builder</code> implementation for <code>PeriodicData</code>.
      */
-    public static final class Builder extends OvalBuilder<PeriodicData> {
+    public static final class Builder extends ThreadLocalBuilder<PeriodicData> {
 
         /**
          * Public constructor.
@@ -151,6 +151,14 @@ public final class PeriodicData {
         public Builder setData(final ImmutableMultimap<String, AggregatedData> value) {
             _data = value;
             return this;
+        }
+
+        @Override
+        protected void reset() {
+            _period = null;
+            _start = null;
+            _dimensions = null;
+            _data = ImmutableMultimap.of();
         }
 
         @NotNull

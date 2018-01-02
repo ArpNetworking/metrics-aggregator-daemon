@@ -16,6 +16,7 @@
 package com.arpnetworking.metrics.mad;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
@@ -85,12 +86,12 @@ import java.util.function.BiFunction;
                 // -> This requires expressions. Otherwise, it's just a matter of changing the
                 // alerts abstraction from a Sink to something more appropriate and hooking it in
                 // here.
-                final PeriodicData periodicData = new PeriodicData.Builder()
-                        .setData(data.build())
-                        .setDimensions(_key)
-                        .setPeriod(_period)
-                        .setStart(_start)
-                        .build();
+                final PeriodicData periodicData = ThreadLocalBuilder.build(
+                        PeriodicData.Builder.class,
+                        b -> b.setData(data.build())
+                                .setDimensions(_key)
+                                .setPeriod(_period)
+                                .setStart(_start));
                 _sink.recordAggregateData(periodicData);
             } finally {
                 _addCloseLock.writeLock().unlock();
@@ -247,8 +248,6 @@ import java.util.function.BiFunction;
             final BiFunction<String, Statistic, Boolean> specified,
             final ImmutableMultimap.Builder<String, AggregatedData> data) {
 
-        final AggregatedData.Builder datumBuilder = new AggregatedData.Builder();
-
         for (final Map.Entry<String, Collection<Calculator<?>>> entry : calculatorsByMetric.entrySet()) {
             final String metric = entry.getKey();
             final Collection<Calculator<?>> calculators = entry.getValue();
@@ -266,25 +265,32 @@ import java.util.function.BiFunction;
                 }
                 dependencies.put(calculator.getStatistic(), calculator);
             }
-            CalculatedValue<?> populationSize = new CalculatedValue.Builder<>()
-                    .setValue(new Quantity.Builder().setValue(-1.0).build())
-                    .build();
+            final CalculatedValue<?> populationSize;
             if (countStatisticCalculator.isPresent()) {
                 populationSize = countStatisticCalculator.get().calculate(dependencies);
+            } else {
+                populationSize = ThreadLocalBuilder.<
+                        CalculatedValue<Object>,
+                        CalculatedValue.Builder<Object>>buildGeneric(
+                                CalculatedValue.Builder.class,
+                                b -> b.setValue(
+                                        ThreadLocalBuilder.build(
+                                                Quantity.Builder.class,
+                                                builder -> builder.setValue(-1.0))));
             }
 
             // Compute each calculated value requested by the client
             for (final Calculator<?> calculator : calculators) {
-                datumBuilder.setSupportingData(null);
                 final CalculatedValue<?> calculatedValue = calculator.calculate(dependencies);
-                data.put(
-                        metric,
-                        datumBuilder.setValue(calculatedValue.getValue())
+                final AggregatedData datum = ThreadLocalBuilder.build(
+                        AggregatedData.Builder.class,
+                        b -> b.setSupportingData(null)
+                                .setValue(calculatedValue.getValue())
                                 .setIsSpecified(specified.apply(metric, calculator.getStatistic()))
                                 .setPopulationSize((long) populationSize.getValue().getValue())
                                 .setSupportingData(calculatedValue.getData())
-                                .setStatistic(calculator.getStatistic())
-                                .build());
+                                .setStatistic(calculator.getStatistic()));
+                data.put(metric, datum);
             }
         }
     }

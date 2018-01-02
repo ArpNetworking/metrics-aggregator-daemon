@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
@@ -181,22 +181,21 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
             final Number value,
             final DateTime timestamp,
             final ImmutableMap<String, String> dimensions) {
-        return new DefaultRecord.Builder()
-                .setId(UUID.randomUUID().toString())
+        return ThreadLocalBuilder.build(
+                DefaultRecord.Builder.class,
+                b1 -> b1.setId(UUID.randomUUID().toString())
                 .setDimensions(dimensions)
                 .setMetrics(ImmutableMap.of(
                         name,
-                        new DefaultMetric.Builder()
-                                .setValues(
+                        ThreadLocalBuilder.build(
+                                DefaultMetric.Builder.class,
+                                b2 -> b2.setValues(
                                         Collections.singletonList(
-                                                new Quantity.Builder()
-                                                        .setValue(value.doubleValue())
-                                                        .build()))
-                                .setType(MetricType.GAUGE)
-                                .build()
-                ))
-                .setTime(timestamp)
-                .build();
+                                                ThreadLocalBuilder.build(
+                                                        Quantity.Builder.class,
+                                                        b3 -> b3.setValue(value.doubleValue()))))
+                                .setType(MetricType.GAUGE))))
+                .setTime(timestamp));
     }
 
     private GraphitePlaintextToRecordParser(final Builder builder) {
@@ -214,7 +213,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
     /**
      * Implementation of <code>Builder</code> for {@link GraphitePlaintextToRecordParser}.
      */
-    public static final class Builder extends OvalBuilder<GraphitePlaintextToRecordParser> {
+    public static final class Builder extends ThreadLocalBuilder<GraphitePlaintextToRecordParser> {
 
         /**
          * Public constructor.
@@ -245,6 +244,12 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
         public Builder setParseCarbonTags(final Boolean value) {
             _parseCarbonTags = value;
             return this;
+        }
+
+        @Override
+        protected void reset() {
+            _globalTags = ImmutableMap.of();
+            _parseCarbonTags = false;
         }
 
         @NotNull

@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
@@ -98,9 +99,9 @@ public final class MaxStatistic extends BaseStatistic {
 
         @Override
         public CalculatedValue<Void> calculate(final Map<Statistic, Calculator<?>> dependencies) {
-            return new CalculatedValue.Builder<Void>()
-                    .setValue(_max.orElse(null))
-                    .build();
+            return ThreadLocalBuilder.<CalculatedValue<Void>, CalculatedValue.Builder<Void>>buildGeneric(
+                    CalculatedValue.Builder.class,
+                    b -> b.setValue(_max.orElse(null)));
         }
 
         private Optional<Quantity> _max = Optional.empty();

@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.model.json;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -90,7 +90,7 @@ public final class Version2fSteno {
     /**
      * Builder for the Version2fSteno class.
      */
-    public static final class Builder extends OvalBuilder<Version2fSteno> {
+    public static final class Builder extends ThreadLocalBuilder<Version2fSteno> {
         /**
          * Public constructor.
          */
@@ -164,6 +164,16 @@ public final class Version2fSteno {
             return this;
         }
 
+        @Override
+        protected void reset() {
+            _time = null;
+            _name = null;
+            _level = null;
+            _data = null;
+            _id = null;
+            _context = null;
+        }
+
         @NotNull
         private DateTime _time;
         @NotNull
@@ -204,7 +214,7 @@ public final class Version2fSteno {
         /**
          * Builder for the Context class.
          */
-        public static final class Builder extends OvalBuilder<Context> {
+        public static final class Builder extends ThreadLocalBuilder<Context> {
             /**
              * Public constructor.
              */
@@ -237,11 +247,17 @@ public final class Version2fSteno {
                 }
             }
 
+            @Override
+            protected void reset() {
+                _host = null;
+                _otherContext = Maps.newHashMap();
+            }
+
             @NotEmpty
             @NotNull
             private String _host;
             @NotNull
-            private final Map<String, String> _otherContext = Maps.newHashMap();
+            private Map<String, String> _otherContext = Maps.newHashMap();
         }
     }
 
@@ -287,7 +303,7 @@ public final class Version2fSteno {
         /**
          * Builder for the Data class.
          */
-        public static final class Builder extends OvalBuilder<Data> {
+        public static final class Builder extends ThreadLocalBuilder<Data> {
             /**
              * Public constructor.
              */
@@ -350,6 +366,15 @@ public final class Version2fSteno {
                 return this;
             }
 
+            @Override
+            protected void reset() {
+                _annotations = null;
+                _counters = null;
+                _gauges = null;
+                _timers = null;
+                _version = null;
+            }
+
             @NotNull
             private Annotations _annotations;
             private Map<String, Element> _counters;
@@ -392,7 +417,7 @@ public final class Version2fSteno {
         /**
          * Builder for the Sample class.
          */
-        public static final class Builder extends OvalBuilder<Sample> {
+        public static final class Builder extends ThreadLocalBuilder<Sample> {
             /**
              * Public constructor.
              */
@@ -433,6 +458,13 @@ public final class Version2fSteno {
                 return this;
             }
 
+            @Override
+            protected void reset() {
+                _unitDenominators = null;
+                _unitNumerators = null;
+                _value = null;
+            }
+
             private List<Unit> _unitNumerators;
             private List<Unit> _unitDenominators;
             @NotNull
@@ -459,7 +491,7 @@ public final class Version2fSteno {
         /**
          * Builder for the Element class.
          */
-        public static final class Builder extends OvalBuilder<Element> {
+        public static final class Builder extends ThreadLocalBuilder<Element> {
             /**
              * Public constructor.
              */
@@ -476,6 +508,11 @@ public final class Version2fSteno {
             public Element.Builder setValues(final List<Sample> value) {
                 _values = value;
                 return this;
+            }
+
+            @Override
+            protected void reset() {
+                _values = null;
             }
 
             @NotNull
@@ -512,7 +549,7 @@ public final class Version2fSteno {
         /**
          * Builder for the Annotations class.
          */
-        public static final class Builder extends OvalBuilder<Annotations> {
+        public static final class Builder extends ThreadLocalBuilder<Annotations> {
             /**
              * Public constructor.
              */
@@ -558,12 +595,19 @@ public final class Version2fSteno {
                 }
             }
 
+            @Override
+            protected void reset() {
+                _start = null;
+                _end = null;
+                _otherAnnotations = Maps.newHashMap();
+            }
+
             @NotNull
             private DateTime _start;
             @NotNull
             private DateTime _end;
             @NotNull
-            private final Map<String, String> _otherAnnotations = Maps.newHashMap();
+            private Map<String, String> _otherAnnotations = Maps.newHashMap();
         }
     }
 }

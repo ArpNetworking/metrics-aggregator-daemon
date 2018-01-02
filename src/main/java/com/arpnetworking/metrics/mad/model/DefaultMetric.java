@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.model;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.tsdcore.model.MetricType;
@@ -105,7 +105,7 @@ public final class DefaultMetric implements Metric {
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
-    public static final class Builder extends OvalBuilder<Metric> {
+    public static final class Builder extends ThreadLocalBuilder<Metric> {
 
         /**
          * Public constructor.
@@ -134,6 +134,12 @@ public final class DefaultMetric implements Metric {
         public Builder setType(final MetricType value) {
             _type = value;
             return this;
+        }
+
+        @Override
+        protected void reset() {
+            _values = null;
+            _type = null;
         }
 
         @NotNull

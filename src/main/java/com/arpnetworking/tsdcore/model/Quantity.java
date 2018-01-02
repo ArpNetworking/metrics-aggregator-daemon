@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -185,7 +185,7 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
     /**
      * <code>Builder</code> implementation for <code>Quantity</code>.
      */
-    public static final class Builder extends OvalBuilder<Quantity> {
+    public static final class Builder extends ThreadLocalBuilder<Quantity> {
 
         /**
          * Public constructor.
@@ -231,6 +231,12 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
         public Quantity build() {
             normalize();
             return new Quantity(this);
+        }
+
+        @Override
+        protected void reset() {
+            _value = null;
+            _unit = null;
         }
 
         private Builder normalize() {

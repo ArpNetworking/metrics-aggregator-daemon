@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
@@ -81,9 +82,9 @@ public final class SumStatistic extends BaseStatistic {
 
         @Override
         public CalculatedValue<Void> calculate(final Map<Statistic, Calculator<?>> dependencies) {
-            return new CalculatedValue.Builder<Void>()
-                    .setValue(_sum.orElse(null))
-                    .build();
+            return ThreadLocalBuilder.<CalculatedValue<Void>, CalculatedValue.Builder<Void>>buildGeneric(
+                    CalculatedValue.Builder.class,
+                    b -> b.setValue(_sum.orElse(null)));
         }
 
         private Optional<Quantity> _sum = Optional.empty();

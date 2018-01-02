@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.model;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -114,7 +114,7 @@ public final class DefaultRecord implements Record {
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
-    public static final class Builder extends OvalBuilder<Record> {
+    public static final class Builder extends ThreadLocalBuilder<Record> {
 
         /**
          * Public constructor.
@@ -178,6 +178,15 @@ public final class DefaultRecord implements Record {
         public Builder setDimensions(final ImmutableMap<String, String> value) {
             _dimensions = value;
             return this;
+        }
+
+        @Override
+        protected void reset() {
+            _metrics = null;
+            _id = null;
+            _time = null;
+            _annotations = ImmutableMap.of();
+            _dimensions = ImmutableMap.of();
         }
 
         @NotNull
