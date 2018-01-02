@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
@@ -53,14 +54,15 @@ public final class ProtobufV1ToRecordParser implements Parser<List<Record>, Http
                 final ByteBuffer byteBuffer = ByteBuffer.wrap(record.getId().toByteArray());
                 final Long high = byteBuffer.getLong();
                 final Long low = byteBuffer.getLong();
-                final DefaultRecord.Builder builder = new DefaultRecord.Builder()
-                        .setId(new UUID(high, low).toString())
-                        .setTime(new DateTime(record.getEndMillisSinceEpoch()))
-                        .setAnnotations(buildAnnotations(record))
-                        .setDimensions(buildDimensions(record))
-                        .setMetrics(buildMetrics(record));
+                final Record defaultRecord = ThreadLocalBuilder.build(
+                        DefaultRecord.Builder.class,
+                        b -> b.setId(new UUID(high, low).toString())
+                                .setTime(new DateTime(record.getEndMillisSinceEpoch()))
+                                .setAnnotations(buildAnnotations(record))
+                                .setDimensions(buildDimensions(record))
+                                .setMetrics(buildMetrics(record)));
 
-                records.add(builder.build());
+                records.add(defaultRecord);
             }
             return records;
         } catch (final InvalidProtocolBufferException e) {
@@ -83,19 +85,20 @@ public final class ProtobufV1ToRecordParser implements Parser<List<Record>, Http
             final List<ClientV1.MetricEntry> entries,
             final MetricType metricType) {
         for (final ClientV1.MetricEntry metricEntry : entries) {
-            final DefaultMetric.Builder metricBuilder = new DefaultMetric.Builder()
-                    .setType(metricType);
             final List<Quantity> quantities = Lists.newArrayListWithExpectedSize(metricEntry.getSamplesCount());
             for (final ClientV1.DoubleQuantity quantity : metricEntry.getSamplesList()) {
                 quantities.add(
-                        new Quantity.Builder()
-                                .setUnit(baseUnit(quantity.getUnit()))
-                                .setValue(quantity.getValue())
-                                .build());
+                        ThreadLocalBuilder.build(
+                                Quantity.Builder.class,
+                                b -> b.setUnit(baseUnit(quantity.getUnit()))
+                                        .setValue(quantity.getValue())));
             }
 
-            metricBuilder.setValues(quantities);
-            metrics.put(metricEntry.getName(), metricBuilder.build());
+            final Metric defaultMetric = ThreadLocalBuilder.build(
+                    DefaultMetric.Builder.class,
+                    b -> b.setType(metricType)
+                            .setValues(quantities));
+            metrics.put(metricEntry.getName(), defaultMetric);
         }
     }
 

@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.commons.uuidfactory.SplittableRandomUuidFactory;
 import com.arpnetworking.commons.uuidfactory.UuidFactory;
@@ -115,23 +115,23 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
                 if (value != null) {
                     metrics.put(
                             telegraf.getName().isEmpty() ? entry.getKey() : telegraf.getName() + "." + entry.getKey(),
-                            new DefaultMetric.Builder()
-                                    .setType(MetricType.TIMER)
+                            ThreadLocalBuilder.build(
+                                    DefaultMetric.Builder.class,
+                                    b1 -> b1.setType(MetricType.TIMER)
                                     .setValues(Collections.singletonList(
-                                            new Quantity.Builder()
-                                                    .setValue(value)
-                                                    .build()))
-                                    .build());
+                                            ThreadLocalBuilder.build(
+                                                    Quantity.Builder.class,
+                                                    b2 -> b2.setValue(value))))));
                 }
             }
             final DateTime timestamp = _timestampUnit.create(telegraf.getTimestamp());
             return Collections.singletonList(
-                    new DefaultRecord.Builder()
-                            .setId(UUID_FACTORY.create().toString())
-                            .setMetrics(metrics.build())
-                            .setDimensions(telegraf.getTags())
-                            .setTime(timestamp)
-                            .build());
+                    ThreadLocalBuilder.build(
+                            DefaultRecord.Builder.class,
+                            b -> b.setId(UUID_FACTORY.create().toString())
+                                    .setMetrics(metrics.build())
+                                    .setDimensions(telegraf.getTags())
+                                    .setTime(timestamp)));
         } catch (final IOException e) {
             throw new ParsingException("Invalid json", record.array(), e);
         }
@@ -163,7 +163,7 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
     /**
      * Implementation of <code>Builder</code> for {@link TelegrafJsonToRecordParser}.
      */
-    public static final class Builder extends OvalBuilder<TelegrafJsonToRecordParser> {
+    public static final class Builder extends ThreadLocalBuilder<TelegrafJsonToRecordParser> {
 
         /**
          * Public constructor.
@@ -181,6 +181,11 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
         public Builder setTimestampUnit(final TimestampUnit value) {
             this._timestampUnit = value;
             return this;
+        }
+
+        @Override
+        protected void reset() {
+            _timestampUnit = null;
         }
 
         @NotNull

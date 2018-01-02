@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.model.json;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.google.common.collect.ImmutableMap;
@@ -75,7 +75,7 @@ public final class Version2c {
     /**
      * Builder for the Version2c class.
      */
-    public static final class Builder extends OvalBuilder<Version2c> {
+    public static final class Builder extends ThreadLocalBuilder<Version2c> {
         /**
          * Public constructor.
          */
@@ -138,6 +138,15 @@ public final class Version2c {
             return this;
         }
 
+        @Override
+        protected void reset() {
+            _annotations = null;
+            _counters = Collections.emptyMap();
+            _gauges = Collections.emptyMap();
+            _timers = Collections.emptyMap();
+            _version = null;
+        }
+
         @NotNull
         private Annotations _annotations;
         @NotNull
@@ -181,7 +190,7 @@ public final class Version2c {
         /**
          * Builder for the Annotations class.
          */
-        public static final class Builder extends OvalBuilder<Annotations> {
+        public static final class Builder extends ThreadLocalBuilder<Annotations> {
             /**
              * Public constructor.
              */
@@ -225,10 +234,17 @@ public final class Version2c {
                 }
             }
 
+            @Override
+            protected void reset() {
+                _finalTimestamp = null;
+                _initTimestamp = null;
+                _otherAnnotations = Maps.newHashMap();
+            }
+
             private String _finalTimestamp;
             private String _initTimestamp;
             @NotNull
-            private final Map<String, String> _otherAnnotations = Maps.newHashMap();
+            private Map<String, String> _otherAnnotations = Maps.newHashMap();
         }
     }
 }

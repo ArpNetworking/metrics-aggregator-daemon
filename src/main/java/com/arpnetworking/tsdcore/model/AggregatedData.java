@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.tsdcore.statistics.Statistic;
@@ -127,7 +127,7 @@ public final class AggregatedData implements Serializable {
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
-    public static final class Builder extends OvalBuilder<AggregatedData> {
+    public static final class Builder extends ThreadLocalBuilder<AggregatedData> {
 
         /**
          * Public constructor.
@@ -206,6 +206,15 @@ public final class AggregatedData implements Serializable {
                 throw new IllegalStateException("isSpecified must not be null");
             }
             return new AggregatedData(this);
+        }
+
+        @Override
+        protected void reset() {
+            _statistic = null;
+            _value = null;
+            _populationSize = null;
+            _isSpecified = null;
+            _supportingData = null;
         }
 
         @NotNull

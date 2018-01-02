@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.model.json;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -93,7 +93,7 @@ public final class Version2e {
     /**
      * Builder for the Version2e class.
      */
-    public static final class Builder extends OvalBuilder<Version2e> {
+    public static final class Builder extends ThreadLocalBuilder<Version2e> {
         /**
          * Public constructor.
          */
@@ -167,6 +167,16 @@ public final class Version2e {
             return this;
         }
 
+        @Override
+        protected void reset() {
+            _time = null;
+            _name = null;
+            _level = null;
+            _data = null;
+            _id = null;
+            _context = null;
+        }
+
         @NotNull
         private DateTime _time;
         @NotNull
@@ -224,7 +234,7 @@ public final class Version2e {
         /**
          * Builder for the Data class.
          */
-        public static final class Builder extends OvalBuilder<Data> {
+        public static final class Builder extends ThreadLocalBuilder<Data> {
             /**
              * Public constructor.
              */
@@ -287,6 +297,15 @@ public final class Version2e {
                 return this;
             }
 
+            @Override
+            protected void reset() {
+                _annotations = null;
+                _counters = null;
+                _gauges = null;
+                _timers = null;
+                _version = null;
+            }
+
             @NotNull
             private Annotations _annotations;
             private Map<String, Element> _counters;
@@ -322,7 +341,7 @@ public final class Version2e {
         /**
          * Builder for the Sample class.
          */
-        public static final class Builder extends OvalBuilder<Sample> {
+        public static final class Builder extends ThreadLocalBuilder<Sample> {
             /**
              * Public constructor.
              */
@@ -352,6 +371,12 @@ public final class Version2e {
                 return this;
             }
 
+            @Override
+            protected void reset() {
+                _unit = null;
+                _value = null;
+            }
+
             private Unit _unit;
             @NotNull
             private Double _value;
@@ -378,7 +403,7 @@ public final class Version2e {
         /**
          * Builder for the Element class.
          */
-        public static final class Builder extends OvalBuilder<Element> {
+        public static final class Builder extends ThreadLocalBuilder<Element> {
             /**
              * Public constructor.
              */
@@ -395,6 +420,11 @@ public final class Version2e {
             public Element.Builder setValues(final List<Sample> value) {
                 _values = value;
                 return this;
+            }
+
+            @Override
+            protected void reset() {
+                _values = null;
             }
 
             @NotNull
@@ -432,7 +462,7 @@ public final class Version2e {
         /**
          * Builder for the Annotations class.
          */
-        public static final class Builder extends OvalBuilder<Annotations> {
+        public static final class Builder extends ThreadLocalBuilder<Annotations> {
             /**
              * Public constructor.
              */
@@ -476,12 +506,19 @@ public final class Version2e {
                 }
             }
 
+            @Override
+            protected void reset() {
+                _finalTimestamp = null;
+                _initTimestamp = null;
+                _otherAnnotations = Maps.newHashMap();
+            }
+
             @NotNull
             private DateTime _finalTimestamp;
             @NotNull
             private DateTime _initTimestamp;
             @NotNull
-            private final Map<String, String> _otherAnnotations = Maps.newHashMap();
+            private Map<String, String> _otherAnnotations = Maps.newHashMap();
         }
     }
 }

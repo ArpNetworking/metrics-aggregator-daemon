@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.metrics.common.parsers.Parser;
@@ -84,11 +84,6 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                 final Multimap<String, Metric> metrics = HashMultimap.create();
 
                 metricTags.put(Key.HOST_DIMENSION_KEY, record.getHost());
-                final DefaultRecord.Builder builder = new DefaultRecord.Builder()
-                        .setId(UUID.randomUUID().toString())
-                        .setTime(record.getTime())
-                        .setAnnotations(ImmutableMap.copyOf(metricTags))
-                        .setDimensions(ImmutableMap.copyOf(metricTags));
 
                 final String plugin = record.getPlugin();
                 final String pluginInstance = record.getPluginInstance();
@@ -102,19 +97,28 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                     final String metricName = computeMetricName(plugin, pluginInstance, type, typeInstance, sample.getDsName());
                     final MetricType metricType = mapDsType(sample.getDsType());
                     // TODO(ville): Support units and normalize
-                    final Metric metric = new DefaultMetric.Builder()
-                            .setType(metricType)
-                            .setValues(Collections.singletonList(
-                                    new Quantity.Builder().setValue(sample.getValue()).build()))
-                            .build();
+                    final Metric metric = ThreadLocalBuilder.build(
+                            DefaultMetric.Builder.class,
+                            b1 -> b1.setType(metricType)
+                                    .setValues(Collections.singletonList(
+                                            ThreadLocalBuilder.build(
+                                                    Quantity.Builder.class,
+                                                    b2 -> b2.setValue(sample.getValue())))));
                     metrics.put(metricName, metric);
                 }
                 final Map<String, Metric> collectedMetrics = metrics.asMap()
                         .entrySet()
                         .stream()
                         .collect(Collectors.toMap(Map.Entry::getKey, CollectdJsonToRecordParser::mergeMetrics));
-                builder.setMetrics(ImmutableMap.copyOf(collectedMetrics));
-                parsedRecords.add(builder.build());
+
+                final Record defaultRecord = ThreadLocalBuilder.build(
+                        DefaultRecord.Builder.class,
+                        b -> b.setId(UUID.randomUUID().toString())
+                                .setTime(record.getTime())
+                                .setAnnotations(ImmutableMap.copyOf(metricTags))
+                                .setDimensions(ImmutableMap.copyOf(metricTags))
+                                .setMetrics(ImmutableMap.copyOf(collectedMetrics)));
+                parsedRecords.add(defaultRecord);
             }
             return parsedRecords;
         } catch (final IOException | ConstraintsViolatedException ex) {
@@ -176,10 +180,10 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             for (final Metric metric : metrics) {
                 quantities.addAll(metric.getValues());
             }
-            return new DefaultMetric.Builder()
-                    .setType(firstMetric.getType())
-                    .setValues(quantities)
-                    .build();
+            return ThreadLocalBuilder.build(
+                    DefaultMetric.Builder.class,
+                    b -> b.setType(firstMetric.getType())
+                            .setValues(quantities));
         }
     }
 
@@ -257,7 +261,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
         /**
          * Builder for the {@link CollectdRecord} class.
          */
-        public static final class Builder extends OvalBuilder<CollectdRecord> {
+        public static final class Builder extends ThreadLocalBuilder<CollectdRecord> {
             /**
              * Public constructor.
              */
@@ -368,6 +372,19 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                 return this;
             }
 
+            @Override
+            protected void reset() {
+                _host = null;
+                _time = null;
+                _plugin = null;
+                _pluginInstance = null;
+                _type = null;
+                _typeInstance = null;
+                _values = Collections.emptyList();
+                _dsTypes = Collections.emptyList();
+                _dsNames = Collections.emptyList();
+            }
+
             @NotNull
             private String _host;
             @NotNull
@@ -387,7 +404,6 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             private List<String> _dsTypes = Collections.emptyList();
             @Nullable
             private List<String> _dsNames = Collections.emptyList();
-
 
             private static class ValueArraysValid implements CheckWithCheck.SimpleCheck {
                 @Override

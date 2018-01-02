@@ -15,9 +15,9 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
@@ -51,7 +51,6 @@ public final class MeanStatistic extends BaseStatistic {
 
     private MeanStatistic() { }
 
-    private static final Quantity ZERO = new Quantity.Builder().setValue(0.0).build();
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Supplier<Statistic> SUM_STATISTIC =
             Suppliers.memoize(() -> STATISTIC_FACTORY.getStatistic("sum"));
@@ -82,9 +81,9 @@ public final class MeanStatistic extends BaseStatistic {
             final CalculatedValue<?> sum = dependencies.get(SUM_STATISTIC.get()).calculate(dependencies);
             final CalculatedValue<?> count = dependencies.get(COUNT_STATISTIC.get()).calculate(dependencies);
 
-            return new CalculatedValue.Builder<Void>()
-                    .setValue(sum.getValue().divide(count.getValue()))
-                    .build();
+            return ThreadLocalBuilder.<CalculatedValue<Void>, CalculatedValue.Builder<Void>>buildGeneric(
+                    CalculatedValue.Builder.class,
+                    b -> b.setValue(sum.getValue().divide(count.getValue())));
         }
     }
 }

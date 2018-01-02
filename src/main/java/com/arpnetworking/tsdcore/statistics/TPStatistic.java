@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
@@ -110,9 +111,9 @@ public abstract class TPStatistic extends BaseStatistic implements OrderedStatis
         public CalculatedValue<Void> calculate(final Map<Statistic, Calculator<?>> dependencies) {
             final HistogramStatistic.HistogramAccumulator calculator =
                     (HistogramStatistic.HistogramAccumulator) dependencies.get(HISTOGRAM_STATISTIC.get());
-            return new CalculatedValue.Builder<Void>()
-                    .setValue(calculator.calculate(((TPStatistic) getStatistic()).getPercentile()))
-                            .build();
+            return ThreadLocalBuilder.<CalculatedValue<Void>, CalculatedValue.Builder<Void>>buildGeneric(
+                    CalculatedValue.Builder.class,
+                    b -> b.setValue(calculator.calculate(((TPStatistic) getStatistic()).getPercentile())));
         }
 
         @Override

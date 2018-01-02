@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.model.json;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -78,7 +78,7 @@ public final class Version2d {
     /**
      * Builder for the Version2d class.
      */
-    public static final class Builder extends OvalBuilder<Version2d> {
+    public static final class Builder extends ThreadLocalBuilder<Version2d> {
         /**
          * Public constructor.
          */
@@ -141,6 +141,15 @@ public final class Version2d {
             return this;
         }
 
+        @Override
+        protected void reset() {
+            _annotations = null;
+            _counters = Collections.emptyMap();
+            _gauges = Collections.emptyMap();
+            _timers = Collections.emptyMap();
+            _version = null;
+        }
+
         @NotNull
         private Annotations _annotations;
         @NotNull
@@ -178,7 +187,7 @@ public final class Version2d {
         /**
          * Builder for the Sample class.
          */
-        public static final class Builder extends OvalBuilder<Sample> {
+        public static final class Builder extends ThreadLocalBuilder<Sample> {
             /**
              * Public constructor.
              */
@@ -208,6 +217,12 @@ public final class Version2d {
                 return this;
             }
 
+            @Override
+            protected void reset() {
+                _unit = null;
+                _value = null;
+            }
+
             private Unit _unit;
             @NotNull
             private Double _value;
@@ -234,7 +249,7 @@ public final class Version2d {
         /**
          * Builder for the Element class.
          */
-        public static final class Builder extends OvalBuilder<Element> {
+        public static final class Builder extends ThreadLocalBuilder<Element> {
             /**
              * Public constructor.
              */
@@ -251,6 +266,11 @@ public final class Version2d {
             public Element.Builder setValues(final List<Sample> value) {
                 _values = value;
                 return this;
+            }
+
+            @Override
+            protected void reset() {
+                _values = Collections.emptyList();
             }
 
             @NotNull
@@ -288,7 +308,7 @@ public final class Version2d {
         /**
          * Builder for the Annotations class.
          */
-        public static final class Builder extends OvalBuilder<Annotations> {
+        public static final class Builder extends ThreadLocalBuilder<Annotations> {
             /**
              * Public constructor.
              */
@@ -332,12 +352,19 @@ public final class Version2d {
                 }
             }
 
+            @Override
+            protected void reset() {
+                _finalTimestamp = null;
+                _initTimestamp = null;
+                _otherAnnotations = Maps.newHashMap();
+            }
+
             @NotNull
             private DateTime _finalTimestamp;
             @NotNull
             private DateTime _initTimestamp;
             @NotNull
-            private final Map<String, String> _otherAnnotations = Maps.newHashMap();
+            private Map<String, String> _otherAnnotations = Maps.newHashMap();
         }
     }
 }

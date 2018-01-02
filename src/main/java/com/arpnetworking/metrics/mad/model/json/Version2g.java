@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.model.json;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.MatchPattern;
@@ -101,7 +101,7 @@ public final class Version2g {
     /**
      * Builder for the Data class.
      */
-    public static final class Builder extends OvalBuilder<Version2g> {
+    public static final class Builder extends ThreadLocalBuilder<Version2g> {
         /**
          * Public constructor.
          */
@@ -208,6 +208,19 @@ public final class Version2g {
             return this;
         }
 
+        @Override
+        protected void reset() {
+            _id = null;
+            _start = null;
+            _end = null;
+            _dimensions = null;
+            _annotations = null;
+            _counters = null;
+            _gauges = null;
+            _timers = null;
+            _version = null;
+        }
+
         @NotNull
         private String _id;
         @NotNull
@@ -250,7 +263,7 @@ public final class Version2g {
         /**
          * Builder for the Sample class.
          */
-        public static final class Builder extends OvalBuilder<Sample> {
+        public static final class Builder extends ThreadLocalBuilder<Sample> {
             /**
              * Public constructor.
              */
@@ -278,6 +291,12 @@ public final class Version2g {
             public Builder setUnit(final Unit value) {
                 _unit = value;
                 return this;
+            }
+
+            @Override
+            protected void reset() {
+                _value = null;
+                _unit = null;
             }
 
             @NotNull
@@ -313,7 +332,7 @@ public final class Version2g {
             /**
              * Builder for the 2G Unit class.
              */
-            public static class Builder extends OvalBuilder<Unit> {
+            public static class Builder extends ThreadLocalBuilder<Unit> {
                 /**
                  * Public constructor.
                  */
@@ -342,6 +361,12 @@ public final class Version2g {
                     return this;
                 }
 
+                @Override
+                protected void reset() {
+                    _numerators = null;
+                    _denominators = null;
+                }
+
                 private List<CompositeUnit> _numerators;
                 private List<CompositeUnit> _denominators;
             }
@@ -367,7 +392,7 @@ public final class Version2g {
         /**
          * Builder for the Element class.
          */
-        public static final class Builder extends OvalBuilder<Element> {
+        public static final class Builder extends ThreadLocalBuilder<Element> {
             /**
              * Public constructor.
              */
@@ -384,6 +409,11 @@ public final class Version2g {
             public Element.Builder setValues(final List<Sample> value) {
                 _values = value;
                 return this;
+            }
+
+            @Override
+            protected void reset() {
+                _values = null;
             }
 
             @NotNull
