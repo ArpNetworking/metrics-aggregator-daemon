@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.tsdcore.sinks;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
@@ -56,9 +57,10 @@ public final class TimeThresholdSink extends BaseSink {
             final ImmutableMultimap<String, AggregatedData> filteredData = _filter.filter(periodicData);
             if (!filteredData.isEmpty()) {
                 _sink.recordAggregateData(
-                        PeriodicData.Builder.clone(periodicData, new PeriodicData.Builder())
-                                .setData(filteredData)
-                                .build());
+                        ThreadLocalBuilder.clone(
+                                periodicData,
+                                PeriodicData.Builder.class,
+                                b -> b.setData(filteredData)));
             }
         }
     }
