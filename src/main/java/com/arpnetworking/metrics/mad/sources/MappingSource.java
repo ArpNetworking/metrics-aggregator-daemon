@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.metrics.mad.sources;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
@@ -147,10 +146,9 @@ public final class MappingSource extends BaseSource {
                                             Maps.transformEntries(
                                                     mergedMetrics,
                                                     (key, mergingMetric) ->
-                                                            OvalBuilder.clone(
+                                                            ThreadLocalBuilder.clone(
                                                                     mergingMetric,
-                                                                    new DefaultMetric.Builder())
-                                                            .build())))
+                                                                    DefaultMetric.Builder.class))))
                                     .setId(record.getId())
                                     .setTime(record.getTime())
                                     .setAnnotations(record.getAnnotations())
