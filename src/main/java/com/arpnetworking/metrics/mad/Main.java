@@ -15,6 +15,9 @@
  */
 package com.arpnetworking.metrics.mad;
 
+import akka.actor.Actor;
+import akka.actor.ActorRef;
+import akka.actor.ActorRefFactory;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.Terminated;
@@ -25,6 +28,8 @@ import akka.http.javadsl.ServerBinding;
 import akka.stream.ActorMaterializer;
 import akka.stream.Materializer;
 import ch.qos.logback.classic.LoggerContext;
+import com.arpnetworking.commons.akka.ActorProvider;
+import com.arpnetworking.commons.akka.GuiceActorCreator;
 import com.arpnetworking.commons.builder.Builder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.configuration.jackson.DynamicConfiguration;
@@ -40,6 +45,7 @@ import com.arpnetworking.metrics.impl.TsdMetricsFactory;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.incubator.impl.TsdPeriodicMetrics;
 import com.arpnetworking.metrics.jvm.JvmMetricsRunnable;
+import com.arpnetworking.metrics.mad.actors.PeriodicMetricsCloser;
 import com.arpnetworking.metrics.mad.actors.Status;
 import com.arpnetworking.metrics.mad.configuration.AggregatorConfiguration;
 import com.arpnetworking.metrics.mad.configuration.PipelineConfiguration;
@@ -56,7 +62,9 @@ import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.name.Names;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -72,12 +80,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
 
 /**
  * Class containing entry point for Metrics Data Aggregator (MAD).
@@ -491,26 +499,24 @@ public final class Main implements Launchable {
             bind(ActorSystem.class).toInstance(_actorSystem);
             bind(MetricsFactory.class).toInstance(_metricsFactory);
             bind(LifecycleRegistration.class).toInstance(_shutdown);
+            bind(PeriodicMetrics.class).to(TsdPeriodicMetrics.class);
+            bindRootActor("periodicMetricsCloser", PeriodicMetricsCloser.class);
+        }
+
+        private void bindRootActor(final String name, final Class<? extends Actor> clazz) {
+            bind(ActorRef.class)
+                    .annotatedWith(Names.named(name))
+                    .toProvider(new ActorProvider(name, clazz, _actorSystem))
+                    .asEagerSingleton();
         }
 
         @Provides
         @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
-        private PeriodicMetrics providePeriodicMetrics(
-                final MetricsFactory metricsFactory,
-                final LifecycleRegistration lifecycle) {
-            final TsdPeriodicMetrics periodicMetrics = new TsdPeriodicMetrics.Builder()
+        private TsdPeriodicMetrics providePeriodicMetrics(
+                final MetricsFactory metricsFactory) {
+            return new TsdPeriodicMetrics.Builder()
                     .setMetricsFactory(metricsFactory)
                     .build();
-            final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(
-                    r -> new Thread(r, "PeriodicMetricsCloser"));
-            executor.scheduleAtFixedRate(periodicMetrics, 500, 500, TimeUnit.MILLISECONDS);
-
-            // Register to shutdown the executor when the Guice stack is shutdown.
-            lifecycle.registerShutdown(() -> {
-                executor.shutdown();
-                return CompletableFuture.completedFuture(null);
-            });
-            return periodicMetrics;
         }
 
         private final ActorSystem _actorSystem;
