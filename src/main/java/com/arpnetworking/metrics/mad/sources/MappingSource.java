@@ -33,11 +33,9 @@ import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.NotNull;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -142,13 +140,12 @@ public final class MappingSource extends BaseSource {
                     ThreadLocalBuilder.build(
                             DefaultRecord.Builder.class,
                             b1 -> b1.setMetrics(
-                                    ImmutableMap.copyOf(
-                                            Maps.transformEntries(
-                                                    mergedMetrics,
-                                                    (key, mergingMetric) ->
-                                                            ThreadLocalBuilder.clone(
-                                                                    mergingMetric,
-                                                                    DefaultMetric.Builder.class))))
+                                    mergedMetrics.entrySet().stream().collect(
+                                            ImmutableMap.toImmutableMap(
+                                                    Map.Entry::getKey,
+                                                    e -> ThreadLocalBuilder.clone(
+                                                            e.getValue(),
+                                                            DefaultMetric.Builder.class))))
                                     .setId(record.getId())
                                     .setTime(record.getTime())
                                     .setAnnotations(record.getAnnotations())
@@ -183,7 +180,7 @@ public final class MappingSource extends BaseSource {
 
         /* package private */ MergingMetric(final Metric metric) {
             _type = metric.getType();
-            _values = Lists.newArrayList(metric.getValues());
+            _values.addAll(metric.getValues());
         }
 
         public boolean isMergable(final Metric metric) {
@@ -203,8 +200,8 @@ public final class MappingSource extends BaseSource {
         }
 
         @Override
-        public List<Quantity> getValues() {
-            return Collections.unmodifiableList(_values);
+        public ImmutableList<Quantity> getValues() {
+            return _values.build();
         }
 
         @Override
@@ -217,7 +214,7 @@ public final class MappingSource extends BaseSource {
         }
 
         private final MetricType _type;
-        private final List<Quantity> _values;
+        private final ImmutableList.Builder<Quantity> _values = ImmutableList.builder();
     }
 
     /**

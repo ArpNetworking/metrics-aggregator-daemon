@@ -29,6 +29,7 @@ import com.arpnetworking.metrics.mad.model.json.Telegraf;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.NotNull;
 import org.joda.time.DateTime;
@@ -118,7 +119,7 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
                             ThreadLocalBuilder.build(
                                     DefaultMetric.Builder.class,
                                     b1 -> b1.setType(MetricType.TIMER)
-                                    .setValues(Collections.singletonList(
+                                    .setValues(ImmutableList.of(
                                             ThreadLocalBuilder.build(
                                                     Quantity.Builder.class,
                                                     b2 -> b2.setValue(value))))));

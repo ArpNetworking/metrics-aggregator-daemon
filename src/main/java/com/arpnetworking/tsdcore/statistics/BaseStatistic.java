@@ -17,6 +17,8 @@ package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -42,7 +44,7 @@ public abstract class BaseStatistic implements Statistic {
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return _hashCodeSupplier.get();
     }
 
     @Override
@@ -83,6 +85,8 @@ public abstract class BaseStatistic implements Statistic {
                     existingUnit));
         }
     }
+
+    private final Supplier<Integer> _hashCodeSupplier = Suppliers.memoize(() -> getClass().hashCode());
 
     private static final long serialVersionUID = -1334453626232464982L;
 }

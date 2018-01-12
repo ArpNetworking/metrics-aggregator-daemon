@@ -94,7 +94,7 @@ public final class DefaultMetric implements Metric {
 
     private DefaultMetric(final Builder builder) {
         _type = builder._type;
-        _values = ImmutableList.copyOf(builder._values);
+        _values = builder._values;
     }
 
     private final MetricType _type;
@@ -120,7 +120,7 @@ public final class DefaultMetric implements Metric {
          * @param value The values <code>List</code>.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setValues(final List<Quantity> value) {
+        public Builder setValues(final ImmutableList<Quantity> value) {
             _values = value;
             return this;
         }
@@ -143,7 +143,7 @@ public final class DefaultMetric implements Metric {
         }
 
         @NotNull
-        private List<Quantity> _values;
+        private ImmutableList<Quantity> _values;
         @NotNull
         private MetricType _type;
     }

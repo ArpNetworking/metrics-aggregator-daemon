@@ -136,7 +136,6 @@ import java.util.concurrent.LinkedBlockingDeque;
         // Find an existing bucket for the record
         final Duration timeout = getPeriodTimeout(_period);
         final DateTime start = getStartTime(record.getTime(), _period);
-        final DateTime expiration = max(DateTime.now().plus(timeout), start.plus(_period).plus(timeout));
         Bucket bucket = _bucketsByStart.get(start);
 
         // Create a new bucket if one does not exist
@@ -154,6 +153,8 @@ import java.util.concurrent.LinkedBlockingDeque;
             // 2) We lost and can proceed to add data to the existing bucket
             bucket = _bucketsByStart.putIfAbsent(start, newBucket);
             if (bucket == null) {
+                final DateTime expiration = max(DateTime.now().plus(timeout), start.plus(_period).plus(timeout));
+
                 LOGGER.debug()
                         .setMessage("Created new bucket")
                         .addData("bucket", newBucket)

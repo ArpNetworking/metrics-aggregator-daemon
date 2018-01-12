@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -100,7 +101,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                     final Metric metric = ThreadLocalBuilder.build(
                             DefaultMetric.Builder.class,
                             b1 -> b1.setType(metricType)
-                                    .setValues(Collections.singletonList(
+                                    .setValues(ImmutableList.of(
                                             ThreadLocalBuilder.build(
                                                     Quantity.Builder.class,
                                                     b2 -> b2.setValue(sample.getValue())))));
@@ -176,14 +177,14 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
         if (metrics.size() == 1) {
             return firstMetric;
         } else {
-            final List<Quantity> quantities = Lists.newArrayList();
+            final ImmutableList.Builder<Quantity> quantities = ImmutableList.builder();
             for (final Metric metric : metrics) {
                 quantities.addAll(metric.getValues());
             }
             return ThreadLocalBuilder.build(
                     DefaultMetric.Builder.class,
                     b -> b.setType(firstMetric.getType())
-                            .setValues(quantities));
+                            .setValues(quantities.build()));
         }
     }
 

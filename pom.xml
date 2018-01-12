@@ -75,7 +75,7 @@
     <akka.http.version>10.0.11</akka.http.version>
     <apache.httpclient.version>4.5.1</apache.httpclient.version>
     <apache.httpcore.version>4.4.3</apache.httpcore.version>
-    <arpnetworking.commons.version>1.15.0</arpnetworking.commons.version>
+    <arpnetworking.commons.version>1.15.3</arpnetworking.commons.version>
     <aspectjrt.version>1.8.9</aspectjrt.version>
     <cglib.version>3.2.5</cglib.version>
     <client.protocol.version>0.10.0</client.protocol.version>

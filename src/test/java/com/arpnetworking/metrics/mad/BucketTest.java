@@ -30,6 +30,7 @@ import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -45,7 +46,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -125,7 +125,7 @@ public class BucketTest {
                                 "MyCounter",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
-                                        .setValues(Collections.emptyList())
+                                        .setValues(ImmutableList.of())
                                         .build()))
                         .build());
         _bucket.close();
@@ -245,7 +245,7 @@ public class BucketTest {
                                 name,
                                 new DefaultMetric.Builder()
                                         .setType(type)
-                                        .setValues(Collections.singletonList(value))
+                                        .setValues(ImmutableList.of(value))
                                         .build()))
                         .build());
     }
