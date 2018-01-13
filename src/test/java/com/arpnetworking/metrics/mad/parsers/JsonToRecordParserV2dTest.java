@@ -22,7 +22,6 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.io.Resources;
-
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsMapContaining;
 import org.joda.time.DateTime;

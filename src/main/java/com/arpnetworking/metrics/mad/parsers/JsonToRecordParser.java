@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -63,7 +64,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
@@ -321,13 +321,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
         for (final Map.Entry<String, List<String>> entry : elements.entrySet()) {
             final List<String> element = entry.getValue();
-            final List<Quantity> quantities = Lists.newArrayList(
+            final ImmutableList<Quantity> quantities =
                     Lists.transform(
                             element,
                             VERSION_2C_SAMPLE_TO_QUANTITY)
                     .stream()
                     .filter(Predicates.notNull()::apply)
-                    .collect(Collectors.toList()));
+                    .collect(ImmutableList.toImmutableList());
             variables.put(
                     entry.getKey(),
                     ThreadLocalBuilder.build(
@@ -344,13 +344,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
         for (final Map.Entry<String, Version2d.Element> entry : elements.entrySet()) {
             final Version2d.Element element = entry.getValue();
-            final List<Quantity> quantities = Lists.newArrayList(
+            final ImmutableList<Quantity> quantities =
                     Lists.transform(
                             element.getValues(),
                             VERSION_2D_SAMPLE_TO_QUANTITY)
                     .stream()
                     .filter(Predicates.notNull()::apply)
-                    .collect(Collectors.toList()));
+                    .collect(ImmutableList.toImmutableList());
             variables.put(
                     entry.getKey(),
                     ThreadLocalBuilder.build(
@@ -367,13 +367,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
         for (final Map.Entry<String, Version2e.Element> entry : elements.entrySet()) {
             final Version2e.Element element = entry.getValue();
-            final List<Quantity> quantities = Lists.newArrayList(
+            final ImmutableList<Quantity> quantities =
                     Lists.transform(
                             element.getValues(),
                             VERSION_2E_SAMPLE_TO_QUANTITY)
                     .stream()
                     .filter(Predicates.notNull()::apply)
-                    .collect(Collectors.toList()));
+                    .collect(ImmutableList.toImmutableList());
             variables.put(
                     entry.getKey(),
                     ThreadLocalBuilder.build(
@@ -390,13 +390,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
         for (final Map.Entry<String, Version2f.Element> entry : elements.entrySet()) {
             final Version2f.Element element = entry.getValue();
-            final List<Quantity> quantities = Lists.newArrayList(
+            final ImmutableList<Quantity> quantities =
                     Lists.transform(
                             element.getValues(),
                             VERSION_2F_SAMPLE_TO_QUANTITY)
                     .stream()
                     .filter(Predicates.notNull()::apply)
-                    .collect(Collectors.toList()));
+                    .collect(ImmutableList.toImmutableList());
             variables.put(
                     entry.getKey(),
                     ThreadLocalBuilder.build(
@@ -413,13 +413,13 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
         for (final Map.Entry<String, Version2fSteno.Element> entry : elements.entrySet()) {
             final Version2fSteno.Element element = entry.getValue();
-            final List<Quantity> quantities = Lists.newArrayList(
+            final ImmutableList<Quantity> quantities =
                     Lists.transform(
                             element.getValues(),
                             VERSION_2F_STENO_SAMPLE_TO_QUANTITY)
                     .stream()
                     .filter(Predicates.notNull()::apply)
-                    .collect(Collectors.toList()));
+                    .collect(ImmutableList.toImmutableList());
             variables.put(
                     entry.getKey(),
                     ThreadLocalBuilder.build(
@@ -436,12 +436,12 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
         for (final Map.Entry<String, Version2g.Element> entry : elements.entrySet()) {
             final Version2g.Element element = entry.getValue();
-            final List<Quantity> quantities = Lists.transform(
+            final ImmutableList<Quantity> quantities = Lists.transform(
                             element.getValues(),
                             JsonToRecordParser::version2gSampleToQuantity)
                             .stream()
                             .filter(Predicates.notNull()::apply)
-                            .collect(Collectors.toList());
+                            .collect(ImmutableList.toImmutableList());
             variables.put(
                     entry.getKey(),
                     ThreadLocalBuilder.build(

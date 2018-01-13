@@ -135,7 +135,7 @@ public class MappingSourceTest {
                         "foo/1/bar",
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
-                                .setValues(Collections.singletonList(
+                                .setValues(ImmutableList.of(
                                         new Quantity.Builder()
                                                 .setValue(1.23d)
                                                 .setUnit(Unit.BYTE)
@@ -144,7 +144,7 @@ public class MappingSourceTest {
                         "foo/2/bar",
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
-                                .setValues(Collections.singletonList(
+                                .setValues(ImmutableList.of(
                                         new Quantity.Builder()
                                                 .setValue(2.46d)
                                                 .build()))
@@ -188,13 +188,13 @@ public class MappingSourceTest {
                         "foo/1/bar",
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
-                                .setValues(Collections.singletonList(
+                                .setValues(ImmutableList.of(
                                         new Quantity.Builder().setValue(1.23d).build()))
                                 .build(),
                         "foo/2/bar",
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.TIMER)
-                                .setValues(Collections.singletonList(
+                                .setValues(ImmutableList.of(
                                         new Quantity.Builder().setValue(2.46d).build()))
                                 .build()))
                 .build();
@@ -243,7 +243,7 @@ public class MappingSourceTest {
                         "cat/sheep/dog",
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
-                                .setValues(Collections.singletonList(
+                                .setValues(ImmutableList.of(
                                         new Quantity.Builder()
                                                 .setValue(1.23d)
                                                 .setUnit(Unit.BYTE)
@@ -285,7 +285,7 @@ public class MappingSourceTest {
                         "cat/bear/dog",
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
-                                .setValues(Collections.singletonList(
+                                .setValues(ImmutableList.of(
                                         new Quantity.Builder()
                                                 .setValue(1.23d)
                                                 .setUnit(Unit.BYTE)
@@ -294,7 +294,7 @@ public class MappingSourceTest {
                         "cat/sheep/dog",
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
-                                .setValues(Collections.singletonList(
+                                .setValues(ImmutableList.of(
                                         new Quantity.Builder()
                                                 .setValue(2.46d)
                                                 .build()))

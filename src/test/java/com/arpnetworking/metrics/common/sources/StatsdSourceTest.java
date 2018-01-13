@@ -24,6 +24,7 @@ import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
@@ -38,7 +39,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import scala.concurrent.duration.Duration;
 
-import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -107,7 +107,7 @@ public final class StatsdSourceTest {
                                     "StatsdSourceTest.test.counter1",
                                     new DefaultMetric.Builder()
                                             .setType(MetricType.COUNTER)
-                                            .setValues(Collections.singletonList(
+                                            .setValues(ImmutableList.of(
                                                     new Quantity.Builder()
                                                             .setValue(3d)
                                                             .build()))

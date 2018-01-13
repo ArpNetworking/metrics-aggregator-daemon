@@ -201,7 +201,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
                                 ThreadLocalBuilder.build(
                                         DefaultMetric.Builder.class,
                                         b2 -> b2.setValues(
-                                                Collections.singletonList(
+                                                ImmutableList.of(
                                                         ThreadLocalBuilder.build(
                                                                 Quantity.Builder.class,
                                                                 b3 -> b3.setValue(value.doubleValue())

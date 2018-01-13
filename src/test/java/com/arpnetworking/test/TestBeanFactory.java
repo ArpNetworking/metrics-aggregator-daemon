@@ -30,14 +30,13 @@ import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
-
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -87,7 +86,7 @@ public final class TestBeanFactory {
     public static DefaultMetric.Builder createMetricBuilder() {
         return new DefaultMetric.Builder()
                 .setType(MetricType.COUNTER)
-                .setValues(Collections.singletonList(new Quantity.Builder()
+                .setValues(ImmutableList.of(new Quantity.Builder()
                         .setValue(1.23d)
                         .build()));
     }

@@ -26,6 +26,7 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -82,7 +83,8 @@ public final class ProtobufV2ToRecordParser implements Parser<List<Record>, Http
             final List<ClientV2.MetricEntry> entries,
             final MetricType metricType) {
         for (final ClientV2.MetricEntry metricEntry : entries) {
-            final List<Quantity> quantities = Lists.newArrayListWithExpectedSize(metricEntry.getSamplesCount());
+            final ImmutableList.Builder<Quantity> quantities =
+                    ImmutableList.builderWithExpectedSize(metricEntry.getSamplesCount());
             for (final ClientV2.Quantity quantity : metricEntry.getSamplesList()) {
                 if (quantity.getValueCase().equals(ClientV2.Quantity.ValueCase.DOUBLEVALUE)) {
                     quantities.add(
@@ -102,7 +104,7 @@ public final class ProtobufV2ToRecordParser implements Parser<List<Record>, Http
             final Metric defaultMetric = ThreadLocalBuilder.build(
                     DefaultMetric.Builder.class,
                     b -> b.setType(metricType)
-                            .setValues(quantities));
+                            .setValues(quantities.build()));
             metrics.put(metricEntry.getName(), defaultMetric);
         }
     }

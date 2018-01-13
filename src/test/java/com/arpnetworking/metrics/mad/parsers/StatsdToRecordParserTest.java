@@ -23,6 +23,7 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import org.joda.time.DateTime;
@@ -38,7 +39,6 @@ import java.nio.ByteBuffer;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -67,7 +67,7 @@ public final class StatsdToRecordParserTest {
                                 "page.views",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
-                                        .setValues(Collections.singletonList(
+                                        .setValues(ImmutableList.of(
                                                 new Quantity.Builder()
                                                         .setValue(1.0)
                                                         .build()))
@@ -90,7 +90,7 @@ public final class StatsdToRecordParserTest {
                                 "fuel.level",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.GAUGE)
-                                        .setValues(Collections.singletonList(
+                                        .setValues(ImmutableList.of(
                                                 new Quantity.Builder()
                                                         .setValue(0.5)
                                                         .build()))
@@ -114,7 +114,7 @@ public final class StatsdToRecordParserTest {
                                 "song.length",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.TIMER)
-                                        .setValues(Collections.singletonList(
+                                        .setValues(ImmutableList.of(
                                                 new Quantity.Builder()
                                                         .setValue(240.0)
                                                         .build()))
@@ -144,7 +144,7 @@ public final class StatsdToRecordParserTest {
                                 "song.length",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.TIMER)
-                                        .setValues(Collections.singletonList(
+                                        .setValues(ImmutableList.of(
                                                 new Quantity.Builder()
                                                         .setValue(240.0)
                                                         .build()))
@@ -179,7 +179,7 @@ public final class StatsdToRecordParserTest {
                                 "users.online",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
-                                        .setValues(Collections.singletonList(
+                                        .setValues(ImmutableList.of(
                                                 new Quantity.Builder()
                                                         .setValue(1.0)
                                                         .build()))
@@ -204,7 +204,7 @@ public final class StatsdToRecordParserTest {
                                 "users.online",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
-                                        .setValues(Collections.singletonList(
+                                        .setValues(ImmutableList.of(
                                                 new Quantity.Builder()
                                                         .setValue(1.0)
                                                         .build()))

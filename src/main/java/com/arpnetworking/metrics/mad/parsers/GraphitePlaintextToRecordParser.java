@@ -35,7 +35,6 @@ import org.joda.time.DateTimeZone;
 import java.nio.ByteBuffer;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -190,7 +189,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
                         ThreadLocalBuilder.build(
                                 DefaultMetric.Builder.class,
                                 b2 -> b2.setValues(
-                                        Collections.singletonList(
+                                        ImmutableList.of(
                                                 ThreadLocalBuilder.build(
                                                         Quantity.Builder.class,
                                                         b3 -> b3.setValue(value.doubleValue()))))

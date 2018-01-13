@@ -29,6 +29,7 @@ import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
@@ -89,7 +90,7 @@ public class AggregatorTest {
                                 "MyMetric",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.GAUGE)
-                                        .setValues(Collections.singletonList(
+                                        .setValues(ImmutableList.of(
                                                 new Quantity.Builder().setValue(1d).build()))
                                         .build()))
                         .setTime(dataTimeInThePast)
@@ -145,7 +146,7 @@ public class AggregatorTest {
                                 "MyCounter",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
-                                        .setValues(Collections.singletonList(ONE))
+                                        .setValues(ImmutableList.of(ONE))
                                         .build()))
                         .build());
 
@@ -162,7 +163,7 @@ public class AggregatorTest {
                                 "MyCounter",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
-                                        .setValues(Collections.singletonList(TWO))
+                                        .setValues(ImmutableList.of(TWO))
                                         .build()))
                         .build());
 
@@ -225,7 +226,7 @@ public class AggregatorTest {
                                 "MyCounter",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
-                                        .setValues(Collections.singletonList(ONE))
+                                        .setValues(ImmutableList.of(ONE))
                                         .build()))
                         .build());
 
@@ -242,7 +243,7 @@ public class AggregatorTest {
                                 "MyCounter",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
-                                        .setValues(Collections.singletonList(TWO))
+                                        .setValues(ImmutableList.of(TWO))
                                         .build()))
                         .build());
 
@@ -305,7 +306,7 @@ public class AggregatorTest {
                                 "MyCounter",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
-                                        .setValues(Collections.singletonList(ONE))
+                                        .setValues(ImmutableList.of(ONE))
                                         .build()))
                         .build());
 
@@ -322,7 +323,7 @@ public class AggregatorTest {
                                 "MyCounter",
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
-                                        .setValues(Collections.singletonList(TWO))
+                                        .setValues(ImmutableList.of(TWO))
                                         .build()))
                         .build());
 
