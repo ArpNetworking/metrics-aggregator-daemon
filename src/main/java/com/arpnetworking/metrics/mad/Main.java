@@ -24,6 +24,8 @@ import akka.http.javadsl.IncomingConnection;
 import akka.http.javadsl.ServerBinding;
 import akka.stream.ActorMaterializer;
 import akka.stream.Materializer;
+import akka.stream.javadsl.Sink;
+import akka.stream.javadsl.Source;
 import ch.qos.logback.classic.LoggerContext;
 import com.arpnetworking.commons.builder.Builder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
@@ -225,13 +227,12 @@ public final class Main implements Launchable {
                 _configuration.getHttpStatusPath(),
                 supplementalHttpRoutes.build());
         final Http http = Http.get(actorSystem);
-        final akka.stream.javadsl.Source<IncomingConnection, CompletionStage<ServerBinding>> binding = http.bind(
+        final Source<IncomingConnection, CompletionStage<ServerBinding>> binding = http.bind(
                 ConnectHttp.toHost(
                         _configuration.getHttpHost(),
-                        _configuration.getHttpPort()),
-                materializer);
+                        _configuration.getHttpPort()));
         binding.to(
-                akka.stream.javadsl.Sink.foreach(
+                Sink.foreach(
                         connection -> connection.handleWith(routes.flow(), materializer)))
                 .run(materializer);
     }

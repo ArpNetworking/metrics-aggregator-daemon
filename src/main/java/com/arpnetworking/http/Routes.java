@@ -31,7 +31,8 @@ import akka.http.javadsl.model.headers.CacheDirectives;
 import akka.http.javadsl.model.ws.Message;
 import akka.japi.JavaPartialFunction;
 import akka.japi.function.Function;
-import akka.pattern.Patterns;
+import akka.japi.pf.PFBuilder;
+import akka.pattern.PatternsCS;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Sink;
@@ -57,8 +58,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import scala.compat.java8.FutureConverters;
-import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.Objects;
@@ -104,7 +103,11 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
      */
     public Flow<HttpRequest, HttpResponse, NotUsed> flow() {
         return Flow.<HttpRequest>create()
-                .mapAsync(1, this);
+                .mapAsync(1, this)
+                .recover(
+                        new PFBuilder<Throwable, HttpResponse>()
+                                .match(Exception.class, e -> HttpResponse.create().withStatus(StatusCodes.INTERNAL_SERVER_ERROR))
+                                .build());
     }
 
     @Override
@@ -208,9 +211,9 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     }
 
     private CompletionStage<HttpResponse> dispatchHttpRequest(final HttpRequest request, final String actorName) {
-        final Future<ActorRef> refFuture = _actorSystem.actorSelection(actorName)
-                .resolveOne(FiniteDuration.create(1, TimeUnit.SECONDS));
-        return FutureConverters.toJava(refFuture).thenCompose(
+        final CompletionStage<ActorRef> refFuture = _actorSystem.actorSelection(actorName)
+                .resolveOneCS(FiniteDuration.create(1, TimeUnit.SECONDS));
+        return refFuture.thenCompose(
                 ref -> {
                     final CompletableFuture<HttpResponse> response = new CompletableFuture<>();
                     ref.tell(new RequestReply(request, response), ActorRef.noSender());
@@ -258,11 +261,10 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
 
     @SuppressWarnings("unchecked")
     private <T> CompletionStage<T> ask(final String actorPath, final Object request, final T defaultValue) {
-        return FutureConverters.toJava(
-                (Future<T>) Patterns.ask(
+        return (CompletionStage<T>) PatternsCS.ask(
                         _actorSystem.actorSelection(actorPath),
                         request,
-                        Timeout.apply(1, TimeUnit.SECONDS)))
+                        Timeout.apply(1, TimeUnit.SECONDS))
                 .exceptionally(throwable -> defaultValue);
     }
 
