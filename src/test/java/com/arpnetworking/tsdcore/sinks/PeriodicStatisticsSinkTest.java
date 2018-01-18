@@ -98,7 +98,7 @@ public class PeriodicStatisticsSinkTest {
         statisticsSink.recordAggregateData(TestBeanFactory.createPeriodicData());
         statisticsSink.close();
         Mockito.verify(_mockMetrics).incrementCounter(COUNTER_NAME, 1);
-        Mockito.verify(_mockMetrics).close();
+        Mockito.verify(_mockMetrics, Mockito.atLeastOnce()).close();
     }
 
     private PeriodicStatisticsSink.Builder _statisticsSinkBuilder;
