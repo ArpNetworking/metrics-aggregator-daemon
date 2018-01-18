@@ -19,6 +19,8 @@ import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.utility.DefaultHostNameResolver;
+import com.arpnetworking.utility.HostNameResolver;
 import com.google.common.collect.EvictingQueue;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotEmpty;
@@ -214,19 +216,22 @@ public abstract class VertxSink extends BaseSink {
             return;
         }
 
+        // Resolve the hostname
+        final String resolvedHostname = _hostnameResolver.resolve(_serverAddress);
+
         // Attempt to connect
         LOGGER.info()
                 .setMessage("Connecting to server")
                 .addData("sink", getName())
                 .addData("attempt", _connectionAttempt)
-                .addData("address", _serverAddress)
+                .addData("address", resolvedHostname)
                 .addData("port", _serverPort)
                 .log();
         _lastConnectionAttempt = currentTime;
         _client.connect(
                 _serverPort,
-                _serverAddress,
-                new ConnectionHandler());
+                resolvedHostname,
+                new ConnectionHandler(resolvedHostname));
     }
 
     private Handler<Void> createSocketCloseHandler(final NetSocket socket) {
@@ -336,6 +341,7 @@ public abstract class VertxSink extends BaseSink {
     protected VertxSink(final Builder<?, ?> builder) {
         super(builder);
         _serverAddress = builder._serverAddress;
+        _hostnameResolver = builder._hostnameResolver;
         _serverPort = builder._serverPort;
         _vertx = VertxFactory.newVertx();
         //Calling this just so the context gets created
@@ -366,6 +372,7 @@ public abstract class VertxSink extends BaseSink {
     }
 
     private final String _serverAddress;
+    private final HostNameResolver _hostnameResolver;
     private final int _serverPort;
     private final Vertx _vertx;
     private final NetClient _client;
@@ -385,13 +392,14 @@ public abstract class VertxSink extends BaseSink {
     private static final int NO_DATA_CONSUME_LOOP_INTERVAL = 100;
 
     private class ConnectionHandler implements AsyncResultHandler<NetSocket> {
+
         @Override
         public void handle(final AsyncResult<NetSocket> event) {
             if (event.succeeded()) {
                 LOGGER.info()
                         .setMessage("Connected to server")
                         .addData("sink", getName())
-                        .addData("address", _serverAddress)
+                        .addData("address", _hostname)
                         .addData("port", _serverPort)
                         .addData("attempt", _connectionAttempt)
                         .log();
@@ -408,7 +416,7 @@ public abstract class VertxSink extends BaseSink {
                 LOGGER.warn()
                         .setMessage("Error connecting to server")
                         .addData("sink", getName())
-                        .addData("address", _serverAddress)
+                        .addData("address", _hostname)
                         .addData("port", _serverPort)
                         .setThrowable(event.cause())
                         .log();
@@ -433,6 +441,12 @@ public abstract class VertxSink extends BaseSink {
                 _socket.set(null);
             }
         }
+
+        ConnectionHandler(final String hostname) {
+            _hostname = hostname;
+        }
+
+        private final String _hostname;
     }
 
     /**
@@ -452,6 +466,17 @@ public abstract class VertxSink extends BaseSink {
          */
         public B setServerAddress(final String value) {
             _serverAddress = value;
+            return self();
+        }
+
+        /**
+         * The host name resolver. Optional. Defaults to {@link DefaultHostNameResolver}. Cannot be null.
+         *
+         * @param value The host name resolver.
+         * @return This instance of <code>Builder</code>.
+         */
+        public B setHostNameResolver(final HostNameResolver value) {
+            _hostnameResolver = value;
             return self();
         }
 
@@ -490,6 +515,8 @@ public abstract class VertxSink extends BaseSink {
         @NotEmpty
         private String _serverAddress;
         @NotNull
+        private HostNameResolver _hostnameResolver = DEFAULT_HOSTNAME_RESOLVER;
+        @NotNull
         @Range(min = 1, max = 65535)
         private Integer _serverPort;
         @NotNull
@@ -497,5 +524,7 @@ public abstract class VertxSink extends BaseSink {
         private Integer _maxQueueSize = 10000;
         @NotNull
         private Integer _exponentialBackoffBase = 500;
+
+        private static final HostNameResolver DEFAULT_HOSTNAME_RESOLVER = new DefaultHostNameResolver();
     }
 }
