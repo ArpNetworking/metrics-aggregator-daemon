@@ -190,7 +190,7 @@ Example MAD source configuration:
   "source": {
     type="com.arpnetworking.metrics.common.sources.CollectdHttpSourceV1"
     actorName="collectd-http-source"
-    name="telegraftcp_source"
+    name="collectd_http_source"
   }
 }
 ```
