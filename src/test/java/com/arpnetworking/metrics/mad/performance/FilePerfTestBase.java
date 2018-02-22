@@ -85,7 +85,7 @@ public class FilePerfTestBase {
         final Set<Period> periods = Sets.newConcurrentHashSet();
 
         // Create custom "canary" sink
-        final ListeningSink sink = new ListeningSink((periodicData) -> {
+        final ListeningSink sink = new ListeningSink(periodicData -> {
                 if (periodicData != null) {
                     for (final String metricName : periodicData.getData().keys()) {
                         if (TestFileGenerator.CANARY.equals(metricName)) {

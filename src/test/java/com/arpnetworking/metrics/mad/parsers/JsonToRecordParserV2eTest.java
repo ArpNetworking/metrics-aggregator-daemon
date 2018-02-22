@@ -22,7 +22,6 @@ import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.io.Resources;
-
 import org.hamcrest.Matchers;
 import org.joda.time.DateTime;
 import org.junit.Assert;

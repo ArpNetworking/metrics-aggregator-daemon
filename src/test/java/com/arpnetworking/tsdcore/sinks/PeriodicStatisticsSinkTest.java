@@ -18,14 +18,12 @@ package com.arpnetworking.tsdcore.sinks;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.test.TestBeanFactory;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for the <code>PeriodicStatisticsSink</code> class.
@@ -57,7 +55,7 @@ public class PeriodicStatisticsSinkTest {
     }
 
     @Test
-    public void testPeriodicFlush() throws InterruptedException {
+    public void testPeriodicFlush() {
         final ScheduledExecutorService executor = Mockito.mock(ScheduledExecutorService.class);
         final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
         final Sink statisticsSink = new PeriodicStatisticsSink(_statisticsSinkBuilder, executor);
@@ -65,7 +63,7 @@ public class PeriodicStatisticsSinkTest {
                 runnableCaptor.capture(),
                 Mockito.anyLong(),
                 Mockito.anyLong(),
-                Mockito.<TimeUnit>any());
+                Mockito.any());
 
         final Runnable periodicRunnable = runnableCaptor.getValue();
 
@@ -91,7 +89,15 @@ public class PeriodicStatisticsSinkTest {
 
     @Test
     public void testRecordProcessedAggregateData() {
-        final Sink statisticsSink = _statisticsSinkBuilder.build();
+        final ScheduledExecutorService executor = Mockito.mock(ScheduledExecutorService.class);
+        final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        final Sink statisticsSink = new PeriodicStatisticsSink(_statisticsSinkBuilder, executor);
+        Mockito.verify(executor).scheduleAtFixedRate(
+                runnableCaptor.capture(),
+                Mockito.anyLong(),
+                Mockito.anyLong(),
+                Mockito.any());
+
         Mockito.verify(_mockMetricsFactory).create();
         Mockito.verify(_mockMetrics).resetCounter(COUNTER_NAME);
 

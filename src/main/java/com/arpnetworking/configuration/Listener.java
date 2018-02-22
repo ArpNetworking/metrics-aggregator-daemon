@@ -34,7 +34,7 @@ public interface Listener {
      * @throws Exception Thrown if the <code>Configuration</code> should be
      * rejected.
      */
-    void offerConfiguration(final Configuration configuration) throws Exception;
+    void offerConfiguration(Configuration configuration) throws Exception;
 
     /**
      * Invoked to apply the most recently offered configuration. Any

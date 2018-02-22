@@ -32,5 +32,5 @@ public interface InterfaceDatabase {
      * @return The <code>Set</code> of classes that are implementing the
      * specified interface.
      */
-    <T> Set<Class<? extends T>> findClassesWithInterface(final Class<T> interfaceClass);
+    <T> Set<Class<? extends T>> findClassesWithInterface(Class<T> interfaceClass);
 }

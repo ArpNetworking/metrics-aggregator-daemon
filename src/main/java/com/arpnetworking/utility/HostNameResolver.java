@@ -37,5 +37,5 @@ public interface HostNameResolver {
      * @param hostName the host name to resolve.
      * @return the resolved host name or ip address.
      */
-    String resolve(final String hostName);
+    String resolve(String hostName);
 }

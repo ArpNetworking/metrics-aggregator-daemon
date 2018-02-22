@@ -16,9 +16,7 @@
 package com.arpnetworking.metrics.common.sources;
 
 import com.arpnetworking.commons.observer.Observer;
-
 import net.sf.oval.exception.ConstraintsViolatedException;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;

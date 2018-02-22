@@ -58,8 +58,8 @@ public interface DynamicConfigurationFactory {
      * @return New instance of <code>DynamicConfiguration</code>.
      */
     DynamicConfiguration create(
-            final DynamicConfiguration.Builder builder,
-            final Collection<Key> keys);
+            DynamicConfiguration.Builder builder,
+            Collection<Key> keys);
 
     /**
      * Update a <code>DynamicConfiguration$Builder</code> with the specified keys using
@@ -69,8 +69,8 @@ public interface DynamicConfigurationFactory {
      * @param keys The <code>Collection</code> of <code>Key</code> instances.
      */
     void update(
-            final DynamicConfiguration.Builder builder,
-            final Collection<Key> keys);
+            DynamicConfiguration.Builder builder,
+            Collection<Key> keys);
 
     /**
      * Key descriptor.

@@ -63,7 +63,7 @@ public enum InitialPosition {
      * @param channel Channel to evaluate the position against
      * @return The position (in bytes) to start reading
      */
-    public abstract long get(final SeekableByteChannel channel);
+    public abstract long get(SeekableByteChannel channel);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InitialPosition.class);
 }

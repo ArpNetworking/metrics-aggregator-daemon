@@ -125,7 +125,7 @@ public abstract class BaseTcpSource extends ActorSource {
          * @param connected the connected message
          * @return the actor reference
          */
-        protected abstract ActorRef createHandler(final BaseTcpSource sink, final Tcp.Connected connected);
+        protected abstract ActorRef createHandler(BaseTcpSource sink, Tcp.Connected connected);
 
         protected BaseTcpSource getSink() {
             return _sink;

@@ -18,7 +18,6 @@ package com.arpnetworking.metrics.mad.model.json;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.collect.ImmutableMap;
-
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
 

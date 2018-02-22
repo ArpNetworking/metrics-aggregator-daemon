@@ -29,5 +29,5 @@ public interface Relaunchable<T> {
      *
      * @param configuration The configuration instance.
      */
-    void relaunch(final T configuration);
+    void relaunch(T configuration);
 }

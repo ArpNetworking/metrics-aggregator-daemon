@@ -33,7 +33,7 @@ public interface Configuration {
      * @return Returns the property value or <code>Optional.absent</code> if
      * the property name has not been defined.
      */
-    Optional<String> getProperty(final String name);
+    Optional<String> getProperty(String name);
 
     /**
      * Retrieve the value of a particular property by its name and if it does
@@ -45,7 +45,7 @@ public interface Configuration {
      * @return Returns the property value or <code>defaultValue</code> if
      * the property name has not been defined.
      */
-    String getProperty(final String name, final String defaultValue);
+    String getProperty(String name, String defaultValue);
 
     /**
      * Retrieve the value of a particular property by its name and if it does
@@ -56,7 +56,7 @@ public interface Configuration {
      * @throws NoSuchElementException throws the <code>RuntimeException</code>
      * if the specified property name is not defined.
      */
-    String getRequiredProperty(final String name) throws NoSuchElementException;
+    String getRequiredProperty(String name) throws NoSuchElementException;
 
     /**
      * <code>Boolean</code> specific accessor. Anything other than "true",
@@ -68,7 +68,7 @@ public interface Configuration {
      * @return Returns the property value or <code>Optional.absent</code> if
      * the property name has not been defined.
      */
-    Optional<Boolean> getPropertyAsBoolean(final String name);
+    Optional<Boolean> getPropertyAsBoolean(String name);
 
     /**
      * <code>Boolean</code> specific accessor. Anything other than "true",
@@ -82,7 +82,7 @@ public interface Configuration {
      * @return Returns the property value or <code>defaultValue</code> if
      * the property name has not been defined.
      */
-    boolean getPropertyAsBoolean(final String name, final boolean defaultValue);
+    boolean getPropertyAsBoolean(String name, boolean defaultValue);
 
     /**
      * <code>Boolean</code> specific accessor. Anything other than "true",
@@ -95,7 +95,7 @@ public interface Configuration {
      * @throws NoSuchElementException throws the <code>RuntimeException</code>
      * if the specified property name is not defined.
      */
-    boolean getRequiredPropertyAsBoolean(final String name) throws NoSuchElementException;
+    boolean getRequiredPropertyAsBoolean(String name) throws NoSuchElementException;
 
     /**
      * <code>Integer</code> specific accessor.
@@ -108,7 +108,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to an
      * <code>Integer</code>.
      */
-    Optional<Integer> getPropertyAsInteger(final String name) throws NumberFormatException;
+    Optional<Integer> getPropertyAsInteger(String name) throws NumberFormatException;
 
     /**
      * <code>Integer</code> specific accessor.
@@ -123,7 +123,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to an
      * <code>Integer</code>.
      */
-    int getPropertyAsInteger(final String name, final int defaultValue) throws NumberFormatException;
+    int getPropertyAsInteger(String name, int defaultValue) throws NumberFormatException;
 
     /**
      * <code>Integer</code> specific accessor.
@@ -137,7 +137,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to an
      * <code>Integer</code>.
      */
-    int getRequiredPropertyAsInteger(final String name) throws NoSuchElementException, NumberFormatException;
+    int getRequiredPropertyAsInteger(String name) throws NoSuchElementException, NumberFormatException;
 
     /**
      * <code>Long</code> specific accessor.
@@ -150,7 +150,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Long</code>.
      */
-    Optional<Long> getPropertyAsLong(final String name) throws NumberFormatException;
+    Optional<Long> getPropertyAsLong(String name) throws NumberFormatException;
 
     /**
      * <code>Long</code> specific accessor.
@@ -165,7 +165,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Long</code>.
      */
-    long getPropertyAsLong(final String name, final long defaultValue) throws NumberFormatException;
+    long getPropertyAsLong(String name, long defaultValue) throws NumberFormatException;
 
     /**
      * <code>Long</code> specific accessor.
@@ -179,7 +179,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Long</code>.
      */
-    long getRequiredPropertyAsLong(final String name) throws NoSuchElementException, NumberFormatException;
+    long getRequiredPropertyAsLong(String name) throws NoSuchElementException, NumberFormatException;
 
     /**
      * <code>Double</code> specific accessor.
@@ -192,7 +192,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Double</code>.
      */
-    Optional<Double> getPropertyAsDouble(final String name) throws NumberFormatException;
+    Optional<Double> getPropertyAsDouble(String name) throws NumberFormatException;
 
     /**
      * <code>Double</code> specific accessor.
@@ -207,7 +207,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Double</code>.
      */
-    double getPropertyAsDouble(final String name, final double defaultValue) throws NumberFormatException;
+    double getPropertyAsDouble(String name, double defaultValue) throws NumberFormatException;
 
     /**
      * <code>Double</code> specific accessor.
@@ -221,7 +221,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Double</code>.
      */
-    double getRequiredPropertyAsDouble(final String name) throws NoSuchElementException, NumberFormatException;
+    double getRequiredPropertyAsDouble(String name) throws NoSuchElementException, NumberFormatException;
 
     /**
      * <code>Float</code> specific accessor.
@@ -234,7 +234,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Float</code>.
      */
-    Optional<Float> getPropertyAsFloat(final String name) throws NumberFormatException;
+    Optional<Float> getPropertyAsFloat(String name) throws NumberFormatException;
 
     /**
      * <code>Float</code> specific accessor.
@@ -249,7 +249,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Float</code>.
      */
-    float getPropertyAsFloat(final String name, final float defaultValue) throws NumberFormatException;
+    float getPropertyAsFloat(String name, float defaultValue) throws NumberFormatException;
 
     /**
      * <code>Float</code> specific accessor.
@@ -263,7 +263,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Float</code>.
      */
-    float getRequiredPropertyAsFloat(final String name) throws NoSuchElementException, NumberFormatException;
+    float getRequiredPropertyAsFloat(String name) throws NoSuchElementException, NumberFormatException;
 
     /**
      * <code>Short</code> specific accessor.
@@ -276,7 +276,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Short</code>.
      */
-    Optional<Short> getPropertyAsShort(final String name) throws NumberFormatException;
+    Optional<Short> getPropertyAsShort(String name) throws NumberFormatException;
 
     /**
      * <code>Short</code> specific accessor.
@@ -291,7 +291,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Short</code>.
      */
-    short getPropertyAsShort(final String name, final short defaultValue) throws NumberFormatException;
+    short getPropertyAsShort(String name, short defaultValue) throws NumberFormatException;
 
     /**
      * <code>Short</code> specific accessor.
@@ -305,7 +305,7 @@ public interface Configuration {
      * @throws NumberFormatException if the value cannot be converted to a
      * <code>Short</code>.
      */
-    short getRequiredPropertyAsShort(final String name) throws NoSuchElementException, NumberFormatException;
+    short getRequiredPropertyAsShort(String name) throws NoSuchElementException, NumberFormatException;
 
     /**
      * Generic object accessor.
@@ -318,7 +318,7 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> Optional<T> getPropertyAs(final String name, final Class<? extends T> clazz) throws IllegalArgumentException;
+    <T> Optional<T> getPropertyAs(String name, Class<? extends T> clazz) throws IllegalArgumentException;
 
     /**
      * Generic object accessor.
@@ -333,7 +333,7 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> T getPropertyAs(final String name, final Class<? extends T> clazz, final T defaultValue) throws IllegalArgumentException;
+    <T> T getPropertyAs(String name, Class<? extends T> clazz, T defaultValue) throws IllegalArgumentException;
 
     /**
      * Generic object accessor.
@@ -348,7 +348,7 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> T getRequiredPropertyAs(final String name, final Class<? extends T> clazz) throws NoSuchElementException, IllegalArgumentException;
+    <T> T getRequiredPropertyAs(String name, Class<? extends T> clazz) throws NoSuchElementException, IllegalArgumentException;
 
     /**
      * Generic object accessor.
@@ -359,7 +359,7 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> Optional<T> getAs(final Class<? extends T> clazz) throws IllegalArgumentException;
+    <T> Optional<T> getAs(Class<? extends T> clazz) throws IllegalArgumentException;
 
     /**
      * Generic object accessor.
@@ -374,7 +374,7 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> T getAs(final Class<? extends T> clazz, final T defaultValue) throws IllegalArgumentException;
+    <T> T getAs(Class<? extends T> clazz, T defaultValue) throws IllegalArgumentException;
 
     /**
      * Generic object accessor.
@@ -387,7 +387,7 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> T getRequiredAs(final Class<? extends T> clazz) throws NoSuchElementException, IllegalArgumentException;
+    <T> T getRequiredAs(Class<? extends T> clazz) throws NoSuchElementException, IllegalArgumentException;
 
     /**
      * Generic object accessor.
@@ -400,7 +400,7 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> Optional<T> getPropertyAs(final String name, final Type type) throws IllegalArgumentException;
+    <T> Optional<T> getPropertyAs(String name, Type type) throws IllegalArgumentException;
 
     /**
      * Generic object accessor.
@@ -415,7 +415,7 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> T getPropertyAs(final String name, final Type type, final T defaultValue) throws IllegalArgumentException;
+    <T> T getPropertyAs(String name, Type type, T defaultValue) throws IllegalArgumentException;
 
     /**
      * Generic object accessor.
@@ -430,7 +430,7 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> T getRequiredPropertyAs(final String name, final Type type) throws NoSuchElementException, IllegalArgumentException;
+    <T> T getRequiredPropertyAs(String name, Type type) throws NoSuchElementException, IllegalArgumentException;
 
     /**
      * Generic object accessor.
@@ -441,7 +441,7 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> Optional<T> getAs(final Type type) throws IllegalArgumentException;
+    <T> Optional<T> getAs(Type type) throws IllegalArgumentException;
 
     /**
      * Generic object accessor.
@@ -456,7 +456,7 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> T getAs(final Type type, final T defaultValue) throws IllegalArgumentException;
+    <T> T getAs(Type type, T defaultValue) throws IllegalArgumentException;
 
     /**
      * Generic object accessor.
@@ -469,6 +469,6 @@ public interface Configuration {
      * @throws IllegalArgumentException if the value cannot be converted to an
      * instance of <code>T</code>.
      */
-    <T> T getRequiredAs(final Type type) throws NoSuchElementException, IllegalArgumentException;
+    <T> T getRequiredAs(Type type) throws NoSuchElementException, IllegalArgumentException;
 }
 

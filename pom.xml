@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>1.0.31</version>
+    <version>1.1.4</version>
     <relativePath />
   </parent>
 
@@ -28,7 +28,7 @@
   <packaging>jar</packaging>
   <name>Metrics Aggregator Daemon</name>
   <description>Aggregates samples published by metrics client libraries and writes to destinations.</description>
-  <version>1.9.3-SNAPSHOT</version>
+  <version>1.9.6-SNAPSHOT</version>
 
   <licenses>
     <license>
