@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2014 Brandon Arp
+  ~ Copyright 2018 Inscope Metrics, Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,18 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<configuration scan="true" scanPeriod="30 seconds">
-    <appender name="mad-logger" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/opt/mad/logs/mad.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <timeBasedFileNamingAndTriggeringPolicy class="com.arpnetworking.logback.SizeAndRandomizedTimeBasedFNATP">
-                <maxOffsetInMillis>900000</maxOffsetInMillis>
-                <maxFileSize>100MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-            <fileNamePattern>/opt/mad/logs/mad.%d{yyyy-MM-dd_HH}.%i.log.gz</fileNamePattern>
-            <maxHistory>4</maxHistory>
-            <cleanHistoryOnStart>true</cleanHistoryOnStart>
-        </rollingPolicy>
+<configuration>
+    <appender name="mad-logger" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="com.arpnetworking.logback.StenoEncoder">
             <injectContextLogger>true</injectContextLogger>
             <compressLoggerName>true</compressLoggerName>
@@ -36,15 +26,9 @@
         </encoder>
     </appender>
 
-    <appender name="mad-async" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="mad-logger"/>
-        <discardingThreshold>50</discardingThreshold>
-        <queueSize>500</queueSize>
-    </appender>
-
     <logger name="org.reflections.Reflections" level="ERROR" />
 
     <root level="INFO">
-        <appender-ref ref="mad-async"/>
+        <appender-ref ref="mad-logger"/>
     </root>
 </configuration>

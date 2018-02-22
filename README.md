@@ -39,11 +39,18 @@ In the installation's *bin* directory there are scripts to start Metrics Aggrega
 
 #### Logging
 
-To customize logging you may provide a [LogBack](http://logback.qos.ch/) configuration file.  To use a custom logging configuration you need to define and export an environment variable before executing *mad*:
+To customize logging you may provide a [LogBack](http://logback.qos.ch/) configuration file. The project ships with `logback.xml` which
+writes logs to rotated files and with `logback-console.xml` which writes logs to STDOUT.
 
-    export JAVA_OPTS="-Dlogback.configurationFile=/usr/local/lib/metrics-aggregator-daemon/config/logger.xml"
+Outside of Docker, set the `JAVA_OPTS` environment variable to configure logging:
+
+    export JAVA_OPTS="-Dlogback.configurationFile=/usr/local/lib/metrics-aggregator-daemon/config/logback-console.xml"
 
 Where */usr/local/lib/metrics-aggregator-daemon/config/logger.xml* is the path to your logging configuration file.
+
+Under Docker, set the `LOGBACK_CONFIG` environment variable to configure logging:
+
+    docker run -e LOGBACK_CONFIG=/opt/mad/config/logack-console.xml arpnetworking/mad:latest
 
 #### Daemon
 
@@ -139,38 +146,156 @@ Each of the pipeline configuration files should be placed in the *pipelinesDirec
 
 The daemon and pipeline configuration files may be written in [Hocon](https://github.com/typesafehub/config) when specified with a _.conf extension. 
 
+### Sources
+
+#### Collectd
+
+Example MAD source configuration:
+```json
+{
+  type="com.arpnetworking.metrics.mad.sources.MappingSource"
+  name="collectd_mapping_source"
+  "findAndReplace": {
+    "^cpu/([\\d]+)/(cpu|percent)/([^/]+)(/value)?": ["cpu/$3", "cpu/by_core/$1/$3"],
+    "^snmp/cpu_detailed/([\\d]+)/([^/]+)(/value)?": ["snmp/cpu/$2", "snmp/cpu/by_core/$1/$2"],
+    "^load/load/((1|5|15)min)": ["load/$1"],
+    "^memory/memory/([^/]+)(/value)?": ["memory/$1"],
+    "^vmem/vmpage_number/([^/]+)(/value)?": ["vmem/$1"],
+    "^vmem/vmpage_io/([^/]+)/(.*)": ["vmem/io/$1/$2"],
+    "^vmem/vmpage_faults/(.*)": ["vmem/faults/$1"],
+    "^swap/swap/([^/]+)(/value)?": ["swap/$1"],
+    "^swap/swap_io/([^/]+)(/value)?": ["swap/io/$1"],
+    "^interface/([^/]+)/if_([^/]+)/(.*)": ["interface/$1/$3/$2"],
+    "^disk/([^/]+)/disk_([^/]+)/(read|write)": ["disk/$1/$3/$2"],
+    "^df/(.*)(/value)?": ["disk/$1"],
+    "^ntpd/(.*)(/value)?": ["ntpd/$1"],
+    "^processes/ps_state/([^/]+)(/value)?": ["processes/by_state/$1"],
+    "^processes/([^/]+)/ps_(vm|rss|data|code|stacksize)(/value)?": ["processes/by_name/$1/$2"],
+    "^processes/([^/]+)/ps_(cputime|count|pagefaults)/(.*)": ["processes/by_name/$1/$2/$3"],
+    "^processes/([^/]+)/ps_disk_([^/]+)/(.*)": ["processes/by_name/$1/disk/$3/$2"],
+    "^tcpconns/([^-]+)-(local|remote)/tcp_connections/([^/]+)(/value)?": ["tcpconns/$2/$1/$3"],
+    "^tcpconns/all/tcp_connections/([^/]+)(/value)?": ["tcpconns/all/$1"],
+    "^memcached/df/cache/(.*)": ["memcached/cache/$1"],
+    "^memcached/memcached_command/([^/]+)(/value)?": ["memcached/commands/$1"],
+    "^memcached/memcached_connections/current(/value)?": ["memcached/connections"],
+    "^memcached/memcached_items/current(/value)?": ["memcached/items"],
+    "^memcached/memcached_octets/rx": ["memcached/network/bytes_read"],
+    "^memcached/memcached_octets/tx": ["memcached/network/bytes_written"],
+    "^memcached/memcached_ops/([^/]+)(/value)?": ["memcached/operations/$1"],
+    "^memcached/percent/([^/]+)(/value)?": ["memcached/$1"],
+    "^memcached/ps_count/.*": [],
+    "^memcached/ps_cputime/.*": [],
+    "^uptime/uptime(/value)?": ["uptime/value"]
+  },
+  "source": {
+    type="com.arpnetworking.metrics.common.sources.CollectdHttpSourceV1"
+    actorName="collectd-http-source"
+    name="telegraftcp_source"
+  }
+}
+```
+
+Example Collectd write plugin configuration:
+```
+LoadPlugin write_http
+<Plugin "write_http">
+  <Node "mad">
+    URL "http://localhost:7090/metrics/v1/collectd"
+    Format "JSON"
+    Header "X-TAG-SERVICE: collectd"
+    Header "X-TAG-CLUSTER: collectd_local"
+    StoreRates true
+    BufferSize 4096
+  </Node>
+</Plugin>
+```
+
+#### Telegraf
+
+Example MAD source configuration:
+```json
+{
+  type="com.arpnetworking.metrics.mad.sources.MappingSource"
+  name="telegraftcp_mapping_source"
+  findAndReplace={
+    "\\."=["/"]
+  }
+  source={
+    type="com.arpnetworking.metrics.common.sources.TcpLineSource"
+    actorName="telegraf-tcp-source"
+    name="telegraftcp_source"
+    host="0.0.0.0"
+    port="8094"
+    parser={
+      type="com.arpnetworking.metrics.mad.parsers.TelegrafJsonToRecordParser"
+      timestampUnit="NANOSECONDS"
+    }
+  }
+}
+```
+
+Example Telegraf output configuration:
+```
+[agent]
+interval="1s"
+flush_interval="1s"
+round_interval=true
+omit_hostname=false
+
+[global_tags]
+service="telegraf"
+cluster="telegraf_local"
+
+[[outputs.socket_writer]]
+address = "tcp://localhost:8094"
+data_format = "json"
+json_timestamp_units = "1ns"
+keep_alive_period = "5m"
+
+[[inputs.cpu]]
+percpu = true
+totalcpu = true
+collect_cpu_time = false
+report_active = false
+[[inputs.mem]]
+[[inputs.net]]
+[[inputs.netstat]]
+[[inputs.disk]]
+interval="10s"
+[[inputs.diskio]]
+[[inputs.swap]]
+[[inputs.kernel]]
+```
+
 Development
 -----------
 
 To build the service locally you must satisfy these prerequisites:
-* [JDK8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 * [Docker](http://www.docker.com/) (for [Mac](https://docs.docker.com/docker-for-mac/))
 
 __Note:__ Requires at least Docker for Mac Beta version _Version 1.12.0-rc4-beta19 (build: 10258)_
-
-You will need an account on [Docker Hub](https://hub.docker.com/) and need to provide these credentials in order for the build to pull the base image(s). Please refer to the [Fabric8 Maven Docker Plugin](https://dmp.fabric8.io/#authentication) for how to provide these credentials. To get started quickly you can pass them on the command line via _-Ddocker.pull.username_ and _-Ddocker.pull.password_.
 
 Next, fork the repository, clone and build:
 
 Building:
 
-    metrics-aggregator-daemon> ./mvnw verify
+    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw verify
 
 To debug the server during run on port 9000:
 
-    metrics-aggregator-daemon> ./mvnw -Ddebug=true docker:start
+    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw -Ddebug=true docker:start
 
 To debug the server during integration tests on port 9000:
 
-    metrics-aggregator-daemon> ./mvnw -Ddebug=true verify
+    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw -Ddebug=true verify
 
 To execute performance tests:
 
-    metrics-aggregator-daemon> ./mvnw -PperformanceTest test
+    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw -PperformanceTest test
 
 To use the local version in your project you must first install it locally:
 
-    metrics-aggregator-daemon> ./mvnw install
+    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw install
 
 You can determine the version of the local build from the pom.xml file.  Using the local version is intended only for testing or development.
 
