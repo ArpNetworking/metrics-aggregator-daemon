@@ -27,7 +27,6 @@ import net.sf.oval.constraint.NotNull;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
