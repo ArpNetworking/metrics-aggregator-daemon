@@ -112,7 +112,7 @@ public final class FileSource<T> extends BaseSource {
                 .setPositionStore(positionStore)
                 .setInitialPosition(builder._initialPosition)
                 .build();
-        _tailerExecutor = Executors.newSingleThreadExecutor((runnable) -> new Thread(runnable, "FileSourceTailer"));
+        _tailerExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "FileSourceTailer"));
     }
 
     private final Parser<T, byte[]> _parser;

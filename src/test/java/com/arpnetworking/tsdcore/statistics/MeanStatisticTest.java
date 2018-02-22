@@ -18,7 +18,6 @@ package com.arpnetworking.tsdcore.statistics;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.ImmutableMap;
-
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;

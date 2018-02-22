@@ -31,7 +31,7 @@ public interface PositionStore extends Closeable {
      * @param identifier unique identifier for the file.
      * @return Optional.absent if the file was not found, otherwise a byte offset
      */
-    Optional<Long> getPosition(final String identifier);
+    Optional<Long> getPosition(String identifier);
 
     /**
      * Update the read offset from the beginning of the file for the specified
@@ -40,5 +40,5 @@ public interface PositionStore extends Closeable {
      * @param identifier unique identifier for the file.
      * @param position the new read offset from the beginning of the file in bytes.
      */
-    void setPosition(final String identifier, long position);
+    void setPosition(String identifier, long position);
 }

@@ -17,7 +17,6 @@ package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
-
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;

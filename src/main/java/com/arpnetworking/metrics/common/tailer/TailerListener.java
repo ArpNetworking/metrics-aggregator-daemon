@@ -29,7 +29,7 @@ public interface TailerListener {
      *
      * @param tailer the <code>Tailer</code> instance.
      */
-    void initialize(final Tailer tailer);
+    void initialize(Tailer tailer);
 
     /**
      * This method is called if the tailed file is not found.
@@ -62,7 +62,7 @@ public interface TailerListener {
      * <b>Note:</b> this is called from the <code>Tailer</code> thread.
      * @param line the raw line.
      */
-    void handle(final byte[] line);
+    void handle(byte[] line);
 
     /**
      * Handles a <code>Throwable</code> encountered during tailing.
@@ -70,6 +70,6 @@ public interface TailerListener {
      * <b>Note:</b> this is called from the <code>Tailer</code> thread.
      * @param throwable the <code>Throwable</code>.
      */
-    void handle(final Throwable throwable);
+    void handle(Throwable throwable);
 
 }

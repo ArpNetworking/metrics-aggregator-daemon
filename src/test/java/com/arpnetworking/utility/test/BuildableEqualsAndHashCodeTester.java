@@ -16,7 +16,6 @@
 package com.arpnetworking.utility.test;
 
 import com.arpnetworking.commons.builder.Builder;
-
 import org.junit.Assert;
 
 import java.lang.reflect.InvocationTargetException;

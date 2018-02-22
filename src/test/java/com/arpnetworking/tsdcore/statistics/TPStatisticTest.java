@@ -18,7 +18,6 @@ package com.arpnetworking.tsdcore.statistics;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.Lists;
-
 import org.junit.Assert;
 import org.junit.Test;
 
