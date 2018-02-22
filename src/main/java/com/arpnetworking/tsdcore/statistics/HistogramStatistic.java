@@ -19,12 +19,14 @@ import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
+import it.unimi.dsi.fastutil.doubles.Double2IntAVLTreeMap;
+import it.unimi.dsi.fastutil.doubles.Double2IntMap;
+import it.unimi.dsi.fastutil.doubles.Double2IntSortedMap;
+import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
 import net.sf.oval.constraint.NotNull;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
 import javax.annotation.Nullable;
 
 /**
@@ -253,8 +255,8 @@ public final class HistogramStatistic extends BaseStatistic {
          * @param histogramSnapshot The histogram snapshot to add to this one.
          */
         public void add(final HistogramSnapshot histogramSnapshot) {
-            for (final Map.Entry<Double, Integer> entry : histogramSnapshot._data.entrySet()) {
-                _data.merge(entry.getKey(), entry.getValue(), (i, j) -> i + j);
+            for (final Double2IntMap.Entry entry : histogramSnapshot._data.double2IntEntrySet()) {
+                _data.merge(entry.getDoubleKey(), entry.getIntValue(), (i, j) -> i + j);
             }
             _entriesCount += histogramSnapshot._entriesCount;
         }
@@ -269,7 +271,7 @@ public final class HistogramStatistic extends BaseStatistic {
         }
 
         private int _entriesCount = 0;
-        private final TreeMap<Double, Integer> _data = new TreeMap<>();
+        private final Double2IntSortedMap _data = new Double2IntAVLTreeMap();
     }
 
     /**
@@ -278,7 +280,7 @@ public final class HistogramStatistic extends BaseStatistic {
      * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
      */
     public static final class HistogramSnapshot {
-        private HistogramSnapshot(final TreeMap<Double, Integer> data, final int entriesCount) {
+        private HistogramSnapshot(final Double2IntSortedMap data, final int entriesCount) {
             _entriesCount = entriesCount;
             _data.putAll(data);
         }
@@ -295,10 +297,10 @@ public final class HistogramStatistic extends BaseStatistic {
             // slightly larger than the _entriesCount and prevents an index out of range.
             final int target = (int) Math.min(Math.ceil(_entriesCount * percentile / 100.0D), _entriesCount);
             int accumulated = 0;
-            for (final Map.Entry<Double, Integer> next : _data.entrySet()) {
-                accumulated += next.getValue();
+            for (final Double2IntMap.Entry next : _data.double2IntEntrySet()) {
+                accumulated += next.getIntValue();
                 if (accumulated >= target) {
-                    return next.getKey();
+                    return next.getDoubleKey();
                 }
             }
             return 0D;
@@ -308,10 +310,11 @@ public final class HistogramStatistic extends BaseStatistic {
             return _entriesCount;
         }
 
-        public Set<Map.Entry<Double, Integer>> getValues() {
-            return _data.entrySet();
+        public ObjectSortedSet<Double2IntMap.Entry> getValues() {
+            return _data.double2IntEntrySet();
         }
+
         private int _entriesCount = 0;
-        private final TreeMap<Double, Integer> _data = new TreeMap<>();
+        private final Double2IntSortedMap _data = new Double2IntAVLTreeMap();
     }
 }

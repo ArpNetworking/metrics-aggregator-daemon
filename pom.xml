@@ -82,6 +82,7 @@
     <commons.codec.version>1.10</commons.codec.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.math3.version>3.3</commons.math3.version>
+    <fastutil.version>8.1.1</fastutil.version>
     <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
     <guava.version>23.4-jre</guava.version>
     <guice.version>4.1.0</guice.version>
@@ -206,6 +207,7 @@
               <mainClass>com.arpnetworking.metrics.mad.Main</mainClass>
             </program>
           </programs>
+          <unixScriptTemplate>${project.basedir}/target/appAssemblerUnixBinTemplate</unixScriptTemplate>
           <endorsedDir>lib/ext</endorsedDir>
         </configuration>
       </plugin>
@@ -594,6 +596,11 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
       <version>${apache.httpcore.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>it.unimi.dsi</groupId>
+      <artifactId>fastutil</artifactId>
+      <version>${fastutil.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
