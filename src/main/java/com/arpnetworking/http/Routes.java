@@ -16,6 +16,7 @@
 package com.arpnetworking.http;
 
 import akka.NotUsed;
+import akka.actor.ActorNotFound;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
@@ -207,7 +208,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
             }
         }
 
-        return CompletableFuture.completedFuture(HttpResponse.create().withStatus(404));
+        return CompletableFuture.completedFuture(HttpResponse.create().withStatus(StatusCodes.NOT_FOUND));
     }
 
     private CompletionStage<HttpResponse> dispatchHttpRequest(final HttpRequest request, final String actorName) {
@@ -221,7 +222,18 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                 })
                 // We return 404 here since actor startup is controlled by config and
                 // the actors may not be running.
-                .exceptionally(err -> HttpResponse.create().withStatus(404));
+                .exceptionally(err -> {
+                    final Throwable cause = err.getCause();
+                    if (cause instanceof ActorNotFound) {
+                        return HttpResponse.create().withStatus(StatusCodes.NOT_FOUND);
+                    }
+                    LOGGER.error()
+                            .setMessage("Unhandled exception when looking up actor for http request routing")
+                            .addData("actorName", actorName)
+                            .setThrowable(cause)
+                            .log();
+                    return HttpResponse.create().withStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+                });
     }
 
     private CompletionStage<HttpResponse> getHttpResponseForTelemetry(
