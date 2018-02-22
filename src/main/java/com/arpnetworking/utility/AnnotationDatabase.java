@@ -32,5 +32,5 @@ public interface AnnotationDatabase {
      * @return The <code>Set</code> of classes that are declared with the
      * specified annotation.
      */
-    Set<Class<?>> findClassesWithAnnotation(final Class<? extends Annotation> annotationClass);
+    Set<Class<?>> findClassesWithAnnotation(Class<? extends Annotation> annotationClass);
 }

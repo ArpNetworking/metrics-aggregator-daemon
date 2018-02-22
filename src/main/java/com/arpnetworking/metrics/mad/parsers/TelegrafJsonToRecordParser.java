@@ -240,6 +240,6 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
          * @param timestamp the {@code long} epoch in this unit
          * @return instance of {@code DateTime}
          */
-        public abstract DateTime create(final long timestamp);
+        public abstract DateTime create(long timestamp);
     }
 }

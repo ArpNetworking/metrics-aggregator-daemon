@@ -35,5 +35,5 @@ public interface MessageProcessorsFactory {
      * @param metrics {@link PeriodicMetrics} instance to record metrics to
      * @return a list of <code>MessagesProcessor</code>
      */
-    List<MessagesProcessor> create(final Connection connection, final PeriodicMetrics metrics);
+    List<MessagesProcessor> create(Connection connection, PeriodicMetrics metrics);
 }

@@ -182,7 +182,7 @@ public final class Main implements Launchable {
         final Runnable runnable = new JvmMetricsRunnable.Builder()
                 .setMetricsFactory(injector.getInstance(MetricsFactory.class))
                 .build();
-        _jvmMetricsCollector = Executors.newSingleThreadScheduledExecutor((r) -> new Thread(r, "JVMMetricsCollector"));
+        _jvmMetricsCollector = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "JVMMetricsCollector"));
         _jvmMetricsCollector.scheduleAtFixedRate(
                 runnable,
                 INITIAL_DELAY_IN_MILLIS,
@@ -358,7 +358,7 @@ public final class Main implements Launchable {
 
         @Override
         public synchronized void launch() {
-            _pipelinesExecutor = Executors.newSingleThreadScheduledExecutor((runnable) -> new Thread(runnable, "PipelineExecutor"));
+            _pipelinesExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "PipelineExecutor"));
             _pipelinesExecutor.scheduleAtFixedRate(
                     this,
                     0,  // initial delay

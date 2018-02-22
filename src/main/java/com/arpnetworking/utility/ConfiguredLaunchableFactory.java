@@ -30,5 +30,5 @@ public interface ConfiguredLaunchableFactory<T, S> {
      * @param config configuration used to build the {@link com.arpnetworking.utility.Launchable}
      * @return a new {@link com.arpnetworking.utility.Launchable}
      */
-    T create(final S config);
+    T create(S config);
 }

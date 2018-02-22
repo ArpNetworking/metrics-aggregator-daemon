@@ -28,5 +28,5 @@ public interface MessagesProcessor {
      * @param message message to be processed.
      * @return true if the message was processed, otherwise false
      */
-    boolean handleMessage(final Object message);
+    boolean handleMessage(Object message);
 }
