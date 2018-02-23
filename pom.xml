@@ -79,7 +79,6 @@
     <aspectjrt.version>1.8.9</aspectjrt.version>
     <cglib.version>3.2.5</cglib.version>
     <client.protocol.version>0.10.0</client.protocol.version>
-    <commons.codec.version>1.10</commons.codec.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.math3.version>3.3</commons.math3.version>
     <fastutil.version>8.1.1</fastutil.version>
@@ -600,11 +599,6 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${commons.io.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>${commons.codec.version}</version>
     </dependency>
     <dependency>
       <groupId>org.reflections</groupId>
