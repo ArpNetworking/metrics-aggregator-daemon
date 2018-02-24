@@ -24,7 +24,6 @@ import com.arpnetworking.utility.TimerTrigger;
 import com.arpnetworking.utility.Trigger;
 import com.google.common.base.MoreObjects;
 import net.sf.oval.constraint.NotNull;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.Duration;
 
@@ -41,6 +40,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 import java.util.Optional;
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * A reimplementation of the Apache Commons IO tailer based on the 2.5 snapshot
@@ -480,7 +480,7 @@ public final class StatefulTailer implements Tailer {
         // Compute the hash
         _md5.reset();
         final byte[] digest = _md5.digest(buffer.array());
-        final String hash = Hex.encodeHexString(digest);
+        final String hash = DatatypeConverter.printHexBinary(digest);
         LOGGER.trace()
                 .setMessage("Computed hash")
                 .addData("hash", hash)
