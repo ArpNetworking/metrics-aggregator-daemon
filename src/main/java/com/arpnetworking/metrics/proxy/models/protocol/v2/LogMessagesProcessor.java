@@ -35,10 +35,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.joda.time.DateTime;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -201,9 +201,9 @@ public class LogMessagesProcessor implements MessagesProcessor {
         }
     }
 
-    private DateTime extractTimestamp(final String line) {
+    private ZonedDateTime extractTimestamp(final String line) {
         // TODO(vkoskela): Implement different timestamp extract strategies [MAI-409]
-        return DateTime.now();
+        return ZonedDateTime.now();
     }
 
     private final Map<Path, Set<String>> _logsSubscriptions = Maps.newHashMap();

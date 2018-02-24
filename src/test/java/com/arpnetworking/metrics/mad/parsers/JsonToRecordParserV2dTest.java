@@ -24,11 +24,11 @@ import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.io.Resources;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsMapContaining;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 /**
@@ -42,7 +42,7 @@ public class JsonToRecordParserV2dTest {
     public void testParse() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2dTest/testParse.json");
         Assert.assertNotNull(record);
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
         Assert.assertNotNull(record.getAnnotations());
 
@@ -74,7 +74,7 @@ public class JsonToRecordParserV2dTest {
     public void testAnnotations() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2dTest/testAnnotations.json");
         Assert.assertNotNull(record);
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
         Assert.assertNotNull(record.getAnnotations());
 
@@ -92,7 +92,7 @@ public class JsonToRecordParserV2dTest {
     public void testNoValues() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2dTest/testNoValues.json");
         Assert.assertNotNull(record);
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
         Assert.assertNotNull(record.getAnnotations());
         Assert.assertNotNull(record.getDimensions());
 
@@ -106,7 +106,7 @@ public class JsonToRecordParserV2dTest {
     public void testNaNValues() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2dTest/testNaNValues.json");
         Assert.assertNotNull(record);
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
         Assert.assertNotNull(record.getAnnotations());
 

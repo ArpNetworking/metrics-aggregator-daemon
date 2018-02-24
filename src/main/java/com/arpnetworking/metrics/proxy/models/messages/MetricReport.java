@@ -20,8 +20,8 @@ import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import org.joda.time.DateTime;
 
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 /**
@@ -50,7 +50,7 @@ public final class MetricReport {
             final String metric,
             final double value,
             final Optional<Unit> unit,
-            final DateTime periodStart) {
+            final ZonedDateTime periodStart) {
         _service = service;
         _host = host;
         _statistic = statistic;
@@ -88,7 +88,7 @@ public final class MetricReport {
         return _denominatorUnits;
     }
 
-    public DateTime getPeriodStart() {
+    public ZonedDateTime getPeriodStart() {
         return _periodStart;
     }
 
@@ -115,5 +115,5 @@ public final class MetricReport {
     private final double _value;
     private final ImmutableList<String> _numeratorUnits;
     private final ImmutableList<String> _denominatorUnits = ImmutableList.of();
-    private final DateTime _periodStart;
+    private final ZonedDateTime _periodStart;
 }

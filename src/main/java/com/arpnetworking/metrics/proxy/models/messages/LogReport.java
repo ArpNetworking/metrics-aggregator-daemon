@@ -19,9 +19,9 @@ package com.arpnetworking.metrics.proxy.models.messages;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import org.joda.time.DateTime;
 
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -43,7 +43,7 @@ public final class LogReport {
             final List<String> matchingRegexes,
             final Path file,
             final String line,
-            final DateTime timestamp) {
+            final ZonedDateTime timestamp) {
         _file = file;
         _line = line;
         _timestamp = timestamp;
@@ -59,7 +59,7 @@ public final class LogReport {
         return _line;
     }
 
-    public DateTime getTimestamp() {
+    public ZonedDateTime getTimestamp() {
         return _timestamp;
     }
 
@@ -82,5 +82,5 @@ public final class LogReport {
     private final List<String> _matchingRegexes;
     private Path _file;
     private String _line;
-    private DateTime _timestamp;
+    private ZonedDateTime _timestamp;
 }

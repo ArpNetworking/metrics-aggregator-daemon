@@ -34,9 +34,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,7 +60,7 @@ public final class TestBeanFactory {
                         ImmutableMap.of(
                                 "foo/bar",
                                 createMetric()))
-                .setTime(new DateTime())
+                .setTime(ZonedDateTime.now())
                 .setId(UUID.randomUUID().toString())
                 .setDimensions(
                         ImmutableMap.of(
@@ -136,8 +136,8 @@ public final class TestBeanFactory {
                                         Key.SERVICE_DIMENSION_KEY, "service-" + UUID.randomUUID(),
                                         Key.CLUSTER_DIMENSION_KEY, "cluster-" + UUID.randomUUID())))
                 .setData(ImmutableMultimap.of("metric-" + UUID.randomUUID(), createAggregatedData()))
-                .setPeriod(Period.minutes(5))
-                .setStart(DateTime.now());
+                .setPeriod(Duration.ofMinutes(5))
+                .setStart(ZonedDateTime.now());
     }
 
     /**

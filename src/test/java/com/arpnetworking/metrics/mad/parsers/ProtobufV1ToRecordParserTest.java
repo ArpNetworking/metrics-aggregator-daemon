@@ -26,11 +26,13 @@ import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.io.Resources;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,7 +54,7 @@ public final class ProtobufV1ToRecordParserTest {
     @Test
     public void testParseSingleRecord() throws ParsingException, IOException {
         final UUID uuid = UUID.fromString("142949d2-c0fc-469e-9958-7d2be2c49fa5");
-        final DateTime time = new DateTime(1513239602974L);
+        final ZonedDateTime time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(1513239602974L), ZoneOffset.UTC);
         final List<Record> records = parseRecords("ProtobufV1ParserTest/testSingleRecord");
 
         Assert.assertEquals(1, records.size());

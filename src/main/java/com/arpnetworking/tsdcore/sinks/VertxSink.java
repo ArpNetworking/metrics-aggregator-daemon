@@ -26,8 +26,6 @@ import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
 import org.vertx.java.core.Context;
@@ -40,6 +38,8 @@ import org.vertx.java.core.impl.DefaultVertx;
 import org.vertx.java.core.net.NetClient;
 import org.vertx.java.core.net.NetSocket;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -280,14 +280,14 @@ public abstract class VertxSink extends BaseSink {
             }
             if (socket == null
                     && (_lastNotConnectedNotify == null
-                    || _lastNotConnectedNotify.plus(Duration.standardSeconds(30)).isBeforeNow())) {
+                    || _lastNotConnectedNotify.plus(Duration.ofSeconds(30)).isBefore(ZonedDateTime.now()))) {
                 LOGGER.debug()
                         .setMessage(
                                 "Not connected to server. Data will be flushed when reconnected. "
                                 + "Suppressing this message for 30 seconds.")
                         .addData("sink", getName())
                         .log();
-                _lastNotConnectedNotify = DateTime.now();
+                _lastNotConnectedNotify = ZonedDateTime.now();
             }
             // CHECKSTYLE.OFF: IllegalCatch - Vertx might not log
         } catch (final Exception e) {
@@ -380,7 +380,7 @@ public abstract class VertxSink extends BaseSink {
     private final AtomicReference<NetSocket> _socket;
     private final EvictingQueue<Buffer> _pendingData;
     private final AtomicBoolean _connecting = new AtomicBoolean(false);
-    private DateTime _lastNotConnectedNotify = null;
+    private ZonedDateTime _lastNotConnectedNotify = null;
     private volatile long _lastConnectionAttempt = 0;
     private volatile int _connectionAttempt = 1;
     private final int _exponentialBackoffBase;

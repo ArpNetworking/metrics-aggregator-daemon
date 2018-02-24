@@ -24,7 +24,6 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.base.Charsets;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.joda.time.Duration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -40,6 +39,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -88,7 +88,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
@@ -127,7 +127,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setInitialPosition(InitialPosition.END)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
@@ -157,7 +157,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.start();
@@ -177,7 +177,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.start();
@@ -204,7 +204,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.start();
@@ -236,7 +236,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.start();
@@ -268,7 +268,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.start();
@@ -296,7 +296,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.start();
@@ -326,7 +326,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.start();
@@ -356,7 +356,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
@@ -400,7 +400,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.ofMillis(interval)),
                 _logger);
 
         source.attach(_observer);
@@ -441,7 +441,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
@@ -507,7 +507,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.ofMillis(interval)),
                 _logger);
 
         source.attach(_observer);
@@ -568,7 +568,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
@@ -645,7 +645,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(interval)),
+                        .setInterval(Duration.ofMillis(interval)),
                 _logger);
 
         source.attach(_observer);
@@ -711,7 +711,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);
@@ -781,7 +781,7 @@ public class FileSourceTest {
                         .setSourceFile(file)
                         .setStateFile(state)
                         .setParser(_parser)
-                        .setInterval(Duration.millis(INTERVAL)),
+                        .setInterval(Duration.ofMillis(INTERVAL)),
                 _logger);
 
         source.attach(_observer);

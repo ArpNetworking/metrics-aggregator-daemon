@@ -30,12 +30,11 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.joda.time.Duration;
-import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,7 +81,7 @@ public class FilePerfTestBase {
                 "Expected canaries; periods=%s",
                 stockPipelineConfiguration.getPeriods()));
         final CountDownLatch latch = new CountDownLatch(stockPipelineConfiguration.getPeriods().size());
-        final Set<Period> periods = Sets.newConcurrentHashSet();
+        final Set<Duration> periods = Sets.newConcurrentHashSet();
 
         // Create custom "canary" sink
         final ListeningSink sink = new ListeningSink(periodicData -> {
@@ -123,7 +122,7 @@ public class FilePerfTestBase {
             timer.start();
             pipeline.launch();
 
-            if (!latch.await(duration.getMillis(), TimeUnit.MILLISECONDS)) {
+            if (!latch.await(duration.toMillis(), TimeUnit.MILLISECONDS)) {
                 LOGGER.error("Test timed out");
                 throw new RuntimeException("Test timed out");
             }

@@ -26,9 +26,9 @@ import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
-import org.joda.time.DateTime;
 import org.vertx.java.core.Handler;
 
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -143,7 +143,7 @@ public final class AggregationServerSink extends VertxSink {
     private void heartbeat() {
 
         final Messages.HeartbeatRecord message = Messages.HeartbeatRecord.newBuilder()
-                .setTimestamp(DateTime.now().toString())
+                .setTimestamp(ZonedDateTime.now().toString())
                 .build();
         sendRawData(AggregationMessage.create(message).serialize());
         LOGGER.debug()

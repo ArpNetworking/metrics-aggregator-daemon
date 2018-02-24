@@ -25,9 +25,9 @@ import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Sets;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.Period;
 
 import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -108,7 +108,7 @@ public final class TimeThresholdSink extends BaseSink {
     private final Set<String> _excludedServices;
     private final Sink _sink;
     private final boolean _logOnly;
-    private final Period _threshold;
+    private final Duration _threshold;
     private final Filter _filter;
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeThresholdSink.class);
     private static final Logger STALE_DATA_LOGGER = LoggerFactory.getRateLimitLogger(TimeThresholdSink.class, Duration.ofSeconds(30));
@@ -116,7 +116,7 @@ public final class TimeThresholdSink extends BaseSink {
 
     private static final class Filter {
         private Filter(
-                final Period freshnessThreshold,
+                final Duration freshnessThreshold,
                 final Consumer<PeriodicData> excludedConsumer,
                 final Set<String> excludedServices) {
             _freshnessThreshold = freshnessThreshold;
@@ -126,7 +126,7 @@ public final class TimeThresholdSink extends BaseSink {
 
         public ImmutableMultimap<String, AggregatedData> filter(final PeriodicData periodicData) {
             final ImmutableMultimap.Builder<String, AggregatedData> retainedDataBuilder = ImmutableMultimap.builder();
-            if (!periodicData.getStart().plus(periodicData.getPeriod()).plus(_freshnessThreshold).isAfterNow()
+            if (!periodicData.getStart().plus(periodicData.getPeriod()).plus(_freshnessThreshold).isAfter(ZonedDateTime.now())
                     && !_excludedServices.contains(periodicData.getDimensions().getService())) {
                 // Exclude all data
                 _excludedConsumer.accept(periodicData);
@@ -137,7 +137,7 @@ public final class TimeThresholdSink extends BaseSink {
             return periodicData.getData();
         }
 
-        private final Period _freshnessThreshold;
+        private final Duration _freshnessThreshold;
         private final Consumer<PeriodicData> _excludedConsumer;
         private final Set<String> _excludedServices;
     }
@@ -195,7 +195,7 @@ public final class TimeThresholdSink extends BaseSink {
          * @param value The threshold for accepted data.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setThreshold(final Period value) {
+        public Builder setThreshold(final Duration value) {
             _threshold = value;
             return self();
         }
@@ -210,7 +210,7 @@ public final class TimeThresholdSink extends BaseSink {
         @NotNull
         private Sink _sink;
         @NotNull
-        private Period _threshold;
+        private Duration _threshold;
         @NotNull
         private Boolean _logOnly = false;
     }

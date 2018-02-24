@@ -25,13 +25,14 @@ import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
-import org.joda.time.DateTime;
-import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -64,7 +65,9 @@ public final class GraphitePlaintextToRecordParserTest {
         Assert.assertFalse(vals.get(0).getUnit().isPresent());
         Assert.assertEquals(MetricType.GAUGE, metric.getType());
 
-        Assert.assertEquals(new DateTime((long) (1458229140 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1458229140 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     @Test
@@ -89,14 +92,16 @@ public final class GraphitePlaintextToRecordParserTest {
         Assert.assertFalse(vals.get(0).getUnit().isPresent());
         Assert.assertEquals(MetricType.GAUGE, metric.getType());
 
-        Assert.assertEquals(new DateTime((long) (1458229140 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1458229140 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     @Test
     public void tesParseSingleLineNoTimestamp() throws ParsingException, IOException {
-        final DateTime before = DateTime.now();
+        final ZonedDateTime before = ZonedDateTime.now();
         final Record record = parseRecord("GraphitePlaintextParserTest/testParseSingleLineNoTimestamp");
-        final DateTime after = DateTime.now();
+        final ZonedDateTime after = ZonedDateTime.now();
 
         Assert.assertNotNull(record);
 
@@ -157,7 +162,9 @@ public final class GraphitePlaintextToRecordParserTest {
         Assert.assertFalse(vals.get(0).getUnit().isPresent());
         Assert.assertEquals(MetricType.GAUGE, metric.getType());
 
-        Assert.assertEquals(new DateTime((long) (1458229140 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1458229140 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     @Test
@@ -192,7 +199,9 @@ public final class GraphitePlaintextToRecordParserTest {
         Assert.assertFalse(vals.get(0).getUnit().isPresent());
         Assert.assertEquals(MetricType.GAUGE, metric.getType());
 
-        Assert.assertEquals(new DateTime((long) (1458229140 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1458229140 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     @Test
@@ -228,7 +237,9 @@ public final class GraphitePlaintextToRecordParserTest {
         Assert.assertFalse(vals.get(0).getUnit().isPresent());
         Assert.assertEquals(MetricType.GAUGE, metric.getType());
 
-        Assert.assertEquals(new DateTime((long) (1458229140 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1458229140 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     private static Record parseRecord(final String fileName) throws ParsingException, IOException {
@@ -253,7 +264,7 @@ public final class GraphitePlaintextToRecordParserTest {
                                 fileName))));
     }
 
-    private static Parser<List<Record>, ByteBuffer> createParser() throws ParsingException, IOException {
+    private static Parser<List<Record>, ByteBuffer> createParser() {
         return new GraphitePlaintextToRecordParser.Builder().build();
     }
 }

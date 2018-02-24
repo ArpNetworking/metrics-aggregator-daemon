@@ -21,8 +21,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
+
+import java.time.Duration;
+import java.time.ZonedDateTime;
 
 /**
  * Contains the data for a specific period in time.
@@ -32,11 +33,11 @@ import org.joda.time.Period;
 @Loggable
 public final class PeriodicData {
 
-    public Period getPeriod() {
+    public Duration getPeriod() {
         return _period;
     }
 
-    public DateTime getStart() {
+    public ZonedDateTime getStart() {
         return _start;
     }
 
@@ -92,8 +93,8 @@ public final class PeriodicData {
         _data = builder._data;
     }
 
-    private final Period _period;
-    private final DateTime _start;
+    private final Duration _period;
+    private final ZonedDateTime _start;
     private final Key _dimensions;
     private final ImmutableMultimap<String, AggregatedData> _data;
 
@@ -115,7 +116,7 @@ public final class PeriodicData {
          * @param value The period.
          * @return This <code>Builder</code> instance.
          */
-        public Builder setPeriod(final Period value) {
+        public Builder setPeriod(final Duration value) {
             _period = value;
             return this;
         }
@@ -126,7 +127,7 @@ public final class PeriodicData {
          * @param value The start.
          * @return This <code>Builder</code> instance.
          */
-        public Builder setStart(final DateTime value) {
+        public Builder setStart(final ZonedDateTime value) {
             _start = value;
             return this;
         }
@@ -162,9 +163,9 @@ public final class PeriodicData {
         }
 
         @NotNull
-        private Period _period;
+        private Duration _period;
         @NotNull
-        private DateTime _start;
+        private ZonedDateTime _start;
         @NotNull
         private Key _dimensions;
         @NotNull

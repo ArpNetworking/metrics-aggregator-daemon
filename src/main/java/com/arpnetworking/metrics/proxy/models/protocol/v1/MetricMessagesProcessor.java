@@ -133,7 +133,7 @@ public class MetricMessagesProcessor implements MessagesProcessor {
         event.put("server", report.getHost());
         event.put("service", report.getService());
         event.put("metric", report.getMetric());
-        event.put("timestamp", report.getPeriodStart().getMillis());
+        event.put("timestamp", report.getPeriodStart().toInstant().toEpochMilli());
         event.put("statistic", report.getStatistic());
         event.put("data", report.getValue());
         _connection.sendCommand(COMMAND_REPORT_METRIC, event);

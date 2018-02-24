@@ -20,8 +20,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.MatchPattern;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -44,11 +44,11 @@ public final class Version2g {
         return _id;
     }
 
-    public DateTime getStart() {
+    public ZonedDateTime getStart() {
         return _start;
     }
 
-    public DateTime getEnd() {
+    public ZonedDateTime getEnd() {
         return _end;
     }
 
@@ -89,8 +89,8 @@ public final class Version2g {
     }
 
     private final String _id;
-    private final DateTime _start;
-    private final DateTime _end;
+    private final ZonedDateTime _start;
+    private final ZonedDateTime _end;
     private final ImmutableMap<String, String> _dimensions;
     private final ImmutableMap<String, String> _annotations;
     private final ImmutableMap<String, Element> _counters;
@@ -115,7 +115,7 @@ public final class Version2g {
          * @param value Value
          * @return This builder
          */
-        public Builder setStart(final DateTime value) {
+        public Builder setStart(final ZonedDateTime value) {
             _start = value;
             return this;
         }
@@ -126,7 +126,7 @@ public final class Version2g {
          * @param value Value
          * @return This builder
          */
-        public Builder setEnd(final DateTime value) {
+        public Builder setEnd(final ZonedDateTime value) {
             _end = value;
             return this;
         }
@@ -224,9 +224,9 @@ public final class Version2g {
         @NotNull
         private String _id;
         @NotNull
-        private DateTime _start;
+        private ZonedDateTime _start;
         @NotNull
-        private DateTime _end;
+        private ZonedDateTime _end;
         @NotNull
         private ImmutableMap<String, String> _dimensions;
         @NotNull

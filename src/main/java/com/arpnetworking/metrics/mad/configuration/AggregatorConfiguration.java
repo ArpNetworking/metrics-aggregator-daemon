@@ -22,9 +22,9 @@ import com.google.common.base.MoreObjects;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
-import org.joda.time.Period;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -69,7 +69,7 @@ public final class AggregatorConfiguration {
         return _supplementalHttpRoutesClass;
     }
 
-    public Period getJvmMetricsCollectionInterval() {
+    public Duration getJvmMetricsCollectionInterval() {
         return _jvmMetricsCollectionInterval;
     }
 
@@ -115,7 +115,7 @@ public final class AggregatorConfiguration {
     private final String _httpStatusPath;
     private final int _httpPort;
     private Optional<Class<? extends SupplementalRoutes>> _supplementalHttpRoutesClass;
-    private final Period _jvmMetricsCollectionInterval;
+    private final Duration _jvmMetricsCollectionInterval;
     private final Map<String, ?> _akkaConfiguration;
 
     /**
@@ -227,7 +227,7 @@ public final class AggregatorConfiguration {
          * @param value A <code>Period</code> value.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setJvmMetricsCollectionInterval(final Period value) {
+        public Builder setJvmMetricsCollectionInterval(final Duration value) {
             _jvmMetricsCollectionInterval = value;
             return this;
         }
@@ -270,7 +270,7 @@ public final class AggregatorConfiguration {
         private String _httpStatusPath = "/status";
         private Class<? extends SupplementalRoutes> _supplementalHttpRoutesClass;
         @NotNull
-        private Period _jvmMetricsCollectionInterval = Period.millis(500);
+        private Duration _jvmMetricsCollectionInterval = Duration.ofMillis(500);
         @NotNull
         private Map<String, ?> _akkaConfiguration;
     }

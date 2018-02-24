@@ -26,8 +26,6 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,8 +35,9 @@ import org.mockito.MockitoAnnotations;
 
 import java.nio.ByteBuffer;
 import java.time.Clock;
-import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -231,11 +230,11 @@ public final class StatsdToRecordParserTest {
     @Mock
     private Random _random;
 
-    private final DateTime _now = DateTime.now(DateTimeZone.UTC);
+    private final ZonedDateTime _now = ZonedDateTime.now(ZoneOffset.UTC);
     private final Parser<List<Record>, ByteBuffer> _parser =
             new StatsdToRecordParser(
                     Clock.fixed(
-                            Instant.ofEpochMilli(_now.getMillis()),
+                            _now.toInstant(),
                             ZoneId.of("UTC")),
                     () -> _random);
 }

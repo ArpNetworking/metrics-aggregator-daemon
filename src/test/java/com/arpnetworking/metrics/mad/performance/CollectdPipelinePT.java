@@ -21,7 +21,6 @@ import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Resources;
-import org.joda.time.Duration;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,6 +32,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -61,7 +61,7 @@ public class CollectdPipelinePT extends FilePerfTestBase {
     public void test() throws IOException {
         benchmark(
                 "collectd_sample1_pipeline.json",
-                Duration.standardMinutes(20),
+                Duration.ofMinutes(20),
                 ImmutableMap.of(
                         "${SAMPLE_FILE}",
                         "target/tmp/perf/collectd-sample1.log"));

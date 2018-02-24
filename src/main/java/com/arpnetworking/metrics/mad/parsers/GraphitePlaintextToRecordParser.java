@@ -29,12 +29,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 import java.nio.ByteBuffer;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -96,7 +97,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
         // CHECKSTYLE.ON: IllegalInstantiation
 
         final ImmutableList.Builder<Record> recordListBuilder = ImmutableList.builder();
-        final DateTime now = DateTime.now();
+        final ZonedDateTime now = ZonedDateTime.now();
         final Matcher matcher = GRAPHITE_PATTERN.matcher(line);
         if (!matcher.matches()) {
             throw new ParsingException("Invalid graphite line", line.getBytes(Charsets.UTF_8));
@@ -131,7 +132,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
         final Number value = parseValue(record, matcher.group("VALUE"));
 
         // Parse the timestamp
-        final DateTime timestamp = parseTimestamp(record, matcher.group("TIMESTAMP"), now);
+        final ZonedDateTime timestamp = parseTimestamp(record, matcher.group("TIMESTAMP"), now);
 
         recordListBuilder.add(createRecord(name, value, timestamp, ImmutableMap.copyOf(dimensions)));
 
@@ -160,14 +161,16 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
         }
     }
 
-    private DateTime parseTimestamp(
+    private ZonedDateTime parseTimestamp(
             final ByteBuffer datagram,
             @Nullable final String timestampAsString,
-            final DateTime now)
+            final ZonedDateTime now)
             throws ParsingException {
         if (null != timestampAsString) {
             try {
-                return new DateTime(NUMBER_FORMAT.get().parse(timestampAsString).longValue() * 1000L, DateTimeZone.UTC);
+                return ZonedDateTime.ofInstant(
+                        Instant.ofEpochMilli(NUMBER_FORMAT.get().parse(timestampAsString).longValue() * 1000L),
+                        ZoneOffset.UTC);
             } catch (final ParseException e) {
                 throw new ParsingException("Timestamp is not a number", datagram.array(), e);
             }
@@ -178,7 +181,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
     private Record createRecord(
             final String name,
             final Number value,
-            final DateTime timestamp,
+            final ZonedDateTime timestamp,
             final ImmutableMap<String, String> dimensions) {
         return ThreadLocalBuilder.build(
                 DefaultRecord.Builder.class,

@@ -37,8 +37,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.Period;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -141,7 +141,7 @@ public final class Aggregator implements Observer, Launchable {
 
     private List<PeriodWorker> createPeriodWorkers(final Key key) {
         final List<PeriodWorker> periodWorkerList = Lists.newArrayListWithExpectedSize(_periods.size());
-        for (final Period period : _periods) {
+        for (final Duration period : _periods) {
             final PeriodWorker periodWorker = new PeriodWorker.Builder()
                     .setPeriod(period)
                     .setBucketBuilder(
@@ -229,7 +229,7 @@ public final class Aggregator implements Observer, Launchable {
                         });
 }
 
-    private final ImmutableSet<Period> _periods;
+    private final ImmutableSet<Duration> _periods;
     private final Sink _sink;
     private final ImmutableSet<Statistic> _specifiedTimerStatistics;
     private final ImmutableSet<Statistic> _specifiedCounterStatistics;
@@ -275,7 +275,7 @@ public final class Aggregator implements Observer, Launchable {
          * @param value The periods.
          * @return This <code>Builder</code> instance.
          */
-        public Builder setPeriods(final Set<Period> value) {
+        public Builder setPeriods(final Set<Duration> value) {
             _periods = value;
             return this;
         }
@@ -328,7 +328,7 @@ public final class Aggregator implements Observer, Launchable {
         @NotNull
         private Sink _sink;
         @NotNull
-        private Set<Period> _periods;
+        private Set<Duration> _periods;
         @NotNull
         private Set<Statistic> _timerStatistics;
         @NotNull

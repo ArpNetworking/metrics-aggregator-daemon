@@ -36,8 +36,8 @@ import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.Period;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +89,7 @@ public final class PipelineConfiguration {
         return _sinks;
     }
 
-    public Set<Period> getPeriods() {
+    public Set<Duration> getPeriods() {
         return _periods;
     }
 
@@ -137,7 +137,7 @@ public final class PipelineConfiguration {
     private final String _name;
     private final ImmutableList<Source> _sources;
     private final ImmutableList<Sink> _sinks;
-    private final ImmutableSet<Period> _periods;
+    private final ImmutableSet<Duration> _periods;
     private final ImmutableSet<Statistic> _timerStatistic;
     private final ImmutableSet<Statistic> _counterStatistic;
     private final ImmutableSet<Statistic> _gaugeStatistic;
@@ -199,7 +199,7 @@ public final class PipelineConfiguration {
          * @param value The sinks.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setPeriods(final Set<Period> value) {
+        public Builder setPeriods(final Set<Duration> value) {
             _periods = value;
             return this;
         }
@@ -261,7 +261,9 @@ public final class PipelineConfiguration {
         private List<Sink> _sinks = Collections.emptyList();
         @NotNull
         @NotEmpty
-        private Set<Period> _periods = Sets.newHashSet(Period.seconds(1), Period.minutes(1));
+        private Set<Duration> _periods = Sets.newHashSet(
+                Duration.ofSeconds(1),
+                Duration.ofMinutes(1));
         @NotNull
         @NotEmpty
         private Set<Statistic> _timerStatistics = Sets.newHashSet(

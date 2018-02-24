@@ -30,12 +30,11 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Period;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -127,7 +126,7 @@ public final class FileSource<T> extends BaseSource {
     private final Logger _logger;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSource.class);
-    private static final Period FILE_NOT_FOUND_WARNING_INTERVAL = Period.minutes(1);
+    private static final Duration FILE_NOT_FOUND_WARNING_INTERVAL = Duration.ofMinutes(1);
     private static final NoPositionStore NO_POSITION_STORE = new NoPositionStore();
 
     private class LogTailerListener implements TailerListener {
@@ -142,7 +141,7 @@ public final class FileSource<T> extends BaseSource {
 
         @Override
         public void fileNotFound() {
-            final DateTime now = DateTime.now();
+            final ZonedDateTime now = ZonedDateTime.now();
             if (!_lastFileNotFoundWarning.isPresent()
                     || _lastFileNotFoundWarning.get().isBefore(now.minus(FILE_NOT_FOUND_WARNING_INTERVAL))) {
                 _logger.warn()
@@ -221,7 +220,7 @@ public final class FileSource<T> extends BaseSource {
             }
         }
 
-        private Optional<DateTime> _lastFileNotFoundWarning = Optional.empty();
+        private Optional<ZonedDateTime> _lastFileNotFoundWarning = Optional.empty();
     }
 
     /**
@@ -306,7 +305,7 @@ public final class FileSource<T> extends BaseSource {
         @NotEmpty
         private Path _sourceFile;
         @NotNull
-        private Duration _interval = Duration.millis(500);
+        private Duration _interval = Duration.ofMillis(500);
         @NotNull
         private Parser<T, byte[]> _parser;
         private Path _stateFile;

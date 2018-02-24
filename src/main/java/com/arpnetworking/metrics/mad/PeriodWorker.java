@@ -24,11 +24,11 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Duration;
-import org.joda.time.Period;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -70,10 +70,10 @@ import java.util.concurrent.LinkedBlockingDeque;
 
         while (_isRunning) {
             try {
-                DateTime now = DateTime.now();
-                final DateTime rotateAt = getRotateAt(now);
-                Duration timeToRotate = new Duration(now, rotateAt);
-                while (_isRunning && timeToRotate.isLongerThan(Duration.ZERO)) {
+                ZonedDateTime now = ZonedDateTime.now();
+                final ZonedDateTime rotateAt = getRotateAt(now);
+                Duration timeToRotate = Duration.between(now, rotateAt);
+                while (_isRunning && timeToRotate.compareTo(Duration.ZERO) > 0) {
                     // Process records or sleep
                     Record recordToProcess = _recordQueue.poll();
                     if (recordToProcess != null) {
@@ -82,11 +82,11 @@ import java.util.concurrent.LinkedBlockingDeque;
                             recordToProcess = _recordQueue.poll();
                         }
                     } else {
-                        Thread.sleep(Math.min(timeToRotate.getMillis(), 100));
+                        Thread.sleep(Math.min(timeToRotate.toMillis(), 100));
                     }
                     // Recompute time to close
-                    now = DateTime.now();
-                    timeToRotate = new Duration(now, rotateAt);
+                    now = ZonedDateTime.now();
+                    timeToRotate = Duration.between(now, rotateAt);
                 }
                 // Drain the record queue before rotating
                 final List<Record> recordsToProcess = Lists.newArrayList();
@@ -135,7 +135,7 @@ import java.util.concurrent.LinkedBlockingDeque;
     /* package private */ void process(final Record record) {
         // Find an existing bucket for the record
         final Duration timeout = getPeriodTimeout(_period);
-        final DateTime start = getStartTime(record.getTime(), _period);
+        final ZonedDateTime start = getStartTime(record.getTime(), _period);
         Bucket bucket = _bucketsByStart.get(start);
 
         // Create a new bucket if one does not exist
@@ -153,7 +153,7 @@ import java.util.concurrent.LinkedBlockingDeque;
             // 2) We lost and can proceed to add data to the existing bucket
             bucket = _bucketsByStart.putIfAbsent(start, newBucket);
             if (bucket == null) {
-                final DateTime expiration = max(DateTime.now().plus(timeout), start.plus(_period).plus(timeout));
+                final ZonedDateTime expiration = max(ZonedDateTime.now().plus(timeout), start.plus(_period).plus(timeout));
 
                 LOGGER.debug()
                         .setMessage("Created new bucket")
@@ -180,13 +180,13 @@ import java.util.concurrent.LinkedBlockingDeque;
         bucket.add(record);
     }
 
-    /* package private */ void rotate(final DateTime now) {
-        final Map<DateTime, List<Bucket>> expiredBucketMap = _bucketsByExpiration.headMap(now);
+    /* package private */ void rotate(final ZonedDateTime now) {
+        final Map<ZonedDateTime, List<Bucket>> expiredBucketMap = _bucketsByExpiration.headMap(now);
         final List<Bucket> expiredBuckets = Lists.newArrayList();
         int closedBucketCount = 0;
 
         // Phase 1: Collect expired buckets
-        for (final DateTime key : expiredBucketMap.keySet()) {
+        for (final ZonedDateTime key : expiredBucketMap.keySet()) {
             for (final Bucket bucket : _bucketsByExpiration.remove(key)) {
                 expiredBuckets.add(bucket);
             }
@@ -211,37 +211,37 @@ import java.util.concurrent.LinkedBlockingDeque;
         LOGGER.debug().setMessage("Rotated").addData("count", closedBucketCount).log();
     }
 
-    /* package private */ DateTime getRotateAt(final DateTime now) {
-        final Map.Entry<DateTime, List<Bucket>> firstEntry = _bucketsByExpiration.firstEntry();
-        final DateTime periodFirstExpiration = firstEntry == null ? null : firstEntry.getKey();
+    /* package private */ ZonedDateTime getRotateAt(final ZonedDateTime now) {
+        final Map.Entry<ZonedDateTime, List<Bucket>> firstEntry = _bucketsByExpiration.firstEntry();
+        final ZonedDateTime periodFirstExpiration = firstEntry == null ? null : firstEntry.getKey();
         if (periodFirstExpiration != null && periodFirstExpiration.isAfter(now)) {
             return periodFirstExpiration;
         }
         return now.plus(_rotationCheck);
     }
 
-    /* package private */ static Duration getPeriodTimeout(final Period period) {
+    /* package private */ static Duration getPeriodTimeout(final Duration period) {
         // TODO(vkoskela): Support separate configurable timeouts per period. [MAI-499]
-        final Duration timeoutDuration = period.toStandardDuration().dividedBy(2);
-        if (MINIMUM_PERIOD_TIMEOUT.isLongerThan(timeoutDuration)) {
+        final Duration timeoutDuration = period.dividedBy(2);
+        if (MINIMUM_PERIOD_TIMEOUT.compareTo(timeoutDuration) > 0) {
             return MINIMUM_PERIOD_TIMEOUT;
         }
-        if (MAXIMUM_PERIOD_TIMEOUT.isShorterThan(timeoutDuration)) {
+        if (MAXIMUM_PERIOD_TIMEOUT.compareTo(timeoutDuration) < 0) {
             return MAXIMUM_PERIOD_TIMEOUT;
         }
         return timeoutDuration;
     }
 
-    /* package private */ static DateTime getStartTime(final DateTime dateTime, final Period period) {
+    /* package private */ static ZonedDateTime getStartTime(final ZonedDateTime dateTime, final Duration period) {
         // This effectively uses Jan 1, 1970 at 00:00:00 as the anchor point
         // for non-standard bucket sizes (e.g. 18 min) that do not divide
         // equally into an hour or day. Such use cases are rather uncommon.
-        final long periodMillis = period.toStandardDuration().getMillis();
-        final long dateTimeMillis = dateTime.getMillis();
-        return new DateTime(dateTimeMillis - (dateTimeMillis % periodMillis), DateTimeZone.UTC);
+        final long periodMillis = period.toMillis();
+        final long dateTimeMillis = dateTime.toInstant().toEpochMilli();
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTimeMillis - (dateTimeMillis % periodMillis)), ZoneOffset.UTC);
     }
 
-    /* package private */ static DateTime max(final DateTime dateTime1, final DateTime dateTime2) {
+    /* package private */ static ZonedDateTime max(final ZonedDateTime dateTime1, final ZonedDateTime dateTime2) {
         if (dateTime1.isAfter(dateTime2)) {
             return dateTime1;
         }
@@ -255,17 +255,17 @@ import java.util.concurrent.LinkedBlockingDeque;
 
     private volatile boolean _isRunning = true;
 
-    private final Period _period;
+    private final Duration _period;
     private final Bucket.Builder _bucketBuilder;
-    private final Duration _rotationCheck = Duration.millis(100);
+    private final Duration _rotationCheck = Duration.ofMillis(100);
     private final BlockingQueue<Record> _recordQueue = new LinkedBlockingDeque<>();
-    private final ConcurrentSkipListMap<DateTime, Bucket> _bucketsByStart = new ConcurrentSkipListMap<>();
-    private final NavigableMap<DateTime, List<Bucket>> _bucketsByExpiration =
+    private final ConcurrentSkipListMap<ZonedDateTime, Bucket> _bucketsByStart = new ConcurrentSkipListMap<>();
+    private final NavigableMap<ZonedDateTime, List<Bucket>> _bucketsByExpiration =
             Maps.synchronizedNavigableMap(new ConcurrentSkipListMap<>());
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PeriodWorker.class);
-    private static final Duration MINIMUM_PERIOD_TIMEOUT = Duration.standardSeconds(1);
-    private static final Duration MAXIMUM_PERIOD_TIMEOUT = Duration.standardMinutes(10);
+    private static final Duration MINIMUM_PERIOD_TIMEOUT = Duration.ofSeconds(1);
+    private static final Duration MAXIMUM_PERIOD_TIMEOUT = Duration.ofMinutes(10);
 
     /**
      * <code>Builder</code> implementation for <code>PeriodWorker</code>.
@@ -285,7 +285,7 @@ import java.util.concurrent.LinkedBlockingDeque;
          * @param value The periods.
          * @return This <code>Builder</code> instance.
          */
-        public Builder setPeriod(final Period value) {
+        public Builder setPeriod(final Duration value) {
             _period = value;
             return this;
         }
@@ -302,7 +302,7 @@ import java.util.concurrent.LinkedBlockingDeque;
         }
 
         @NotNull
-        private Period _period;
+        private Duration _period;
         @NotNull
         private Bucket.Builder _bucketBuilder;
     }

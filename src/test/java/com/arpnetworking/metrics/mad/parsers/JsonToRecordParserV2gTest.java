@@ -23,11 +23,11 @@ import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.io.Resources;
 import org.hamcrest.Matchers;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +45,7 @@ public class JsonToRecordParserV2gTest {
         final Record record = parseRecord("QueryLogParserV2gTest/testParse.json");
         Assert.assertNotNull(record);
         Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
         Assert.assertEquals("bar", record.getAnnotations().get("foo"));
 
@@ -88,7 +88,7 @@ public class JsonToRecordParserV2gTest {
         final Record record = parseRecord("QueryLogParserV2gTest/testEmpty.json");
         Assert.assertNotNull(record);
         Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
         Assert.assertTrue(record.getAnnotations().isEmpty());
 
@@ -104,7 +104,7 @@ public class JsonToRecordParserV2gTest {
         final Record record = parseRecord("QueryLogParserV2gTest/testPresentDimensions.json");
         Assert.assertNotNull(record);
         Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
         Assert.assertTrue(record.getAnnotations().isEmpty());
 
@@ -122,7 +122,7 @@ public class JsonToRecordParserV2gTest {
         final Record record = parseRecord("QueryLogParserV2gTest/testEmptyDimensions.json");
         Assert.assertNotNull(record);
         Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
         Assert.assertTrue(record.getAnnotations().isEmpty());
         Assert.assertTrue(record.getDimensions().isEmpty());
@@ -202,7 +202,7 @@ public class JsonToRecordParserV2gTest {
         final Record record = parseRecord("QueryLogParserV2gTest/testEmptyValues.json");
         Assert.assertNotNull(record);
         Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
         Assert.assertTrue(record.getAnnotations().isEmpty());
 
@@ -388,7 +388,7 @@ public class JsonToRecordParserV2gTest {
         final Record record = parseRecord("QueryLogParserV2gTest/testNaNValues.json");
         Assert.assertNotNull(record);
         Assert.assertEquals("6be33313-bb39-423a-a928-1d0cc0da60a9", record.getId());
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
         Assert.assertTrue(record.getAnnotations().isEmpty());
 

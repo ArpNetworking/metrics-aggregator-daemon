@@ -23,11 +23,11 @@ import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.io.Resources;
 import org.hamcrest.Matchers;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -55,7 +55,7 @@ public class JsonToRecordParserV2fStenoTest {
         Assert.assertEquals("oRw59PrARvatGNC7fiWw4A", record.getId());
         Assert.assertFalse(record.getId().isEmpty());
 
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertThat(variables, Matchers.hasKey("t1"));
@@ -91,7 +91,7 @@ public class JsonToRecordParserV2fStenoTest {
         final Record record = parseRecord("QueryLogParserV2fStenoTest/testEmpty.json");
         Assert.assertNotNull(record);
 
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
         Assert.assertEquals(3, record.getAnnotations().size());
         Assert.assertEquals("MyHost", record.getAnnotations().get("_" + Key.HOST_DIMENSION_KEY));
         Assert.assertEquals("MyService", record.getAnnotations().get("_" + Key.SERVICE_DIMENSION_KEY));
@@ -182,7 +182,7 @@ public class JsonToRecordParserV2fStenoTest {
         final Record record = parseRecord("QueryLogParserV2fStenoTest/testEmptyValues.json");
         Assert.assertNotNull(record);
 
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
         Assert.assertEquals(3, record.getAnnotations().size());
         Assert.assertEquals("MyHost", record.getAnnotations().get("_" + Key.HOST_DIMENSION_KEY));
         Assert.assertEquals("MyService", record.getAnnotations().get("_" + Key.SERVICE_DIMENSION_KEY));
@@ -439,7 +439,7 @@ public class JsonToRecordParserV2fStenoTest {
         final Record record = parseRecord("QueryLogParserV2fStenoTest/testNaNValues.json");
         Assert.assertNotNull(record);
 
-        Assert.assertEquals(DateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
+        Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
         Assert.assertEquals(3, record.getAnnotations().size());
         Assert.assertEquals("MyHost", record.getAnnotations().get("_" + Key.HOST_DIMENSION_KEY));
         Assert.assertEquals("MyService", record.getAnnotations().get("_" + Key.SERVICE_DIMENSION_KEY));

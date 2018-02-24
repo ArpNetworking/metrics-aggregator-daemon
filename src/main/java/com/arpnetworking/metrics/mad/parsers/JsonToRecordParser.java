@@ -52,13 +52,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import net.sf.oval.exception.ConstraintsViolatedException;
-import org.joda.time.DateTime;
-import org.joda.time.chrono.ISOChronology;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -132,7 +133,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
         final Version2c model = OBJECT_MAPPER.treeToValue(jsonNode, Version2c.class);
         final Version2c.Annotations annotations = model.getAnnotations();
-        final DateTime timestamp = getTimestampFor2c(annotations);
+        final ZonedDateTime timestamp = getTimestampFor2c(annotations);
 
         final ImmutableMap.Builder<String, Metric> variables = ImmutableMap.builder();
         putVariablesVersion2c(model.getTimers(), MetricType.TIMER, variables);
@@ -160,7 +161,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
 
         final Version2d model = OBJECT_MAPPER.treeToValue(jsonNode, Version2d.class);
         final Version2d.Annotations annotations = model.getAnnotations();
-        final DateTime timestamp = annotations.getFinalTimestamp();
+        final ZonedDateTime timestamp = annotations.getFinalTimestamp();
 
         final ImmutableMap.Builder<String, Metric> variables = ImmutableMap.builder();
         putVariablesVersion2d(model.getTimers(), MetricType.TIMER, variables);
@@ -189,7 +190,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         final Version2e model = OBJECT_MAPPER.treeToValue(jsonNode, Version2e.class);
         final Version2e.Data data = model.getData();
         final Version2e.Annotations annotations = data.getAnnotations();
-        final DateTime timestamp = annotations.getFinalTimestamp();
+        final ZonedDateTime timestamp = annotations.getFinalTimestamp();
 
         final ImmutableMap.Builder<String, Metric> variables = ImmutableMap.builder();
         putVariablesVersion2e(data.getTimers(), MetricType.TIMER, variables);
@@ -451,7 +452,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         }
     }
 
-    private DateTime getTimestampFor2c(final Version2c.Annotations annotations)
+    private ZonedDateTime getTimestampFor2c(final Version2c.Annotations annotations)
             throws JsonProcessingException {
         if (annotations.getFinalTimestamp().isPresent()) {
             try {
@@ -474,8 +475,8 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         throw new JsonMappingException(null, "No timestamp found in annotations");
     }
 
-    private static DateTime timestampToDateTime(final double seconds) {
-        return new DateTime(Math.round(seconds * 1000.0), ISOChronology.getInstanceUTC());
+    private static ZonedDateTime timestampToDateTime(final double seconds) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Math.round(seconds * 1000.0)), ZoneOffset.UTC);
     }
 
     private JsonToRecordParser(final Builder builder) {
