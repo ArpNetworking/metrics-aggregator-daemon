@@ -17,13 +17,13 @@ package com.arpnetworking.configuration.jackson;
 
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
+import com.arpnetworking.steno.Logger;
+import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.sf.oval.constraint.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Collection;
@@ -91,7 +91,10 @@ public final class JsonNodeDirectorySource extends BaseJsonNodeSource {
         if (_directory.exists() && _directory.isDirectory() && _directory.canRead()) {
             for (final File file : MoreObjects.firstNonNull(_directory.listFiles(), EMPTY_FILE_ARRAY)) {
                 if (isFileMonitored(file)) {
-                    LOGGER.debug(String.format("Loading configuration file; file=%s", file));
+                    LOGGER.debug()
+                            .setMessage("Loading configuration file")
+                            .addData("file", file)
+                            .log();
                     jsonNodeMergingSourceBuilder.addSource(new JsonNodeFileSource.Builder()
                             .setFile(file)
                             .build());

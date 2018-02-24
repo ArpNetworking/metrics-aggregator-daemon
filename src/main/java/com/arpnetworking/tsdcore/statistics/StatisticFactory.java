@@ -15,14 +15,14 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.steno.Logger;
+import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.utility.InterfaceDatabase;
 import com.arpnetworking.utility.ReflectionsDatabase;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -88,11 +88,12 @@ public class StatisticFactory {
         final Statistic existingStatistic =  map.get(key);
         if (existingStatistic != null) {
             if (!existingStatistic.equals(statistic)) {
-                LOGGER.error(String.format(
-                        "Statistic already registered; key=%s, existing=%s, new=%s",
-                        key,
-                        existingStatistic,
-                        statistic));
+                LOGGER.error()
+                    .setMessage("Statistic already registered")
+                    .addData("key", key)
+                    .addData("existing", existingStatistic)
+                    .addData("new", statistic)
+                    .log();
             }
             return;
         }
@@ -124,7 +125,11 @@ public class StatisticFactory {
                     }
                 } catch (final InvocationTargetException | NoSuchMethodException
                         | InstantiationException | IllegalAccessException e) {
-                    LOGGER.warn(String.format("Unable to load statistic; class=%s", statisticClass), e);
+                    LOGGER.warn()
+                        .setMessage("Unable to load statistic")
+                        .addData("class", statisticClass)
+                        .setThrowable(e)
+                        .log();
                 }
             }
         }
