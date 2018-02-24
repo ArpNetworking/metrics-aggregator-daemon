@@ -24,7 +24,6 @@ import com.arpnetworking.utility.TimerTrigger;
 import com.arpnetworking.utility.Trigger;
 import com.google.common.base.MoreObjects;
 import net.sf.oval.constraint.NotNull;
-import org.apache.commons.io.IOUtils;
 import org.joda.time.Duration;
 
 import java.io.ByteArrayOutputStream;
@@ -68,11 +67,14 @@ public final class StatefulTailer implements Tailer {
                         .setThrowable(throwable)
                         .log());
 
-        try {
-            fileLoop();
-        } finally {
-            IOUtils.closeQuietly(_positionStore);
-            IOUtils.closeQuietly(_lineBuffer);
+        while (_isRunning) {
+            try (ByteArrayOutputStream lineBuffer = new ByteArrayOutputStream(INITIAL_BUFFER_SIZE)) {
+                _lineBuffer = lineBuffer;
+                fileLoop();
+            } catch (final IOException e) {
+                // Ignoring exception from closing line buffer because it's not a
+                // buffered output stream (e.g. nothing to flush).
+            }
         }
     }
 
@@ -107,23 +109,16 @@ public final class StatefulTailer implements Tailer {
     }
 
     private void fileLoop() {
-        SeekableByteChannel reader = null;
         InitialPosition nextInitialPosition = _initialPosition;
         try {
             while (isRunning()) {
                 // Attempt to open the file
-                try {
-                    reader = Files.newByteChannel(_file, StandardOpenOption.READ);
+                try (SeekableByteChannel reader = Files.newByteChannel(_file, StandardOpenOption.READ)) {
                     LOGGER.trace()
                             .setMessage("Opened file")
                             .addData("file", _file)
                             .log();
-                } catch (final NoSuchFileException e) {
-                    _listener.fileNotFound();
-                    _trigger.waitOnTrigger();
-                }
 
-                if (reader != null) {
                     // Position the reader
                     resume(reader, nextInitialPosition);
                     _listener.fileOpened();
@@ -135,9 +130,10 @@ public final class StatefulTailer implements Tailer {
                     readLoop(reader);
 
                     // Reset per file state
-                    IOUtils.closeQuietly(reader);
-                    reader = null;
                     _hash = Optional.empty();
+                } catch (final NoSuchFileException e) {
+                    _listener.fileNotFound();
+                    _trigger.waitOnTrigger();
                 }
             }
         // Clients may elect to kill the stateful tailer on an exception by calling stop, or they
@@ -153,8 +149,6 @@ public final class StatefulTailer implements Tailer {
             // CHECKSTYLE.ON: IllegalCatch
             handleThrowable(e);
         } finally {
-            IOUtils.closeQuietly(reader);
-            reader = null;
             _hash = Optional.empty();
         }
     }
@@ -515,7 +509,6 @@ public final class StatefulTailer implements Tailer {
         _trigger = trigger;
 
         _buffer = ByteBuffer.allocate(INITIAL_BUFFER_SIZE);
-        _lineBuffer = new ByteArrayOutputStream(INITIAL_BUFFER_SIZE);
         try {
             _md5 = MessageDigest.getInstance("MD5");
         } catch (final NoSuchAlgorithmException e) {
@@ -536,7 +529,6 @@ public final class StatefulTailer implements Tailer {
     private final PositionStore _positionStore;
     private final TailerListener _listener;
     private final ByteBuffer _buffer;
-    private final ByteArrayOutputStream _lineBuffer;
     private final MessageDigest _md5;
     private final InitialPosition _initialPosition;
     private final Optional<Long> _maximumOffsetOnResume;
@@ -544,6 +536,7 @@ public final class StatefulTailer implements Tailer {
 
     private volatile boolean _isRunning = true;
     private Optional<String> _hash = Optional.empty();
+    private ByteArrayOutputStream _lineBuffer;
 
     private static final int REQUIRED_BYTES_FOR_HASH = 512;
     private static final int INITIAL_BUFFER_SIZE = 65536;

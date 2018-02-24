@@ -34,6 +34,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Period;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -67,6 +68,11 @@ public final class FileSource<T> extends BaseSource {
                     .setThrowable(e)
                     .log();
         }
+        try {
+            _positionStore.close();
+        } catch (final IOException e) {
+            // Ignore close exception.
+        }
     }
 
     /**
@@ -98,23 +104,23 @@ public final class FileSource<T> extends BaseSource {
         super(builder);
         _logger = logger;
         _parser = builder._parser;
-        final PositionStore positionStore;
         if (builder._stateFile == null) {
-            positionStore = NO_POSITION_STORE;
+            _positionStore = NO_POSITION_STORE;
         } else {
-            positionStore = new FilePositionStore.Builder().setFile(builder._stateFile).build();
+            _positionStore = new FilePositionStore.Builder().setFile(builder._stateFile).build();
         }
 
         _tailer = new StatefulTailer.Builder()
                 .setFile(builder._sourceFile)
                 .setListener(new LogTailerListener())
                 .setReadInterval(builder._interval)
-                .setPositionStore(positionStore)
+                .setPositionStore(_positionStore)
                 .setInitialPosition(builder._initialPosition)
                 .build();
         _tailerExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "FileSourceTailer"));
     }
 
+    private final PositionStore _positionStore;
     private final Parser<T, byte[]> _parser;
     private final Tailer _tailer;
     private final ExecutorService _tailerExecutor;

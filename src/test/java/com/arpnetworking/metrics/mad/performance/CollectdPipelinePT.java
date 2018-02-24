@@ -19,8 +19,8 @@ import com.arpnetworking.test.junitbenchmarks.JsonBenchmarkConsumer;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteStreams;
 import com.google.common.io.Resources;
-import org.apache.commons.io.IOUtils;
 import org.joda.time.Duration;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -52,7 +52,7 @@ public class CollectdPipelinePT extends FilePerfTestBase {
         final Path path = Paths.get("target/tmp/perf/collectd-sample1.log");
         final FileOutputStream outputStream = new FileOutputStream(path.toFile());
 
-        IOUtils.copy(gzipInputStream, outputStream);
+        ByteStreams.copy(gzipInputStream, outputStream);
 
         JSON_BENCHMARK_CONSUMER.prepareClass();
     }
