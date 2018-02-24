@@ -67,14 +67,14 @@ public final class StatefulTailer implements Tailer {
                         .setThrowable(throwable)
                         .log());
 
-        try (ByteArrayOutputStream lineBuffer = new ByteArrayOutputStream(INITIAL_BUFFER_SIZE)) {
-            _lineBuffer = lineBuffer;
-            while (_isRunning) {
+        while (_isRunning) {
+            try (ByteArrayOutputStream lineBuffer = new ByteArrayOutputStream(INITIAL_BUFFER_SIZE)) {
+                _lineBuffer = lineBuffer;
                 fileLoop();
+            } catch (final IOException e) {
+                // Ignoring exception from closing line buffer because it's not a
+                // buffered output stream (e.g. nothing to flush).
             }
-        } catch (final IOException e) {
-            // Ignoring exception from closing line buffer because it's not a
-            // buffered output stream (e.g. nothing to flush).
         }
     }
 
