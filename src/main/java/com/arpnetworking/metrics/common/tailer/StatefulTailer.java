@@ -110,9 +110,11 @@ public final class StatefulTailer implements Tailer {
 
     private void fileLoop() {
         InitialPosition nextInitialPosition = _initialPosition;
+        int openFileAttempt = 0;
         try {
             while (isRunning()) {
                 // Attempt to open the file
+                openFileAttempt++;
                 try (SeekableByteChannel reader = Files.newByteChannel(_file, StandardOpenOption.READ)) {
                     LOGGER.trace()
                             .setMessage("Opened file")
@@ -131,9 +133,10 @@ public final class StatefulTailer implements Tailer {
 
                     // Reset per file state
                     _hash = Optional.empty();
+                    openFileAttempt = 0;
                 } catch (final NoSuchFileException e) {
                     _listener.fileNotFound();
-                    _trigger.waitOnTrigger();
+                    _trigger.waitOnFileNotFoundTrigger(openFileAttempt);
                 }
             }
         // Clients may elect to kill the stateful tailer on an exception by calling stop, or they
@@ -312,7 +315,7 @@ public final class StatefulTailer implements Tailer {
                     // rotated.
 
                     // Read interval
-                    _trigger.waitOnTrigger();
+                    _trigger.waitOnReadTrigger();
                 }
             }
 
@@ -347,7 +350,7 @@ public final class StatefulTailer implements Tailer {
     private void rotate(final Optional<SeekableByteChannel> reader, final String reason) throws InterruptedException, IOException {
         // Allow a full read interval before calling it quits on the old file
         if (reader.isPresent()) {
-            _trigger.waitOnTrigger();
+            _trigger.waitOnReadTrigger();
             readLines(reader.get());
         }
 
