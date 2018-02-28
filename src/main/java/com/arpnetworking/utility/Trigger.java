@@ -26,5 +26,13 @@ public interface Trigger {
      *
      * @throws InterruptedException thrown when the wait is interrupted.
      */
-    void waitOnTrigger() throws InterruptedException;
+    void waitOnReadTrigger() throws InterruptedException;
+
+    /**
+     * Blocks the current thread.
+     *
+     * @param attempt The attempt number to open or find the file. Used for exponential backoff.
+     * @throws InterruptedException thrown when the wait is interrupted.
+     */
+    void waitOnFileNotFoundTrigger(int attempt) throws InterruptedException;
 }

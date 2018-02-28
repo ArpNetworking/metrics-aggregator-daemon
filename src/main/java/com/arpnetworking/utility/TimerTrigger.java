@@ -36,8 +36,17 @@ public class TimerTrigger implements Trigger {
     }
 
     @Override
-    public void waitOnTrigger() throws InterruptedException {
+    public void waitOnReadTrigger() throws InterruptedException {
         Thread.sleep(_duration.getMillis());
+    }
+
+    @Override
+    public void waitOnFileNotFoundTrigger(final int attempt) throws InterruptedException {
+        // Max time = 1.3^n * base  (n capped at 20)
+        final double maxBackoff = Math.pow(1.3, Math.min(attempt, 20)) * _duration.getMillis();
+        // Sleep duration is random from 0 to max, capped at 30 seconds
+        final int sleepDurationMillis = (int) Math.max(Math.random() * maxBackoff, 30000);
+        Thread.sleep(sleepDurationMillis);
     }
 
     /**

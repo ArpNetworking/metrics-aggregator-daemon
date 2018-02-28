@@ -31,7 +31,15 @@ import java.util.concurrent.Semaphore;
  */
 public class ManualSingleThreadedTrigger implements Trigger {
     @Override
-    public void waitOnTrigger() throws InterruptedException {
+    public void waitOnReadTrigger() throws InterruptedException {
+        if (_enabled) {
+            _waiter.release();
+            _semaphore.acquire();
+        }
+    }
+
+    @Override
+    public void waitOnFileNotFoundTrigger(final int attempt) throws InterruptedException {
         if (_enabled) {
             _waiter.release();
             _semaphore.acquire();
