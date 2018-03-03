@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.5</version>
     <relativePath />
   </parent>
 
@@ -761,6 +761,8 @@
               </postremoveScriptlet>
               <requires>
                 <require>java &gt;= ${jdk.version}</require>
+                <require>initscripts</require>
+                <require>which</require>
               </requires>
               <mappings>
                 <mapping>

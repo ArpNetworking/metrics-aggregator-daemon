@@ -15,7 +15,11 @@ Metrics Aggregator Daemon
 </a>
 [![Docker Pulls](https://img.shields.io/docker/pulls/arpnetworking/mad.svg?maxAge=2592000)]()
 
-Aggregates samples into configurable time buckets (e.g. 1 second, 1 minute, etc.) published by metrics client libraries (e.g. [Java](https://github.com/ArpNetworking/metrics-client-java), [NodeJS](https://github.com/ArpNetworking/metrics-client-nodejs), [Ruby](https://github.com/ArpNetworking/metrics-client-ruby), etc.) to compute a variety of statistics. The statistics are reaggregatable and are published together with supporting data to configurable destination(s).
+Aggregates samples into configurable time buckets (e.g. 1 second, 1 minute, etc.) published by metrics client libraries
+(e.g. [Java](https://github.com/ArpNetworking/metrics-client-java),
+[NodeJS](https://github.com/ArpNetworking/metrics-client-nodejs),
+[Ruby](https://github.com/ArpNetworking/metrics-client-ruby), etc.) to compute a variety of statistics. The statistics
+are reaggregatable and are published together with supporting data to configurable destination(s).
 
 
 Usage
@@ -24,14 +28,21 @@ Usage
 ### Installation
 
 #### Manual
-The artifacts from the build are in *metrics-aggregator-daemon/target/appassembler* and should be copied to an appropriate directory on your application host(s).
+The artifacts from the build are in *metrics-aggregator-daemon/target/appassembler* and should be copied to an
+appropriate directory on your application host(s).
 
 #### Docker
-If you use Docker, we publish a base docker image that makes it easy for you to layer configuration on top of.  Create a Docker image based on the image arpnetworking/mad.  Configuration files are typically located at /opt/mad/config/ with pipeline files located at /opt/mad/config/pipelines.  In addition, you can specify CONFIG_FILE (defaults to /opt/mad/config/config.json), PARAMS (defaults to $CONFIG_FILE), LOGGING_CONFIG (defaults to "-Dlogback.configurationFile=/opt/mad/config/logback.xml"), and JAVA_OPTS (defaults to $LOGGING_CONFIG) environment variables to control startup.
+If you use Docker, we publish a base docker image that makes it easy for you to layer configuration on top of.  Create
+a Docker image based on the image arpnetworking/mad.  Configuration files are typically located at /opt/mad/config/
+with pipeline files located at /opt/mad/config/pipelines.  In addition, you can specify CONFIG_FILE (defaults to
+/opt/mad/config/config.json), PARAMS (defaults to $CONFIG_FILE), LOGGING_CONFIG (defaults to
+"-Dlogback.configurationFile=/opt/mad/config/logback.xml"), and JAVA_OPTS (defaults to "") environment variables to
+control startup.
 
 ### Execution
 
-In the installation's *bin* directory there are scripts to start Metrics Aggregator Daemon: *mad* (Linux) and *mad.bat* (Windows).  One of these should be executed on system start with appropriate parameters; for example:
+In the installation's *bin* directory there are scripts to start Metrics Aggregator Daemon: *mad* (Linux) and
+*mad.bat* (Windows).  One of these should be executed on system start with appropriate parameters; for example:
 
     /usr/local/lib/metrics-aggregator-daemon/bin/mad /usr/local/lib/metrics-aggregator-daemon/config/config.json
 
@@ -39,8 +50,8 @@ In the installation's *bin* directory there are scripts to start Metrics Aggrega
 
 #### Logging
 
-To customize logging you may provide a [LogBack](http://logback.qos.ch/) configuration file. The project ships with `logback.xml` which
-writes logs to rotated files and with `logback-console.xml` which writes logs to STDOUT.
+To customize logging you may provide a [LogBack](http://logback.qos.ch/) configuration file. The project ships with
+`logback.xml` which writes logs to rotated files and with `logback-console.xml` which writes logs to STDOUT.
 
 Outside of Docker, set the `JAVA_OPTS` environment variable to configure logging:
 
@@ -54,7 +65,8 @@ Under Docker, set the `LOGBACK_CONFIG` environment variable to configure logging
 
 #### Daemon
 
-The Metrics Aggregator Daemon configuration is specified in a JSON file.  The location of the configuration file is passed to *mad* as a command line argument:
+The Metrics Aggregator Daemon configuration is specified in a JSON file.  The location of the configuration file is
+passed to *mad* as a command line argument:
 
     /usr/local/lib/metrics-aggregator-daemon/config/config.json
 
@@ -102,7 +114,11 @@ For example:
 
 #### Pipelines
 
-One instance of Metrics Aggregator daemon supports multiple independent services on the same host.  The most basic single application host still typically configures two services: i) the end-user application running on the host, and ii) the system metrics captured by CollectD.  Each of these services is configured as a pipeline in Metrics Aggregator Daemon.  The pipeline defines the name of the service, one or more sources of metrics and one more destinations or sinks for the aggregated statistics.
+One instance of Metrics Aggregator daemon supports multiple independent services on the same host.  The most basic
+single application host still typically configures two services: i) the end-user application running on the host,
+and ii) the system metrics captured by CollectD.  Each of these services is configured as a pipeline in Metrics
+Aggregator Daemon.  The pipeline defines the name of the service, one or more sources of metrics and one more
+destinations or sinks for the aggregated statistics.
 
 For example:
 
@@ -140,11 +156,13 @@ For example:
 }
 ```
 
-Each of the pipeline configuration files should be placed in the *pipelinesDirectory* defined as part of the daemon configuration above.
+Each of the pipeline configuration files should be placed in the *pipelinesDirectory* defined as part of the daemon
+configuration above.
 
 #### Hocon
 
-The daemon and pipeline configuration files may be written in [Hocon](https://github.com/typesafehub/config) when specified with a _.conf extension. 
+The daemon and pipeline configuration files may be written in [Hocon](https://github.com/typesafehub/config) when
+specified with a _.conf extension.
 
 ### Sources
 
@@ -297,7 +315,8 @@ To use the local version in your project you must first install it locally:
 
     metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw install
 
-You can determine the version of the local build from the pom.xml file.  Using the local version is intended only for testing or development.
+You can determine the version of the local build from the pom.xml file.  Using the local version is intended only for
+testing or development.
 
 You may also need to add the local repository to your build in order to pick-up the local version:
 
