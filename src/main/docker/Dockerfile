@@ -24,6 +24,7 @@ ENV JVM_XMS="64m"
 ENV JVM_XMX="1024m"
 ENV LOGBACK_CONFIG="-Dlogback.configurationFile=/opt/mad/config/logback.xml"
 ENV MAD_CONFIG="/opt/mad/config/config.conf"
+ENV JAVA_OPTS=""
 
 # Build
 RUN mkdir -p /opt/mad/lib/ext && \
