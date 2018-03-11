@@ -188,7 +188,7 @@ public final class Main implements Launchable {
         _jvmMetricsCollector.scheduleAtFixedRate(
                 runnable,
                 INITIAL_DELAY_IN_MILLIS,
-                _configuration.getJvmMetricsCollectionInterval().toStandardDuration().getMillis(),
+                _configuration.getJvmMetricsCollectionInterval().toMillis(),
                 TIME_UNIT);
     }
 

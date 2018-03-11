@@ -27,14 +27,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
@@ -66,7 +66,7 @@ public final class FilePositionStore implements PositionStore {
                         .setPosition(position)
                         .build());
 
-        final DateTime now = DateTime.now();
+        final ZonedDateTime now = ZonedDateTime.now();
         boolean requiresFlush = now.minus(_flushInterval).isAfter(_lastFlush);
         if (descriptor != null) {
             descriptor.update(position, now);
@@ -105,8 +105,8 @@ public final class FilePositionStore implements PositionStore {
 
     private void flush() {
         // Age out old state
-        final DateTime now = DateTime.now();
-        final DateTime oldest = now.minus(_retention);
+        final ZonedDateTime now = ZonedDateTime.now();
+        final ZonedDateTime oldest = now.minus(_retention);
         final long sizeBefore = _state.size();
         final Iterator<Map.Entry<String, Descriptor>> iterator = _state.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -171,7 +171,7 @@ public final class FilePositionStore implements PositionStore {
     private final Duration _retention;
     private final ConcurrentMap<String, Descriptor> _state;
 
-    private DateTime _lastFlush = DateTime.now();
+    private ZonedDateTime _lastFlush = ZonedDateTime.now();
 
     private static final TypeReference<ConcurrentMap<String, Descriptor>> STATE_MAP_TYPE_REFERENCE =
             new TypeReference<ConcurrentMap<String, Descriptor>>(){};
@@ -180,7 +180,7 @@ public final class FilePositionStore implements PositionStore {
 
     private static final class Descriptor {
 
-        public void update(final long position, final DateTime updatedAt) {
+        public void update(final long position, final ZonedDateTime updatedAt) {
             _delta += position - _position;
             _lastUpdated = updatedAt;
             _position = position;
@@ -194,7 +194,7 @@ public final class FilePositionStore implements PositionStore {
             return _position;
         }
 
-        public DateTime getLastUpdated() {
+        public ZonedDateTime getLastUpdated() {
             return _lastUpdated;
         }
 
@@ -210,7 +210,7 @@ public final class FilePositionStore implements PositionStore {
         }
 
         private long _position;
-        private DateTime _lastUpdated;
+        private ZonedDateTime _lastUpdated;
         private long _delta;
 
         private static final class Builder extends OvalBuilder<Descriptor> {
@@ -224,7 +224,7 @@ public final class FilePositionStore implements PositionStore {
                 return this;
             }
 
-            public Builder setLastUpdated(final DateTime value) {
+            public Builder setLastUpdated(final ZonedDateTime value) {
                 _lastUpdated = value;
                 return this;
             }
@@ -232,7 +232,7 @@ public final class FilePositionStore implements PositionStore {
             @NotNull
             private Long _position;
             @NotNull
-            private DateTime _lastUpdated = DateTime.now();
+            private ZonedDateTime _lastUpdated = ZonedDateTime.now();
         }
     }
 
@@ -300,11 +300,11 @@ public final class FilePositionStore implements PositionStore {
         @NotNull
         private Path _file;
         @NotNull
-        private Duration _flushInterval = Duration.standardSeconds(10);
+        private Duration _flushInterval = Duration.ofSeconds(10);
         @NotNull
         @Min(0)
         private Long _flushThreshold = 10485760L; // 2^20 * 10 = (10 Mebibyte)
         @NotNull
-        private Duration _retention = Duration.standardDays(1);
+        private Duration _retention = Duration.ofDays(1);
     }
 }

@@ -34,9 +34,9 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.joda.time.Duration;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Map;
 
 /**
@@ -54,7 +54,7 @@ public final class FileSourcesManager extends AbstractActor {
      */
     @Inject
     public FileSourcesManager(@Named("StreamContext") final ActorRef streamContextActor) {
-        _fileSourceInterval = Duration.millis(500L);
+        _fileSourceInterval = Duration.ofMillis(500L);
         _streamContextActor = streamContextActor;
     }
 

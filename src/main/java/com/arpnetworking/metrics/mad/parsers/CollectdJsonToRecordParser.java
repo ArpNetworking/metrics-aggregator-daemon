@@ -44,9 +44,11 @@ import net.sf.oval.constraint.CheckWith;
 import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.exception.ConstraintsViolatedException;
-import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -206,7 +208,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             return _host;
         }
 
-        public DateTime getTime() {
+        public ZonedDateTime getTime() {
             return _time;
         }
 
@@ -232,7 +234,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
 
         private CollectdRecord(final Builder builder) {
             _host = builder._host;
-            _time = new DateTime(Math.round(builder._time * 1000));
+            _time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Math.round(builder._time * 1000)), ZoneOffset.UTC);
             _plugin = builder._plugin;
             _pluginInstance = builder._pluginInstance;
             _type = builder._type;
@@ -252,7 +254,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
         }
 
         private final String _host;
-        private final DateTime _time;
+        private final ZonedDateTime _time;
         private final String _plugin;
         private final String _pluginInstance;
         private final String _type;

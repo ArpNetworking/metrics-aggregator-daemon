@@ -32,9 +32,11 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.inscopemetrics.client.protocol.ClientV1;
 import net.sf.oval.exception.ConstraintsViolatedException;
-import org.joda.time.DateTime;
 
 import java.nio.ByteBuffer;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -58,7 +60,10 @@ public final class ProtobufV1ToRecordParser implements Parser<List<Record>, Http
                 final Record defaultRecord = ThreadLocalBuilder.build(
                         DefaultRecord.Builder.class,
                         b -> b.setId(new UUID(high, low).toString())
-                                .setTime(new DateTime(record.getEndMillisSinceEpoch()))
+                                .setTime(
+                                        ZonedDateTime.ofInstant(
+                                                Instant.ofEpochMilli(record.getEndMillisSinceEpoch()),
+                                                ZoneOffset.UTC))
                                 .setAnnotations(buildAnnotations(record))
                                 .setDimensions(buildDimensions(record))
                                 .setMetrics(buildMetrics(record)));

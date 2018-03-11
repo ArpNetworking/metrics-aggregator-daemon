@@ -24,7 +24,6 @@ import com.arpnetworking.utility.TimerTrigger;
 import com.arpnetworking.utility.Trigger;
 import com.google.common.base.MoreObjects;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.Duration;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,6 +36,7 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import javax.xml.bind.DatatypeConverter;
@@ -672,7 +672,7 @@ public final class StatefulTailer implements Tailer {
         @NotNull
         private TailerListener _listener;
         @NotNull
-        private Duration _readInterval = Duration.millis(250);
+        private Duration _readInterval = Duration.ofMillis(250);
         @NotNull
         private InitialPosition _initialPosition = InitialPosition.START;
         private Long _maximumOffsetOnResume = null;

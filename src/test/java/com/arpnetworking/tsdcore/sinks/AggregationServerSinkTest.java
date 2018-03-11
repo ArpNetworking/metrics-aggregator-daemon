@@ -17,8 +17,6 @@ package com.arpnetworking.tsdcore.sinks;
 
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,6 +26,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -65,7 +65,7 @@ public class AggregationServerSinkTest {
             final PeriodicData data = TestBeanFactory.createPeriodicData();
             sink.recordAggregateData(data);
 
-            final SocketChannel connectedSocket = listenForConnection(_serverChannel, Duration.standardSeconds(5));
+            final SocketChannel connectedSocket = listenForConnection(_serverChannel, Duration.ofSeconds(5));
             Assert.assertNotNull(connectedSocket);
         } finally {
             if (sink != null) {
@@ -87,18 +87,18 @@ public class AggregationServerSinkTest {
             final PeriodicData data = TestBeanFactory.createPeriodicData();
             sink.recordAggregateData(data);
 
-            SocketChannel connectedSocket = listenForConnection(_serverChannel, Duration.standardSeconds(5));
+            SocketChannel connectedSocket = listenForConnection(_serverChannel, Duration.ofSeconds(5));
             Thread.sleep(1000);
             connectedSocket.close();
             _serverChannel.close();
 
 
-            spammyWait(3000, sink);
+            spammyWait(Duration.ofSeconds(3), sink);
             _serverChannel = ServerSocketChannel.open();
             _serverChannel.bind(new InetSocketAddress(_port)).configureBlocking(false);
 
             //Wait for reconnect
-            connectedSocket = listenForConnection(_serverChannel, Duration.standardSeconds(10));
+            connectedSocket = listenForConnection(_serverChannel, Duration.ofSeconds(10));
             Assert.assertNotNull(connectedSocket);
 
         } finally {
@@ -108,22 +108,24 @@ public class AggregationServerSinkTest {
         }
     }
 
-    private void spammyWait(final int wait, final AggregationServerSink sink) throws InterruptedException {
-        final DateTime start = DateTime.now();
+    private void spammyWait(final Duration wait, final AggregationServerSink sink) throws InterruptedException {
+        final ZonedDateTime start = ZonedDateTime.now();
 
-        while (DateTime.now().isBefore(start.plusMillis(wait))) {
+        while (ZonedDateTime.now().isBefore(start.plus(wait))) {
             sink.recordAggregateData(TestBeanFactory.createPeriodicData());
             Thread.sleep(500);
         }
     }
 
-    private SocketChannel listenForConnection(final ServerSocketChannel serverChannel,
-                                              final Duration timeout) throws IOException, InterruptedException {
+    private SocketChannel listenForConnection(
+            final ServerSocketChannel serverChannel,
+            final Duration timeout)
+            throws IOException, InterruptedException {
         SocketChannel connectedSocket = null;
         boolean connected = false;
-        final DateTime start = DateTime.now();
+        final ZonedDateTime start = ZonedDateTime.now();
         while (!connected) {
-            if (DateTime.now().isAfter(start.plus(timeout))) {
+            if (ZonedDateTime.now().isAfter(start.plus(timeout))) {
                 throw new RuntimeException("Connection not established within timeout");
             }
             final SocketChannel socketChannel = serverChannel.accept();

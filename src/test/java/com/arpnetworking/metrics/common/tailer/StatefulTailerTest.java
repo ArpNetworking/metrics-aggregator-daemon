@@ -19,7 +19,6 @@ package com.arpnetworking.metrics.common.tailer;
 import com.arpnetworking.utility.ManualSingleThreadedTrigger;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import org.joda.time.Duration;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -34,6 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -79,7 +79,7 @@ public class StatefulTailerTest {
         _readTrigger.disable();
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener).initialize(_tailer);
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -108,7 +108,7 @@ public class StatefulTailerTest {
         _readTrigger.disable();
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).fileRotated();
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
@@ -142,7 +142,7 @@ public class StatefulTailerTest {
         _readTrigger.disable();
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
         Mockito.verify(_listener, Mockito.never()).fileRotated();
@@ -176,7 +176,7 @@ public class StatefulTailerTest {
         writer.close();
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
         Mockito.verify(_listener, Mockito.never()).fileRotated();
@@ -206,7 +206,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         for (final String expectedValue : expectedValues) {
             Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
@@ -235,7 +235,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         Mockito.verify(_listener).initialize(_tailer);
@@ -274,7 +274,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_positionStore, Mockito.atLeastOnce()).setPosition(Mockito.anyString(), Mockito.anyLong());
         Mockito.verify(_listener).initialize(_tailer);
@@ -317,7 +317,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -369,7 +369,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -428,7 +428,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -476,7 +476,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.atLeastOnce()).fileNotFound();
@@ -524,7 +524,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -572,7 +572,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -625,7 +625,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.atLeastOnce()).fileNotFound();
@@ -673,7 +673,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -717,7 +717,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -766,7 +766,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.atLeastOnce()).fileNotFound();
@@ -814,7 +814,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.atLeastOnce()).fileNotFound();
@@ -858,7 +858,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -902,7 +902,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -958,7 +958,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -1015,7 +1015,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -1077,7 +1077,7 @@ public class StatefulTailerTest {
 
         _tailer.stop();
         _executor.shutdown();
-        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.getMillis(), TimeUnit.MILLISECONDS);
+        _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_listener, Mockito.never()).fileNotFound();
@@ -1109,7 +1109,7 @@ public class StatefulTailerTest {
     private final TailerListener _listener = Mockito.mock(TailerListener.class);
     private final ExecutorService _executor = Executors.newSingleThreadExecutor();
 
-    private static final Duration READ_INTERVAL = Duration.millis(250);
-    private static final Duration EXECUTOR_TERMINATE_TIMEOUT = Duration.standardMinutes(10);
+    private static final Duration READ_INTERVAL = Duration.ofMillis(250);
+    private static final Duration EXECUTOR_TERMINATE_TIMEOUT = Duration.ofMinutes(10);
     private static final Logger LOGGER = LoggerFactory.getLogger(StatefulTailerTest.class);
 }

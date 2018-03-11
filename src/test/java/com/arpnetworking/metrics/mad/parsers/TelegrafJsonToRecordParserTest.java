@@ -24,13 +24,14 @@ import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
-import org.joda.time.DateTime;
-import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -95,7 +96,7 @@ public class TelegrafJsonToRecordParserTest {
         Assert.assertFalse(vals.get(0).getUnit().isPresent());
         Assert.assertEquals(MetricType.TIMER, c1.getType());
 
-        Assert.assertEquals(new DateTime((long) (1458229140 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1458229140 * 1000d)), ZoneOffset.UTC), record.getTime());
     }
 
     @Test

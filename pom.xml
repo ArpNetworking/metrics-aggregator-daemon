@@ -75,7 +75,7 @@
     <akka.http.version>10.0.11</akka.http.version>
     <apache.httpclient.version>4.5.1</apache.httpclient.version>
     <apache.httpcore.version>4.4.3</apache.httpcore.version>
-    <arpnetworking.commons.version>1.15.3</arpnetworking.commons.version>
+    <arpnetworking.commons.version>1.16.0</arpnetworking.commons.version>
     <aspectjrt.version>1.8.9</aspectjrt.version>
     <cglib.version>3.2.5</cglib.version>
     <client.protocol.version>0.10.0</client.protocol.version>
@@ -86,7 +86,6 @@
     <jackson.version>2.9.2</jackson.version>
     <javassist.version>3.22.0-GA</javassist.version>
     <javassist.maven.core.version>0.2.1</javassist.maven.core.version>
-    <joda.time.version>2.9.9</joda.time.version>
     <jsr305.version>3.0.2</jsr305.version>
     <logback.version>1.2.3</logback.version>
     <logback.steno.version>1.18.0</logback.steno.version>
@@ -102,7 +101,6 @@
     <scala.version>2.11</scala.version>
     <scala.library.version>2.11.7</scala.library.version>
     <slf4j.version>1.7.25</slf4j.version>
-    <statsd.client.timgroup>3.0.1</statsd.client.timgroup>
     <typesafe.config.version>1.3.1</typesafe.config.version>
     <vertx.core.version>2.1.6</vertx.core.version>
 
@@ -111,9 +109,10 @@
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <junit.benchmarks.version>0.7.2</junit.benchmarks.version>
     <junit.version>4.12</junit.version>
-    <metrics.generator.version>1.2.0</metrics.generator.version>
+    <metrics.generator.version>1.2.1</metrics.generator.version>
     <mockito.version>2.12.0</mockito.version>
     <performance.test.version>1.1.0</performance.test.version>
+    <statsd.client.timgroup>3.0.1</statsd.client.timgroup>
     <wiremock.version>1.57</wiremock.version>
 
     <!-- Additional Plugins -->
@@ -504,7 +503,7 @@
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-joda</artifactId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
       <version>${jackson.version}</version>
       <scope>runtime</scope>
     </dependency>
@@ -539,11 +538,6 @@
       <groupId>com.arpnetworking.commons</groupId>
       <artifactId>commons</artifactId>
       <version>${arpnetworking.commons.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-      <version>${joda.time.version}</version>
     </dependency>
     <dependency>
       <groupId>net.sf.oval</groupId>

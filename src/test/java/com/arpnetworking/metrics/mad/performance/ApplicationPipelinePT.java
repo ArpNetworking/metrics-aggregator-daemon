@@ -23,8 +23,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,11 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -68,8 +66,13 @@ public class ApplicationPipelinePT extends FilePerfTestBase {
             }
         }
 
-        final DateTime start = DateTime.now().minusDays(1).hourOfDay().roundFloorCopy();
-        final DateTime stop = start.plusMinutes(10);
+        final ZonedDateTime start = ZonedDateTime.now()
+                .minusDays(1)
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0);
+        final ZonedDateTime stop = start.plusMinutes(10);
         final TestFileGenerator generator = new TestFileGenerator.Builder()
                 .setRandom(RANDOM)
                 .setUnitOfWorkCount(uowCount)
@@ -100,7 +103,7 @@ public class ApplicationPipelinePT extends FilePerfTestBase {
         final List<Integer> uowPerInterval = Lists.newArrayList(10000, 30000, 90000);
         final List<Integer> metricNamesPerUOW = Lists.newArrayList(1, 10, 100);
 
-        final ArrayList<Object[]> params = Lists.newArrayList();
+        final List<Object[]> params = Lists.newArrayList();
         for (final Integer uowCount : uowPerInterval) {
             for (final Integer namesCount : metricNamesPerUOW) {
                 for (final Integer samplesCount : metricSamplesPerUOW) {
@@ -114,14 +117,14 @@ public class ApplicationPipelinePT extends FilePerfTestBase {
     }
 
     @Test
-    public void test() throws IOException, InterruptedException, URISyntaxException {
+    public void test() throws IOException {
         LOGGER.info(String.format(
                 "ApplicationPipeline Performance Test; uowCount=%d, namesCount=%d, samplesCount=%d",
                 _uowCount, _namesCount, _samplesCount));
 
         benchmark(
                 "application_perf_pipeline.json",
-                Duration.standardMinutes(90),
+                Duration.ofMinutes(90),
                 ImmutableMap.of(
                         "${SAMPLE_FILE}",
                         _file.toString()));

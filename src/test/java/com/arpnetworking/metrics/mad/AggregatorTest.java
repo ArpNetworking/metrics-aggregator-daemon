@@ -34,10 +34,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Duration;
-import org.joda.time.Period;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -48,6 +44,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.time.Duration;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -67,7 +66,7 @@ public class AggregatorTest {
                 .setCounterStatistics(Collections.singleton(MAX_STATISTIC))
                 .setTimerStatistics(Collections.singleton(MAX_STATISTIC))
                 .setGaugeStatistics(Collections.singleton(MAX_STATISTIC))
-                .setPeriods(Collections.singleton(Period.seconds(1)))
+                .setPeriods(Collections.singleton(Duration.ofSeconds(1)))
                 .build();
         _aggregator.launch();
     }
@@ -79,8 +78,8 @@ public class AggregatorTest {
 
     @Test
     public void testCloseAfterElapsed() throws InterruptedException {
-        final DateTime dataTimeInThePast = new DateTime(DateTimeZone.UTC)
-                .minus(Duration.standardSeconds(10));
+        final ZonedDateTime dataTimeInThePast = ZonedDateTime.now(ZoneOffset.UTC)
+                .minus(Duration.ofSeconds(10));
 
         // Send data to aggregator
         _aggregator.notify(
@@ -131,7 +130,7 @@ public class AggregatorTest {
 
     @Test
     public void testMultipleClusters() throws InterruptedException {
-        final DateTime start = DateTime.parse("2015-02-05T00:00:00Z");
+        final ZonedDateTime start = ZonedDateTime.parse("2015-02-05T00:00:00Z");
 
         _aggregator.notify(
                 OBSERVABLE,
@@ -211,7 +210,7 @@ public class AggregatorTest {
 
     @Test
     public void testMultipleServices() throws InterruptedException {
-        final DateTime start = DateTime.parse("2015-02-05T00:00:00Z");
+        final ZonedDateTime start = ZonedDateTime.parse("2015-02-05T00:00:00Z");
 
         _aggregator.notify(
                 OBSERVABLE,
@@ -291,7 +290,7 @@ public class AggregatorTest {
 
     @Test
     public void testMultipleHosts() throws InterruptedException {
-        final DateTime start = DateTime.parse("2015-02-05T00:00:00Z");
+        final ZonedDateTime start = ZonedDateTime.parse("2015-02-05T00:00:00Z");
 
         _aggregator.notify(
                 OBSERVABLE,

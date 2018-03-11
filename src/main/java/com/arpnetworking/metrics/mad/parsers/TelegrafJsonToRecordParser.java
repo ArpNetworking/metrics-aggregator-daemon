@@ -32,13 +32,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +126,7 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
                                                     b2 -> b2.setValue(value))))));
                 }
             }
-            final DateTime timestamp = _timestampUnit.create(telegraf.getTimestamp());
+            final ZonedDateTime timestamp = _timestampUnit.create(telegraf.getTimestamp());
             return Collections.singletonList(
                     ThreadLocalBuilder.build(
                             DefaultRecord.Builder.class,
@@ -202,8 +203,8 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
          */
         SECONDS {
             @Override
-            public DateTime create(final long timestamp) {
-                return new DateTime(timestamp * 1000, DateTimeZone.UTC);
+            public ZonedDateTime create(final long timestamp) {
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp * 1000), ZoneOffset.UTC);
             }
         },
         /**
@@ -211,8 +212,8 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
          */
         MILLISECONDS {
             @Override
-            public DateTime create(final long timestamp) {
-                return new DateTime(timestamp, DateTimeZone.UTC);
+            public ZonedDateTime create(final long timestamp) {
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
             }
         },
         /**
@@ -220,8 +221,8 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
          */
         MICROSECONDS {
             @Override
-            public DateTime create(final long timestamp) {
-                return new DateTime(timestamp / 1000, DateTimeZone.UTC);
+            public ZonedDateTime create(final long timestamp) {
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp / 1000), ZoneOffset.UTC);
             }
         },
         /**
@@ -229,8 +230,8 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
          */
         NANOSECONDS {
             @Override
-            public DateTime create(final long timestamp) {
-                return new DateTime(timestamp / 1000000, DateTimeZone.UTC);
+            public ZonedDateTime create(final long timestamp) {
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp * 1000000), ZoneOffset.UTC);
             }
         };
 
@@ -240,6 +241,6 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
          * @param timestamp the {@code long} epoch in this unit
          * @return instance of {@code DateTime}
          */
-        public abstract DateTime create(long timestamp);
+        public abstract ZonedDateTime create(long timestamp);
     }
 }

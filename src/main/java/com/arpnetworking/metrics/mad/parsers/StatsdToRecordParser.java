@@ -31,13 +31,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 import java.nio.ByteBuffer;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -207,7 +208,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
                                                                 b3 -> b3.setValue(value.doubleValue())
                                                                         .setUnit(type.getUnit()))))
                                         .setType(type.getMetricType()))))
-                        .setTime(new DateTime(_clock.millis(), DateTimeZone.UTC)));
+                        .setTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(_clock.millis()), ZoneOffset.UTC)));
     }
 
     /**

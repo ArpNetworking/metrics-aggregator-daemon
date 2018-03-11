@@ -25,8 +25,8 @@ import com.google.common.collect.Maps;
 import net.sf.oval.constraint.MatchPattern;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -303,11 +303,11 @@ public final class Version2f {
      * Represents the set of annotations on a line.
      */
     public static final class Annotations {
-        public DateTime getStart() {
+        public ZonedDateTime getStart() {
             return _start;
         }
 
-        public DateTime getEnd() {
+        public ZonedDateTime getEnd() {
             return _end;
         }
 
@@ -326,8 +326,8 @@ public final class Version2f {
             _otherAnnotations = ImmutableMap.copyOf(builder._otherAnnotations);
         }
 
-        private final DateTime _start;
-        private final DateTime _end;
+        private final ZonedDateTime _start;
+        private final ZonedDateTime _end;
         private final String _id;
         private final ImmutableMap<String, String> _otherAnnotations;
 
@@ -349,7 +349,7 @@ public final class Version2f {
              * @return This builder
              */
             @JsonSetter("_start")
-            public Annotations.Builder setStart(final DateTime value) {
+            public Annotations.Builder setStart(final ZonedDateTime value) {
                 _start = value;
                 return this;
             }
@@ -361,7 +361,7 @@ public final class Version2f {
              * @return This builder
              */
             @JsonSetter("_end")
-            public Annotations.Builder setEnd(final DateTime value) {
+            public Annotations.Builder setEnd(final ZonedDateTime value) {
                 _end = value;
                 return this;
             }
@@ -401,9 +401,9 @@ public final class Version2f {
             }
 
             @NotNull
-            private DateTime _start;
+            private ZonedDateTime _start;
             @NotNull
-            private DateTime _end;
+            private ZonedDateTime _end;
             @NotEmpty
             @NotNull
             private String _id;

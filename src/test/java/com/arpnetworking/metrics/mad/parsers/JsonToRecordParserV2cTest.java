@@ -26,12 +26,13 @@ import com.google.common.base.Strings;
 import com.google.common.io.Resources;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsMapContaining;
-import org.joda.time.DateTime;
-import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -90,7 +91,9 @@ public class JsonToRecordParserV2cTest {
         Assert.assertEquals(15d, vals.get(0).getValue(), 0.001);
         Assert.assertEquals(MetricType.GAUGE, gauge2Var.getType());
 
-        Assert.assertEquals(new DateTime((long) (1347527687.686 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1347527687.686 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     @Test
@@ -114,7 +117,9 @@ public class JsonToRecordParserV2cTest {
         final Record record = parseRecord("QueryLogParserV2cTest/testMissingFinalTimestampFallback.json");
 
         Assert.assertNotNull(record);
-        Assert.assertEquals(new DateTime((long) (1347527680.486 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1347527680.486 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     @Test
@@ -122,7 +127,9 @@ public class JsonToRecordParserV2cTest {
         final Record record = parseRecord("QueryLogParserV2cTest/testBadTimestampFallback.json");
 
         Assert.assertNotNull(record);
-        Assert.assertEquals(new DateTime((long) (1347527680.486 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1347527680.486 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     @Test(expected = ParsingException.class)
@@ -177,7 +184,9 @@ public class JsonToRecordParserV2cTest {
         Assert.assertEquals(15d, vals.get(0).getValue(), 0.001);
         Assert.assertEquals(MetricType.GAUGE, gauge2Var.getType());
 
-        Assert.assertEquals(new DateTime((long) (1347527687.686 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1347527687.686 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     @Test
@@ -208,7 +217,9 @@ public class JsonToRecordParserV2cTest {
         Assert.assertEquals(15d, vals.get(0).getValue(), 0.001);
         Assert.assertEquals(MetricType.GAUGE, gauge2Var.getType());
 
-        Assert.assertEquals(new DateTime((long) (1347527687.686 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1347527687.686 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     @Test
@@ -244,8 +255,9 @@ public class JsonToRecordParserV2cTest {
         Assert.assertEquals(15d, vals.get(0).getValue(), 0.001);
         Assert.assertEquals(MetricType.GAUGE, gauge2Var.getType());
 
-        final DateTime timestamp = record.getTime();
-        Assert.assertEquals(new DateTime((long) (1347527687.686 * 1000d), ISOChronology.getInstanceUTC()), timestamp);
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1347527687.686 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     @Test
@@ -275,7 +287,9 @@ public class JsonToRecordParserV2cTest {
         Assert.assertEquals(1d, vals.get(0).getValue(), 0.001);
         Assert.assertEquals(MetricType.COUNTER, counter2Var.getType());
 
-        Assert.assertEquals(new DateTime((long) (1347527687.686 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1347527687.686 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
     }
 
     @Test(expected = ParsingException.class)
@@ -287,7 +301,9 @@ public class JsonToRecordParserV2cTest {
     public void testNaNValues() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2cTest/testNaNValues.json");
         Assert.assertNotNull(record);
-        Assert.assertEquals(new DateTime((long) (1347527687.686 * 1000d), ISOChronology.getInstanceUTC()), record.getTime());
+        Assert.assertEquals(
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1347527687.686 * 1000d)), ZoneOffset.UTC),
+                record.getTime());
 
         Assert.assertNotNull(record.getAnnotations());
 

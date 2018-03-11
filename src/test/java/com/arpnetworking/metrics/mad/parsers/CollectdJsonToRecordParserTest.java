@@ -25,12 +25,12 @@ import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.io.Resources;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +52,7 @@ public class CollectdJsonToRecordParserTest {
         Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
         Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
         verifyMetric(records,
-                DateTime.parse("2016-03-31T23:14:46.740Z"),
+                ZonedDateTime.parse("2016-03-31T23:14:46.740Z"),
                 "cpu/0/cpu/wait",
                 MetricType.COUNTER,
                 Collections.singletonList(
@@ -60,7 +60,7 @@ public class CollectdJsonToRecordParserTest {
                                 .setValue(0.0)
                                 .build()));
         verifyMetric(records,
-                DateTime.parse("2016-03-31T23:14:46.741Z"),
+                ZonedDateTime.parse("2016-03-31T23:14:46.741Z"),
                 "vmem/vmpage_number/file_pages",
                 MetricType.GAUGE,
                 Collections.singletonList(
@@ -68,7 +68,7 @@ public class CollectdJsonToRecordParserTest {
                                 .setValue(944937.0)
                                 .build()));
         verifyMetric(records,
-                DateTime.parse("2016-03-31T23:14:46.741Z"),
+                ZonedDateTime.parse("2016-03-31T23:14:46.741Z"),
                 "vmem/vmpage_number/dirty",
                 MetricType.GAUGE,
                 Collections.singletonList(
@@ -76,7 +76,7 @@ public class CollectdJsonToRecordParserTest {
                                 .setValue(6463.0)
                                 .build()));
         verifyMetric(records,
-                DateTime.parse("2016-03-31T23:14:46.741Z"),
+                ZonedDateTime.parse("2016-03-31T23:14:46.741Z"),
                 "vmem/vmpage_number/writeback",
                 MetricType.GAUGE,
                 Collections.singletonList(
@@ -86,13 +86,13 @@ public class CollectdJsonToRecordParserTest {
     }
 
     private void verifyMetric(final List<Record> records,
-            final DateTime timestamp,
+            final ZonedDateTime timestamp,
             final String name,
             final MetricType type,
             final List<Quantity> values) {
-        Assert.assertTrue(records.size() > 0);
+        Assert.assertTrue(!records.isEmpty());
         final Record record = records.remove(0);
-        Assert.assertEquals(timestamp, record.getTime().withZone(DateTimeZone.UTC));
+        Assert.assertEquals(timestamp, record.getTime().withZoneSameInstant(ZoneOffset.UTC));
         final Map<String, ? extends Metric> metrics = record.getMetrics();
         Assert.assertTrue(metrics.containsKey(name));
         final Metric metric = metrics.get(name);

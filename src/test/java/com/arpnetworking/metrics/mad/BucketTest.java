@@ -35,9 +35,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import org.hamcrest.Matchers;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +43,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -68,7 +67,7 @@ public class BucketTest {
                                 Key.CLUSTER_DIMENSION_KEY, "MyCluster")))
                 .setSink(_sink)
                 .setStart(START)
-                .setPeriod(Period.minutes(1))
+                .setPeriod(Duration.ofMinutes(1))
                 .setSpecifiedCounterStatistics(ImmutableSet.of(MIN_STATISTIC))
                 .setSpecifiedGaugeStatistics(ImmutableSet.of(MEAN_STATISTIC))
                 .setSpecifiedTimerStatistics(ImmutableSet.of(MAX_STATISTIC))
@@ -114,7 +113,7 @@ public class BucketTest {
     public void testEmptyCounter() {
         _bucket.add(
                 new DefaultRecord.Builder()
-                        .setTime(START.plus(Duration.standardSeconds(10)))
+                        .setTime(START.plus(Duration.ofSeconds(10)))
                         .setDimensions(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "MyHost",
@@ -215,8 +214,8 @@ public class BucketTest {
                         Key.CLUSTER_DIMENSION_KEY, "MyCluster"
                 )))
                 .setSink(Mockito.mock(Sink.class))
-                .setStart(new DateTime())
-                .setPeriod(Period.minutes(1))
+                .setStart(ZonedDateTime.now())
+                .setPeriod(Duration.ofMinutes(1))
                 .setSpecifiedCounterStatistics(ImmutableSet.of(MIN_STATISTIC))
                 .setSpecifiedGaugeStatistics(ImmutableSet.of(MEAN_STATISTIC))
                 .setSpecifiedTimerStatistics(ImmutableSet.of(MAX_STATISTIC))
@@ -234,7 +233,7 @@ public class BucketTest {
     private void addData(final String name, final MetricType type, final Quantity value, final long offset) {
         _bucket.add(
                 new DefaultRecord.Builder()
-                        .setTime(START.plus(Duration.standardSeconds(offset)))
+                        .setTime(START.plus(Duration.ofSeconds(offset)))
                         .setDimensions(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "MyHost",
@@ -261,7 +260,7 @@ public class BucketTest {
     @Mock
     private Sink _sink;
 
-    private static final DateTime START = DateTime.parse("2015-02-05T00:00:00Z");
+    private static final ZonedDateTime START = ZonedDateTime.parse("2015-02-05T00:00:00Z");
 
     private static final Quantity ONE = new Quantity.Builder().setValue(1.0).build();
     private static final Quantity TWO = new Quantity.Builder().setValue(2.0).build();

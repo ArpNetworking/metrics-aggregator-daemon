@@ -39,10 +39,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
 
 import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -187,7 +186,7 @@ import java.util.function.BiFunction;
         }
     }
 
-    public DateTime getStart() {
+    public ZonedDateTime getStart() {
         return _start;
     }
 
@@ -298,7 +297,7 @@ import java.util.function.BiFunction;
     private void addMetric(
             final String name,
             final Metric metric,
-            final DateTime time,
+            final ZonedDateTime time,
             final Collection<Calculator<?>> calculators) {
 
         try {
@@ -382,8 +381,8 @@ import java.util.function.BiFunction;
     private final ConcurrentMap<String, Collection<Calculator<?>>> _explicitMetricCalculators = Maps.newConcurrentMap();
     private final Sink _sink;
     private final Key _key;
-    private final DateTime _start;
-    private final Period _period;
+    private final ZonedDateTime _start;
+    private final Duration _period;
     private final ImmutableSet<Statistic> _specifiedCounterStatistics;
     private final ImmutableSet<Statistic> _specifiedGaugeStatistics;
     private final ImmutableSet<Statistic> _specifiedTimerStatistics;
@@ -509,7 +508,7 @@ import java.util.function.BiFunction;
          * @param value The start.
          * @return This <code>Builder</code> instance.
          */
-        public Builder setStart(final DateTime value) {
+        public Builder setStart(final ZonedDateTime value) {
             _start = value;
             return this;
         }
@@ -520,7 +519,7 @@ import java.util.function.BiFunction;
          * @param value The period.
          * @return This <code>Builder</code> instance.
          */
-        public Builder setPeriod(final Period value) {
+        public Builder setPeriod(final Duration value) {
             _period = value;
             return this;
         }
@@ -579,9 +578,9 @@ import java.util.function.BiFunction;
         @NotNull
         private Key _key;
         @NotNull
-        private DateTime _start;
+        private ZonedDateTime _start;
         @NotNull
-        private Period _period;
+        private Duration _period;
         @NotNull
         private ImmutableSet<Statistic> _specifiedTimerStatistics;
         @NotNull

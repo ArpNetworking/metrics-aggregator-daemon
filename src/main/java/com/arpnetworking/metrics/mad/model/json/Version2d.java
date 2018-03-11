@@ -24,8 +24,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.MatchPattern;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
 
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -281,11 +281,11 @@ public final class Version2d {
      */
     @Loggable
     public static final class Annotations {
-        public DateTime getInitTimestamp() {
+        public ZonedDateTime getInitTimestamp() {
             return _initTimestamp;
         }
 
-        public DateTime getFinalTimestamp() {
+        public ZonedDateTime getFinalTimestamp() {
             return _finalTimestamp;
         }
 
@@ -299,8 +299,8 @@ public final class Version2d {
             _otherAnnotations = ImmutableMap.copyOf(builder._otherAnnotations);
         }
 
-        private final DateTime _finalTimestamp;
-        private final DateTime _initTimestamp;
+        private final ZonedDateTime _finalTimestamp;
+        private final ZonedDateTime _initTimestamp;
         private final ImmutableMap<String, String> _otherAnnotations;
 
         /**
@@ -320,7 +320,7 @@ public final class Version2d {
              * @param value Value
              * @return This builder
              */
-            public Annotations.Builder setInitTimestamp(final DateTime value) {
+            public Annotations.Builder setInitTimestamp(final ZonedDateTime value) {
                 _initTimestamp = value;
                 return this;
             }
@@ -331,7 +331,7 @@ public final class Version2d {
              * @param value Value
              * @return This builder
              */
-            public Annotations.Builder setFinalTimestamp(final DateTime value) {
+            public Annotations.Builder setFinalTimestamp(final ZonedDateTime value) {
                 _finalTimestamp = value;
                 return this;
             }
@@ -358,9 +358,9 @@ public final class Version2d {
             }
 
             @NotNull
-            private DateTime _finalTimestamp;
+            private ZonedDateTime _finalTimestamp;
             @NotNull
-            private DateTime _initTimestamp;
+            private ZonedDateTime _initTimestamp;
             @NotNull
             private Map<String, String> _otherAnnotations = Maps.newHashMap();
         }

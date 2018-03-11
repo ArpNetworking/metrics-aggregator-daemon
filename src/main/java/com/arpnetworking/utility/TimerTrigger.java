@@ -17,7 +17,8 @@ package com.arpnetworking.utility;
 
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
-import org.joda.time.Duration;
+
+import java.time.Duration;
 
 /**
  * A {@link Trigger} that waits a set amount of time then fires.
@@ -37,13 +38,13 @@ public class TimerTrigger implements Trigger {
 
     @Override
     public void waitOnReadTrigger() throws InterruptedException {
-        Thread.sleep(_duration.getMillis());
+        Thread.sleep(_duration.toMillis());
     }
 
     @Override
     public void waitOnFileNotFoundTrigger(final int attempt) throws InterruptedException {
         // Max time = 1.3^n * base  (n capped at 20)
-        final double maxBackoff = Math.pow(1.3, Math.min(attempt, 20)) * _duration.getMillis();
+        final double maxBackoff = Math.pow(1.3, Math.min(attempt, 20)) * _duration.toMillis();
         // Sleep duration is random from 0 to max, capped at 30 seconds
         final int sleepDurationMillis = (int) Math.max(Math.random() * maxBackoff, 30000);
         Thread.sleep(sleepDurationMillis);

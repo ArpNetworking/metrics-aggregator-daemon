@@ -25,8 +25,8 @@ import com.google.common.collect.Maps;
 import net.sf.oval.constraint.MatchPattern;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -47,7 +47,7 @@ import java.util.regex.Pattern;
  */
 public final class Version2fSteno {
 
-    public DateTime getTime() {
+    public ZonedDateTime getTime() {
         return _time;
     }
 
@@ -80,7 +80,7 @@ public final class Version2fSteno {
         _context = builder._context;
     }
 
-    private final DateTime _time;
+    private final ZonedDateTime _time;
     private final String _name;
     private final String _level;
     private final Data _data;
@@ -104,7 +104,7 @@ public final class Version2fSteno {
          * @param value Value
          * @return This builder
          */
-        public Builder setTime(final DateTime value) {
+        public Builder setTime(final ZonedDateTime value) {
             _time = value;
             return this;
         }
@@ -175,7 +175,7 @@ public final class Version2fSteno {
         }
 
         @NotNull
-        private DateTime _time;
+        private ZonedDateTime _time;
         @NotNull
         @MatchPattern(pattern = "^aint\\.metrics$")
         private String _name;
@@ -524,11 +524,11 @@ public final class Version2fSteno {
      * Represents the set of annotations on a line.
      */
     public static final class Annotations {
-        public DateTime getStart() {
+        public ZonedDateTime getStart() {
             return _start;
         }
 
-        public DateTime getEnd() {
+        public ZonedDateTime getEnd() {
             return _end;
         }
 
@@ -542,8 +542,8 @@ public final class Version2fSteno {
             _otherAnnotations = ImmutableMap.copyOf(builder._otherAnnotations);
         }
 
-        private final DateTime _start;
-        private final DateTime _end;
+        private final ZonedDateTime _start;
+        private final ZonedDateTime _end;
         private final ImmutableMap<String, String> _otherAnnotations;
 
         /**
@@ -564,7 +564,7 @@ public final class Version2fSteno {
              * @return This builder
              */
             @JsonSetter("_start")
-            public Annotations.Builder setStart(final DateTime value) {
+            public Annotations.Builder setStart(final ZonedDateTime value) {
                 _start = value;
                 return this;
             }
@@ -576,7 +576,7 @@ public final class Version2fSteno {
              * @return This builder
              */
             @JsonSetter("_end")
-            public Annotations.Builder setEnd(final DateTime value) {
+            public Annotations.Builder setEnd(final ZonedDateTime value) {
                 _end = value;
                 return this;
             }
@@ -603,9 +603,9 @@ public final class Version2fSteno {
             }
 
             @NotNull
-            private DateTime _start;
+            private ZonedDateTime _start;
             @NotNull
-            private DateTime _end;
+            private ZonedDateTime _end;
             @NotNull
             private Map<String, String> _otherAnnotations = Maps.newHashMap();
         }

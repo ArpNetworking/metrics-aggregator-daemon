@@ -25,9 +25,9 @@ import com.arpnetworking.utility.Launchable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -174,7 +174,7 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
 
     private ExecutorService _triggerEvaluatorExecutor;
 
-    private static final Duration TRIGGER_EVALUATION_INTERVAL = Duration.standardSeconds(60);
+    private static final Duration TRIGGER_EVALUATION_INTERVAL = Duration.ofSeconds(60);
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicConfiguration.class);
 
     private final class TriggerEvaluator implements Runnable {
@@ -230,8 +230,8 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
 
                 // Wait for the next evaluation period
                 try {
-                    final DateTime sleepTimeout = DateTime.now().plus(TRIGGER_EVALUATION_INTERVAL);
-                    while (DateTime.now().isBefore(sleepTimeout) && _isRunning) {
+                    final ZonedDateTime sleepTimeout = ZonedDateTime.now().plus(TRIGGER_EVALUATION_INTERVAL);
+                    while (ZonedDateTime.now().isBefore(sleepTimeout) && _isRunning) {
                         Thread.sleep(100);
                     }
                 } catch (final InterruptedException e) {

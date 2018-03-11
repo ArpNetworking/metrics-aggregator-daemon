@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
-import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,6 +38,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import scala.concurrent.duration.Duration;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -101,7 +101,7 @@ public final class StatsdSourceTest {
             // Verify the captured records
             assertRecordEquality(
                     new DefaultRecord.Builder()
-                            .setTime(DateTime.now())
+                            .setTime(ZonedDateTime.now())
                             .setId(UUID.randomUUID().toString())
                             .setMetrics(ImmutableMap.of(
                                     "StatsdSourceTest.test.counter1",

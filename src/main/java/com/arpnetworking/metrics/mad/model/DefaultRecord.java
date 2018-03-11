@@ -22,7 +22,8 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-import org.joda.time.DateTime;
+
+import java.time.ZonedDateTime;
 
 /**
  * Default implementation of the <code>Record</code> interface.
@@ -40,7 +41,7 @@ public final class DefaultRecord implements Record {
     }
 
     @Override
-    public DateTime getTime() {
+    public ZonedDateTime getTime() {
         return _time;
     }
 
@@ -105,7 +106,7 @@ public final class DefaultRecord implements Record {
 
     private final ImmutableMap<String, ? extends Metric> _metrics;
     private final String _id;
-    private final DateTime _time;
+    private final ZonedDateTime _time;
     private final ImmutableMap<String, String> _annotations;
     private final ImmutableMap<String, String> _dimensions;
 
@@ -151,7 +152,7 @@ public final class DefaultRecord implements Record {
          * @param value The timestamp.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setTime(final DateTime value) {
+        public Builder setTime(final ZonedDateTime value) {
             _time = value;
             return this;
         }
@@ -195,7 +196,7 @@ public final class DefaultRecord implements Record {
         @NotEmpty
         private String _id;
         @NotNull
-        private DateTime _time;
+        private ZonedDateTime _time;
         @NotNull
         private ImmutableMap<String, String> _annotations = ImmutableMap.of();
         @NotNull
