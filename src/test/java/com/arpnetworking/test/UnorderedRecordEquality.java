@@ -22,6 +22,7 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Implementation of <code>Comparator</code> which compares <code>Record</code>
@@ -61,6 +62,11 @@ public final class UnorderedRecordEquality {
             if (!v1.equals(v2)) {
                 return false;
             }
+        }
+
+        for (Map.Entry<String, String> entry : r1.getDimensions().entrySet()) {
+            return r2.getDimensions().containsKey(entry.getKey())
+                    && Objects.equals(entry.getValue(), r2.getDimensions().get(entry.getKey()));
         }
 
         return true;
