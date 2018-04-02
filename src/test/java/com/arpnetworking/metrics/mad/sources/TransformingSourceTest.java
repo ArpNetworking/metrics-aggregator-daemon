@@ -28,6 +28,8 @@ import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +38,7 @@ import org.mockito.Mockito;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -55,7 +58,19 @@ public class TransformingSourceTest {
                         "foo/([^/]*)/bar", ImmutableList.of("foo/bar"),
                         "cat/([^/]*)/dog", ImmutableList.of("cat/dog", "cat/dog/$1"),
                         "tagged/([^/]*)/dog", ImmutableList.of("tagged/dog;animal=$1"),
+                        "named/(?<animal>[^/]*)", ImmutableList.of("named/extracted_animal;extracted=${animal}"),
                         "tagged/([^/]*)/animal", ImmutableList.of("tagged/${animal}/animal")))
+                .setInject(Lists.newArrayList(
+                        new TransformingSource.DimensionInjection.Builder()
+                                .setDimension("inject")
+                                .setValue("value")
+                                .setReplaceExisting(true)
+                                .build(),
+                        new TransformingSource.DimensionInjection.Builder()
+                                .setDimension("no_over")
+                                .setValue("not_overwriting")
+                                .setReplaceExisting(false)
+                                .build()))
                 .setSource(_mockSource);
     }
 
@@ -285,8 +300,8 @@ public class TransformingSourceTest {
                 .build();
         assertRecordsEqual(actualRecord, expectedRecord);
     }
-    @Test
 
+    @Test
     public void testInjectTagWithCapture() {
         final Record matchingRecord = TestBeanFactory.createRecordBuilder()
                 .setMetrics(ImmutableMap.of(
@@ -315,6 +330,92 @@ public class TransformingSourceTest {
                 .setDimensions(matchingRecord.getDimensions())
                 .setMetrics(ImmutableMap.of(
                         "tagged/frog/animal",
+                        TestBeanFactory.createMetricBuilder()
+                                .setType(MetricType.GAUGE)
+                                .setValues(ImmutableList.of(
+                                        new Quantity.Builder()
+                                                .setValue(1.23d)
+                                                .setUnit(Unit.BYTE)
+                                                .build()))
+                                .build()))
+                .build();
+        assertRecordsEqual(actualRecord, expectedRecord);
+    }
+
+    @Test
+    public void testMatchOverridesTagInCapture() {
+        final Record matchingRecord = TestBeanFactory.createRecordBuilder()
+                .setMetrics(ImmutableMap.of(
+                        "named/frog",
+                        TestBeanFactory.createMetricBuilder()
+                                .setType(MetricType.GAUGE)
+                                .setValues(ImmutableList.of(
+                                        new Quantity.Builder()
+                                                .setValue(1.23d)
+                                                .setUnit(Unit.BYTE)
+                                                .build()))
+                                .build()))
+                .setDimensions(
+                        ImmutableMap.of(
+                                Key.HOST_DIMENSION_KEY, "MyHost",
+                                Key.SERVICE_DIMENSION_KEY, "MyService",
+                                Key.CLUSTER_DIMENSION_KEY, "MyCluster",
+                                "animal", "cat"))
+                .build();
+
+        final Record actualRecord = mapRecord(matchingRecord);
+
+        final Map<String, String> expectedDimensions = Maps.newHashMap(matchingRecord.getDimensions());
+        expectedDimensions.put("extracted", "frog");
+        final Record expectedRecord = TestBeanFactory.createRecordBuilder()
+                .setAnnotations(matchingRecord.getAnnotations())
+                .setTime(matchingRecord.getTime())
+                .setDimensions(ImmutableMap.copyOf(expectedDimensions))
+                .setMetrics(ImmutableMap.of(
+                        "named/extracted_animal",
+                        TestBeanFactory.createMetricBuilder()
+                                .setType(MetricType.GAUGE)
+                                .setValues(ImmutableList.of(
+                                        new Quantity.Builder()
+                                                .setValue(1.23d)
+                                                .setUnit(Unit.BYTE)
+                                                .build()))
+                                .build()))
+                .build();
+        assertRecordsEqual(actualRecord, expectedRecord);
+    }
+
+    @Test
+    public void testExtractOverridesExisting() {
+        final Record matchingRecord = TestBeanFactory.createRecordBuilder()
+                .setMetrics(ImmutableMap.of(
+                        "named/frog",
+                        TestBeanFactory.createMetricBuilder()
+                                .setType(MetricType.GAUGE)
+                                .setValues(ImmutableList.of(
+                                        new Quantity.Builder()
+                                                .setValue(1.23d)
+                                                .setUnit(Unit.BYTE)
+                                                .build()))
+                                .build()))
+                .setDimensions(
+                        ImmutableMap.of(
+                                Key.HOST_DIMENSION_KEY, "MyHost",
+                                Key.SERVICE_DIMENSION_KEY, "MyService",
+                                Key.CLUSTER_DIMENSION_KEY, "MyCluster",
+                                "extracted", "none"))
+                .build();
+
+        final Record actualRecord = mapRecord(matchingRecord);
+
+        final Map<String, String> expectedDimensions = Maps.newHashMap(matchingRecord.getDimensions());
+        expectedDimensions.put("extracted", "frog");
+        final Record expectedRecord = TestBeanFactory.createRecordBuilder()
+                .setAnnotations(matchingRecord.getAnnotations())
+                .setTime(matchingRecord.getTime())
+                .setDimensions(ImmutableMap.copyOf(expectedDimensions))
+                .setMetrics(ImmutableMap.of(
+                        "named/extracted_animal",
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(

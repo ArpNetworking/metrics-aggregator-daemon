@@ -133,8 +133,10 @@ public final class TransformingSource extends BaseSource {
                     final Matcher matcher = metricPattern.matcher(metricName);
                     if (matcher.find()) {
                         for (final String replacement : findAndReplace.getValue()) {
-                            final String replacedString =
+                            final RegexAndMapReplacer.Replacement rep =
                                     RegexAndMapReplacer.replaceAll(metricPattern, metricName, replacement, record.getDimensions());
+                            final String replacedString = rep.getReplacement();
+                            final ImmutableList<String> consumedDimensions = rep.getVariablesMatched();
 
                             final int tagsStart = replacedString.indexOf(';');
                             if (tagsStart == -1) {
@@ -143,11 +145,13 @@ public final class TransformingSource extends BaseSource {
                             } else {
                                 final String newMetricName = replacedString.substring(0, tagsStart);
                                 final Map<String, String> parsedTags = TAG_SPLITTER.split(replacedString.substring(tagsStart + 1));
-                                final ImmutableMap.Builder<String, String> finalTags = ImmutableMap.builder();
+                                final Map<String, String> finalTags = Maps.newHashMap();
                                 finalTags.putAll(record.getDimensions());
+                                // Remove the dimensions that we consumed in the replacement
+                                consumedDimensions.forEach(finalTags::remove);
                                 finalTags.putAll(parsedTags);
 
-                                merge(metric.getValue(), newMetricName, mergedMetrics, finalTags.build());
+                                merge(metric.getValue(), newMetricName, mergedMetrics, ImmutableMap.copyOf(finalTags));
                             }
                         }
                         //Having "found" set here means that mapping a metric to an empty list suppresses that metric

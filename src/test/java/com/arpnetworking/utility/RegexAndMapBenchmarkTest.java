@@ -34,7 +34,7 @@ public final class RegexAndMapBenchmarkTest {
     @BenchmarkOptions(benchmarkRounds = 2000000, warmupRounds = 50000)
     @Test
     public void testRegexAndMap() {
-        final String result = RegexAndMapReplacer.replaceAll(PATTERN, INPUT, REPLACE, ImmutableMap.of());
+        final String result = RegexAndMapReplacer.replaceAll(PATTERN, INPUT, REPLACE, ImmutableMap.of()).getReplacement();
     }
 
     @BenchmarkOptions(benchmarkRounds = 2000000, warmupRounds = 50000)

@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.utility;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
@@ -42,7 +43,7 @@ public final class RegexAndMapReplacer {
      * @param variables map of variables to include
      * @return a string with replacement tokens replaced
      */
-    public static String replaceAll(
+    public static Replacement replaceAll(
             final Pattern pattern,
             final String input,
             final String replace,
@@ -50,28 +51,30 @@ public final class RegexAndMapReplacer {
         final Matcher matcher = pattern.matcher(input);
         boolean found = matcher.find();
         if (found) {
+            final ImmutableList.Builder<String> variablesUsedBuilder = ImmutableList.builder();
             final StringBuilder builder = new StringBuilder();
             int lastMatchedIndex = 0;
             do {
                 builder.append(input.substring(lastMatchedIndex, matcher.start()));
                 lastMatchedIndex = matcher.end();
-                appendReplacement(matcher, replace, builder, variables);
+                appendReplacement(matcher, replace, builder, variables, variablesUsedBuilder);
                 found = matcher.find();
             } while (found);
             // Append left-over string after the matches
             if (lastMatchedIndex < input.length() - 1) {
                 builder.append(input.substring(lastMatchedIndex, input.length()));
             }
-            return builder.toString();
+            return new Replacement(builder.toString(), variablesUsedBuilder.build());
         }
-        return input;
+        return new Replacement(input, ImmutableList.of());
     }
 
     private static void appendReplacement(
             final Matcher matcher,
             final String replacement,
             final StringBuilder replacementBuilder,
-            final Map<String, String> variables) {
+            final Map<String, String> variables,
+            final ImmutableList.Builder<String> variablesUsedBuilder) {
         final StringBuilder tokenBuilder = new StringBuilder();
         int x = -1;
         while (x < replacement.length() - 1) {
@@ -82,7 +85,7 @@ public final class RegexAndMapReplacer {
                 processEscapedCharacter(replacement, x, replacementBuilder);
             } else {
                 if (c == '$') {
-                    x += writeReplacementToken(replacement, x, replacementBuilder, matcher, variables, tokenBuilder);
+                    x += writeReplacementToken(replacement, x, replacementBuilder, matcher, variables, tokenBuilder, variablesUsedBuilder);
                 } else {
                     replacementBuilder.append(c);
                 }
@@ -110,7 +113,8 @@ public final class RegexAndMapReplacer {
             final StringBuilder output,
             final Matcher matcher,
             final Map<String, String> variables,
-            final StringBuilder tokenBuilder) {
+            final StringBuilder tokenBuilder,
+            final ImmutableList.Builder<String> variablesUsedBuilder) {
         boolean inReplaceBrackets = false;
         boolean tokenNumeric = true;
         tokenBuilder.setLength(0);  // reset the shared builder
@@ -143,7 +147,7 @@ public final class RegexAndMapReplacer {
                 throw new IllegalArgumentException("Invalid replacement token, expected '}' at col " + x + ": " + replacement);
             }
             x++; // Consume the }
-            output.append(getReplacement(matcher, tokenBuilder.toString(), tokenNumeric, variables));
+            output.append(getReplacement(matcher, tokenBuilder.toString(), tokenNumeric, variables, variablesUsedBuilder));
         } else {
             // Consume until we hit a non-digit character
             while (x < replacement.length()) {
@@ -162,7 +166,7 @@ public final class RegexAndMapReplacer {
                                 x,
                                 replacement));
             }
-            output.append(getReplacement(matcher, tokenBuilder.toString(), true, variables));
+            output.append(getReplacement(matcher, tokenBuilder.toString(), true, variables, variablesUsedBuilder));
         }
         return x - offset - 1;
     }
@@ -171,7 +175,8 @@ public final class RegexAndMapReplacer {
             final Matcher matcher,
             final String replaceToken,
             final boolean numeric,
-            final Map<String, String> variables) {
+            final Map<String, String> variables,
+            final ImmutableList.Builder<String> variablesUsedBuilder) {
         if (numeric) {
             final int replaceGroup = Integer.parseInt(replaceToken);
             return matcher.group(replaceGroup);
@@ -179,10 +184,33 @@ public final class RegexAndMapReplacer {
             try {
                 return matcher.group(replaceToken);
             } catch (final IllegalArgumentException e) { // No group with this name
+                variablesUsedBuilder.add(replaceToken);
                 return variables.getOrDefault(replaceToken, "");
             }
         }
     }
 
     private RegexAndMapReplacer() { }
+
+    /**
+     * Describes the replacement string and variables used in it's creation.
+     */
+    public static final class Replacement {
+        public String getReplacement() {
+            return _replacement;
+        }
+
+        public ImmutableList<String> getVariablesMatched() {
+            return _variablesMatched;
+        }
+
+        private Replacement(final String replacement, final ImmutableList<String> variablesMatched) {
+
+            _replacement = replacement;
+            _variablesMatched = variablesMatched;
+        }
+
+        private final String _replacement;
+        private final ImmutableList<String> _variablesMatched;
+    }
 }

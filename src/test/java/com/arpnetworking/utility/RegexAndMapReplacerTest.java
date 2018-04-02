@@ -41,7 +41,7 @@ public final class RegexAndMapReplacerTest {
         final Pattern pattern = Pattern.compile("test");
         final String input = "test";
         final String replace = "${\\avariable}"; // \a is an invalid escape sequence
-        final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, ImmutableMap.of());
+        final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, ImmutableMap.of()).getReplacement();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -49,7 +49,7 @@ public final class RegexAndMapReplacerTest {
         final Pattern pattern = Pattern.compile("test");
         final String input = "test";
         final String replace = "${0"; // no ending }
-        final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, ImmutableMap.of());
+        final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, ImmutableMap.of()).getReplacement();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -57,7 +57,7 @@ public final class RegexAndMapReplacerTest {
         final Pattern pattern = Pattern.compile("test");
         final String input = "test";
         final String replace = "${0}\\"; // trailing \
-        final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, ImmutableMap.of());
+        final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, ImmutableMap.of()).getReplacement();
     }
 
     @Test
@@ -74,7 +74,7 @@ public final class RegexAndMapReplacerTest {
         final Pattern pattern = Pattern.compile("test");
         final String input = "test";
         final String replace = "$variable"; // replacement variable has no {
-        final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, ImmutableMap.of());
+        final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, ImmutableMap.of()).getReplacement();
     }
 
     @Test
@@ -187,7 +187,7 @@ public final class RegexAndMapReplacerTest {
 
     private void testExpression(final Pattern pattern, final String input, final String replace, final String expected,
             final ImmutableMap<String, String> variables) {
-        final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, variables);
+        final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, variables).getReplacement();
         Assert.assertEquals(expected, result);
         try {
             final String stockResult = pattern.matcher(input).replaceAll(replace);
