@@ -36,11 +36,11 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -90,16 +90,23 @@ public final class TransformingSource extends BaseSource {
         super(builder);
         _source = builder._source;
 
-        _findAndReplace = Maps.newHashMapWithExpectedSize(builder._findAndReplace.size());
+        final ImmutableMap.Builder<Pattern, List<String>> findReplaceBuilder =
+                ImmutableMap.builderWithExpectedSize(builder._findAndReplace.size());
         for (final Map.Entry<String, ? extends List<String>> entry : builder._findAndReplace.entrySet()) {
-            _findAndReplace.put(Pattern.compile(entry.getKey()), ImmutableList.copyOf(entry.getValue()));
+            findReplaceBuilder.put(Pattern.compile(entry.getKey()), ImmutableList.copyOf(entry.getValue()));
         }
+        _findAndReplace = findReplaceBuilder.build();
 
-        _source.attach(new TransformingObserver(this, _findAndReplace));
+        _inject = builder._inject;
+        _remove = builder._remove;
+
+        _source.attach(new TransformingObserver(this, _findAndReplace, _inject, _remove));
     }
 
     private final Source _source;
-    private final Map<Pattern, List<String>> _findAndReplace;
+    private final ImmutableMap<Pattern, List<String>> _findAndReplace;
+    private final ImmutableMap<String, DimensionInjection> _inject;
+    private final ImmutableList<String> _remove;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransformingSource.class);
     private static final Splitter.MapSplitter TAG_SPLITTER = Splitter.on(';').omitEmptyStrings().trimResults().withKeyValueSeparator('=');
@@ -107,9 +114,15 @@ public final class TransformingSource extends BaseSource {
     // NOTE: Package private for testing
     /* package private */ static final class TransformingObserver implements Observer {
 
-        /* package private */ TransformingObserver(final TransformingSource source, final Map<Pattern, List<String>> findAndReplace) {
+        /* package private */ TransformingObserver(
+                final TransformingSource source,
+                final Map<Pattern, List<String>> findAndReplace,
+                final ImmutableMap<String, DimensionInjection> inject,
+                final ImmutableList<String> remove) {
             _source = source;
             _findAndReplace = findAndReplace;
+            _inject = inject;
+            _remove = remove;
         }
 
         @Override
@@ -141,17 +154,19 @@ public final class TransformingSource extends BaseSource {
                             final int tagsStart = replacedString.indexOf(';');
                             if (tagsStart == -1) {
                                 // We just have a metric name.  Optimize for this common case
-                                merge(metric.getValue(), replacedString, mergedMetrics, record.getDimensions());
+                                merge(
+                                        metric.getValue(),
+                                        replacedString,
+                                        mergedMetrics,
+                                        getModifiedDimensions(record.getDimensions(), Collections.emptyMap(), ImmutableList.of()));
                             } else {
                                 final String newMetricName = replacedString.substring(0, tagsStart);
                                 final Map<String, String> parsedTags = TAG_SPLITTER.split(replacedString.substring(tagsStart + 1));
-                                final Map<String, String> finalTags = Maps.newHashMap();
-                                finalTags.putAll(record.getDimensions());
-                                // Remove the dimensions that we consumed in the replacement
-                                consumedDimensions.forEach(finalTags::remove);
-                                finalTags.putAll(parsedTags);
-
-                                merge(metric.getValue(), newMetricName, mergedMetrics, ImmutableMap.copyOf(finalTags));
+                                merge(
+                                        metric.getValue(),
+                                        newMetricName,
+                                        mergedMetrics,
+                                        getModifiedDimensions(record.getDimensions(), parsedTags, consumedDimensions));
                             }
                         }
                         //Having "found" set here means that mapping a metric to an empty list suppresses that metric
@@ -159,7 +174,11 @@ public final class TransformingSource extends BaseSource {
                     }
                 }
                 if (!found) {
-                    merge(metric.getValue(), metricName, mergedMetrics, record.getDimensions());
+                    merge(
+                            metric.getValue(),
+                            metricName,
+                            mergedMetrics,
+                            getModifiedDimensions(record.getDimensions(), Collections.emptyMap(), ImmutableList.of()));
                 }
             }
 
@@ -181,6 +200,24 @@ public final class TransformingSource extends BaseSource {
                                         .setAnnotations(record.getAnnotations())
                                         .setDimensions(entry.getKey())));
             }
+        }
+
+        private ImmutableMap<String, String> getModifiedDimensions(
+                final ImmutableMap<String, String> inputDimensions,
+                final Map<String, String> add,
+                final ImmutableList<String> remove) {
+            final Map<String, String> finalTags = Maps.newHashMap();
+            finalTags.putAll(inputDimensions);
+            // Remove the dimensions that we consumed in the replacement
+            remove.forEach(finalTags::remove);
+            _remove.forEach(finalTags::remove);
+            _inject.forEach(
+                    (key, inject) ->
+                            finalTags.compute(key, (k, oldValue) ->
+                                    inject.isReplaceExisting() || oldValue == null ? inject.getValue() : oldValue));
+            finalTags.putAll(add);
+
+            return ImmutableMap.copyOf(finalTags);
         }
 
         private void merge(final Metric metric, final String key,
@@ -208,6 +245,8 @@ public final class TransformingSource extends BaseSource {
 
         private final TransformingSource _source;
         private final Map<Pattern, List<String>> _findAndReplace;
+        private final ImmutableMap<String, DimensionInjection> _inject;
+        private final ImmutableList<String> _remove;
     }
 
     // NOTE: Package private for testing
@@ -256,10 +295,6 @@ public final class TransformingSource extends BaseSource {
      * Represents a dimension to inject and whether or not it should overwrite the existing value (if any).
      */
     public static final class DimensionInjection {
-        public String getDimension() {
-            return _dimension;
-        }
-
         public String getValue() {
             return _value;
         }
@@ -269,12 +304,10 @@ public final class TransformingSource extends BaseSource {
         }
 
         private DimensionInjection(final Builder builder) {
-            _dimension = builder._dimension;
             _value = builder._value;
             _replaceExisting = builder._replaceExisting;
         }
 
-        private final String _dimension;
         private final String _value;
         private final boolean _replaceExisting;
 
@@ -289,17 +322,6 @@ public final class TransformingSource extends BaseSource {
              */
             public Builder() {
                 super(DimensionInjection::new);
-            }
-
-            /**
-             * Sets the dimension. Required. Cannot be null. Cannot be empty.
-             *
-             * @param value The dimension to inject.
-             * @return This instance of {@link Builder}.
-             */
-            public Builder setDimension(final String value) {
-                _dimension = value;
-                return this;
             }
 
             /**
@@ -324,9 +346,6 @@ public final class TransformingSource extends BaseSource {
                 return this;
             }
 
-            @NotNull
-            @NotEmpty
-            private String _dimension;
             @NotNull
             @NotEmpty
             private String _value;
@@ -366,7 +385,7 @@ public final class TransformingSource extends BaseSource {
          * @param value The find and replace expression map.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setFindAndReplace(final Map<String, ? extends List<String>> value) {
+        public Builder setFindAndReplace(final ImmutableMap<String, ? extends List<String>> value) {
             _findAndReplace = value;
             return this;
         }
@@ -377,8 +396,19 @@ public final class TransformingSource extends BaseSource {
          * @param value List of dimensions to inject.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setInject(final List<DimensionInjection> value) {
+        public Builder setInject(final ImmutableMap<String, DimensionInjection> value) {
             _inject = value;
+            return this;
+        }
+
+        /**
+         * Sets dimensions to remove. Optional. Cannot be null. Defaults to empty.
+         *
+         * @param value List of dimensions to inject.
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setRemove(final ImmutableList<String> value) {
+            _remove = value;
             return this;
         }
 
@@ -390,8 +420,10 @@ public final class TransformingSource extends BaseSource {
         @NotNull
         private Source _source;
         @NotNull
-        private Map<String, ? extends List<String>> _findAndReplace = Maps.newHashMap();
+        private ImmutableMap<String, ? extends List<String>> _findAndReplace = ImmutableMap.of();
         @NotNull
-        private List<DimensionInjection> _inject = Lists.newArrayList();
+        private ImmutableMap<String, DimensionInjection> _inject = ImmutableMap.of();
+        @NotNull
+        private ImmutableList<String> _remove = ImmutableList.of();
     }
 }
