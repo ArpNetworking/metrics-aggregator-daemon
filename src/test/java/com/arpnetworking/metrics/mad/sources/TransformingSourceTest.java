@@ -335,11 +335,13 @@ public class TransformingSourceTest {
                 .build();
 
         final Record actualRecord = mapRecord(matchingRecord);
+        final Map<String, String> expectedDimensions = Maps.newHashMap(matchingRecord.getDimensions());
+        expectedDimensions.remove("animal");
 
         final Record expectedRecord = TestBeanFactory.createRecordBuilder()
                 .setAnnotations(matchingRecord.getAnnotations())
                 .setTime(matchingRecord.getTime())
-                .setDimensions(matchingRecord.getDimensions())
+                .setDimensions(ImmutableMap.copyOf(expectedDimensions))
                 .setMetrics(ImmutableMap.of(
                         "tagged/frog/animal",
                         TestBeanFactory.createMetricBuilder()
