@@ -50,12 +50,16 @@ public class TransformingSourceTest {
         _mockSource = Mockito.mock(Source.class);
         _transformingSourceBuilder = new TransformingSource.Builder()
                 .setName("TransformingSourceTest")
-                .setFindAndReplace(ImmutableMap.of(
-                        "foo/([^/]*)/bar", ImmutableList.of("foo/bar"),
-                        "cat/([^/]*)/dog", ImmutableList.of("cat/dog", "cat/dog/$1"),
-                        "tagged/([^/]*)/dog", ImmutableList.of("tagged/dog;animal=$1"),
-                        "named/(?<animal>[^/]*)", ImmutableList.of("named/extracted_animal;extracted=${animal}"),
-                        "tagged/([^/]*)/animal", ImmutableList.of("tagged/${animal}/animal")))
+                .setTransformations(ImmutableList.of(
+                        new TransformingSource.TransformationSet.Builder()
+                                .setFindAndReplace(ImmutableMap.of(
+                                        "foo/([^/]*)/bar", ImmutableList.of("foo/bar"),
+                                        "cat/([^/]*)/dog", ImmutableList.of("cat/dog", "cat/dog/$1"),
+                                        "tagged/([^/]*)/dog", ImmutableList.of("tagged/dog;animal=$1"),
+                                        "named/(?<animal>[^/]*)", ImmutableList.of("named/extracted_animal;extracted=${animal}"),
+                                        "tagged/([^/]*)/animal", ImmutableList.of("tagged/${animal}/animal")))
+                        .build()
+                ))
                 .setSource(_mockSource);
     }
 
