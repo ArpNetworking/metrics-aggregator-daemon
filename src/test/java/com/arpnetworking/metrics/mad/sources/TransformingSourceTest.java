@@ -48,18 +48,16 @@ public class TransformingSourceTest {
     public void setUp() {
         _mockObserver = Mockito.mock(Observer.class);
         _mockSource = Mockito.mock(Source.class);
+        _transformSetBuilder = new TransformingSource.TransformationSet.Builder()
+                .setFindAndReplace(ImmutableMap.of(
+                        "foo/([^/]*)/bar", ImmutableList.of("foo/bar"),
+                        "cat/([^/]*)/dog", ImmutableList.of("cat/dog", "cat/dog/$1"),
+                        "tagged/([^/]*)/dog", ImmutableList.of("tagged/dog;animal=$1"),
+                        "named/(?<animal>[^/]*)", ImmutableList.of("named/extracted_animal;extracted=${animal}"),
+                        "tagged/([^/]*)/animal", ImmutableList.of("tagged/${animal}/animal")));
         _transformingSourceBuilder = new TransformingSource.Builder()
                 .setName("TransformingSourceTest")
-                .setTransformations(ImmutableList.of(
-                        new TransformingSource.TransformationSet.Builder()
-                                .setFindAndReplace(ImmutableMap.of(
-                                        "foo/([^/]*)/bar", ImmutableList.of("foo/bar"),
-                                        "cat/([^/]*)/dog", ImmutableList.of("cat/dog", "cat/dog/$1"),
-                                        "tagged/([^/]*)/dog", ImmutableList.of("tagged/dog;animal=$1"),
-                                        "named/(?<animal>[^/]*)", ImmutableList.of("named/extracted_animal;extracted=${animal}"),
-                                        "tagged/([^/]*)/animal", ImmutableList.of("tagged/${animal}/animal")))
-                        .build()
-                ))
+                .setTransformations(ImmutableList.of(_transformSetBuilder.build()))
                 .setSource(_mockSource);
     }
 
@@ -90,17 +88,19 @@ public class TransformingSourceTest {
 
     @Test
     public void testMergingObserverInvalidEvent() {
+        final TransformingSource.TransformationSet transformationSet = new TransformingSource.TransformationSet.Builder()
+                .setFindAndReplace(ImmutableMap.of())
+                .build();
         final TransformingSource transformingSource = new TransformingSource.Builder()
                 .setName("testMergingObserverInvalidEventTransformingSource")
                 .setSource(_mockSource)
-                .setFindAndReplace(ImmutableMap.of())
+                .setTransformations(ImmutableList.of(
+                        transformationSet))
                 .build();
         Mockito.reset(_mockSource);
         new TransformingSource.TransformingObserver(
                 transformingSource,
-                ImmutableMap.of(),
-                ImmutableMap.of(),
-                ImmutableList.of())
+                ImmutableList.of(transformationSet))
                 .notify(OBSERVABLE, "Not a Record");
         Mockito.verifyZeroInteractions(_mockSource);
     }
@@ -405,7 +405,7 @@ public class TransformingSourceTest {
 
     @Test
     public void testStaticDimensionInjection() {
-        _transformingSourceBuilder.setInject(ImmutableMap.of(
+        _transformSetBuilder.setInject(ImmutableMap.of(
                 "injected",
                 new TransformingSource.DimensionInjection.Builder()
                         .setValue("value")
@@ -453,7 +453,7 @@ public class TransformingSourceTest {
 
     @Test
     public void testStaticDimensionInjectionOverwrite() {
-        _transformingSourceBuilder.setInject(ImmutableMap.of(
+        _transformSetBuilder.setInject(ImmutableMap.of(
                 "injected",
                 new TransformingSource.DimensionInjection.Builder()
                         .setValue("new_value")
@@ -509,7 +509,7 @@ public class TransformingSourceTest {
 
     @Test
     public void testRemoveDimension() {
-        _transformingSourceBuilder.setRemove(ImmutableList.of("remove"));
+        _transformSetBuilder.setRemove(ImmutableList.of("remove"));
         final Record matchingRecord = TestBeanFactory.createRecordBuilder()
                 .setMetrics(ImmutableMap.of(
                         "doesnt_match",
@@ -697,6 +697,7 @@ public class TransformingSourceTest {
     }
 
     private Record mapRecord(final Record record) {
+        _transformingSourceBuilder.setTransformations(ImmutableList.of(_transformSetBuilder.build()));
         final Source transformingSource = _transformingSourceBuilder.build();
         transformingSource.attach(_mockObserver);
         notify(_mockSource, record);
@@ -717,6 +718,7 @@ public class TransformingSourceTest {
     private Observer _mockObserver;
     private Source _mockSource;
     private TransformingSource.Builder _transformingSourceBuilder;
+    private TransformingSource.TransformationSet.Builder _transformSetBuilder;
 
     private static final Observable OBSERVABLE = new Observable() {
         @Override

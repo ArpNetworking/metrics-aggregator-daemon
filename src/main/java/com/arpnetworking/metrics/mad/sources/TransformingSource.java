@@ -347,6 +347,11 @@ public final class TransformingSource extends BaseSource {
         }
     }
 
+    /**
+     * Represents a set of transformations to apply.
+     *
+     * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+     */
     public static final class TransformationSet {
         public ImmutableMap<Pattern, ImmutableList<String>> getFindAndReplace() {
             return _findAndReplace;
