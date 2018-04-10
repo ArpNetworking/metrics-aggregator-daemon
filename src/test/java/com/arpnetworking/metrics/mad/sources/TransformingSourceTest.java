@@ -409,7 +409,7 @@ public class TransformingSourceTest {
                 "injected",
                 new TransformingSource.DimensionInjection.Builder()
                         .setValue("value")
-                        .setReplaceExisting(false)
+                        .setOverwriteExisting(false)
                         .build()));
         final Record matchingRecord = TestBeanFactory.createRecordBuilder()
                 .setMetrics(ImmutableMap.of(
@@ -457,12 +457,12 @@ public class TransformingSourceTest {
                 "injected",
                 new TransformingSource.DimensionInjection.Builder()
                         .setValue("new_value")
-                        .setReplaceExisting(true)
+                        .setOverwriteExisting(true)
                         .build(),
                 "injected_no_over",
                 new TransformingSource.DimensionInjection.Builder()
                         .setValue("new_value")
-                        .setReplaceExisting(false)
+                        .setOverwriteExisting(false)
                         .build()));
         final Record matchingRecord = TestBeanFactory.createRecordBuilder()
                 .setMetrics(ImmutableMap.of(

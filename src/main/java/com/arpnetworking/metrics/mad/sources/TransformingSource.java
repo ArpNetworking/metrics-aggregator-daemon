@@ -216,7 +216,7 @@ public final class TransformingSource extends BaseSource {
             transformation.getInject().forEach(
                     (key, inject) ->
                             finalTags.compute(key, (k, oldValue) ->
-                                    inject.isReplaceExisting() || oldValue == null ? inject.getValue() : oldValue));
+                                    inject.isOverwriteExisting() || oldValue == null ? inject.getValue() : oldValue));
             finalTags.putAll(add);
 
             return new DefaultKey(ImmutableMap.copyOf(finalTags));
@@ -302,17 +302,17 @@ public final class TransformingSource extends BaseSource {
             return _value;
         }
 
-        public boolean isReplaceExisting() {
-            return _replaceExisting;
+        public boolean isOverwriteExisting() {
+            return _overwriteExisting;
         }
 
         private DimensionInjection(final Builder builder) {
             _value = builder._value;
-            _replaceExisting = builder._replaceExisting;
+            _overwriteExisting = builder._overwriteExisting;
         }
 
         private final String _value;
-        private final boolean _replaceExisting;
+        private final boolean _overwriteExisting;
 
         /**
          * Implementation of the <code>Builder</code> pattern for {@link DimensionInjection}.
@@ -344,8 +344,8 @@ public final class TransformingSource extends BaseSource {
              * @param value true to replace existing dimension value
              * @return This instance of {@link Builder}.
              */
-            public Builder setReplaceExisting(final Boolean value) {
-                _replaceExisting = value;
+            public Builder setOverwriteExisting(final Boolean value) {
+                _overwriteExisting = value;
                 return this;
             }
 
@@ -353,7 +353,7 @@ public final class TransformingSource extends BaseSource {
             @NotEmpty
             private String _value;
             @NotNull
-            private Boolean _replaceExisting = true;
+            private Boolean _overwriteExisting = true;
         }
     }
 
