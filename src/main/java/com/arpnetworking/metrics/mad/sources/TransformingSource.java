@@ -43,9 +43,12 @@ import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link Source} which wraps another {@link Source}
@@ -124,6 +127,10 @@ public final class TransformingSource extends BaseSource {
             // Merge the metrics in the record together
             final Record record = (Record) event;
             final Map<Key, Map<String, MergingMetric>> mergedMetrics = Maps.newHashMap();
+            final LinkedHashMap<String, Map<String, String>> variablesMap = new LinkedHashMap<>();
+            variablesMap.put("dimension", record.getDimensions());
+            variablesMap.put("env", System.getenv());
+
             for (TransformationSet transformation : _transformations) {
                 for (final Map.Entry<String, ? extends Metric> metric : record.getMetrics().entrySet()) {
                     boolean found = false;
@@ -134,9 +141,12 @@ public final class TransformingSource extends BaseSource {
                         if (matcher.find()) {
                             for (final String replacement : findAndReplace.getValue()) {
                                 final RegexAndMapReplacer.Replacement rep =
-                                        RegexAndMapReplacer.replaceAll(metricPattern, metricName, replacement, record.getDimensions());
+                                        RegexAndMapReplacer.replaceAll(metricPattern, metricName, replacement, variablesMap);
                                 final String replacedString = rep.getReplacement();
-                                final ImmutableList<String> consumedDimensions = rep.getVariablesMatched();
+                                final List<String> consumedDimensions = rep.getVariablesMatched().stream()
+                                        .filter(var -> var.startsWith("dimension:") || var.indexOf(':') == -1) // Only dimension vars
+                                        .map(var -> var.substring(var.indexOf(":") + 1)) // Strip the prefix
+                                        .collect(Collectors.toList());
 
                                 final int tagsStart = replacedString.indexOf(';');
                                 if (tagsStart == -1) {
@@ -197,7 +207,7 @@ public final class TransformingSource extends BaseSource {
         private Key getModifiedDimensions(
                 final ImmutableMap<String, String> inputDimensions,
                 final Map<String, String> add,
-                final ImmutableList<String> remove,
+                final List<String> remove,
                 final TransformationSet transformation) {
             final Map<String, String> finalTags = Maps.newHashMap(inputDimensions);
             // Remove the dimensions that we consumed in the replacement

@@ -17,11 +17,11 @@ package com.arpnetworking.utility;
 
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
-import com.google.common.collect.ImmutableMap;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -34,7 +34,7 @@ public final class RegexAndMapBenchmarkTest {
     @BenchmarkOptions(benchmarkRounds = 2000000, warmupRounds = 50000)
     @Test
     public void testRegexAndMap() {
-        final String result = RegexAndMapReplacer.replaceAll(PATTERN, INPUT, REPLACE, ImmutableMap.of()).getReplacement();
+        final String result = RegexAndMapReplacer.replaceAll(PATTERN, INPUT, REPLACE, new LinkedHashMap<>()).getReplacement();
     }
 
     @BenchmarkOptions(benchmarkRounds = 2000000, warmupRounds = 50000)

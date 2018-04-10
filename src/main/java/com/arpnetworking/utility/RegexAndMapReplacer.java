@@ -16,8 +16,8 @@
 package com.arpnetworking.utility;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,11 +43,11 @@ public final class RegexAndMapReplacer {
      * @param variables map of variables to include
      * @return a string with replacement tokens replaced
      */
-    public static Replacement replaceAll(
+        public static Replacement replaceAll(
             final Pattern pattern,
             final String input,
             final String replace,
-            final ImmutableMap<String, String> variables) {
+            final LinkedHashMap<String, Map<String, String>> variables) {
         final Matcher matcher = pattern.matcher(input);
         boolean found = matcher.find();
         if (found) {
@@ -73,7 +73,7 @@ public final class RegexAndMapReplacer {
             final Matcher matcher,
             final String replacement,
             final StringBuilder replacementBuilder,
-            final Map<String, String> variables,
+            final LinkedHashMap<String, Map<String, String>> variables,
             final ImmutableList.Builder<String> variablesUsedBuilder) {
         final StringBuilder tokenBuilder = new StringBuilder();
         int x = -1;
@@ -112,7 +112,7 @@ public final class RegexAndMapReplacer {
             final int offset,
             final StringBuilder output,
             final Matcher matcher,
-            final Map<String, String> variables,
+            final LinkedHashMap<String, Map<String, String>> variables,
             final StringBuilder tokenBuilder,
             final ImmutableList.Builder<String> variablesUsedBuilder) {
         boolean inReplaceBrackets = false;
@@ -175,25 +175,105 @@ public final class RegexAndMapReplacer {
             final Matcher matcher,
             final String replaceToken,
             final boolean numeric,
-            final Map<String, String> variables,
+            final LinkedHashMap<String, Map<String, String>> variables,
             final ImmutableList.Builder<String> variablesUsedBuilder) {
         if (numeric) {
             final int replaceGroup = Integer.parseInt(replaceToken);
             return matcher.group(replaceGroup);
         } else {
-            try {
-                return matcher.group(replaceToken);
-            } catch (final IllegalArgumentException e) { // No group with this name
-                variablesUsedBuilder.add(replaceToken);
-                return variables.getOrDefault(replaceToken, "");
+            final int prefixSeparatorIndex = replaceToken.indexOf(':');
+            final String prefix;
+            final String variableName;
+            if (prefixSeparatorIndex == replaceToken.length() - 1) {
+                throw new IllegalArgumentException(
+                        String.format("found prefix in variable replacement, but no variable name found: '%s'",
+                        replaceToken));
+            }
+            if (prefixSeparatorIndex != -1) {
+                prefix = replaceToken.substring(0, prefixSeparatorIndex);
+                variableName = replaceToken.substring(prefixSeparatorIndex + 1);
+            } else {
+                prefix = "";
+                variableName = replaceToken;
+            }
+            if (prefix.isEmpty()) {
+                return replaceNonPrefix(matcher, variables, variablesUsedBuilder, variableName);
+
+            } else {
+                return replacePrefix(matcher, variables, variablesUsedBuilder, prefix, variableName);
             }
         }
+    }
+
+    private static String replacePrefix(
+            final Matcher matcher,
+            final LinkedHashMap<String, Map<String, String>> variables,
+            final ImmutableList.Builder<String> variablesUsedBuilder,
+            final String prefix,
+            final String variableName) {
+        if (prefix.equals("capture")) {
+            if (isNumeric(variableName)) {
+                final Integer groupIndex = Integer.valueOf(variableName);
+                return matcher.group(groupIndex);
+            } else {
+                try {
+                    return matcher.group(variableName);
+                } catch (final IllegalArgumentException ignored2) { // No group with this name
+                    return "";
+                }
+            }
+        }
+
+        // Only record variables that are not captures
+        variablesUsedBuilder.add(String.format("%s:%s", prefix, variableName));
+
+        final Map<String, String> variableMap = variables.get(prefix);
+        if (variableMap == null) {
+            throw new IllegalArgumentException(String.format("could not find map for variables with prefix '%s'", prefix));
+        }
+        return variableMap.getOrDefault(variableName, "");
+    }
+
+    private static String replaceNonPrefix(
+            final Matcher matcher,
+            final LinkedHashMap<String, Map<String, String>> variables,
+            final ImmutableList.Builder<String> variablesUsedBuilder,
+            final String variableName) {
+        // First try the capture group with the name
+        try {
+            return matcher.group(variableName);
+        } catch (final IllegalArgumentException e) { // No group with this name
+            // Walk through the variable maps in order to find the first match
+            for (final Map.Entry<String, Map<String, String>> entry : variables.entrySet()) {
+                final Map<String, String> variableMap = entry.getValue();
+                final String replacement = variableMap.get(variableName);
+                if (replacement != null) {
+                    variablesUsedBuilder.add(String.format("%s:%s", entry.getKey(), variableName));
+                    return replacement;
+                }
+            }
+        }
+        return "";
+    }
+
+    private static boolean isNumeric(final String string) {
+        boolean isNumeric = true;
+        for (int x = 0; x < string.length(); x++) {
+            if (!Character.isDigit(string.charAt(x))) {
+                isNumeric = false;
+                break;
+            }
+        }
+        return isNumeric;
     }
 
     private RegexAndMapReplacer() { }
 
     /**
      * Describes the replacement string and variables used in it's creation.
+     *
+     * The "replacement" field is the resulting string.
+     * The "variablesMatched" field is a list of input variables that were matched, in prefix:variable form
      */
     public static final class Replacement {
         public String getReplacement() {
