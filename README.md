@@ -300,16 +300,16 @@ ex:
   name="transforming_source"
   transformations = [
     {
-      inject = {
+      injectDimensions = {
         foo {
           value = bar
-          overwriteExisting = false
+          overwrite = false
         }
       }
-      remove = [
+      removeDimensions = [
         baz
       ]
-      findAndReplace = {
+      transformMetrics = {
         "this" = ["that"]
         "extract/([^/]*)/thing" = ["extract/thing/${other_dimension};my_dimension=${1}"]
       }

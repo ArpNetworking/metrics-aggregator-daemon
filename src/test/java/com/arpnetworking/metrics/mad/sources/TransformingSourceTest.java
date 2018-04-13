@@ -49,7 +49,7 @@ public class TransformingSourceTest {
         _mockObserver = Mockito.mock(Observer.class);
         _mockSource = Mockito.mock(Source.class);
         _transformSetBuilder = new TransformingSource.TransformationSet.Builder()
-                .setFindAndReplace(ImmutableMap.of(
+                .setTransformMetrics(ImmutableMap.of(
                         "foo/([^/]*)/bar", ImmutableList.of("foo/bar"),
                         "cat/([^/]*)/dog", ImmutableList.of("cat/dog", "cat/dog/${1}"),
                         "tagged/([^/]*)/dog", ImmutableList.of("tagged/dog;animal=${1}"),
@@ -89,7 +89,7 @@ public class TransformingSourceTest {
     @Test
     public void testMergingObserverInvalidEvent() {
         final TransformingSource.TransformationSet transformationSet = new TransformingSource.TransformationSet.Builder()
-                .setFindAndReplace(ImmutableMap.of())
+                .setTransformMetrics(ImmutableMap.of())
                 .build();
         final TransformingSource transformingSource = new TransformingSource.Builder()
                 .setName("testMergingObserverInvalidEventTransformingSource")
@@ -405,11 +405,11 @@ public class TransformingSourceTest {
 
     @Test
     public void testStaticDimensionInjection() {
-        _transformSetBuilder.setInject(ImmutableMap.of(
+        _transformSetBuilder.setInjectDimensions(ImmutableMap.of(
                 "injected",
                 new TransformingSource.DimensionInjection.Builder()
                         .setValue("value")
-                        .setOverwriteExisting(false)
+                        .setOverwrite(false)
                         .build()));
         final Record matchingRecord = TestBeanFactory.createRecordBuilder()
                 .setMetrics(ImmutableMap.of(
@@ -453,16 +453,16 @@ public class TransformingSourceTest {
 
     @Test
     public void testStaticDimensionInjectionOverwrite() {
-        _transformSetBuilder.setInject(ImmutableMap.of(
+        _transformSetBuilder.setInjectDimensions(ImmutableMap.of(
                 "injected",
                 new TransformingSource.DimensionInjection.Builder()
                         .setValue("new_value")
-                        .setOverwriteExisting(true)
+                        .setOverwrite(true)
                         .build(),
                 "injected_no_over",
                 new TransformingSource.DimensionInjection.Builder()
                         .setValue("new_value")
-                        .setOverwriteExisting(false)
+                        .setOverwrite(false)
                         .build()));
         final Record matchingRecord = TestBeanFactory.createRecordBuilder()
                 .setMetrics(ImmutableMap.of(
@@ -509,7 +509,7 @@ public class TransformingSourceTest {
 
     @Test
     public void testRemoveDimension() {
-        _transformSetBuilder.setRemove(ImmutableList.of("remove"));
+        _transformSetBuilder.setRemoveDimensions(ImmutableList.of("remove"));
         final Record matchingRecord = TestBeanFactory.createRecordBuilder()
                 .setMetrics(ImmutableMap.of(
                         "doesnt_match",
