@@ -51,8 +51,8 @@ public class TransformingSourceTest {
         _transformSetBuilder = new TransformingSource.TransformationSet.Builder()
                 .setFindAndReplace(ImmutableMap.of(
                         "foo/([^/]*)/bar", ImmutableList.of("foo/bar"),
-                        "cat/([^/]*)/dog", ImmutableList.of("cat/dog", "cat/dog/$1"),
-                        "tagged/([^/]*)/dog", ImmutableList.of("tagged/dog;animal=$1"),
+                        "cat/([^/]*)/dog", ImmutableList.of("cat/dog", "cat/dog/${1}"),
+                        "tagged/([^/]*)/dog", ImmutableList.of("tagged/dog;animal=${1}"),
                         "named/(?<animal>[^/]*)", ImmutableList.of("named/extracted_animal;extracted=${animal}"),
                         "tagged/([^/]*)/animal", ImmutableList.of("tagged/${animal}/animal")));
         _transformingSourceBuilder = new TransformingSource.Builder()

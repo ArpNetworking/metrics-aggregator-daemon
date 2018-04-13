@@ -71,15 +71,6 @@ public final class RegexAndMapReplacerTest {
         final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, new LinkedHashMap<>()).getReplacement();
     }
 
-    @Test
-    public void testNumericWithClosingCurly() {
-        final Pattern pattern = Pattern.compile("test");
-        final String input = "test";
-        final String replace = "$0}";
-        final String expected = "test}";
-        testExpression(pattern, input, replace, expected, ImmutableMap.of());
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidReplacementTokenMissingOpen() {
         final Pattern pattern = Pattern.compile("test");
@@ -88,11 +79,19 @@ public final class RegexAndMapReplacerTest {
         final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, new LinkedHashMap<>()).getReplacement();
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidReplacementTokenNumeric() {
+        final Pattern pattern = Pattern.compile("test");
+        final String input = "test";
+        final String replace = "$0"; // replacement variable has no {
+        final String result = RegexAndMapReplacer.replaceAll(pattern, input, replace, new LinkedHashMap<>()).getReplacement();
+    }
+
     @Test
     public void testGroup0Replace() {
         final Pattern pattern = Pattern.compile("test");
         final String input = "test";
-        final String replace = "$0";
+        final String replace = "${0}";
         final String expected = "test";
         testExpression(pattern, input, replace, expected, ImmutableMap.of());
     }
@@ -128,7 +127,7 @@ public final class RegexAndMapReplacerTest {
     public void testSingleMatchPartialMultipleGroupNumberReplace() {
         final Pattern pattern = Pattern.compile("(test)/pattern/(foo)");
         final String input = "test/pattern/foo";
-        final String replace = "this is a $1 pattern called $2";
+        final String replace = "this is a ${1} pattern called ${2}";
         final String expected = "this is a test pattern called foo";
         testExpression(pattern, input, replace, expected, ImmutableMap.of());
     }
@@ -140,6 +139,26 @@ public final class RegexAndMapReplacerTest {
         final String replace = "this is a ${g1} pattern called ${g2}";
         final String expected = "this is a test pattern called foo";
         testExpression(pattern, input, replace, expected, ImmutableMap.of());
+    }
+
+    @Test
+    public void testSingleVariableReplaceAsNumber() {
+        final Pattern pattern = Pattern.compile("test/pattern/foo");
+        final String input = "test/pattern/foo";
+        final String replace = "this is a ${1} pattern";
+        final String expected = "this is a test pattern";
+        testExpression(pattern, input, replace, expected, ImmutableMap.of("1", "test"));
+    }
+
+    @Test
+    public void testSingleVariableReplaceAsNumberPrefixed() {
+        final Pattern pattern = Pattern.compile("test/pattern/foo");
+        final String input = "test/pattern/foo";
+        final String replace = "this is a ${prefix1:1} pattern";
+        final String expected = "this is a test pattern";
+        final LinkedHashMap<String, Map<String, String>> variables = new LinkedHashMap<>();
+        variables.put("prefix1", ImmutableMap.of("1", "test"));
+        testExpression(pattern, input, replace, expected, variables);
     }
 
     @Test
@@ -188,7 +207,9 @@ public final class RegexAndMapReplacerTest {
         variables.put("prefix1", ImmutableMap.of("var", "var1"));
         variables.put("prefix2", ImmutableMap.of("var", "var2"));
         final RegexAndMapReplacer.Replacement replacement = testExpression(pattern, input, replace, expected, variables);
-        Assert.assertEquals(ImmutableList.of("prefix1:var", "prefix2:var"), replacement.getVariablesMatched());
+        Assert.assertEquals(
+                ImmutableMap.of("prefix1", ImmutableList.of("var"), "prefix2", ImmutableList.of("var")),
+                replacement.getVariablesMatched());
     }
 
     @Test
@@ -201,7 +222,9 @@ public final class RegexAndMapReplacerTest {
         variables.put("prefix1", ImmutableMap.of("var", "1-var", "var2", "1-var2"));
         variables.put("prefix2", ImmutableMap.of("var", "2-var", "var2", "2-var2", "var3", "2-var3"));
         final RegexAndMapReplacer.Replacement replacement = testExpression(pattern, input, replace, expected, variables);
-        Assert.assertEquals(ImmutableList.of("prefix1:var2", "prefix2:var3"), replacement.getVariablesMatched());
+        Assert.assertEquals(
+                ImmutableMap.of("prefix1", ImmutableList.of("var2"), "prefix2", ImmutableList.of("var3")),
+                replacement.getVariablesMatched());
     }
 
     @Test

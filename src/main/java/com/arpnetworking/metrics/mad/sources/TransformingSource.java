@@ -48,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link Source} which wraps another {@link Source}
@@ -143,10 +142,8 @@ public final class TransformingSource extends BaseSource {
                                 final RegexAndMapReplacer.Replacement rep =
                                         RegexAndMapReplacer.replaceAll(metricPattern, metricName, replacement, variablesMap);
                                 final String replacedString = rep.getReplacement();
-                                final List<String> consumedDimensions = rep.getVariablesMatched().stream()
-                                        .filter(var -> var.startsWith("dimension:") || var.indexOf(':') == -1) // Only dimension vars
-                                        .map(var -> var.substring(var.indexOf(":") + 1)) // Strip the prefix
-                                        .collect(Collectors.toList());
+                                final List<String> consumedDimensions = rep.getVariablesMatched()
+                                        .getOrDefault("dimension", ImmutableList.of());
 
                                 final int tagsStart = replacedString.indexOf(';');
                                 if (tagsStart == -1) {

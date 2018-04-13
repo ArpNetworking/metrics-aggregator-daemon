@@ -324,7 +324,7 @@ ex:
 tranformations is a list of TransformationSet objects.  Each TransformationSet has an inject (Map\<String, DimensionInjection\>),
  remove (List\<String\>) and a findAndReplace (Map\<String, List\<String\>\>).
 
- A DimensionInjection is just a value and a boolean of whether or not to overwrite existing values.
+ A DimensionInjection is just a value and a boolean of whether or not to overwrite existing values. Of omitted, overwrite defaults to true.
 
  The keys in findAndReplace are regular expressions used to match metrics.  If matched, the list of replacements is
  executed, allowing for a single input metric to be recorded multiple times with different names or dimensions.
