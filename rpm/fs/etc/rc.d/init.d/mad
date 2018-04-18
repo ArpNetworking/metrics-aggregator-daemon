@@ -8,7 +8,7 @@
 #   services
 # processname: mad
 # config: /opt/mad/config/config.conf
-# pidfile: /var/run/mad/mad.pid
+# pidfile: /var/run/mad.pid
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -18,7 +18,7 @@ prog="mad"
 dir="/opt/mad"
 log_dir="$dir/logs"
 exec="/opt/mad/bin/mad"
-pid_file="/var/run/mad/mad.pid"
+pid_file="/var/run/mad.pid"
 export CONFIG_FILE="/opt/mad/config/config.conf"
 export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which java))))"
 export JVM_XMS="64m"
@@ -48,7 +48,7 @@ if [ -z "$JAVA_OPTS" ]; then
         ${ADDITIONAL_JAVA_OPTS}"
 fi
 
-lockfile=/var/lock/subsys/$prog
+lockfile=/var/lock/$prog
 
 get_pid() {
     if [ -f "$pid_file" ]; then
