@@ -42,7 +42,8 @@ public final class UnorderedRecordEquality {
      */
     public static boolean equals(final Record r1, final Record r2) {
         if (!r1.getTime().equals(r2.getTime())
-                || !r1.getAnnotations().equals(r2.getAnnotations())) {
+                || !r1.getAnnotations().equals(r2.getAnnotations())
+                || !r1.getDimensions().equals(r2.getDimensions())) {
             return false;
         }
 

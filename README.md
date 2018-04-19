@@ -285,6 +285,80 @@ interval="10s"
 [[inputs.kernel]]
 ```
 
+#### TransformSource
+Sometimes you'll want to transform the incoming data before aggregating.
+As shown in the example collectd source, it is possible to wrap a source with
+another source that will transform the data.  The TransformingSource specifies
+sets of transformations to apply to the input records, allowing you to add dimensions
+to all metrics, remove dimensions from all metrics, and modify metrics based on their
+name.
+
+ex:
+```hocon
+{
+  type="com.arpnetworking.metrics.mad.sources.TransformingSource"
+  name="transforming_source"
+  transformations = [
+    {
+      injectDimensions = {
+        foo {
+          value = bar
+          overwrite = false
+        }
+      }
+      removeDimensions = [
+        baz
+      ]
+      transformMetrics = {
+        "this" = ["that"]
+        "extract/([^/]*)/thing" = ["extract/thing/${other_dimension};my_dimension=${1}"]
+      }
+    }
+  ]
+  source {
+    // your wrapped source goes here
+  }
+}
+```
+
+tranformations is a list of TransformationSet objects.  Each TransformationSet has an inject (Map\<String, DimensionInjection\>),
+ remove (List\<String\>) and a findAndReplace (Map\<String, List\<String\>\>).
+
+ A DimensionInjection is just a value and a boolean of whether or not to overwrite existing values. Of omitted, overwrite defaults to true.
+
+ The keys in findAndReplace are regular expressions used to match metrics.  If matched, the list of replacements is
+ executed, allowing for a single input metric to be recorded multiple times with different names or dimensions.
+ The format for the values in the list are similar to a standard java regex replacement.  Variables are enclosed in ${},
+ for example:
+ ```bash
+${my_variable}
+```
+Variables will be matched in the following order (first match wins):
+1. capture group
+2. dimension
+3. environment variable
+
+
+Variable names may also have a prefix that specifies where the value should originate.  For example:
+```bash
+${capture:my_var}
+```
+```bash
+${env:MYVAR}
+```
+```bash
+${dimension:some_dimension}
+```
+
+This namespacing prevents the built-in precendence search for a matching variable.
+
+__Note: Any dimensions matched as part of a replacement will be removed from the resulting metric.__
+
+Dimensions can also be injected into a metric.  To do this, add a ';' after the replacement name of the metric
+and proceed to specify key=value pairs (where both the key and value can use variables).  Basically, the
+replacement is processed, the string split on ';' with the first part being the metric name and anything
+after the ';' being parsed as key=value pairs to be added to the metric's dimensions.
+
 Development
 -----------
 

@@ -40,6 +40,27 @@ safe_command() {
   fi
 }
 
+checksum() {
+  l_file="$1"
+  checksum_exec=""
+  if command -v md5 > /dev/null; then
+    checksum_exec="md5"
+  elif command -v sha1sum > /dev/null; then
+    checksum_exec="sha1sum"
+  elif command -v shasum > /dev/null; then
+    checksum_exec="shasum"
+  fi
+  if [ -z "${checksum_exec}" ]; then
+    log_err "ERROR: No supported checksum command found!"
+    exit 1
+  fi
+  cat "${l_file}" | ${checksum_exec}
+}
+
+rand() {
+  awk 'BEGIN {srand();printf "%d\n", (rand() * 10^8);}'
+}
+
 download() {
   file="$1"
   if [ ! -f "${JDKW_PATH}/${file}" ]; then
@@ -93,7 +114,10 @@ fi
 
 # Resolve latest version
 if [ "${JDKW_RELEASE}" = "latest" ]; then
-  JDKW_RELEASE=$(curl ${CURL_OPTIONS} -f -k -L -H 'Accept: application/json' "${JDKW_BASE_URI}/releases/latest" | sed -e 's/.*"tag_name":"\([^"]*\)".*/\1/')
+  latest_version_json="${TMPDIR:-/tmp}/jdkw-latest-version-$$.$(rand)"
+  safe_command "curl ${CURL_OPTIONS} -f -k -L -o \"${latest_version_json}\" -H 'Accept: application/json' \"${JDKW_BASE_URI}/releases/latest\""
+  JDKW_RELEASE=$(cat "${latest_version_json}" | sed -e 's/.*"tag_name":"\([^"]*\)".*/\1/')
+  rm -f "${latest_version_json}"
   log_out "Resolved latest version to ${JDKW_RELEASE}"
 fi
 
@@ -114,7 +138,7 @@ download "${JDKW_WRAPPER}"
 # Check whether this wrapper is the one specified for this version
 jdkw_download="${JDKW_PATH}/${JDKW_WRAPPER}"
 jdkw_current="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/$(basename "$0")"
-if [ "$(cat "${jdkw_download}" | sha1sum )" != "$(cat "${jdkw_current}" | sha1sum)" ]; then
+if [ "$(checksum "${jdkw_download}")" != "$(checksum "${jdkw_current}")" ]; then
   printf "\e[0;31m[WARNING]\e[0m Your jdk-wrapper.sh file does not match the one in your JDKW_RELEASE.\n"
   printf "\e[0;32mUpdate your jdk-wrapper.sh to match by running:\e[0m\n"
   printf "cp \"%s\" \"%s\"\n" "${jdkw_download}" "${jdkw_current}"
