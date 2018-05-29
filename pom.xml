@@ -118,7 +118,7 @@
     <!-- Additional Plugins -->
     <aspectjtools.maven.plugin>1.8.9</aspectjtools.maven.plugin>
     <aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
-    <docker.maven.plugin.version>0.16.7</docker.maven.plugin.version>
+    <docker.maven.plugin.version>0.26.0</docker.maven.plugin.version>
     <javassist.maven.plugin.version>0.1.2</javassist.maven.plugin.version>
     <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
     <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
