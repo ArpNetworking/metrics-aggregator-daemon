@@ -131,6 +131,9 @@
     <debugJavaOptions />
     <debugJavaPort>9001</debugJavaPort>
 
+    <!-- Docker Overrides -->
+    <skipDockerBuild>false</skipDockerBuild>
+
     <!-- Assembly Overrides -->
     <tgz.finalName>${project.build.finalName}</tgz.finalName>
 
@@ -312,6 +315,88 @@
             <version>${aspectjtools.maven.plugin}</version>
           </dependency>
         </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>${docker.maven.plugin.version}</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <id>default-build</id>
+            <phase>package</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>default-start</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+            <configuration>
+              <skip>${skipIntegrationTests}</skip>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-stop</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+            <configuration>
+              <skip>${skipIntegrationTests}</skip>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-push</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>push</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <showLogs>true</showLogs>
+          <images>
+            <image>
+              <name>arpnetworking/mad:${project.version}</name>
+              <build>
+                <dockerFile>${project.build.directory}/docker-assembly/Dockerfile</dockerFile>
+                <tags>
+                  <tag>${buildNumber}</tag>
+                </tags>
+              </build>
+              <run>
+                <env>
+                  <ADDITIONAL_JAVA_OPTS>${debugJavaOptions}</ADDITIONAL_JAVA_OPTS>
+                </env>
+                <ports>
+                  <port>${debugJavaPort}:${debugJavaPort}</port>
+                  <port>7090:7090</port>
+                  <port>8125:8125/udp</port>
+                </ports>
+                <volumes>
+                  <bind>
+                    <volume>${project.basedir}/logs/docker:/opt/mad/logs</volume>
+                  </bind>
+                </volumes>
+                <wait>
+                  <http>
+                    <url>http://${docker.host.address}:7090/ping</url>
+                    <method>GET</method>
+                    <status>200</status>
+                  </http>
+                  <!-- NOTE: The service is _really_ slow to start-up under native docker -->
+                  <time>150000</time>
+                  <kill>1000</kill>
+                </wait>
+              </run>
+            </image>
+          </images>
+          <skip>${skipDockerBuild}</skip>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -733,102 +818,14 @@
       </properties>
     </profile>
     <profile>
-      <id>docker</id>
+      <id>no-docker</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <activeByDefault>false</activeByDefault>
       </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>io.fabric8</groupId>
-            <artifactId>docker-maven-plugin</artifactId>
-            <version>${docker.maven.plugin.version}</version>
-            <extensions>true</extensions>
-            <executions>
-              <execution>
-                <id>default-build</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>build</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>default-remove</id>
-                <phase>validate</phase>
-                <configuration>
-                  <removeAll>true</removeAll>
-                </configuration>
-              </execution>
-              <execution>
-                <id>default-start</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                  <goal>start</goal>
-                </goals>
-                <configuration>
-                  <skip>${skipIntegrationTests}</skip>
-                </configuration>
-              </execution>
-              <execution>
-                <id>default-stop</id>
-                <phase>post-integration-test</phase>
-                <goals>
-                  <goal>stop</goal>
-                </goals>
-                <configuration>
-                  <skip>${skipIntegrationTests}</skip>
-                </configuration>
-              </execution>
-              <execution>
-                <id>default-push</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>push</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <showLogs>true</showLogs>
-              <images>
-                <image>
-                  <name>arpnetworking/mad:${project.version}</name>
-                  <build>
-                    <dockerFile>${project.build.directory}/docker-assembly/Dockerfile</dockerFile>
-                    <tags>
-                      <tag>${buildNumber}</tag>
-                    </tags>
-                  </build>
-                  <run>
-                    <env>
-                      <ADDITIONAL_JAVA_OPTS>${debugJavaOptions}</ADDITIONAL_JAVA_OPTS>
-                    </env>
-                    <ports>
-                      <port>${debugJavaPort}:${debugJavaPort}</port>
-                      <port>7090:7090</port>
-                      <port>8125:8125/udp</port>
-                    </ports>
-                    <volumes>
-                      <bind>
-                        <volume>${project.basedir}/logs/docker:/opt/mad/logs</volume>
-                      </bind>
-                    </volumes>
-                    <wait>
-                      <http>
-                        <url>http://${docker.host.address}:7090/ping</url>
-                        <method>GET</method>
-                        <status>200</status>
-                      </http>
-                      <!-- NOTE: The service is _really_ slow to start-up under native docker -->
-                      <time>150000</time>
-                      <kill>1000</kill>
-                    </wait>
-                  </run>
-                </image>
-              </images>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
+      <properties>
+        <skipIntegrationTests>true</skipIntegrationTests>
+        <skipDockerBuild>true</skipDockerBuild>
+      </properties>
     </profile>
   </profiles>
 </project>
