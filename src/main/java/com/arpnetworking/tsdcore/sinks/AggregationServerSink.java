@@ -46,7 +46,7 @@ public final class AggregationServerSink extends VertxSink {
                 .addData("sink", getName())
                 .addData("dataSize", periodicData.getData().size())
                 .log();
-        
+
         for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
             final String metricName = entry.getKey();
             final Collection<AggregatedData> data = entry.getValue();

@@ -471,4 +471,3 @@ public interface Configuration {
      */
     <T> T getRequiredAs(Type type) throws NoSuchElementException, IllegalArgumentException;
 }
-
