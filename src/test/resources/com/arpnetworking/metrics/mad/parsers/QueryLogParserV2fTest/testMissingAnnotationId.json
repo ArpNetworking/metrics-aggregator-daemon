@@ -5,7 +5,7 @@
         "_end": "2014-03-24T12:15:41.010Z",
         "_service": "MyService",
         "_cluster": "MyCluster",
-        "_host": "MyHost",
+        "_host": "MyHost"
     },
     "timers": {},
     "gauges": {},

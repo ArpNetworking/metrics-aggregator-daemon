@@ -130,8 +130,19 @@
     <!-- JVM Debug -->
     <debugJavaOptions />
     <debugJavaPort>9001</debugJavaPort>
+
+    <!-- Docker Overrides -->
+    <skipDockerBuild>false</skipDockerBuild>
+
+    <!-- Assembly Overrides -->
+    <tgz.finalName>${project.build.finalName}</tgz.finalName>
+
+    <!-- Project Overrides -->
+    <buildDirectory>${project.basedir}/target</buildDirectory>
   </properties>
+
   <build>
+    <directory>${buildDirectory}</directory>
     <resources>
       <resource>
         <directory>src/main/resources</directory>
@@ -205,7 +216,7 @@
               <mainClass>com.arpnetworking.metrics.mad.Main</mainClass>
             </program>
           </programs>
-          <unixScriptTemplate>${project.basedir}/target/appAssemblerUnixBinTemplate</unixScriptTemplate>
+          <unixScriptTemplate>${project.build.directory}/appAssemblerUnixBinTemplate</unixScriptTemplate>
           <endorsedDir>lib/ext</endorsedDir>
         </configuration>
       </plugin>
@@ -237,6 +248,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
+              <finalName>${tgz.finalName}</finalName>
               <appendAssemblyId>true</appendAssemblyId>
               <attach>false</attach>
               <tarLongFileMode>posix</tarLongFileMode>
@@ -318,13 +330,6 @@
             </goals>
           </execution>
           <execution>
-            <id>default-remove</id>
-            <phase>validate</phase>
-            <configuration>
-              <removeAll>true</removeAll>
-            </configuration>
-          </execution>
-          <execution>
             <id>default-start</id>
             <phase>pre-integration-test</phase>
             <goals>
@@ -390,6 +395,7 @@
               </run>
             </image>
           </images>
+          <skip>${skipDockerBuild}</skip>
         </configuration>
       </plugin>
     </plugins>
@@ -809,6 +815,16 @@
       </activation>
       <properties>
         <debugJavaOptions>-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=${debugJavaPort},suspend=n</debugJavaOptions>
+      </properties>
+    </profile>
+    <profile>
+      <id>no-docker</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <skipIntegrationTests>true</skipIntegrationTests>
+        <skipDockerBuild>true</skipDockerBuild>
       </properties>
     </profile>
   </profiles>

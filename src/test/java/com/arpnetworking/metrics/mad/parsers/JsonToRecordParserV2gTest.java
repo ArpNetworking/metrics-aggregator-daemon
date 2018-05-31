@@ -99,7 +99,7 @@ public class JsonToRecordParserV2gTest {
         Assert.assertTrue(record.getMetrics().isEmpty());
     }
 
-    @Test 
+    @Test
     public void testPresentDimensions() throws ParsingException, IOException {
         final Record record = parseRecord("QueryLogParserV2gTest/testPresentDimensions.json");
         Assert.assertNotNull(record);

@@ -1,3 +1,4 @@
+set -e
 /sbin/chkconfig --add mad
 mkdir -p /opt/mad/logs
 chown mad:mad /opt/mad/logs

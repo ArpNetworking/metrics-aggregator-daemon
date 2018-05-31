@@ -128,9 +128,9 @@ For example:
     "serviceName": "MyApplication",
     "sources":
     [
-        {                                                                 
+        {
             "type": "com.arpnetworking.metrics.common.sources.ClientHttpSourceV1",
-            "name": "my_application_http_source"                                   
+            "name": "my_application_http_source"
         },
         {
             "type": "com.arpnetworking.metrics.common.sources.FileSource",
