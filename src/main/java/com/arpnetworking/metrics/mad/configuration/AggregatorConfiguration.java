@@ -69,6 +69,14 @@ public final class AggregatorConfiguration {
         return _supplementalHttpRoutesClass;
     }
 
+    public String getMetricsClientHost() {
+        return _metricsClientHost;
+    }
+
+    public Integer getMetricsClientPort() {
+        return _metricsClientPort;
+    }
+
     public Duration getJvmMetricsCollectionInterval() {
         return _jvmMetricsCollectionInterval;
     }
@@ -90,6 +98,8 @@ public final class AggregatorConfiguration {
                 .add("HttpStatusPath", _httpStatusPath)
                 .add("SupplementalHttpRoutesClass", _supplementalHttpRoutesClass)
                 .add("AkkaConfiguration", _akkaConfiguration)
+                .add("MetricsClientHost", _metricsClientHost)
+                .add("MetricsClientPort", _metricsClientPort)
                 .add("JvmMetricsCollectorInterval", _jvmMetricsCollectionInterval)
                 .toString();
     }
@@ -103,6 +113,9 @@ public final class AggregatorConfiguration {
         _httpHealthCheckPath = builder._httpHealthCheckPath;
         _httpStatusPath = builder._httpStatusPath;
         _supplementalHttpRoutesClass = Optional.ofNullable(builder._supplementalHttpRoutesClass);
+        _metricsClientHost = Optional.ofNullable(builder._metricsClientHost).orElse(
+                "0.0.0.0".equals(_httpHost) ? "localhost" : _httpHost);
+        _metricsClientPort = Optional.ofNullable(builder._metricsClientPort).orElse(_httpPort);
         _jvmMetricsCollectionInterval = builder._jvmMetricsCollectionInterval;
         _akkaConfiguration = builder._akkaConfiguration;
     }
@@ -115,6 +128,8 @@ public final class AggregatorConfiguration {
     private final String _httpStatusPath;
     private final int _httpPort;
     private Optional<Class<? extends SupplementalRoutes>> _supplementalHttpRoutesClass;
+    private final String _metricsClientHost;
+    private final int _metricsClientPort;
     private final Duration _jvmMetricsCollectionInterval;
     private final Map<String, ?> _akkaConfiguration;
 
@@ -222,6 +237,31 @@ public final class AggregatorConfiguration {
         }
 
         /**
+         * The metrics client http host address to send to. Optional. Cannot be
+         * empty. Defaults to the http address unless it's 0.0.0.0 in which
+         * case it defaults to localhost.
+         *
+         * @param value The metrics client host address to send to.
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setMetricsClientHost(final String value) {
+            _metricsClientHost = value;
+            return this;
+        }
+
+        /**
+         * The metrics client http port to send to. Optional. must be between
+         * 1 and 65535 (inclusive). Defaults to the http port.
+         *
+         * @param value The metrics client port to listen send to.
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setMetricsClientPort(final Integer value) {
+            _metricsClientPort = value;
+            return this;
+        }
+
+        /**
          * Period for collecting JVM metrics. Optional. Default is 500 milliseconds.
          *
          * @param value A <code>Period</code> value.
@@ -269,6 +309,10 @@ public final class AggregatorConfiguration {
         @NotEmpty
         private String _httpStatusPath = "/status";
         private Class<? extends SupplementalRoutes> _supplementalHttpRoutesClass;
+        @NotEmpty
+        private String _metricsClientHost;
+        @Range(min = 1, max = 65535)
+        private Integer _metricsClientPort;
         @NotNull
         private Duration _jvmMetricsCollectionInterval = Duration.ofMillis(500);
         @NotNull
