@@ -1,5 +1,5 @@
-/*
- * Copyright 2014 Brandon Arp
+/**
+ * Copyright 2015 Dropbox Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,46 +18,27 @@ package com.arpnetworking.tsdcore.sinks;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.arpnetworking.steno.LogValueMapFactory;
-import com.arpnetworking.steno.Logger;
-import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.AggregationMessage;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.tsdcore.statistics.HistogramStatistic;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.net.MediaType;
 import com.google.protobuf.ByteString;
 
-import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Publisher to send data to an upstream aggregation server.
+ * Publisher to send data to an upstream aggregation server over HTTP.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Ville Koskela (vkoskela at dropbox dot com)
  */
-public final class AggregationServerSink extends VertxSink {
-
-    @Override
-    public void recordAggregateData(final PeriodicData periodicData) {
-        LOGGER.debug()
-                .setMessage("Writing aggregated data")
-                .addData("sink", getName())
-                .addData("dataSize", periodicData.getData().size())
-                .log();
-
-        for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
-            final String metricName = entry.getKey();
-            final Collection<AggregatedData> data = entry.getValue();
-            if (!data.isEmpty()) {
-                final Messages.StatisticSetRecord record = serializeMetricData(periodicData, metricName, data);
-                enqueueData(AggregationMessage.create(record).serializeToBuffer());
-            }
-        }
-    }
+public final class AggregationServerHttpSink extends HttpPostSink {
 
     @LogValue
     @Override
@@ -65,6 +46,25 @@ public final class AggregationServerSink extends VertxSink {
         return LogValueMapFactory.builder(this)
                 .put("super", super.toLogValue())
                 .build();
+    }
+
+    @Override
+    protected String getContentType() {
+        return MediaType.PROTOBUF.toString();
+    }
+
+    @Override
+    protected Collection<byte[]> serialize(final PeriodicData periodicData) {
+        final ImmutableList.Builder<byte[]> serializedPeriodicData = ImmutableList.builder();
+        for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
+            final String metricName = entry.getKey();
+            final Collection<AggregatedData> data = entry.getValue();
+            if (!data.isEmpty()) {
+                final Messages.StatisticSetRecord record = serializeMetricData(periodicData, metricName, data);
+                serializedPeriodicData.add(AggregationMessage.create(record).serializeToByteString().toArray());
+            }
+        }
+        return serializedPeriodicData.build();
     }
 
     private Messages.StatisticSetRecord serializeMetricData(
@@ -144,53 +144,32 @@ public final class AggregationServerSink extends VertxSink {
                         .build();
             }
             byteString = ByteString.copyFrom(
-                    AggregationMessage.create(builder.build()).serializeToBuffer().getBytes());
+                    AggregationMessage.create(builder.build()).serializeToByteString().toArray());
         } else {
             return null;
         }
         return byteString;
     }
 
-    private void heartbeat() {
-
-        final Messages.HeartbeatRecord message = Messages.HeartbeatRecord.newBuilder()
-                .setTimestamp(ZonedDateTime.now().toString())
-                .build();
-        sendRawData(AggregationMessage.create(message).serializeToBuffer());
-        LOGGER.debug()
-                .setMessage("Heartbeat sent to aggregation server")
-                .addData("sink", getName())
-                .log();
-    }
-
-    private AggregationServerSink(final Builder builder) {
+    private AggregationServerHttpSink(final Builder builder) {
         super(builder);
-        super.getVertx().setPeriodic(15000, event -> {
-            LOGGER.trace()
-                    .setMessage("Heartbeat tick")
-                    .addData("sink", getName())
-                    .log();
-            heartbeat();
-        });
     }
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic EXPRESSION_STATISTIC = STATISTIC_FACTORY.getStatistic("expression");
-    private static final Logger LOGGER = LoggerFactory.getLogger(AggregationServerSink.class);
 
     /**
-     * Implementation of builder pattern for <code>AggreationServerSink</code>.
+     * Implementation of builder pattern for <code>AggregationServerHttpSink</code>.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at dropbox dot com)
      */
-    public static final class Builder extends VertxSink.Builder<Builder, AggregationServerSink> {
+    public static final class Builder extends HttpPostSink.Builder<Builder, AggregationServerHttpSink> {
 
         /**
          * Public constructor.
          */
         public Builder() {
-            super(AggregationServerSink::new);
-            setServerPort(7065);
+            super(AggregationServerHttpSink::new);
         }
 
         @Override

@@ -43,7 +43,7 @@ ENTRYPOINT [ \
     "-XX:HeapDumpPath=/opt/mad/logs/mad.oom.hprof", \
     "-XX:+PrintGCDetails", \
     "-XX:+PrintGCDateStamps", \
-    "-Xloggc:logs/mad.gc.log", \
+    "-Xloggc:/opt/mad/logs/mad.gc.log", \
     "-XX:NumberOfGCLogFiles=2", \
     "-XX:GCLogFileSize=50M", \
     "-XX:+UseGCLogFileRotation", \

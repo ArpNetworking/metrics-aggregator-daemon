@@ -131,11 +131,6 @@ public final class PeriodicStatisticsSink extends BaseSink {
         flushMetrics(_metrics.get());
     }
 
-    /**
-     * Generate a Steno log compatible representation.
-     *
-     * @return Steno log compatible representation.
-     */
     @LogValue
     @Override
     public Object toLogValue() {

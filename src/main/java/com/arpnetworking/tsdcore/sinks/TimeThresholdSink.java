@@ -70,11 +70,6 @@ public final class TimeThresholdSink extends BaseSink {
         _sink.close();
     }
 
-    /**
-     * Generate a Steno log compatible representation.
-     *
-     * @return Steno log compatible representation.
-     */
     @LogValue
     @Override
     public Object toLogValue() {

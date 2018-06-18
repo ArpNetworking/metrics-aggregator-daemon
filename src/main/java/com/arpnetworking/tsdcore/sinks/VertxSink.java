@@ -90,11 +90,6 @@ public abstract class VertxSink extends BaseSink {
                 });
     }
 
-    /**
-     * Generate a Steno log compatible representation.
-     *
-     * @return Steno log compatible representation.
-     */
     @LogValue
     @Override
     public Object toLogValue() {

@@ -147,9 +147,9 @@ For example:
             "name": "my_application_telemetry_sink"
         },
         {
-            "type": "com.arpnetworking.tsdcore.sinks.AggregationServerSink",
-            "name": "my_application_aggregation_server_sink",
-            "serverAddress": "192.168.0.2"
+            "type": "com.arpnetworking.tsdcore.sinks.AggregationServerHttpSink",
+            "name": "my_application_aggregation_server_http_sink",
+            "uri": "http://192.168.0.2:7066/metrics/v1/data"
         }
     ]
 }
@@ -282,6 +282,27 @@ interval="10s"
 [[inputs.diskio]]
 [[inputs.swap]]
 [[inputs.kernel]]
+```
+
+### Graphite
+
+Example MAD source configuration:
+
+```json
+{
+  type="com.arpnetworking.metrics.mad.sources.MappingSource"
+  name="graphitetcp_mapping_source"
+  actorName="graphite-tcp-source"
+  findAndReplace={
+    "\\."=["/"]
+  }
+  source={
+    type="com.arpnetworking.metrics.common.sources.TcpLineSource"
+    name="graphitetcp_source"
+    host="0.0.0.0"
+    port="2003"
+  }
+}
 ```
 
 Development
