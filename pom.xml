@@ -716,7 +716,7 @@
                   <parallel combine.self="override" />
                   <forkCount>1</forkCount>
                   <reuseForks>false</reuseForks>
-                  <argLine>-agentlib:hprof=cpu=samples,depth=15,interval=5,force=y,file=${basedir}/target/perf.profile.hprof.txt</argLine>
+                  <argLine>-agentlib:hprof=cpu=samples,depth=15,interval=5,force=y,file=${buildDirectory}/perf.profile.hprof.txt</argLine>
                 </configuration>
               </execution>
             </executions>
