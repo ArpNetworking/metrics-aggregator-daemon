@@ -30,7 +30,7 @@
             <fileMode>0644</fileMode>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/target/appassembler/bin</directory>
+            <directory>${buildDirectory}/appassembler/bin</directory>
             <outputDirectory>bin</outputDirectory>
             <fileMode>0755</fileMode>
             <includes>
@@ -38,7 +38,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/target/appassembler/lib</directory>
+            <directory>${buildDirectory}/appassembler/lib</directory>
             <outputDirectory>lib</outputDirectory>
             <fileMode>0644</fileMode>
         </fileSet>
