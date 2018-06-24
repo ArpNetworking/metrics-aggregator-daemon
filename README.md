@@ -125,7 +125,6 @@ For example:
 ```json
 {
     "name": "MyApplicationPipeline",
-    "serviceName": "MyApplication",
     "sources":
     [
         {

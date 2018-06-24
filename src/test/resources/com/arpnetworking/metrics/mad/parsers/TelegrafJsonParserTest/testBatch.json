@@ -1,0 +1,40 @@
+{
+  "metrics": [
+    {
+      "fields":{
+        "t1":123,
+        "t2":1.23,
+        "g1":246,
+        "g2":2.46,
+        "c1":1
+      },
+      "name":"MyName",
+      "tags":{
+        "cluster":"MyCluster",
+        "service":"MyService",
+        "host":"MyHost",
+        "region":"US",
+        "foo":"bar"
+      },
+      "timestamp":1458229140
+    },
+    {
+      "fields":{
+        "t1":456,
+        "t2":4.56,
+        "g1":482,
+        "g2":4.82,
+        "c1":2
+      },
+      "name":"MyName2",
+      "tags":{
+        "cluster":"MyCluster2",
+        "service":"MyService2",
+        "host":"MyHost2",
+        "region":"CA",
+        "bar":"foo"
+      },
+      "timestamp":1458229140
+    }
+  ]
+}
