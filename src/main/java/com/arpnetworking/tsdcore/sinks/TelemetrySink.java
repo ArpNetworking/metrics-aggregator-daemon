@@ -42,11 +42,6 @@ public final class TelemetrySink extends BaseSink {
         // Nothing to do.
     }
 
-    /**
-     * Generate a Steno log compatible representation.
-     *
-     * @return Steno log compatible representation.
-     */
     @LogValue
     @Override
     public Object toLogValue() {

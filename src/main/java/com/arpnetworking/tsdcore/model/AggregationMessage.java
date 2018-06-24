@@ -15,12 +15,17 @@
  */
 package com.arpnetworking.tsdcore.model;
 
+import akka.util.ByteString;
+import akka.util.ByteStringBuilder;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.google.protobuf.GeneratedMessage;
 import org.vertx.java.core.buffer.Buffer;
 
+import java.io.IOException;
+import java.nio.ByteOrder;
+
 /**
- * Class for building messages from the raw, on-the-wire bytes in the TCP stream.
+ * Class for building on-the-wire bytes for messages.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
@@ -41,7 +46,7 @@ public final class AggregationMessage {
      *
      * @return <code>Buffer</code> containing serialized message.
      */
-    public Buffer serialize() {
+    public Buffer serializeToBuffer() {
         final Buffer b = new Buffer();
         b.appendInt(0);
         if (_message instanceof Messages.HostIdentification) {
@@ -62,6 +67,40 @@ public final class AggregationMessage {
         b.appendBytes(_message.toByteArray());
         b.setInt(0, b.length());
         return b;
+    }
+
+    /**
+     * Serialize the message into a <code>ByteString</code>.
+     *
+     * @return <code>Buffer</code> containing serialized message.
+     */
+    public ByteString serializeToByteString() {
+        final ByteStringBuilder b = ByteString.createBuilder();
+        if (_message instanceof Messages.HostIdentification) {
+            b.putByte((byte) 0x01);
+        } else if (_message instanceof Messages.HeartbeatRecord) {
+            b.putByte((byte) 0x03);
+        } else if (_message instanceof Messages.StatisticSetRecord) {
+            b.putByte((byte) 0x04);
+        } else if (_message instanceof Messages.SamplesSupportingData) {
+            b.putByte((byte) 0x05);
+            b.putByte((byte) 0x01);
+        } else if (_message instanceof Messages.SparseHistogramSupportingData) {
+            b.putByte((byte) 0x05);
+            b.putByte((byte) 0x02);
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Unsupported message; messageClass=%s", _message.getClass()));
+        }
+        try {
+            _message.writeTo(b.asOutputStream());
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+        final ByteString bs = b.result();
+        final ByteStringBuilder sizePrefix = ByteString.createBuilder();
+        sizePrefix.putInt(bs.size() + INTEGER_SIZE_IN_BYTES, ByteOrder.BIG_ENDIAN);
+        return sizePrefix.result().concat(bs);
     }
 
     public GeneratedMessage getMessage() {
