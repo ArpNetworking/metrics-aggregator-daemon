@@ -22,7 +22,6 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
-import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,6 +31,8 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -44,10 +45,69 @@ public class TelegrafJsonToRecordParserTest {
 
     @Test
     public void testParse() throws ParsingException, IOException {
-        final Record record = parseRecord("TelegrafJsonParserTest/testParse.json");
+        final Collection<Record> records = parseRecord("TelegrafJsonParserTest/testParse.json");
+
+        Assert.assertNotNull(records);
+        Assert.assertEquals(1, records.size());
+
+        final Record record = records.iterator().next();
+
+        verifyRecordOne(record);
+    }
+
+    @Test
+    public void testParseBatch() throws ParsingException, IOException {
+        final Collection<Record> records = parseRecord("TelegrafJsonParserTest/testBatch.json");
+
+        Assert.assertNotNull(records);
+        Assert.assertEquals(2, records.size());
+
+        final Iterator<Record> iterator = records.iterator();
+        final Record recordOne = iterator.next();
+        final Record recordTwo = iterator.next();
+
+        verifyRecordOne(recordOne);
+        verifyRecordTwo(recordTwo);
+    }
+
+    @Test
+    public void tesBlankName() throws ParsingException, IOException {
+        final Collection<Record> records = parseRecord("TelegrafJsonParserTest/testBlankName.json");
+
+        Assert.assertNotNull(records);
+        Assert.assertEquals(1, records.size());
+
+        final Record record = records.iterator().next();
 
         Assert.assertNotNull(record);
 
+        Assert.assertEquals(3, record.getDimensions().size());
+        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
+
+        Assert.assertEquals(0, record.getAnnotations().size());
+
+        final Map<String, ? extends Metric> map = record.getMetrics();
+        Assert.assertEquals(2, map.size());
+
+        final Metric t1 = map.get("foo.t1");
+        List<Quantity> vals = t1.getValues();
+        Assert.assertEquals(1, vals.size());
+        Assert.assertEquals(123d, vals.get(0).getValue(), 0.001);
+        Assert.assertFalse(vals.get(0).getUnit().isPresent());
+        Assert.assertEquals(MetricType.TIMER, t1.getType());
+
+        final Metric t2 = map.get("bar.t2");
+        vals = t2.getValues();
+        Assert.assertEquals(1, vals.size());
+        Assert.assertEquals(1.23d, vals.get(0).getValue(), 0.001);
+        Assert.assertFalse(vals.get(0).getUnit().isPresent());
+        Assert.assertEquals(MetricType.TIMER, t2.getType());
+    }
+
+
+    private void verifyRecordOne(final Record record) {
         Assert.assertNotNull(record.getAnnotations());
         Assert.assertEquals(0, record.getAnnotations().size());
 
@@ -99,45 +159,65 @@ public class TelegrafJsonToRecordParserTest {
         Assert.assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1458229140 * 1000d)), ZoneOffset.UTC), record.getTime());
     }
 
-    @Test
-    public void tesBlankName() throws ParsingException, IOException {
-        final Record record = parseRecord("TelegrafJsonParserTest/testBlankName.json");
-
-        Assert.assertNotNull(record);
-
-        Assert.assertEquals(3, record.getDimensions().size());
-        Assert.assertEquals("MyHost", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
-        Assert.assertEquals("MyService", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
-        Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
-
+    private void verifyRecordTwo(final Record record) {
+        Assert.assertNotNull(record.getAnnotations());
         Assert.assertEquals(0, record.getAnnotations().size());
 
-        final Map<String, ? extends Metric> map = record.getMetrics();
-        Assert.assertEquals(2, map.size());
+        Assert.assertEquals(5, record.getDimensions().size());
+        Assert.assertEquals("MyCluster2", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
+        Assert.assertEquals("MyService2", record.getDimensions().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyHost2", record.getDimensions().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("CA", record.getDimensions().get("region"));
+        Assert.assertEquals("foo", record.getDimensions().get("bar"));
 
-        final Metric t1 = map.get("foo.t1");
+        final Map<String, ? extends Metric> map = record.getMetrics();
+        Assert.assertEquals(5, map.size());
+
+        final Metric t1 = map.get("MyName2.t1");
         List<Quantity> vals = t1.getValues();
         Assert.assertEquals(1, vals.size());
-        Assert.assertEquals(123d, vals.get(0).getValue(), 0.001);
+        Assert.assertEquals(456d, vals.get(0).getValue(), 0.001);
         Assert.assertFalse(vals.get(0).getUnit().isPresent());
         Assert.assertEquals(MetricType.TIMER, t1.getType());
 
-        final Metric t2 = map.get("bar.t2");
+        final Metric t2 = map.get("MyName2.t2");
         vals = t2.getValues();
         Assert.assertEquals(1, vals.size());
-        Assert.assertEquals(1.23d, vals.get(0).getValue(), 0.001);
+        Assert.assertEquals(4.56d, vals.get(0).getValue(), 0.001);
         Assert.assertFalse(vals.get(0).getUnit().isPresent());
         Assert.assertEquals(MetricType.TIMER, t2.getType());
+
+        final Metric g1 = map.get("MyName2.g1");
+        vals = g1.getValues();
+        Assert.assertEquals(1, vals.size());
+        Assert.assertEquals(482d, vals.get(0).getValue(), 0.001);
+        Assert.assertFalse(vals.get(0).getUnit().isPresent());
+        Assert.assertEquals(MetricType.TIMER, g1.getType());
+
+        final Metric g2 = map.get("MyName2.g2");
+        vals = g2.getValues();
+        Assert.assertEquals(1, vals.size());
+        Assert.assertEquals(4.82d, vals.get(0).getValue(), 0.001);
+        Assert.assertFalse(vals.get(0).getUnit().isPresent());
+        Assert.assertEquals(MetricType.TIMER, g2.getType());
+
+        final Metric c1 = map.get("MyName2.c1");
+        vals = c1.getValues();
+        Assert.assertEquals(1, vals.size());
+        Assert.assertEquals(2d, vals.get(0).getValue(), 0.001);
+        Assert.assertFalse(vals.get(0).getUnit().isPresent());
+        Assert.assertEquals(MetricType.TIMER, c1.getType());
+
+        Assert.assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) (1458229140 * 1000d)), ZoneOffset.UTC), record.getTime());
     }
 
-    private static Record parseRecord(final String fileName) throws ParsingException, IOException {
-        return Iterables.getOnlyElement(
-                new TelegrafJsonToRecordParser.Builder()
-                        .build()
-                        .parse(ByteBuffer.wrap(
-                                Resources.toByteArray(
-                                        Resources.getResource(
-                                                TelegrafJsonToRecordParserTest.class,
-                                                fileName)))));
+    private static Collection<Record> parseRecord(final String fileName) throws ParsingException, IOException {
+        return new TelegrafJsonToRecordParser.Builder()
+                .build()
+                .parse(ByteBuffer.wrap(
+                        Resources.toByteArray(
+                                Resources.getResource(
+                                        TelegrafJsonToRecordParserTest.class,
+                                        fileName))));
     }
 }

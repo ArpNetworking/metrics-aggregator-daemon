@@ -28,6 +28,8 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.model.json.Telegraf;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -40,7 +42,6 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -110,30 +111,53 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
      */
     public List<Record> parse(final ByteBuffer record) throws ParsingException {
         try {
-            final Telegraf telegraf = OBJECT_MAPPER.readValue(record.array(), Telegraf.class);
-            final ImmutableMap.Builder<String, Metric> metrics = ImmutableMap.builder();
-            for (final Map.Entry<String, String> entry : telegraf.getFields().entrySet()) {
-                final @Nullable Double value = parseValue(entry.getValue());
-                if (value != null) {
-                    metrics.put(
-                            telegraf.getName().isEmpty() ? entry.getKey() : telegraf.getName() + "." + entry.getKey(),
-                            ThreadLocalBuilder.build(
-                                    DefaultMetric.Builder.class,
-                                    b1 -> b1.setType(MetricType.TIMER)
-                                    .setValues(ImmutableList.of(
-                                            ThreadLocalBuilder.build(
-                                                    Quantity.Builder.class,
-                                                    b2 -> b2.setValue(value))))));
-                }
+            // Parse into abstract json node structure to determine between
+            // batch and single metric telegraf json formats.
+            final JsonNode jsonNode;
+            try {
+                jsonNode = OBJECT_MAPPER.readTree(record.array());
+            } catch (final IOException e) {
+                throw new ParsingException("Invalid json", record.array(), e);
             }
-            final ZonedDateTime timestamp = _timestampUnit.create(telegraf.getTimestamp());
-            return Collections.singletonList(
-                    ThreadLocalBuilder.build(
-                            DefaultRecord.Builder.class,
-                            b -> b.setId(UUID_FACTORY.create().toString())
-                                    .setMetrics(metrics.build())
-                                    .setDimensions(telegraf.getTags())
-                                    .setTime(timestamp)));
+
+            final ImmutableList<Telegraf> telegrafList;
+            if (jsonNode.has(METRICS_JSON_KEY)) {
+                // Convoluted; see: https://github.com/FasterXML/jackson-databind/issues/1294
+                telegrafList = OBJECT_MAPPER.readValue(
+                        OBJECT_MAPPER.treeAsTokens(jsonNode.get(METRICS_JSON_KEY)),
+                        OBJECT_MAPPER.getTypeFactory().constructType(TELEGRAF_LIST_TYPE_REFERENCE));
+            } else {
+                final Telegraf telegraf = OBJECT_MAPPER.treeToValue(jsonNode, Telegraf.class);
+                telegrafList = ImmutableList.of(telegraf);
+            }
+
+            final ImmutableList.Builder<Record> records = ImmutableList.builder();
+            for (final Telegraf telegraf : telegrafList) {
+                final ImmutableMap.Builder<String, Metric> metrics = ImmutableMap.builder();
+                for (final Map.Entry<String, String> entry : telegraf.getFields().entrySet()) {
+                    final @Nullable Double value = parseValue(entry.getValue());
+                    if (value != null) {
+                        metrics.put(
+                                telegraf.getName().isEmpty() ? entry.getKey() : telegraf.getName() + "." + entry.getKey(),
+                                ThreadLocalBuilder.build(
+                                        DefaultMetric.Builder.class,
+                                        b1 -> b1.setType(MetricType.TIMER)
+                                                .setValues(ImmutableList.of(
+                                                        ThreadLocalBuilder.build(
+                                                                Quantity.Builder.class,
+                                                                b2 -> b2.setValue(value))))));
+                    }
+                }
+                final ZonedDateTime timestamp = _timestampUnit.create(telegraf.getTimestamp());
+                records.add(
+                        ThreadLocalBuilder.build(
+                                DefaultRecord.Builder.class,
+                                b -> b.setId(UUID_FACTORY.create().toString())
+                                        .setMetrics(metrics.build())
+                                        .setDimensions(telegraf.getTags())
+                                        .setTime(timestamp)));
+            }
+            return records.build();
         } catch (final IOException e) {
             throw new ParsingException("Invalid json", record.array(), e);
         }
@@ -161,6 +185,9 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
     private static final UuidFactory UUID_FACTORY = new SplittableRandomUuidFactory();
     private static final ThreadLocal<NumberFormat> NUMBER_FORMAT = ThreadLocal.withInitial(NumberFormat::getInstance);
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
+    private static final TypeReference<ImmutableList<Telegraf>> TELEGRAF_LIST_TYPE_REFERENCE =
+            new TypeReference<ImmutableList<Telegraf>>() {};
+    private static final String METRICS_JSON_KEY = "metrics";
 
     /**
      * Implementation of <code>Builder</code> for {@link TelegrafJsonToRecordParser}.
