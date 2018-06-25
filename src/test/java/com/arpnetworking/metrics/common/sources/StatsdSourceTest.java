@@ -66,6 +66,7 @@ public final class StatsdSourceTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void test() {
         final StatsdSource statsdSource = new StatsdSource.Builder()
                 .setActorSystem(_actorSystem)

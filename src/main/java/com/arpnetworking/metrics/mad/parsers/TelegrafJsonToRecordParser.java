@@ -258,7 +258,7 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
         NANOSECONDS {
             @Override
             public ZonedDateTime create(final long timestamp) {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp * 1000000), ZoneOffset.UTC);
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp / 1000000), ZoneOffset.UTC);
             }
         };
 
