@@ -72,7 +72,8 @@ public abstract class BaseTcpSource extends ActorSource {
 
         @Override
         public void preStart() {
-            _tcpManager.tell(
+            final ActorRef tcpManager = Tcp.get(getContext().system()).manager();
+            tcpManager.tell(
                     TcpMessage.bind(
                             getSelf(),
                             new InetSocketAddress(_host, _port),
@@ -87,24 +88,24 @@ public abstract class BaseTcpSource extends ActorSource {
                         getSender().tell(_isReady, getSelf());
                     })
                     .match(Tcp.Bound.class, tcpBound -> {
-                        _isReady = true;
-                        _tcpManager.tell(tcpBound, getSelf());
                         LOGGER.info()
                                 .setMessage("Tcp server binding complete")
                                 .addData("name", _sink.getName())
                                 .addData("address", tcpBound.localAddress().getAddress().getHostAddress())
                                 .addData("port", tcpBound.localAddress().getPort())
                                 .log();
+
+                        _isReady = true;
                     })
                     .match(Tcp.CommandFailed.class, failed -> {
-                        getContext().stop(getSelf());
                         LOGGER.warn()
                                 .setMessage("Tcp server bad command")
                                 .addData("name", _sink.getName())
                                 .log();
+
+                        getContext().stop(getSelf());
                     })
                     .match(Tcp.Connected.class, tcpConnected -> {
-                        _tcpManager.tell(tcpConnected, getSelf());
                         LOGGER.debug()
                                 .setMessage("Tcp connection established")
                                 .addData("name", _sink.getName())
@@ -141,8 +142,6 @@ public abstract class BaseTcpSource extends ActorSource {
             _host = source._host;
             _port = source._port;
             _acceptQueue = source._acceptQueue;
-
-            _tcpManager = Tcp.get(getContext().system()).manager();
         }
 
         private boolean _isReady = false;
@@ -150,7 +149,6 @@ public abstract class BaseTcpSource extends ActorSource {
         private final String _host;
         private final int _port;
         private final int _acceptQueue;
-        private final ActorRef _tcpManager;
 
         private static final String IS_READY = "IsReady";
     }
