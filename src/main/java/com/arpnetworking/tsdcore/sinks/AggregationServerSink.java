@@ -26,13 +26,12 @@ import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.tsdcore.statistics.HistogramStatistic;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
-import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Publisher to send data to an upstream aggregation server.
@@ -72,28 +71,17 @@ public final class AggregationServerSink extends VertxSink {
             final String metricName,
             final Collection<AggregatedData> data) {
 
-        // Map all dimensions
-        final List<Messages.DimensionEntry> dimensions = Lists.newArrayList();
-        for (final Map.Entry<String, String> entry : periodicData.getDimensions().getParameters().entrySet()) {
-            dimensions.add(
-                    Messages.DimensionEntry.newBuilder()
-                            .setKey(entry.getKey())
-                            .setValue(entry.getValue())
-                            .build()
-            );
-        }
-
         // Create a statistic record set
         final Messages.StatisticSetRecord.Builder builder = Messages.StatisticSetRecord.newBuilder()
                 .setMetric(metricName)
                 .setPeriod(periodicData.getPeriod().toString())
                 .setPeriodStart(periodicData.getStart().toString())
-                .addAllDimensions(dimensions)
+                .putAllDimensions(periodicData.getDimensions().getParameters())
                 .setCluster(periodicData.getDimensions().getCluster())
                 .setService(periodicData.getDimensions().getService());
 
         for (final AggregatedData datum : data) {
-            if (EXPRESSION_STATISTIC.equals(datum.getStatistic())) {
+            if (Objects.equals(EXPRESSION_STATISTIC, datum.getStatistic())) {
                 continue;
             }
 
@@ -165,7 +153,7 @@ public final class AggregationServerSink extends VertxSink {
 
     private AggregationServerSink(final Builder builder) {
         super(builder);
-        super.getVertx().setPeriodic(15000, event -> {
+        super.getVertx().setPeriodic(HEARTBEAT_INTERVAL_MILLISECONDS, event -> {
             LOGGER.trace()
                     .setMessage("Heartbeat tick")
                     .addData("sink", getName())
@@ -176,10 +164,11 @@ public final class AggregationServerSink extends VertxSink {
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic EXPRESSION_STATISTIC = STATISTIC_FACTORY.getStatistic("expression");
+    private static final int HEARTBEAT_INTERVAL_MILLISECONDS = 15000;
     private static final Logger LOGGER = LoggerFactory.getLogger(AggregationServerSink.class);
 
     /**
-     * Implementation of builder pattern for <code>AggreationServerSink</code>.
+     * Implementation of builder pattern for ${code AggreationServerSink}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
@@ -190,12 +179,14 @@ public final class AggregationServerSink extends VertxSink {
          */
         public Builder() {
             super(AggregationServerSink::new);
-            setServerPort(7065);
+            setServerPort(DEFAULT_PORT);
         }
 
         @Override
         protected Builder self() {
             return this;
         }
+
+        private static final int DEFAULT_PORT = 7065;
     }
 }

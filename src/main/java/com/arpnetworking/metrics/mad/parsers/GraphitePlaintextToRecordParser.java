@@ -28,6 +28,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
 
 import java.nio.ByteBuffer;
@@ -139,7 +140,9 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
         return recordListBuilder.build();
     }
 
-    private String parseName(final ByteBuffer datagram, @Nullable final String name) throws ParsingException {
+    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
+    // See: https://github.com/findbugsproject/findbugs/issues/79
+    private String parseName(final ByteBuffer datagram, final @Nullable String name) throws ParsingException {
         if (Strings.isNullOrEmpty(name)) {
             throw new ParsingException("Name not found or empty", datagram.array());
         }
@@ -148,7 +151,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
 
     private Number parseValue(
             final ByteBuffer datagram,
-            @Nullable final String valueAsString)
+            final @Nullable String valueAsString)
             throws ParsingException {
         try {
             if (valueAsString == null) {
@@ -163,7 +166,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
 
     private ZonedDateTime parseTimestamp(
             final ByteBuffer datagram,
-            @Nullable final String timestampAsString,
+            final @Nullable String timestampAsString,
             final ZonedDateTime now)
             throws ParsingException {
         if (null != timestampAsString) {

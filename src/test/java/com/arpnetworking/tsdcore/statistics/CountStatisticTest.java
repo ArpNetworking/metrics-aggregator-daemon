@@ -41,7 +41,7 @@ public class CountStatisticTest {
     public void testAliases() {
         final Statistic statistic = COUNT_STATISTIC;
         Assert.assertEquals(1, statistic.getAliases().size());
-        Assert.assertEquals("n", Iterables.getFirst(statistic.getAliases(), null));
+        Assert.assertEquals("n", Iterables.getOnlyElement(statistic.getAliases()));
     }
 
     @Test

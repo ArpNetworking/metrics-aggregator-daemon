@@ -51,7 +51,6 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.utility.Configurator;
 import com.arpnetworking.utility.Launchable;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -139,7 +138,7 @@ public final class Main implements Launchable {
                     .addListener(configurator.get())
                     .build());
 
-            configuration.get().launch();
+            configuration.ifPresent(DynamicConfiguration::launch);
             // Wait for application shutdown
             SHUTDOWN_SEMAPHORE.acquire();
         } catch (final InterruptedException e) {
@@ -155,7 +154,7 @@ public final class Main implements Launchable {
     /**
      * Public constructor.
      *
-     * @param configuration Instance of <code>TsdAggregatorConfiguration</code>.
+     * @param configuration Instance of {@link AggregatorConfiguration}.
      */
     public Main(final AggregatorConfiguration configuration) {
         _configuration = configuration;
@@ -214,9 +213,8 @@ public final class Main implements Launchable {
 
         // Load supplemental routes
         final ImmutableList.Builder<SupplementalRoutes> supplementalHttpRoutes = ImmutableList.builder();
-        _configuration.getSupplementalHttpRoutesClass().ifPresent(clazz -> {
-                supplementalHttpRoutes.add(injector.getInstance(clazz));
-        });
+        _configuration.getSupplementalHttpRoutesClass().ifPresent(
+                clazz -> supplementalHttpRoutes.add(injector.getInstance(clazz)));
 
         // Create and bind Http server
         final Materializer materializer = ActorMaterializer.create(actorSystem);
@@ -379,7 +377,6 @@ public final class Main implements Launchable {
             _pipelinesExecutor = null;
 
             _fileToPipelineLaunchables.keySet()
-                    .stream()
                     .forEach(this::shutdownPipeline);
             _fileToPipelineLaunchables.clear();
         }
@@ -389,7 +386,7 @@ public final class Main implements Launchable {
             final boolean exists = _directory.exists() && _directory.isDirectory();
             if (exists) {
                 final Set<File> missingFiles = Sets.newHashSet(_fileToPipelineLaunchables.keySet());
-                for (final File file : MoreObjects.firstNonNull(_directory.listFiles(), EMPTY_FILE_ARRAY)) {
+                for (final File file : Optional.ofNullable(_directory.listFiles()).orElse(EMPTY_FILE_ARRAY)) {
                     missingFiles.remove(file);
                     if (!_fileToPipelineLaunchables.containsKey(file)) {
                         launchPipeline(file);
