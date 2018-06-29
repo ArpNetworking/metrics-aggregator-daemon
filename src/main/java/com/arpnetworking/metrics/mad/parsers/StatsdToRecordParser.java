@@ -117,8 +117,8 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
 
     private StatsdType parseStatsdType(
             final ByteBuffer datagram,
-            final @Nullable String statsdTypeAsString) throws ParsingException {
-        final @Nullable StatsdType type = StatsdType.fromToken(statsdTypeAsString);
+            @Nullable final String statsdTypeAsString) throws ParsingException {
+        @Nullable final StatsdType type = StatsdType.fromToken(statsdTypeAsString);
         if (type == null) {
             throw new ParsingException("Type not found or unsupported", datagram.array());
         }
@@ -127,7 +127,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
 
     @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
     // See: https://github.com/findbugsproject/findbugs/issues/79
-    private String parseName(final ByteBuffer datagram, final @Nullable String name) throws ParsingException {
+    private String parseName(final ByteBuffer datagram, @Nullable final String name) throws ParsingException {
         if (Strings.isNullOrEmpty(name)) {
             throw new ParsingException("Name not found or empty", datagram.array());
         }
@@ -136,7 +136,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
 
     private Number parseValue(
             final ByteBuffer datagram,
-            final @Nullable String valueAsString,
+            @Nullable final String valueAsString,
             final StatsdType type) throws ParsingException {
         try {
             if (Objects.equals(StatsdType.METERS, type) && valueAsString == null) {
@@ -153,7 +153,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
 
     @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
     // See: https://github.com/findbugsproject/findbugs/issues/79
-    private ImmutableMap<String, String> parseTags(final @Nullable String taqsAsString) {
+    private ImmutableMap<String, String> parseTags(@Nullable final String taqsAsString) {
         final ImmutableMap.Builder<String, String> annotations = ImmutableMap.builder();
         if (null != taqsAsString) {
             for (final String keyValue : taqsAsString.split(",")) {
@@ -168,7 +168,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
 
     private Optional<Double> parseSampleRate(
             final ByteBuffer datagram,
-            final @Nullable String sampleRateAsString,
+            @Nullable final String sampleRateAsString,
             final StatsdType type) throws ParsingException {
         try {
             if (sampleRateAsString != null) {
@@ -250,14 +250,14 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
 
         private final String _token;
         private final MetricType _metricType;
-        private final @Nullable Unit _unit;
+        private @Nullable final Unit _unit;
 
         private static final Map<String, StatsdType> TOKEN_TO_TYPE = Maps.newHashMap();
 
         /* package private */ StatsdType(
                 final String token,
                 final MetricType metricType,
-                final @Nullable Unit unit) {
+                @Nullable final Unit unit) {
             _token = token;
             _metricType = metricType;
             _unit = unit;

@@ -207,7 +207,7 @@ public final class HistogramStatistic extends BaseStatistic {
              * @param value the unit
              * @return This {@link Builder} instance.
              */
-            public Builder setUnit(final @Nullable Unit value) {
+            public Builder setUnit(@Nullable final Unit value) {
                 _unit = value;
                 return this;
             }

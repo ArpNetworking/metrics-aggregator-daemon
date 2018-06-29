@@ -142,7 +142,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
 
     @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
     // See: https://github.com/findbugsproject/findbugs/issues/79
-    private String parseName(final ByteBuffer datagram, final @Nullable String name) throws ParsingException {
+    private String parseName(final ByteBuffer datagram, @Nullable final String name) throws ParsingException {
         if (Strings.isNullOrEmpty(name)) {
             throw new ParsingException("Name not found or empty", datagram.array());
         }
@@ -151,7 +151,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
 
     private Number parseValue(
             final ByteBuffer datagram,
-            final @Nullable String valueAsString)
+            @Nullable final String valueAsString)
             throws ParsingException {
         try {
             if (valueAsString == null) {
@@ -166,7 +166,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
 
     private ZonedDateTime parseTimestamp(
             final ByteBuffer datagram,
-            final @Nullable String timestampAsString,
+            @Nullable final String timestampAsString,
             final ZonedDateTime now)
             throws ParsingException {
         if (null != timestampAsString) {

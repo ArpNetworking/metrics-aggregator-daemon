@@ -280,7 +280,7 @@ public class BucketTest {
 
     private static final class AbsentStatisticCacheLoader extends CacheLoader<String, Optional<ImmutableSet<Statistic>>> {
         @Override
-        public Optional<ImmutableSet<Statistic>> load(final @Nullable String key) {
+        public Optional<ImmutableSet<Statistic>> load(@Nullable final String key) {
             return Optional.empty();
         }
     }
