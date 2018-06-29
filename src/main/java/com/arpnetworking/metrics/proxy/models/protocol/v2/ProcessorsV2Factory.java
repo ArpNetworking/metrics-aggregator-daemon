@@ -19,7 +19,6 @@ import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.proxy.actors.Connection;
 import com.arpnetworking.metrics.proxy.models.protocol.MessageProcessorsFactory;
 import com.arpnetworking.metrics.proxy.models.protocol.MessagesProcessor;
-import com.arpnetworking.metrics.proxy.models.protocol.v1.HeartbeatMessagesProcessor;
 import com.google.common.collect.Lists;
 
 import java.util.List;
