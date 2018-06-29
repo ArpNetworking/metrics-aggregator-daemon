@@ -72,7 +72,7 @@ public final class ReflectionsDatabase implements InterfaceDatabase, AnnotationD
     }
 
     // NOTE: Package private for testing
-    /* package private */ReflectionsDatabase(final Reflections reflections) {
+    ReflectionsDatabase(final Reflections reflections) {
         _reflections = reflections;
     }
 

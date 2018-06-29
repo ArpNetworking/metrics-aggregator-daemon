@@ -59,7 +59,7 @@ import java.util.function.BiFunction;
 *
 * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
 */
-/* package private */ final class Bucket {
+final class Bucket {
 
     /**
      * Close the bucket. The aggregates for each metric are emitted to the sink.
@@ -410,7 +410,7 @@ import java.util.function.BiFunction;
         /**
          * Public constructor.
          */
-        /* package private */ Builder() {
+        Builder() {
             super(Bucket::new);
         }
 

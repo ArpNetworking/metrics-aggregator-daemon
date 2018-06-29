@@ -146,9 +146,9 @@ public final class FileSourcesManager extends AbstractActor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSourcesManager.class);
 
-    /* package private */ static final class LogFileObserver implements Observer {
+    static final class LogFileObserver implements Observer {
 
-        /* package private */ LogFileObserver(final ActorRef streamContextActor, final ActorRef messageSender) {
+        LogFileObserver(final ActorRef streamContextActor, final ActorRef messageSender) {
             _streamContextActor = streamContextActor;
             _messageSender = messageSender;
         }

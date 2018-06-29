@@ -45,7 +45,7 @@ public final class JsonNodeLiteralSource extends BaseJsonNodeSource {
                 .build();
     }
 
-    /* package private */ Optional<JsonNode> getJsonNode() {
+    Optional<JsonNode> getJsonNode() {
         return _jsonNode;
     }
 

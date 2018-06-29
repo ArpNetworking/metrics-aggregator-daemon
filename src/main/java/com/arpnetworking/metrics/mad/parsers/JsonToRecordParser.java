@@ -128,7 +128,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     }
 
     // NOTE: Package private for testing
-    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2cLogLine(final JsonNode jsonNode)
+    com.arpnetworking.metrics.mad.model.Record parseV2cLogLine(final JsonNode jsonNode)
             throws JsonProcessingException {
 
         final Version2c model = OBJECT_MAPPER.treeToValue(jsonNode, Version2c.class);
@@ -156,7 +156,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     }
 
     // NOTE: Package private for testing
-    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2dLogLine(final JsonNode jsonNode)
+    com.arpnetworking.metrics.mad.model.Record parseV2dLogLine(final JsonNode jsonNode)
             throws JsonProcessingException {
 
         final Version2d model = OBJECT_MAPPER.treeToValue(jsonNode, Version2d.class);
@@ -184,7 +184,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     }
 
     // NOTE: Package private for testing
-    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2eLogLine(final JsonNode jsonNode)
+    com.arpnetworking.metrics.mad.model.Record parseV2eLogLine(final JsonNode jsonNode)
             throws JsonProcessingException {
 
         final Version2e model = OBJECT_MAPPER.treeToValue(jsonNode, Version2e.class);
@@ -213,7 +213,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     }
 
     // NOTE: Package private for testing
-    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2fLogLine(final JsonNode jsonNode)
+    com.arpnetworking.metrics.mad.model.Record parseV2fLogLine(final JsonNode jsonNode)
             throws JsonProcessingException {
 
         final Version2f model = OBJECT_MAPPER.treeToValue(jsonNode, Version2f.class);
@@ -234,7 +234,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     }
 
     // NOTE: Package private for testing
-    /* package private */ com.arpnetworking.metrics.mad.model.Record parseV2fStenoLogLine(final JsonNode jsonNode)
+    com.arpnetworking.metrics.mad.model.Record parseV2fStenoLogLine(final JsonNode jsonNode)
             throws JsonProcessingException {
 
         final Version2fSteno model = OBJECT_MAPPER.treeToValue(jsonNode, Version2fSteno.class);
@@ -262,7 +262,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     }
 
     // NOTE: Package private for testing
-    /* package private */com.arpnetworking.metrics.mad.model.Record parseV2gLogLine(final JsonNode jsonNode)
+    com.arpnetworking.metrics.mad.model.Record parseV2gLogLine(final JsonNode jsonNode)
             throws JsonProcessingException {
 
         final Version2g model = OBJECT_MAPPER.treeToValue(jsonNode, Version2g.class);

@@ -21,7 +21,7 @@ package com.arpnetworking.tsdcore.model;
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
-/* package private */ enum Type {
+enum Type {
     TIME {
         @Override
         public Unit getDefaultUnit() {

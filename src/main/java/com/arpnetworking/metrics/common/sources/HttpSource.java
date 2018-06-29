@@ -81,14 +81,14 @@ public class HttpSource extends ActorSource {
     /**
      * Internal actor to process requests.
      */
-    /* package private */ static final class Actor extends AbstractActor {
+    static final class Actor extends AbstractActor {
         /**
          * Creates a {@link Props} for this actor.
          *
          * @param source The {@link HttpSource} to send notifications through.
          * @return A new {@link Props}
          */
-        /* package private */ static Props props(final HttpSource source) {
+        static Props props(final HttpSource source) {
             return Props.create(Actor.class, source);
         }
 
@@ -126,7 +126,7 @@ public class HttpSource extends ActorSource {
          *
          * @param source The {@link HttpSource} to send notifications through.
          */
-        /* package private */ Actor(final HttpSource source) {
+        Actor(final HttpSource source) {
             _parser = source._parser;
             _sink = Sink.foreach(source::notify);
             _materializer = ActorMaterializer.create(

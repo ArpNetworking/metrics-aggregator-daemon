@@ -76,15 +76,15 @@ public class Reconfigurator<T extends Relaunchable<? super S>, S> implements Lis
         return toLogValue().toString();
     }
 
-    /* package private */ synchronized Relaunchable<S> getRelaunchable() {
+    synchronized Relaunchable<S> getRelaunchable() {
         return _relaunchable;
     }
 
-    /* package private */ synchronized Optional<S> getConfiguration() {
+    synchronized Optional<S> getConfiguration() {
         return _configuration;
     }
 
-    /* package private */ synchronized Optional<S> getOfferedConfiguration() {
+    synchronized Optional<S> getOfferedConfiguration() {
         return _offeredConfiguration;
     }
 
