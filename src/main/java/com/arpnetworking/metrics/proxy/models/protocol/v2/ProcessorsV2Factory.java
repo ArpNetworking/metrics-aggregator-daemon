@@ -34,7 +34,6 @@ public class ProcessorsV2Factory implements MessageProcessorsFactory {
     public List<MessagesProcessor> create(final Connection connection, final PeriodicMetrics metrics) {
         return Lists.newArrayList(
                 new HeartbeatMessagesProcessor(connection, metrics),
-                new LogMessagesProcessor(connection, metrics),
                 new MetricMessagesProcessor(connection, metrics)
         );
     }
