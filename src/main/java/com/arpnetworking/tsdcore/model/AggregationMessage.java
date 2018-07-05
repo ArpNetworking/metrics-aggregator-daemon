@@ -19,7 +19,6 @@ import akka.util.ByteString;
 import akka.util.ByteStringBuilder;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.google.protobuf.GeneratedMessage;
-import org.vertx.java.core.buffer.Buffer;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
@@ -39,34 +38,6 @@ public final class AggregationMessage {
      */
     public static AggregationMessage create(final GeneratedMessage message) {
         return new AggregationMessage(message);
-    }
-
-    /**
-     * Serialize the message into a <code>Buffer</code>.
-     *
-     * @return <code>Buffer</code> containing serialized message.
-     */
-    public Buffer serializeToBuffer() {
-        final Buffer b = new Buffer();
-        b.appendInt(0);
-        if (_message instanceof Messages.HostIdentification) {
-            b.appendByte((byte) 0x01);
-        } else if (_message instanceof Messages.HeartbeatRecord) {
-            b.appendByte((byte) 0x03);
-        } else if (_message instanceof Messages.StatisticSetRecord) {
-            b.appendByte((byte) 0x04);
-        } else if (_message instanceof Messages.SamplesSupportingData) {
-            b.appendByte((byte) 0x05);
-            b.appendByte((byte) 0x01);
-        } else if (_message instanceof Messages.SparseHistogramSupportingData) {
-            b.appendByte((byte) 0x05);
-            b.appendByte((byte) 0x02);
-        } else {
-            throw new IllegalArgumentException(String.format("Unsupported message; message=%s", _message));
-        }
-        b.appendBytes(_message.toByteArray());
-        b.setInt(0, b.length());
-        return b;
     }
 
     /**
