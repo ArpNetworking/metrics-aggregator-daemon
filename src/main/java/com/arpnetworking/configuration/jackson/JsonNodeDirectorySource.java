@@ -58,7 +58,7 @@ public final class JsonNodeDirectorySource extends BaseJsonNodeSource {
                 .build();
     }
 
-    /* package private */ Optional<JsonNode> getJsonNode() {
+    Optional<JsonNode> getJsonNode() {
         return _jsonNode;
     }
 

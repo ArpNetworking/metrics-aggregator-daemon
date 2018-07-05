@@ -54,7 +54,7 @@ public final class JsonNodePaginatedUriSource extends BaseJsonNodeSource {
     }
 
 
-    /* package private */ Optional<JsonNode> getJsonNode() {
+    Optional<JsonNode> getJsonNode() {
         return _mergingSource.getValue(_dataKeys);
     }
 

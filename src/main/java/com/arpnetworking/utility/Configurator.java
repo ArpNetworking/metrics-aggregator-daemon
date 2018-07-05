@@ -99,15 +99,15 @@ public class Configurator<T extends Launchable, S> implements Listener, Launchab
     }
 
 
-    /* package private */ synchronized Optional<T> getLaunchable() {
+    synchronized Optional<T> getLaunchable() {
         return _launchable;
     }
 
-    /* package private */ synchronized Optional<S>  getConfiguration() {
+    synchronized Optional<S>  getConfiguration() {
         return _configuration;
     }
 
-    /* package private */ synchronized Optional<S> getOfferedConfiguration() {
+    synchronized Optional<S> getOfferedConfiguration() {
         return _offeredConfiguration;
     }
 

@@ -97,9 +97,9 @@ public final class MappingSource extends BaseSource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingSource.class);
 
     // NOTE: Package private for testing
-    /* package private */ static final class MappingObserver implements Observer {
+    static final class MappingObserver implements Observer {
 
-        /* package private */ MappingObserver(final MappingSource source, final Map<Pattern, List<String>> findAndReplace) {
+        MappingObserver(final MappingSource source, final Map<Pattern, List<String>> findAndReplace) {
             _source = source;
             _findAndReplace = findAndReplace;
         }
@@ -176,9 +176,9 @@ public final class MappingSource extends BaseSource {
     }
 
     // NOTE: Package private for testing
-    /* package private */ static final class MergingMetric implements Metric {
+    static final class MergingMetric implements Metric {
 
-        /* package private */ MergingMetric(final Metric metric) {
+        MergingMetric(final Metric metric) {
             _type = metric.getType();
             _values.addAll(metric.getValues());
         }
