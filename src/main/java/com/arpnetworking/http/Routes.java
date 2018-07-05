@@ -41,7 +41,6 @@ import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import akka.util.Timeout;
 import com.arpnetworking.metrics.Units;
-import com.arpnetworking.metrics.common.sources.ClientHttpSourceV1;
 import com.arpnetworking.metrics.common.sources.ClientHttpSourceV2;
 import com.arpnetworking.metrics.common.sources.CollectdHttpSourceV1;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
@@ -181,8 +180,6 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                 return dispatchHttpRequest(request, ACTOR_COLLECTD_V1);
             } else if (Objects.equals(path, APP_V2_SOURCE_PREFIX)) {
                 return dispatchHttpRequest(request, ACTOR_APP_V2);
-            } else if (Objects.equals(path, APP_V1_SOURCE_PREFIX)) {
-                return dispatchHttpRequest(request, ACTOR_APP_V1);
             }
         }
 
@@ -306,10 +303,8 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private static final ProcessorsV2Factory TELEMETRY_V2_FACTORY = new ProcessorsV2Factory();
     private static final String TELEMETRY_STREAM_V2_PATH = "/telemetry/v2/stream";
     private static final String COLLECTD_V1_SOURCE_PREFIX = "/metrics/v1/collectd";
-    private static final String APP_V1_SOURCE_PREFIX = "/metrics/v1/application";
     private static final String APP_V2_SOURCE_PREFIX = "/metrics/v2/application";
     private static final String ACTOR_COLLECTD_V1 = "/user/" + CollectdHttpSourceV1.ACTOR_NAME;
-    private static final String ACTOR_APP_V1 = "/user/" + ClientHttpSourceV1.ACTOR_NAME;
     private static final String ACTOR_APP_V2 = "/user/" + ClientHttpSourceV2.ACTOR_NAME;
     private static final String REST_SERVICE_METRIC_ROOT = "rest_service/";
     private static final String BODY_SIZE_METRIC = "body_size";
