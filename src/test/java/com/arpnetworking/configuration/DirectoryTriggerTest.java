@@ -17,7 +17,6 @@ package com.arpnetworking.configuration;
 
 import com.arpnetworking.configuration.triggers.DirectoryTrigger;
 import com.google.common.base.Charsets;
-import com.google.common.base.MoreObjects;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,10 +24,11 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * Tests for the <code>DirectoryTrigger</code> class.
+ * Tests for the ${link DirectoryTrigger} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
@@ -100,7 +100,7 @@ public class DirectoryTriggerTest {
     }
 
     @Test
-    public void testDirectoryChangedFileCreated() throws IOException, InterruptedException {
+    public void testDirectoryChangedFileCreated() throws IOException {
         final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testDirectoryChangedFileCreated");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
@@ -140,7 +140,7 @@ public class DirectoryTriggerTest {
     }
 
     @Test
-    public void testDirectoryChangedFileDeleted() throws IOException, InterruptedException {
+    public void testDirectoryChangedFileDeleted() throws IOException {
         final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testDirectoryChangedFileDeleted");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
@@ -160,7 +160,7 @@ public class DirectoryTriggerTest {
     }
 
     @Test
-    public void testOnlyMatchedName() throws IOException, InterruptedException {
+    public void testOnlyMatchedName() throws IOException {
         final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testIgnoreUnmatchedName");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
@@ -181,7 +181,7 @@ public class DirectoryTriggerTest {
     }
 
     @Test
-    public void testOnlyMatchedNamePattern() throws IOException, InterruptedException {
+    public void testOnlyMatchedNamePattern() throws IOException {
         final File directory = new File("./target/tmp/filter/DirectoryTriggerTest/testIgnoreUnmatchedNamePattern");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
@@ -203,7 +203,7 @@ public class DirectoryTriggerTest {
 
     private static void deleteDirectory(final File directory) throws IOException {
         if (directory.exists() && directory.isDirectory()) {
-            for (final File file : MoreObjects.firstNonNull(directory.listFiles(), new File[0])) {
+            for (final File file : Optional.ofNullable(directory.listFiles()).orElse(new File[0])) {
                 Files.deleteIfExists(file.toPath());
             }
         }

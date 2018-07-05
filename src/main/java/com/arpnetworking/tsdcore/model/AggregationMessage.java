@@ -18,7 +18,7 @@ package com.arpnetworking.tsdcore.model;
 import akka.util.ByteString;
 import akka.util.ByteStringBuilder;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageV3;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
@@ -34,16 +34,16 @@ public final class AggregationMessage {
      * Static factory.
      *
      * @param message The message.
-     * @return New <code>AggregationMessage</code> instance.
+     * @return New ${link AggregationMessage} instance.
      */
-    public static AggregationMessage create(final GeneratedMessage message) {
+    public static AggregationMessage create(final GeneratedMessageV3 message) {
         return new AggregationMessage(message);
     }
 
     /**
-     * Serialize the message into a <code>ByteString</code>.
+     * Serialize the message into a ${code ByteString}.
      *
-     * @return <code>Buffer</code> containing serialized message.
+     * @return ${code ByteString} containing serialized message.
      */
     public ByteString serializeToByteString() {
         final ByteStringBuilder b = ByteString.createBuilder();
@@ -74,7 +74,7 @@ public final class AggregationMessage {
         return sizePrefix.result().concat(bs);
     }
 
-    public GeneratedMessage getMessage() {
+    public GeneratedMessageV3 getMessage() {
         return _message;
     }
 
@@ -82,11 +82,11 @@ public final class AggregationMessage {
         return _message.getSerializedSize() + HEADER_SIZE_IN_BYTES;
     }
 
-    private AggregationMessage(final GeneratedMessage message) {
+    private AggregationMessage(final GeneratedMessageV3 message) {
         _message = message;
     }
 
-    private final GeneratedMessage _message;
+    private final GeneratedMessageV3 _message;
 
     private static final int INTEGER_SIZE_IN_BYTES = Integer.SIZE / 8;
     private static final int HEADER_SIZE_IN_BYTES = INTEGER_SIZE_IN_BYTES + 1;

@@ -28,6 +28,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
 
 import java.nio.ByteBuffer;
@@ -139,6 +140,8 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
         return recordListBuilder.build();
     }
 
+    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
+    // See: https://github.com/findbugsproject/findbugs/issues/79
     private String parseName(final ByteBuffer datagram, @Nullable final String name) throws ParsingException {
         if (Strings.isNullOrEmpty(name)) {
             throw new ParsingException("Name not found or empty", datagram.array());
