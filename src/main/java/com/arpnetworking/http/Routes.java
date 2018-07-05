@@ -49,7 +49,6 @@ import com.arpnetworking.metrics.mad.actors.Status;
 import com.arpnetworking.metrics.proxy.actors.Connection;
 import com.arpnetworking.metrics.proxy.models.messages.Connect;
 import com.arpnetworking.metrics.proxy.models.protocol.MessageProcessorsFactory;
-import com.arpnetworking.metrics.proxy.models.protocol.v1.ProcessorsV1Factory;
 import com.arpnetworking.metrics.proxy.models.protocol.v2.ProcessorsV2Factory;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
@@ -156,9 +155,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private CompletionStage<HttpResponse> process(final HttpRequest request) {
         final String path = request.getUri().path();
         if (Objects.equals(HttpMethods.GET, request.method())) {
-            if (Objects.equals(TELEMETRY_STREAM_V1_PATH, path)) {
-                return getHttpResponseForTelemetry(request, TELEMETRY_V1_FACTORY);
-            } else if (Objects.equals(TELEMETRY_STREAM_V2_PATH, path)) {
+            if (Objects.equals(TELEMETRY_STREAM_V2_PATH, path)) {
                 return getHttpResponseForTelemetry(request, TELEMETRY_V2_FACTORY);
             } else if (Objects.equals(_healthCheckPath, path)) {
                 return ask("/user/status", Status.IS_HEALTHY, Boolean.FALSE)
@@ -247,11 +244,11 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
             final ActorRef connection = _actorSystem.actorOf(Connection.props(_metrics, messageProcessorsFactory));
             final Sink<Message, ?> inChannel = Sink.actorRef(connection, PoisonPill.getInstance());
             final Source<Message, ActorRef> outChannel = Source.<Message>actorRef(TELEMETRY_BUFFER_SIZE, OverflowStrategy.dropBuffer())
-                    .<ActorRef>mapMaterializedValue(channel -> {
+                    .mapMaterializedValue(channel -> {
                         _actorSystem.actorSelection("/user/telemetry").resolveOne(Timeout.apply(1, TimeUnit.SECONDS)).onSuccess(
                                 new JavaPartialFunction<ActorRef, Object>() {
                                     @Override
-                                    public Object apply(final ActorRef telemetry, final boolean isCheck) throws Exception {
+                                    public Object apply(final ActorRef telemetry, final boolean isCheck) {
                                         final Connect connectMessage = new Connect(telemetry, connection, channel);
                                         connection.tell(connectMessage, ActorRef.noSender());
                                         telemetry.tell(connectMessage, ActorRef.noSender());
@@ -306,9 +303,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
 
     // Telemetry
     private static final int TELEMETRY_BUFFER_SIZE = 256;
-    private static final ProcessorsV1Factory TELEMETRY_V1_FACTORY = new ProcessorsV1Factory();
     private static final ProcessorsV2Factory TELEMETRY_V2_FACTORY = new ProcessorsV2Factory();
-    private static final String TELEMETRY_STREAM_V1_PATH = "/telemetry/v1/stream";
     private static final String TELEMETRY_STREAM_V2_PATH = "/telemetry/v2/stream";
     private static final String COLLECTD_V1_SOURCE_PREFIX = "/metrics/v1/collectd";
     private static final String APP_V1_SOURCE_PREFIX = "/metrics/v1/application";
