@@ -99,7 +99,7 @@ public final class FileSource<T> extends BaseSource {
     }
 
     // NOTE: Package private for testing
-    /* package private */ FileSource(final Builder<T> builder, final Logger logger) {
+    FileSource(final Builder<T> builder, final Logger logger) {
         super(builder);
         _logger = logger;
         _parser = builder._parser;

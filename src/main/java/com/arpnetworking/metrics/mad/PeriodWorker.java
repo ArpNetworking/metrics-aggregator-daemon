@@ -41,7 +41,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
-/* package private */ final class PeriodWorker implements Runnable {
+final class PeriodWorker implements Runnable {
 
     /**
      * Shutdown this <code>PeriodWorker</code>. Cannot be restarted.
@@ -132,7 +132,7 @@ import java.util.concurrent.LinkedBlockingDeque;
         return toLogValue().toString();
     }
 
-    /* package private */ void process(final Record record) {
+    void process(final Record record) {
         // Find an existing bucket for the record
         final Duration timeout = getPeriodTimeout(_period);
         final ZonedDateTime start = getStartTime(record.getTime(), _period);
@@ -180,7 +180,7 @@ import java.util.concurrent.LinkedBlockingDeque;
         bucket.add(record);
     }
 
-    /* package private */ void rotate(final ZonedDateTime now) {
+    void rotate(final ZonedDateTime now) {
         final Map<ZonedDateTime, List<Bucket>> expiredBucketMap = _bucketsByExpiration.headMap(now);
         final List<Bucket> expiredBuckets = Lists.newArrayList();
         int closedBucketCount = 0;
@@ -211,7 +211,7 @@ import java.util.concurrent.LinkedBlockingDeque;
         LOGGER.debug().setMessage("Rotated").addData("count", closedBucketCount).log();
     }
 
-    /* package private */ ZonedDateTime getRotateAt(final ZonedDateTime now) {
+    ZonedDateTime getRotateAt(final ZonedDateTime now) {
         final Map.Entry<ZonedDateTime, List<Bucket>> firstEntry = _bucketsByExpiration.firstEntry();
         final ZonedDateTime periodFirstExpiration = firstEntry == null ? null : firstEntry.getKey();
         if (periodFirstExpiration != null && periodFirstExpiration.isAfter(now)) {
@@ -220,7 +220,7 @@ import java.util.concurrent.LinkedBlockingDeque;
         return now.plus(_rotationCheck);
     }
 
-    /* package private */ static Duration getPeriodTimeout(final Duration period) {
+    static Duration getPeriodTimeout(final Duration period) {
         // TODO(vkoskela): Support separate configurable timeouts per period. [MAI-499]
         final Duration timeoutDuration = period.dividedBy(2);
         if (MINIMUM_PERIOD_TIMEOUT.compareTo(timeoutDuration) > 0) {
@@ -232,7 +232,7 @@ import java.util.concurrent.LinkedBlockingDeque;
         return timeoutDuration;
     }
 
-    /* package private */ static ZonedDateTime getStartTime(final ZonedDateTime dateTime, final Duration period) {
+    static ZonedDateTime getStartTime(final ZonedDateTime dateTime, final Duration period) {
         // This effectively uses Jan 1, 1970 at 00:00:00 as the anchor point
         // for non-standard bucket sizes (e.g. 18 min) that do not divide
         // equally into an hour or day. Such use cases are rather uncommon.
@@ -241,7 +241,7 @@ import java.util.concurrent.LinkedBlockingDeque;
         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTimeMillis - (dateTimeMillis % periodMillis)), ZoneOffset.UTC);
     }
 
-    /* package private */ static ZonedDateTime max(final ZonedDateTime dateTime1, final ZonedDateTime dateTime2) {
+    static ZonedDateTime max(final ZonedDateTime dateTime1, final ZonedDateTime dateTime2) {
         if (dateTime1.isAfter(dateTime2)) {
             return dateTime1;
         }

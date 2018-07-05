@@ -19,7 +19,6 @@ import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.proxy.actors.Connection;
 import com.arpnetworking.metrics.proxy.models.protocol.MessageProcessorsFactory;
 import com.arpnetworking.metrics.proxy.models.protocol.MessagesProcessor;
-import com.arpnetworking.metrics.proxy.models.protocol.v1.HeartbeatMessagesProcessor;
 import com.google.common.collect.Lists;
 
 import java.util.List;
@@ -35,7 +34,6 @@ public class ProcessorsV2Factory implements MessageProcessorsFactory {
     public List<MessagesProcessor> create(final Connection connection, final PeriodicMetrics metrics) {
         return Lists.newArrayList(
                 new HeartbeatMessagesProcessor(connection, metrics),
-                new LogMessagesProcessor(connection, metrics),
                 new MetricMessagesProcessor(connection, metrics)
         );
     }

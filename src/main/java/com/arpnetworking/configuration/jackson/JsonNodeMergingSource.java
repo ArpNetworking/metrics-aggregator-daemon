@@ -98,7 +98,7 @@ public final class JsonNodeMergingSource implements JsonNodeSource {
         }
     }
 
-    /* package private */ Optional<JsonNode> getJsonNode() {
+    Optional<JsonNode> getJsonNode() {
         return _mergedNode;
     }
 

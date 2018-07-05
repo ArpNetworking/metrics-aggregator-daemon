@@ -61,7 +61,7 @@ public final class JsonNodeUriSource extends BaseJsonNodeSource {
         return toLogValue().toString();
     }
 
-    /* package private */ Optional<JsonNode> getJsonNode() {
+    Optional<JsonNode> getJsonNode() {
         return _jsonNode;
     }
 

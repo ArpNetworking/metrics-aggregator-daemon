@@ -59,14 +59,14 @@ public abstract class BaseTcpSource extends ActorSource {
     /**
      * Internal actor to process requests.
      */
-    /* package private */ abstract static class BaseTcpListenerActor extends AbstractActor {
+    abstract static class BaseTcpListenerActor extends AbstractActor {
         /**
          * Creates a {@link Props} for this actor.
          *
          * @param source The {@link BaseTcpSource} to send notifications through.
          * @return A new {@link Props}
          */
-        /* package private */ static Props props(final BaseTcpSource source) {
+        static Props props(final BaseTcpSource source) {
             return Props.create(BaseTcpListenerActor.class, source);
         }
 

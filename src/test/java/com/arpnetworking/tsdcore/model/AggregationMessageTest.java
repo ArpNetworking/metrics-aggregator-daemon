@@ -22,7 +22,6 @@ import com.google.protobuf.UnknownFieldSet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.vertx.java.core.buffer.Buffer;
 
 import java.nio.ByteOrder;
 
@@ -32,38 +31,6 @@ import java.nio.ByteOrder;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 public class AggregationMessageTest {
-
-    @Test
-    public void testToBufferHostIdentification() {
-        final GeneratedMessage protobufMessage = Messages.HostIdentification.getDefaultInstance();
-        final AggregationMessage message = AggregationMessage.create(protobufMessage);
-        Assert.assertNotNull(message);
-        Assert.assertSame(protobufMessage, message.getMessage());
-
-        final Buffer vertxBuffer = message.serializeToBuffer();
-        final byte[] messageBuffer = vertxBuffer.getBytes();
-        final byte[] protobufBuffer = protobufMessage.toByteArray();
-
-        // Assert length
-        Assert.assertEquals(protobufBuffer.length + 5, messageBuffer.length);
-        Assert.assertEquals(protobufBuffer.length + 5, vertxBuffer.getInt(0));
-        Assert.assertEquals(protobufBuffer.length + 5, message.getLength());
-
-        // Assert payload type
-        Assert.assertEquals(1, messageBuffer[4]);
-
-        // Assert the payload was not corrupted
-        for (int i = 0; i < protobufBuffer.length; ++i) {
-            Assert.assertEquals(protobufBuffer[i], messageBuffer[i + 5]);
-        }
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testToBufferSerializedUnsupportedMessage() {
-        final GeneratedMessage mockMessage = Mockito.mock(GeneratedMessage.class);
-        Mockito.doReturn(UnknownFieldSet.getDefaultInstance()).when(mockMessage).getUnknownFields();
-        AggregationMessage.create(mockMessage).serializeToBuffer();
-    }
 
     @Test
     public void testToByteStringHostIdentification() {
@@ -95,23 +62,5 @@ public class AggregationMessageTest {
         final GeneratedMessage mockMessage = Mockito.mock(GeneratedMessage.class);
         Mockito.doReturn(UnknownFieldSet.getDefaultInstance()).when(mockMessage).getUnknownFields();
         AggregationMessage.create(mockMessage).serializeToByteString();
-    }
-
-    @Test
-    public void testAkkaVsVertx() {
-        final GeneratedMessage protobufMessage = Messages.HostIdentification.getDefaultInstance();
-        final AggregationMessage message = AggregationMessage.create(protobufMessage);
-        Assert.assertNotNull(message);
-        Assert.assertSame(protobufMessage, message.getMessage());
-
-        final ByteString akkaByteString = message.serializeToByteString();
-        final Buffer vertxBuffer = message.serializeToBuffer();
-
-        final byte[] akkaBytes = akkaByteString.toArray();
-        final byte[] vertxBytes = vertxBuffer.getBytes();
-
-        // Assert length
-        Assert.assertEquals(akkaBytes.length, vertxBytes.length);
-        Assert.assertArrayEquals(akkaBytes, vertxBytes);
     }
 }

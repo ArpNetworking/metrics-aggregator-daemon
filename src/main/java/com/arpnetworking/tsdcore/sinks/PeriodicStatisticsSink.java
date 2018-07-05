@@ -185,7 +185,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
     }
 
     // NOTE: Package private for testing
-    /* package private */ PeriodicStatisticsSink(final Builder builder, final ScheduledExecutorService executor) {
+    PeriodicStatisticsSink(final Builder builder, final ScheduledExecutorService executor) {
         super(builder);
 
         // Initialize the metrics factory and metrics instance

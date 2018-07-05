@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.metrics.proxy.models.protocol.v1;
+package com.arpnetworking.metrics.proxy.models.protocol.v2;
 
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;

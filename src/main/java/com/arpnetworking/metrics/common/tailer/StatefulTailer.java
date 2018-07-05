@@ -505,7 +505,7 @@ public final class StatefulTailer implements Tailer {
 
     // NOTE: Package private for testing
 
-    /* package private */ StatefulTailer(final Builder builder, final Trigger trigger) {
+    StatefulTailer(final Builder builder, final Trigger trigger) {
         _file = builder._file;
         _positionStore = builder._positionStore;
         _listener = builder._listener;

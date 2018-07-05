@@ -72,14 +72,14 @@ public final class StatsdSource extends ActorSource {
     /**
      * Internal actor to process requests.
      */
-    /* package private */ static final class Actor extends AbstractActor {
+    static final class Actor extends AbstractActor {
         /**
          * Creates a {@link Props} for this actor.
          *
          * @param source The {@link StatsdSource} to send notifications through.
          * @return A new {@link Props}
          */
-        /* package private */ static Props props(final StatsdSource source) {
+        static Props props(final StatsdSource source) {
             return Props.create(Actor.class, source);
         }
 
@@ -141,7 +141,7 @@ public final class StatsdSource extends ActorSource {
          *
          * @param source The {@link StatsdSource} to send notifications through.
          */
-        /* package private */ Actor(final StatsdSource source) {
+        Actor(final StatsdSource source) {
             _sink = source;
             _host = source._host;
             _port = source._port;

@@ -45,7 +45,7 @@ public final class TcpLineSource extends BaseTcpSource {
         return TcpListenerActor.props(this);
     }
 
-    /* package private */ Parser<List<Record>, ByteBuffer> getParser() {
+    Parser<List<Record>, ByteBuffer> getParser() {
         return _parser;
     }
 
@@ -66,14 +66,14 @@ public final class TcpLineSource extends BaseTcpSource {
     /**
      * Internal actor to processRecords requests.
      */
-    /* package private */ static final class TcpListenerActor extends BaseTcpListenerActor {
+    static final class TcpListenerActor extends BaseTcpListenerActor {
         /**
          * Creates a {@link Props} for this actor.
          *
          * @param source The {@link TcpLineSource} to send notifications through.
          * @return A new {@link Props}
          */
-        /* package private */ static Props props(final TcpLineSource source) {
+        static Props props(final TcpLineSource source) {
             return Props.create(TcpListenerActor.class, source);
         }
 
@@ -90,7 +90,7 @@ public final class TcpLineSource extends BaseTcpSource {
          *
          * @param source The {@link TcpLineSource} to send notifications through.
          */
-        /* package private */ TcpListenerActor(final TcpLineSource source) {
+        TcpListenerActor(final TcpLineSource source) {
             super(source);
         }
     }
@@ -98,9 +98,9 @@ public final class TcpLineSource extends BaseTcpSource {
     /**
      * Internal actor to processRecords requests.
      */
-    /* package private */ static final class TcpRequestHandlerActor extends AbstractActor {
+    static final class TcpRequestHandlerActor extends AbstractActor {
 
-        /* package private */ TcpRequestHandlerActor(
+        TcpRequestHandlerActor(
                 final TcpLineSource sink,
                 final InetSocketAddress remoteAddress) {
             _sink = sink;

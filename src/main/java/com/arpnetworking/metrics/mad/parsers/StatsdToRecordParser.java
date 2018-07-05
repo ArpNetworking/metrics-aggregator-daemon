@@ -219,7 +219,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         _randomSupplier = ThreadLocalRandom::current;
     }
 
-    /* package private */ StatsdToRecordParser(
+    StatsdToRecordParser(
             final Clock clock,
             final Supplier<Random> randomSupplier) {
         _clock = clock;
@@ -253,7 +253,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
 
         private static final Map<String, StatsdType> TOKEN_TO_TYPE = Maps.newHashMap();
 
-        /* package private */ StatsdType(
+        StatsdType(
                 final String token,
                 final MetricType metricType,
                 @Nullable final Unit unit) {

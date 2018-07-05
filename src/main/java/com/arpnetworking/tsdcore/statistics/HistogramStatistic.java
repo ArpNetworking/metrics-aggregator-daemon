@@ -58,7 +58,7 @@ public final class HistogramStatistic extends BaseStatistic {
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
-    /* package private */ static final class HistogramAccumulator
+    static final class HistogramAccumulator
             extends BaseCalculator<HistogramSupportingData>
             implements Accumulator<HistogramSupportingData> {
 
@@ -67,7 +67,7 @@ public final class HistogramStatistic extends BaseStatistic {
          *
          * @param statistic The <code>Statistic</code>.
          */
-        /* package private */ HistogramAccumulator(final Statistic statistic) {
+        HistogramAccumulator(final Statistic statistic) {
             super(statistic);
         }
 
