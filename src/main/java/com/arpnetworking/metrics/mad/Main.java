@@ -260,7 +260,7 @@ public final class Main implements Launchable {
                         + _configuration.getMetricsClientPort() + "/metrics/v2/application");
         final MetricsFactory metricsFactory = new TsdMetricsFactory.Builder()
                 .setClusterName(_configuration.getMonitoringCluster())
-                .setServiceName("mad")
+                .setServiceName(_configuration.getMonitoringService())
                 .setSinks(
                         Collections.singletonList(
                                 new ApacheHttpSink.Builder()
