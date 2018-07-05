@@ -25,13 +25,12 @@ import com.arpnetworking.tsdcore.statistics.HistogramStatistic;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import com.google.protobuf.ByteString;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Publisher to send data to an upstream aggregation server over HTTP.
@@ -72,28 +71,17 @@ public final class AggregationServerHttpSink extends HttpPostSink {
             final String metricName,
             final Collection<AggregatedData> data) {
 
-        // Map all dimensions
-        final List<Messages.DimensionEntry> dimensions = Lists.newArrayList();
-        for (final Map.Entry<String, String> entry : periodicData.getDimensions().getParameters().entrySet()) {
-            dimensions.add(
-                    Messages.DimensionEntry.newBuilder()
-                            .setKey(entry.getKey())
-                            .setValue(entry.getValue())
-                            .build()
-            );
-        }
-
         // Create a statistic record set
         final Messages.StatisticSetRecord.Builder builder = Messages.StatisticSetRecord.newBuilder()
                 .setMetric(metricName)
                 .setPeriod(periodicData.getPeriod().toString())
                 .setPeriodStart(periodicData.getStart().toString())
-                .addAllDimensions(dimensions)
+                .putAllDimensions(periodicData.getDimensions().getParameters())
                 .setCluster(periodicData.getDimensions().getCluster())
                 .setService(periodicData.getDimensions().getService());
 
         for (final AggregatedData datum : data) {
-            if (EXPRESSION_STATISTIC.equals(datum.getStatistic())) {
+            if (Objects.equals(EXPRESSION_STATISTIC, datum.getStatistic())) {
                 continue;
             }
 
@@ -159,7 +147,7 @@ public final class AggregationServerHttpSink extends HttpPostSink {
     private static final Statistic EXPRESSION_STATISTIC = STATISTIC_FACTORY.getStatistic("expression");
 
     /**
-     * Implementation of builder pattern for <code>AggregationServerHttpSink</code>.
+     * Implementation of builder pattern for ${code AggregationServerHttpSink}.
      *
      * @author Ville Koskela (ville dot koskela at dropbox dot com)
      */

@@ -17,7 +17,7 @@ package com.arpnetworking.tsdcore.model;
 
 import akka.util.ByteString;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.UnknownFieldSet;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +35,7 @@ public class AggregationMessageTest {
 
     @Test
     public void testToBufferHostIdentification() {
-        final GeneratedMessage protobufMessage = Messages.HostIdentification.getDefaultInstance();
+        final GeneratedMessageV3 protobufMessage = Messages.HostIdentification.getDefaultInstance();
         final AggregationMessage message = AggregationMessage.create(protobufMessage);
         Assert.assertNotNull(message);
         Assert.assertSame(protobufMessage, message.getMessage());
@@ -60,14 +60,14 @@ public class AggregationMessageTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testToBufferSerializedUnsupportedMessage() {
-        final GeneratedMessage mockMessage = Mockito.mock(GeneratedMessage.class);
+        final GeneratedMessageV3 mockMessage = Mockito.mock(GeneratedMessageV3.class);
         Mockito.doReturn(UnknownFieldSet.getDefaultInstance()).when(mockMessage).getUnknownFields();
         AggregationMessage.create(mockMessage).serializeToBuffer();
     }
 
     @Test
     public void testToByteStringHostIdentification() {
-        final GeneratedMessage protobufMessage = Messages.HostIdentification.getDefaultInstance();
+        final GeneratedMessageV3 protobufMessage = Messages.HostIdentification.getDefaultInstance();
         final AggregationMessage message = AggregationMessage.create(protobufMessage);
         Assert.assertNotNull(message);
         Assert.assertSame(protobufMessage, message.getMessage());
@@ -92,14 +92,14 @@ public class AggregationMessageTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testToByteStringSerializedUnsupportedMessage() {
-        final GeneratedMessage mockMessage = Mockito.mock(GeneratedMessage.class);
+        final GeneratedMessageV3 mockMessage = Mockito.mock(GeneratedMessageV3.class);
         Mockito.doReturn(UnknownFieldSet.getDefaultInstance()).when(mockMessage).getUnknownFields();
         AggregationMessage.create(mockMessage).serializeToByteString();
     }
 
     @Test
     public void testAkkaVsVertx() {
-        final GeneratedMessage protobufMessage = Messages.HostIdentification.getDefaultInstance();
+        final GeneratedMessageV3 protobufMessage = Messages.HostIdentification.getDefaultInstance();
         final AggregationMessage message = AggregationMessage.create(protobufMessage);
         Assert.assertNotNull(message);
         Assert.assertSame(protobufMessage, message.getMessage());

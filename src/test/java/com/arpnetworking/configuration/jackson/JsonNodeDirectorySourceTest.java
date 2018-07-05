@@ -18,7 +18,6 @@ package com.arpnetworking.configuration.jackson;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.base.Charsets;
-import com.google.common.base.MoreObjects;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,11 +25,12 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Iterator;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * Tests for the <code>JsonNodeDirectorySource</code> class.
+ * Tests for the {@link JsonNodeDirectorySource} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
@@ -42,7 +42,7 @@ public class JsonNodeDirectorySourceTest {
     }
 
     @Test
-    public void testDirectoryDoesNotExist() throws IOException {
+    public void testDirectoryDoesNotExist() {
         final File directory = new File("./target/tmp/filter/JsonNodeDirectorySourceTest/testDirectoryDoesNotExist");
         final JsonNodeDirectorySource source = new JsonNodeDirectorySource.Builder()
                 .setDirectory(directory)
@@ -128,10 +128,8 @@ public class JsonNodeDirectorySourceTest {
     }
 
     private static boolean arrayNodeContains(final ArrayNode arrayNode, final String value) {
-        final Iterator<JsonNode> iterator = arrayNode.iterator();
-        while (iterator.hasNext()) {
-            final JsonNode node = iterator.next();
-            if (node.asText().equals(value)) {
+        for (final JsonNode node : arrayNode) {
+            if (Objects.equals(node.asText(), value)) {
                 return true;
             }
         }
@@ -140,7 +138,7 @@ public class JsonNodeDirectorySourceTest {
 
     private static void deleteDirectory(final File directory) throws IOException {
         if (directory.exists() && directory.isDirectory()) {
-            for (final File file : MoreObjects.firstNonNull(directory.listFiles(), new File[0])) {
+            for (final File file : Optional.ofNullable(directory.listFiles()).orElse(new File[0])) {
                 Files.deleteIfExists(file.toPath());
             }
         }

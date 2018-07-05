@@ -177,7 +177,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
         // TODO(ville): This is the only use of period serialization in MAD (weird, eh?)
         // However, we should consider generalizing and moving this to commons.
 
-        final @Nullable String periodAsString = CACHED_PERIOD_STRINGS.get(period);
+        @Nullable final String periodAsString = CACHED_PERIOD_STRINGS.get(period);
         if (periodAsString == null) {
             return period.toString();
         }

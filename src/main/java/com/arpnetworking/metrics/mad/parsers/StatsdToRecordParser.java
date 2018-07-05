@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.nio.ByteBuffer;
 import java.text.NumberFormat;
@@ -71,13 +72,7 @@ import javax.annotation.Nullable;
  */
 public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuffer> {
 
-    /**
-     * Parses a statsd datagram.
-     *
-     * @param datagram a datagram
-     * @return A list of {@link DefaultRecord.Builder}
-     * @throws ParsingException if the datagram is not parsable as statsd formatted message
-     */
+    @Override
     public List<Record> parse(final ByteBuffer datagram) throws ParsingException {
         // CHECKSTYLE.OFF: IllegalInstantiation - This is the recommended way
         final String datagramAsString = new String(datagram.array(), Charsets.UTF_8);
@@ -120,7 +115,9 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         return recordListBuilder.build();
     }
 
-    private StatsdType parseStatsdType(final ByteBuffer datagram, final @Nullable String statsdTypeAsString) throws ParsingException {
+    private StatsdType parseStatsdType(
+            final ByteBuffer datagram,
+            @Nullable final String statsdTypeAsString) throws ParsingException {
         @Nullable final StatsdType type = StatsdType.fromToken(statsdTypeAsString);
         if (type == null) {
             throw new ParsingException("Type not found or unsupported", datagram.array());
@@ -128,6 +125,8 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         return type;
     }
 
+    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
+    // See: https://github.com/findbugsproject/findbugs/issues/79
     private String parseName(final ByteBuffer datagram, @Nullable final String name) throws ParsingException {
         if (Strings.isNullOrEmpty(name)) {
             throw new ParsingException("Name not found or empty", datagram.array());
@@ -152,6 +151,8 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         }
     }
 
+    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
+    // See: https://github.com/findbugsproject/findbugs/issues/79
     private ImmutableMap<String, String> parseTags(@Nullable final String taqsAsString) {
         final ImmutableMap.Builder<String, String> annotations = ImmutableMap.builder();
         if (null != taqsAsString) {

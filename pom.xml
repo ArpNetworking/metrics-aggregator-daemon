@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>1.1.6</version>
+    <version>1.1.7</version>
     <relativePath />
   </parent>
 
@@ -73,51 +73,51 @@
     <!--Dependency versions-->
     <akka.version>2.5.13</akka.version>
     <akka.http.version>10.1.3</akka.http.version>
-    <apache.httpclient.version>4.5.1</apache.httpclient.version>
-    <apache.httpcore.version>4.4.3</apache.httpcore.version>
-    <arpnetworking.commons.version>1.16.0</arpnetworking.commons.version>
-    <aspectjrt.version>1.8.9</aspectjrt.version>
-    <asynchttpclient.version>2.4.8</asynchttpclient.version>
-    <cglib.version>3.2.5</cglib.version>
+    <apache.httpclient.version>4.5.5</apache.httpclient.version>
+    <apache.httpcore.version>4.4.9</apache.httpcore.version>
+    <arpnetworking.commons.version>1.16.1</arpnetworking.commons.version>
+    <aspectjrt.version>1.9.1</aspectjrt.version>
+    <asynchttpclient.version>2.4.9</asynchttpclient.version>
+    <cglib.version>3.2.6</cglib.version>
     <client.protocol.version>0.10.0</client.protocol.version>
-    <fastutil.version>8.1.1</fastutil.version>
+    <fastutil.version>8.2.1</fastutil.version>
     <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
-    <guava.version>23.4-jre</guava.version>
-    <guice.version>4.1.0</guice.version>
-    <jackson.version>2.9.2</jackson.version>
+    <guava.version>25.1-jre</guava.version>
+    <guice.version>4.2.0</guice.version>
+    <jackson.version>2.9.6</jackson.version>
     <javassist.version>3.22.0-GA</javassist.version>
     <javassist.maven.core.version>0.2.1</javassist.maven.core.version>
     <jsr305.version>3.0.2</jsr305.version>
     <logback.version>1.2.3</logback.version>
-    <logback.steno.version>1.18.0</logback.steno.version>
+    <logback.steno.version>1.18.1</logback.steno.version>
     <log4j.over.slf4j.version>1.7.12</log4j.over.slf4j.version>
-    <metrics.aggregator.protocol.version>1.0.3</metrics.aggregator.protocol.version>
+    <metrics.aggregator.protocol.version>1.0.5</metrics.aggregator.protocol.version>
     <metrics.client.version>0.10.0</metrics.client.version>
     <metrics.client.http.version>0.9.1</metrics.client.http.version>
-    <metrics.client.incubator.version>0.6.0</metrics.client.incubator.version>
-    <metrics.jvm.extra.version>0.9.0</metrics.jvm.extra.version>
+    <metrics.client.incubator.version>0.6.2</metrics.client.incubator.version>
+    <metrics.jvm.extra.version>0.10.0</metrics.jvm.extra.version>
     <oval.version>1.90</oval.version>
-    <protobuf.version>3.4.0</protobuf.version>
+    <protobuf.version>3.6.0</protobuf.version>
     <reflections.version>0.9.11</reflections.version>
     <scala.version>2.11</scala.version>
     <scala.library.version>2.11.7</scala.library.version>
     <slf4j.version>1.7.25</slf4j.version>
-    <typesafe.config.version>1.3.1</typesafe.config.version>
+    <typesafe.config.version>1.3.3</typesafe.config.version>
     <vertx.core.version>2.1.6</vertx.core.version>
 
     <!--Test dependency versions-->
-    <commons.math3.version>3.3</commons.math3.version>
+    <commons.math3.version>3.6.1</commons.math3.version>
     <hamcrest.version>2.0.0.0</hamcrest.version>
     <junit.benchmarks.version>0.7.2</junit.benchmarks.version>
     <junit.version>4.12</junit.version>
-    <metrics.generator.version>1.2.1</metrics.generator.version>
-    <mockito.version>2.12.0</mockito.version>
+    <metrics.generator.version>1.2.2</metrics.generator.version>
+    <mockito.version>2.19.0</mockito.version>
     <performance.test.version>1.1.0</performance.test.version>
-    <statsd.client.timgroup>3.0.1</statsd.client.timgroup>
-    <wiremock.version>1.57</wiremock.version>
+    <statsd.client.timgroup>3.1.0</statsd.client.timgroup>
+    <wiremock.version>2.18.0</wiremock.version>
 
     <!-- Additional Plugins -->
-    <aspectjtools.maven.plugin>1.8.9</aspectjtools.maven.plugin>
+    <aspectjtools.maven.plugin>1.9.1</aspectjtools.maven.plugin>
     <aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
     <docker.maven.plugin.version>0.26.0</docker.maven.plugin.version>
     <javassist.maven.plugin.version>0.1.2</javassist.maven.plugin.version>
@@ -457,13 +457,6 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>${guava.version}</version>
-    </dependency>
-    <dependency>
-      <!-- Temporary: see https://github.com/google/guava/issues/2721 -->
-      <groupId>com.google.errorprone</groupId>
-      <artifactId>error_prone_annotations</artifactId>
-      <version>2.0.15</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
