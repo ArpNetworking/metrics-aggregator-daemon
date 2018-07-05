@@ -35,8 +35,9 @@ public final class DimensionInjectingSink extends BaseSink {
      */
     @Override
     public void recordAggregateData(final PeriodicData data) {
-        final Map<String, String> mergedDimensions = Maps.newHashMap(data.getDimensions().getParameters());
-        mergedDimensions.putAll(_dimensions);
+        final Map<String, String> mergedDimensions = Maps.newHashMap(_defaultDimensions);
+        mergedDimensions.putAll(data.getDimensions().getParameters());
+        mergedDimensions.putAll(_overrideDimensions);
         final PeriodicData.Builder dataBuilder = PeriodicData.Builder.clone(data);
         dataBuilder.setDimensions(new DefaultKey(ImmutableMap.copyOf(mergedDimensions)));
         _sink.recordAggregateData(dataBuilder.build());
@@ -53,11 +54,13 @@ public final class DimensionInjectingSink extends BaseSink {
     private DimensionInjectingSink(final Builder builder) {
         super(builder);
         _sink = builder._sink;
-        _dimensions = builder._dimensions;
+        _defaultDimensions = builder._defaultDimensions;
+        _overrideDimensions = builder._overrideDimensions;
     }
 
     private final Sink _sink;
-    private final ImmutableMap<String, String> _dimensions;
+    private final ImmutableMap<String, String> _defaultDimensions;
+    private final ImmutableMap<String, String> _overrideDimensions;
 
     /**
      * Implementation of builder pattern for {@link DimensionInjectingSink}.
@@ -74,13 +77,26 @@ public final class DimensionInjectingSink extends BaseSink {
         }
 
         /**
-         * Sets the dimensions to inject.
+         * Sets the default dimensions to inject. Matching dimensions in the data
+         * overwrite any default dimensions.
          *
-         * @param value The dimensions to inject.
+         * @param value The default dimensions to inject.
          * @return This instance of {@link Builder}.
          */
-        public Builder setDimensions(final ImmutableMap<String, String> value) {
-            _dimensions = value;
+        public Builder setDefaultDimensions(final ImmutableMap<String, String> value) {
+            _defaultDimensions = value;
+            return self();
+        }
+
+        /**
+         * Sets the override dimensions to inject. Matching dimensions in the data
+         * are overwritten by override dimensions.
+         *
+         * @param value The overrride dimensions to inject.
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setOverrideDimensions(final ImmutableMap<String, String> value) {
+            _overrideDimensions = value;
             return self();
         }
 
@@ -104,7 +120,9 @@ public final class DimensionInjectingSink extends BaseSink {
         }
 
         @NotNull
-        private ImmutableMap<String, String> _dimensions = ImmutableMap.of();
+        private ImmutableMap<String, String> _defaultDimensions = ImmutableMap.of();
+        @NotNull
+        private ImmutableMap<String, String> _overrideDimensions = ImmutableMap.of();
         @NotNull
         private Sink _sink;
     }
