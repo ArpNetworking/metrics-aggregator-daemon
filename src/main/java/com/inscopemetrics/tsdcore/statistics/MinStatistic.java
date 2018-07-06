@@ -17,9 +17,9 @@ package com.inscopemetrics.tsdcore.statistics;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
+import com.google.common.collect.Sets;
 import com.inscopemetrics.tsdcore.model.CalculatedValue;
 import com.inscopemetrics.tsdcore.model.Quantity;
-import com.google.common.collect.Sets;
 
 import java.util.Map;
 import java.util.Optional;

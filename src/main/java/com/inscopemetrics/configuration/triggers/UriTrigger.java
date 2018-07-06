@@ -16,11 +16,11 @@
 package com.inscopemetrics.configuration.triggers;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
-import com.inscopemetrics.configuration.Trigger;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.inscopemetrics.configuration.Trigger;
 import net.sf.oval.constraint.NotNull;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;

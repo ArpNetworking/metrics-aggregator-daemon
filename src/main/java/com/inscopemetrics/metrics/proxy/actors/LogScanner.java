@@ -19,8 +19,6 @@ package com.inscopemetrics.metrics.proxy.actors;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.arpnetworking.logback.annotations.LogValue;
-import com.inscopemetrics.metrics.proxy.models.messages.LogFileAppeared;
-import com.inscopemetrics.metrics.proxy.models.messages.LogFileDisappeared;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;

@@ -23,10 +23,10 @@ import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.inscopemetrics.tsdcore.model.PeriodicData;
 import com.google.common.base.Charsets;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Sets;
+import com.inscopemetrics.tsdcore.model.PeriodicData;
 import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Request;
@@ -285,7 +285,7 @@ public class HttpPostSinkActor extends AbstractActor {
     }
 
     /**
-     * Message class to wrap a list of {@link com.arpnetworking.tsdcore.model.AggregatedData}.
+     * Message class to wrap a list of {@link com.inscopemetrics.tsdcore.model.AggregatedData}.
      */
     public static final class EmitAggregation {
 

@@ -15,11 +15,11 @@
  */
 package com.inscopemetrics.test;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import com.inscopemetrics.metrics.mad.model.Metric;
 import com.inscopemetrics.metrics.mad.model.Record;
 import com.inscopemetrics.tsdcore.model.Quantity;
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
 
 import java.util.Map;
 

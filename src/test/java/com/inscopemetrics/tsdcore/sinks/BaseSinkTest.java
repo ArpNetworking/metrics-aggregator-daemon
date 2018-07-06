@@ -16,7 +16,6 @@
 package com.inscopemetrics.tsdcore.sinks;
 
 import com.inscopemetrics.tsdcore.model.PeriodicData;
-import com.inscopemetrics.tsdcore.model.PeriodicData;
 import org.junit.Assert;
 import org.junit.Test;
 

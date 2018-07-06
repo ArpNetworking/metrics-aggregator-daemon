@@ -15,7 +15,6 @@
  */
 package com.inscopemetrics.metrics.common.parsers;
 
-import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
 

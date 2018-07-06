@@ -17,9 +17,9 @@
 package com.inscopemetrics.metrics.proxy.models.messages;
 
 import com.arpnetworking.logback.annotations.Loggable;
-import com.inscopemetrics.tsdcore.model.Unit;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.inscopemetrics.tsdcore.model.Unit;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;

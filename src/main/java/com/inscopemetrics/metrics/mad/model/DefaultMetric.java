@@ -18,11 +18,11 @@ package com.inscopemetrics.metrics.mad.model;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
-import com.inscopemetrics.tsdcore.model.MetricType;
-import com.inscopemetrics.tsdcore.model.Quantity;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import com.inscopemetrics.tsdcore.model.MetricType;
+import com.inscopemetrics.tsdcore.model.Quantity;
 import net.sf.oval.constraint.NotNull;
 
 import java.util.List;

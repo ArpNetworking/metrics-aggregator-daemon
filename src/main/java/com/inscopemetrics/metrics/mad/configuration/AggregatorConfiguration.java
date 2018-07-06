@@ -16,9 +16,9 @@
 package com.inscopemetrics.metrics.mad.configuration;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
-import com.inscopemetrics.http.SupplementalRoutes;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
+import com.inscopemetrics.http.SupplementalRoutes;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;

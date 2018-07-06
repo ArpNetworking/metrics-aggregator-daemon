@@ -15,8 +15,8 @@
  */
 package com.inscopemetrics.tsdcore.sinks;
 
-import com.inscopemetrics.tsdcore.model.PeriodicData;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.inscopemetrics.tsdcore.model.PeriodicData;
 
 /**
  * Interface to describe a class that publishes <code>PeriodicData</code>.

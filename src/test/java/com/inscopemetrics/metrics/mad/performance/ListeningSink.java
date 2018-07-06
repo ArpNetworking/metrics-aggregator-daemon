@@ -15,8 +15,6 @@
  */
 package com.inscopemetrics.metrics.mad.performance;
 
-import com.inscopemetrics.tsdcore.model.PeriodicData;
-import com.inscopemetrics.tsdcore.sinks.Sink;
 import com.google.common.base.Function;
 import com.inscopemetrics.tsdcore.model.PeriodicData;
 import com.inscopemetrics.tsdcore.sinks.Sink;

@@ -15,8 +15,6 @@
  */
 package com.inscopemetrics.tsdcore.statistics;
 
-import com.inscopemetrics.tsdcore.model.CalculatedValue;
-import com.inscopemetrics.tsdcore.model.Quantity;
 import com.google.common.collect.Iterables;
 import com.inscopemetrics.tsdcore.model.CalculatedValue;
 import com.inscopemetrics.tsdcore.model.Quantity;

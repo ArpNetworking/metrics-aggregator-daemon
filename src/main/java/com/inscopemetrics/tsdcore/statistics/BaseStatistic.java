@@ -15,10 +15,10 @@
  */
 package com.inscopemetrics.tsdcore.statistics;
 
-import com.inscopemetrics.tsdcore.model.Unit;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import com.inscopemetrics.tsdcore.model.Unit;
 
 import java.util.Collections;
 import java.util.Objects;

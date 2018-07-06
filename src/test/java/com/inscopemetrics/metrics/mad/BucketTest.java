@@ -15,6 +15,13 @@
  */
 package com.inscopemetrics.metrics.mad;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.inscopemetrics.metrics.mad.model.DefaultMetric;
 import com.inscopemetrics.metrics.mad.model.DefaultRecord;
 import com.inscopemetrics.tsdcore.model.AggregatedData;
@@ -27,13 +34,6 @@ import com.inscopemetrics.tsdcore.model.Unit;
 import com.inscopemetrics.tsdcore.sinks.Sink;
 import com.inscopemetrics.tsdcore.statistics.Statistic;
 import com.inscopemetrics.tsdcore.statistics.StatisticFactory;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;

@@ -17,11 +17,11 @@
 package com.inscopemetrics.metrics.proxy.parsers;
 
 import com.arpnetworking.logback.annotations.LogValue;
-import com.inscopemetrics.metrics.common.parsers.Parser;
-import com.inscopemetrics.metrics.proxy.models.messages.LogLine;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.inscopemetrics.metrics.common.parsers.Parser;
+import com.inscopemetrics.metrics.proxy.models.messages.LogLine;
 
 import java.nio.file.Path;
 

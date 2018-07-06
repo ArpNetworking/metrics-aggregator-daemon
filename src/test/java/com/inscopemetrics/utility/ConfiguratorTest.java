@@ -17,8 +17,6 @@ package com.inscopemetrics.utility;
 
 import com.inscopemetrics.configuration.jackson.JsonNodeLiteralSource;
 import com.inscopemetrics.configuration.jackson.StaticConfiguration;
-import com.inscopemetrics.configuration.jackson.JsonNodeLiteralSource;
-import com.inscopemetrics.configuration.jackson.StaticConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
 

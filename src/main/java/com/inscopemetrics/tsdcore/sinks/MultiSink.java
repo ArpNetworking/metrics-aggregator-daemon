@@ -19,8 +19,8 @@ import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.inscopemetrics.tsdcore.model.PeriodicData;
 import com.google.common.collect.Lists;
+import com.inscopemetrics.tsdcore.model.PeriodicData;
 import net.sf.oval.constraint.NotNull;
 
 import java.util.Collection;

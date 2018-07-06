@@ -15,15 +15,15 @@
  */
 package com.inscopemetrics.configuration.jackson;
 
-import com.inscopemetrics.configuration.Listener;
-import com.inscopemetrics.configuration.Trigger;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.inscopemetrics.utility.Launchable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.inscopemetrics.configuration.Listener;
+import com.inscopemetrics.configuration.Trigger;
+import com.inscopemetrics.utility.Launchable;
 import net.sf.oval.constraint.NotNull;
 
 import java.time.Duration;

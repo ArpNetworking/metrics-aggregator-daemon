@@ -21,11 +21,10 @@ import akka.actor.Props;
 import akka.io.Tcp;
 import akka.util.ByteString;
 import akka.util.ByteStringBuilder;
-import com.inscopemetrics.metrics.common.parsers.Parser;
-import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
-import com.inscopemetrics.metrics.mad.model.Record;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.inscopemetrics.metrics.common.parsers.Parser;
+import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
 import com.inscopemetrics.metrics.mad.model.Record;
 import net.sf.oval.constraint.NotNull;
 

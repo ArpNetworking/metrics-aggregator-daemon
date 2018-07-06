@@ -15,7 +15,6 @@
  */
 package com.inscopemetrics.configuration;
 
-import com.inscopemetrics.configuration.triggers.FileTrigger;
 import com.google.common.base.Charsets;
 import com.inscopemetrics.configuration.triggers.FileTrigger;
 import org.junit.Assert;

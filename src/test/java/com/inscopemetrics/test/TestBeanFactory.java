@@ -15,6 +15,12 @@
  */
 package com.inscopemetrics.test;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Lists;
 import com.inscopemetrics.metrics.mad.model.DefaultMetric;
 import com.inscopemetrics.metrics.mad.model.DefaultRecord;
 import com.inscopemetrics.metrics.mad.model.Metric;
@@ -28,12 +34,6 @@ import com.inscopemetrics.tsdcore.model.Quantity;
 import com.inscopemetrics.tsdcore.model.Unit;
 import com.inscopemetrics.tsdcore.statistics.Statistic;
 import com.inscopemetrics.tsdcore.statistics.StatisticFactory;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Lists;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;

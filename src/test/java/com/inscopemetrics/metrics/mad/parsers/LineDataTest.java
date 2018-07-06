@@ -16,8 +16,8 @@
 
 package com.inscopemetrics.metrics.mad.parsers;
 
-import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
 import com.google.common.base.Charsets;
+import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
 import org.junit.Assert;
 import org.junit.Test;
 

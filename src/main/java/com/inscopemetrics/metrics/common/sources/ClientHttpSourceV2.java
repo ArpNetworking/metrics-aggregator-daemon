@@ -16,7 +16,6 @@
 package com.inscopemetrics.metrics.common.sources;
 
 import com.inscopemetrics.metrics.mad.parsers.ProtobufV2ToRecordParser;
-import com.inscopemetrics.metrics.mad.parsers.ProtobufV2ToRecordParser;
 
 /**
  * Processes HTTP requests from the metrics client, extracts data and emits metrics.

@@ -16,19 +16,19 @@
 package com.inscopemetrics.utility;
 
 /**
- * Defines a factory for creating {@link com.arpnetworking.utility.Launchable} objects from a config object.
+ * Defines a factory for creating {@link com.inscopemetrics.utility.Launchable} objects from a config object.
  *
- * @param <T> The type of the {@link com.arpnetworking.utility.Launchable}.
+ * @param <T> The type of the {@link com.inscopemetrics.utility.Launchable}.
  * @param <S> The type of config.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 public interface ConfiguredLaunchableFactory<T, S> {
     /**
-     * Creates a {@link com.arpnetworking.utility.Launchable}.
+     * Creates a {@link com.inscopemetrics.utility.Launchable}.
      *
-     * @param config configuration used to build the {@link com.arpnetworking.utility.Launchable}
-     * @return a new {@link com.arpnetworking.utility.Launchable}
+     * @param config configuration used to build the {@link com.inscopemetrics.utility.Launchable}
+     * @return a new {@link com.inscopemetrics.utility.Launchable}
      */
     T create(S config);
 }

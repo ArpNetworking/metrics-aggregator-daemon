@@ -16,7 +16,6 @@
 package com.inscopemetrics.metrics.common.sources;
 
 import com.inscopemetrics.metrics.mad.parsers.CollectdJsonToRecordParser;
-import com.inscopemetrics.metrics.mad.parsers.CollectdJsonToRecordParser;
 
 /**
  * Processes HTTP requests from Collectd, extracts data and emits metrics.

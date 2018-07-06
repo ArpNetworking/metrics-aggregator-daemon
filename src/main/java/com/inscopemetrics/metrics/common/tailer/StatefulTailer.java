@@ -20,8 +20,6 @@ import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.inscopemetrics.utility.TimerTrigger;
-import com.inscopemetrics.utility.Trigger;
 import com.google.common.base.MoreObjects;
 import com.inscopemetrics.utility.TimerTrigger;
 import com.inscopemetrics.utility.Trigger;

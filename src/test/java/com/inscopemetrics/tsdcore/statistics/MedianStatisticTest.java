@@ -17,8 +17,6 @@ package com.inscopemetrics.tsdcore.statistics;
 
 import com.inscopemetrics.tsdcore.model.CalculatedValue;
 import com.inscopemetrics.tsdcore.model.Quantity;
-import com.inscopemetrics.tsdcore.model.CalculatedValue;
-import com.inscopemetrics.tsdcore.model.Quantity;
 import org.junit.Assert;
 import org.junit.Test;
 

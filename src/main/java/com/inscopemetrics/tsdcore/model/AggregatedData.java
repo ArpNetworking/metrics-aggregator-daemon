@@ -18,7 +18,6 @@ package com.inscopemetrics.tsdcore.model;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
-import com.inscopemetrics.tsdcore.statistics.Statistic;
 import com.google.common.base.Objects;
 import com.inscopemetrics.tsdcore.statistics.Statistic;
 import net.sf.oval.constraint.NotNull;

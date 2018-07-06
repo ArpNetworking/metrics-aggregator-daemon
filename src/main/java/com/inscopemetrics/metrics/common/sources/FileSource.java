@@ -16,6 +16,9 @@
 package com.inscopemetrics.metrics.common.sources;
 
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.steno.LogValueMapFactory;
+import com.arpnetworking.steno.Logger;
+import com.arpnetworking.steno.LoggerFactory;
 import com.inscopemetrics.metrics.common.parsers.Parser;
 import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
 import com.inscopemetrics.metrics.common.tailer.FilePositionStore;
@@ -25,10 +28,6 @@ import com.inscopemetrics.metrics.common.tailer.PositionStore;
 import com.inscopemetrics.metrics.common.tailer.StatefulTailer;
 import com.inscopemetrics.metrics.common.tailer.Tailer;
 import com.inscopemetrics.metrics.common.tailer.TailerListener;
-import com.arpnetworking.steno.LogValueMapFactory;
-import com.arpnetworking.steno.Logger;
-import com.arpnetworking.steno.LoggerFactory;
-import com.inscopemetrics.metrics.common.tailer.FilePositionStore;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 

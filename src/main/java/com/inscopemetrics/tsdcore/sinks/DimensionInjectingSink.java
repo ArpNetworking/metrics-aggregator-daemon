@@ -15,10 +15,10 @@
  */
 package com.inscopemetrics.tsdcore.sinks;
 
-import com.inscopemetrics.tsdcore.model.DefaultKey;
-import com.inscopemetrics.tsdcore.model.PeriodicData;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.inscopemetrics.tsdcore.model.DefaultKey;
+import com.inscopemetrics.tsdcore.model.PeriodicData;
 import net.sf.oval.constraint.NotNull;
 
 import java.util.Map;

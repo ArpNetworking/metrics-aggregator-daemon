@@ -16,6 +16,11 @@
 package com.inscopemetrics.metrics.mad.parsers;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.inscopemetrics.client.protocol.ClientV2;
 import com.inscopemetrics.metrics.common.parsers.Parser;
 import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
 import com.inscopemetrics.metrics.mad.model.DefaultMetric;
@@ -26,11 +31,6 @@ import com.inscopemetrics.metrics.mad.model.Record;
 import com.inscopemetrics.tsdcore.model.MetricType;
 import com.inscopemetrics.tsdcore.model.Quantity;
 import com.inscopemetrics.tsdcore.model.Unit;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.inscopemetrics.client.protocol.ClientV2;
 import net.sf.oval.exception.ConstraintsViolatedException;
 
 import java.nio.ByteBuffer;

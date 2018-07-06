@@ -16,10 +16,10 @@
 package com.inscopemetrics.configuration.jackson;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
-import com.inscopemetrics.configuration.triggers.DirectoryTrigger;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.google.common.collect.Lists;
+import com.inscopemetrics.configuration.triggers.DirectoryTrigger;
 
 import java.io.File;
 import java.util.Collection;

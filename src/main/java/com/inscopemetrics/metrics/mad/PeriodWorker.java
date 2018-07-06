@@ -17,7 +17,6 @@ package com.inscopemetrics.metrics.mad;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
-import com.inscopemetrics.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;

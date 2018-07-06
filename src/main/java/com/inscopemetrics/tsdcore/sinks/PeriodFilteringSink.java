@@ -17,11 +17,11 @@ package com.inscopemetrics.tsdcore.sinks;
 
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
-import com.inscopemetrics.tsdcore.model.PeriodicData;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Sets;
+import com.inscopemetrics.tsdcore.model.PeriodicData;
 import net.sf.oval.constraint.NotNull;
 
 import java.time.Duration;

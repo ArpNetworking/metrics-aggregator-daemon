@@ -16,6 +16,13 @@
 package com.inscopemetrics.metrics.mad.parsers;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
+import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.inscopemetrics.metrics.common.parsers.Parser;
 import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
 import com.inscopemetrics.metrics.mad.model.DefaultMetric;
@@ -24,13 +31,6 @@ import com.inscopemetrics.metrics.mad.model.Record;
 import com.inscopemetrics.tsdcore.model.MetricType;
 import com.inscopemetrics.tsdcore.model.Quantity;
 import com.inscopemetrics.tsdcore.model.Unit;
-import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.nio.ByteBuffer;

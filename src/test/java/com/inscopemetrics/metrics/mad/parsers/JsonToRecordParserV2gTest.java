@@ -15,13 +15,13 @@
  */
 package com.inscopemetrics.metrics.mad.parsers;
 
+import com.google.common.io.Resources;
 import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
 import com.inscopemetrics.metrics.mad.model.Metric;
 import com.inscopemetrics.metrics.mad.model.Record;
 import com.inscopemetrics.tsdcore.model.Key;
 import com.inscopemetrics.tsdcore.model.Quantity;
 import com.inscopemetrics.tsdcore.model.Unit;
-import com.google.common.io.Resources;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;

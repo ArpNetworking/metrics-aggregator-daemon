@@ -20,8 +20,8 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
-import com.inscopemetrics.tsdcore.model.PeriodicData;
 import com.fasterxml.jackson.annotation.JacksonInject;
+import com.inscopemetrics.tsdcore.model.PeriodicData;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 

@@ -39,14 +39,12 @@ import akka.stream.javadsl.Keep;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Zip;
 import akka.util.ByteString;
-import com.inscopemetrics.http.RequestReply;
-import com.inscopemetrics.metrics.common.parsers.Parser;
-import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
-import com.inscopemetrics.metrics.mad.model.Record;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.collect.ImmutableMultimap;
 import com.inscopemetrics.http.RequestReply;
+import com.inscopemetrics.metrics.common.parsers.Parser;
+import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
 import com.inscopemetrics.metrics.mad.model.Record;
 import net.sf.oval.constraint.NotNull;
 

@@ -16,16 +16,14 @@
 package com.inscopemetrics.metrics.mad;
 
 import com.arpnetworking.logback.annotations.LogValue;
-import com.inscopemetrics.metrics.common.sources.Source;
-import com.inscopemetrics.metrics.mad.configuration.PipelineConfiguration;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.google.common.collect.Lists;
+import com.inscopemetrics.metrics.common.sources.Source;
+import com.inscopemetrics.metrics.mad.configuration.PipelineConfiguration;
 import com.inscopemetrics.tsdcore.sinks.MultiSink;
 import com.inscopemetrics.tsdcore.sinks.Sink;
-import com.inscopemetrics.utility.Launchable;
-import com.google.common.collect.Lists;
-import com.inscopemetrics.metrics.mad.configuration.PipelineConfiguration;
 import com.inscopemetrics.utility.Launchable;
 
 import java.util.List;

@@ -17,8 +17,6 @@ package com.inscopemetrics.tsdcore.statistics;
 
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.inscopemetrics.utility.InterfaceDatabase;
-import com.inscopemetrics.utility.ReflectionsDatabase;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;

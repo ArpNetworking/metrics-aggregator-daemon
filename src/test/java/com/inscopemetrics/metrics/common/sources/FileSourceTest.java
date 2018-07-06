@@ -16,14 +16,13 @@
 package com.inscopemetrics.metrics.common.sources;
 
 import com.arpnetworking.commons.observer.Observer;
-import com.inscopemetrics.metrics.common.parsers.Parser;
-import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
-import com.inscopemetrics.metrics.common.tailer.InitialPosition;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.base.Charsets;
+import com.inscopemetrics.metrics.common.parsers.Parser;
 import com.inscopemetrics.metrics.common.parsers.exceptions.ParsingException;
+import com.inscopemetrics.metrics.common.tailer.InitialPosition;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.Assert;
 import org.junit.Before;

@@ -18,15 +18,15 @@ package com.inscopemetrics.tsdcore.sinks;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.arpnetworking.steno.LogValueMapFactory;
+import com.google.common.collect.ImmutableList;
+import com.google.common.net.MediaType;
+import com.google.protobuf.ByteString;
 import com.inscopemetrics.tsdcore.model.AggregatedData;
 import com.inscopemetrics.tsdcore.model.AggregationMessage;
 import com.inscopemetrics.tsdcore.model.PeriodicData;
 import com.inscopemetrics.tsdcore.statistics.HistogramStatistic;
 import com.inscopemetrics.tsdcore.statistics.Statistic;
 import com.inscopemetrics.tsdcore.statistics.StatisticFactory;
-import com.google.common.collect.ImmutableList;
-import com.google.common.net.MediaType;
-import com.google.protobuf.ByteString;
 
 import java.util.Collection;
 import java.util.Map;

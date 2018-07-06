@@ -16,7 +16,6 @@
 
 package com.inscopemetrics.metrics.common.tailer;
 
-import com.inscopemetrics.utility.ManualSingleThreadedTrigger;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.inscopemetrics.utility.ManualSingleThreadedTrigger;

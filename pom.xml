@@ -213,7 +213,7 @@
           <programs>
             <program>
               <id>mad</id>
-              <mainClass>com.arpnetworking.metrics.mad.Main</mainClass>
+              <mainClass>com.inscopemetrics.metrics.mad.Main</mainClass>
             </program>
           </programs>
           <unixScriptTemplate>${project.build.directory}/appAssemblerUnixBinTemplate</unixScriptTemplate>

@@ -15,8 +15,6 @@
  */
 package com.inscopemetrics.utility;
 
-import com.inscopemetrics.configuration.Configuration;
-import com.inscopemetrics.configuration.Listener;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.inscopemetrics.configuration.Configuration;
