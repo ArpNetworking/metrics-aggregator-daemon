@@ -40,7 +40,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import net.sf.oval.exception.ConstraintsViolatedException;
 
 import java.io.IOException;
@@ -120,7 +119,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
      * @return The existing <code>Unit</code> to which the <code>CompoundUnit</code> maps.
      */
     @Nullable
-    private static Unit getLegacyUnit(final CompositeUnit compositeUnit) {
+    private static Unit getLegacyUnit(@Nullable final CompositeUnit compositeUnit) {
         return LEGACY_UNIT_MAP.getOrDefault(compositeUnit, null);
     }
 
@@ -194,8 +193,8 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     private static Quantity version2gSampleToQuantity(final Version2g.Sample sample) {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
-                final CompositeUnit sampleUnit = sample.getUnit2g() != null
-                        ? Iterables.getFirst(sample.getUnit2g().getNumerators(), null)
+                @Nullable final CompositeUnit sampleUnit = sample.getUnit2g() != null
+                        ? sample.getUnit2g().getNumerators().stream().findFirst().orElse(null)
                         : null;
 
                 return ThreadLocalBuilder.build(

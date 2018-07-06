@@ -41,6 +41,10 @@ public final class AggregatorConfiguration {
         return _monitoringCluster;
     }
 
+    public String getMonitoringService() {
+        return _monitoringService;
+    }
+
     public File getLogDirectory() {
         return _logDirectory;
     }
@@ -90,6 +94,7 @@ public final class AggregatorConfiguration {
         return MoreObjects.toStringHelper(this)
                 .add("id", Integer.toHexString(System.identityHashCode(this)))
                 .add("MonitoringCluster", _monitoringCluster)
+                .add("MonitoringService", _monitoringService)
                 .add("LogDirectory", _logDirectory)
                 .add("PipelinesDirectory", _pipelinesDirectory)
                 .add("HttpHost", _httpHost)
@@ -106,6 +111,7 @@ public final class AggregatorConfiguration {
 
     private AggregatorConfiguration(final Builder builder) {
         _monitoringCluster = builder._monitoringCluster;
+        _monitoringService = builder._monitoringService;
         _logDirectory = builder._logDirectory;
         _pipelinesDirectory = builder._pipelinesDirectory;
         _httpHost = builder._httpHost;
@@ -121,6 +127,7 @@ public final class AggregatorConfiguration {
     }
 
     private final String _monitoringCluster;
+    private final String _monitoringService;
     private final File _logDirectory;
     private final File _pipelinesDirectory;
     private final String _httpHost;
@@ -155,6 +162,18 @@ public final class AggregatorConfiguration {
          */
         public Builder setMonitoringCluster(final String value) {
             _monitoringCluster = value;
+            return this;
+        }
+
+        /**
+         * The monitoring service. Optional. Cannot be null or empty. The
+         * default value is {@code mad}.
+         *
+         * @param value The monitoring service.
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setMonitoringService(final String value) {
+            _monitoringService = value;
             return this;
         }
 
@@ -292,6 +311,9 @@ public final class AggregatorConfiguration {
         @NotNull
         @NotEmpty
         private String _monitoringCluster;
+        @NotNull
+        @NotEmpty
+        private String _monitoringService = "mad";
         @NotNull
         private File _logDirectory;
         @NotNull

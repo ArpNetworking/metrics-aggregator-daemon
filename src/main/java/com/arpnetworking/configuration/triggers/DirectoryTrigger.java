@@ -21,7 +21,6 @@ import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -36,9 +35,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * <code>Trigger</code> implementation based on the contents of a directory.
+ * ${link Trigger} implementation based on the contents of a directory.
  * Configurable to either monitor all content or only specific content. The
- * <code>FileTrigger</code> is used to determine whether a file changed. This
+ * ${link FileTrigger} is used to determine whether a file changed. This
  * is intended to monitor the files in a single directory and is not designed
  * to monitor a directory tree (e.g. it is not recursive).
  *
@@ -56,7 +55,7 @@ public final class DirectoryTrigger implements Trigger {
 
         // Track directory contents
         if (exists) {
-            for (final File file : MoreObjects.firstNonNull(_directory.listFiles(), EMPTY_FILE_ARRAY)) {
+            for (final File file :Optional.ofNullable(_directory.listFiles()).orElse(EMPTY_FILE_ARRAY)) {
                 // Note: To save memory in cases where a directory contains
                 // temporary files (e.g. create, destroy and never recreate)
                 // we should remove any triggers for files that no longer exist
@@ -170,7 +169,7 @@ public final class DirectoryTrigger implements Trigger {
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryTrigger.class);
 
     /**
-     * Builder for <code>DirectoryTrigger</code>.
+     * Builder for {@link DirectoryTrigger}.
      */
     public static final class Builder extends OvalBuilder<DirectoryTrigger> {
 
@@ -185,7 +184,7 @@ public final class DirectoryTrigger implements Trigger {
          * Set the directory.
          *
          * @param value The directory.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setDirectory(final File value) {
             _directory = value;
@@ -193,14 +192,14 @@ public final class DirectoryTrigger implements Trigger {
         }
 
         /**
-         * Set the <code>Collection</code> of file names. Optional. Default is
+         * Set the {@code Collection} of file names. Optional. Default is
          * an empty list (e.g. all files). Cannot be null.
          *
          * <b>Note:</b> Both the file names and file name patterns must be
          * empty (e.g. unset) in order to consider all files in the directory.
          *
-         * @param value The <code>Collection</code> of file names.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@code Collection} of file names.
+         * @return This {@link Builder} instance.
          */
         public Builder setFileNames(final Collection<String> value) {
             _fileNames = Lists.newArrayList(value);
@@ -211,7 +210,7 @@ public final class DirectoryTrigger implements Trigger {
          * Add a file name.
          *
          * @param value The file name.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder addFileName(final String value) {
             if (_fileNames == null) {
@@ -223,14 +222,14 @@ public final class DirectoryTrigger implements Trigger {
         }
 
         /**
-         * Set the <code>Collection</code> of file name patterns. Optional.
+         * Set the {@code Collection} of file name patterns. Optional.
          * Default is an empty list (e.g. all files). Cannot be null.
          *
          * <b>Note:</b> Both the file names and file name patterns must be
          * empty (e.g. unset) in order to consider all files in the directory.
          *
-         * @param value The <code>Collection</code> of file name patterns.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@code Collection} of file name patterns.
+         * @return This {@link Builder} instance.
          */
         public Builder setFileNamePatterns(final Collection<Pattern> value) {
             _fileNamePatterns = Lists.newArrayList(value);
@@ -241,7 +240,7 @@ public final class DirectoryTrigger implements Trigger {
          * Add a file name pattern.
          *
          * @param value The file name pattern.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder addFileNamePattern(final Pattern value) {
             if (_fileNamePatterns == null) {

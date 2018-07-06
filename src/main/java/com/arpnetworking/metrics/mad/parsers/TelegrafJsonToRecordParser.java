@@ -135,7 +135,7 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
             for (final Telegraf telegraf : telegrafList) {
                 final ImmutableMap.Builder<String, Metric> metrics = ImmutableMap.builder();
                 for (final Map.Entry<String, String> entry : telegraf.getFields().entrySet()) {
-                    final @Nullable Double value = parseValue(entry.getValue());
+                    @Nullable final Double value = parseValue(entry.getValue());
                     if (value != null) {
                         metrics.put(
                                 telegraf.getName().isEmpty() ? entry.getKey() : telegraf.getName() + "." + entry.getKey(),
