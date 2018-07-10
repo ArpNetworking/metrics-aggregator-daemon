@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Tests for Telegraf JSON format.
+ * Tests for TelegrafJson JSON format.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.inscopemetrics.mad.model.json;
+package com.inscopemetrics.mad.model.telegraf;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
@@ -29,7 +29,7 @@ import net.sf.oval.constraint.NotNull;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
 @Loggable
-public final class Telegraf {
+public final class TelegrafJson {
 
     public ImmutableMap<String, String> getFields() {
         return _fields;
@@ -47,7 +47,7 @@ public final class Telegraf {
         return _name;
     }
 
-    private Telegraf(final Builder builder) {
+    private TelegrafJson(final Builder builder) {
         _tags = builder._tags;
         _name = builder._name;
         _fields = builder._fields;
@@ -60,14 +60,14 @@ public final class Telegraf {
     private final String _name;
 
     /**
-     * Builder for the Telegraf class.
+     * Builder for the TelegrafJson class.
      */
-    public static final class Builder extends ThreadLocalBuilder<Telegraf> {
+    public static final class Builder extends ThreadLocalBuilder<TelegrafJson> {
         /**
          * Public constructor.
          */
         public Builder() {
-            super(Telegraf::new);
+            super(TelegrafJson::new);
         }
 
         /**

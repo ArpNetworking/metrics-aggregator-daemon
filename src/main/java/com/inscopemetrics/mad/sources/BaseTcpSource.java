@@ -20,6 +20,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.io.Tcp;
 import akka.io.TcpMessage;
+import akka.util.ByteString;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import net.sf.oval.constraint.Min;
@@ -41,32 +42,32 @@ public abstract class BaseTcpSource extends ActorSource {
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     protected BaseTcpSource(final Builder<?, ?> builder) {
         super(builder);
         _host = builder._host;
         _port = builder._port;
-        _acceptQueue = builder._acceptQueue;
+        _listenQueue = builder._listenQueue;
     }
 
     private final String _host;
     private final int _port;
-    private final int _acceptQueue;
+    private final int _listenQueue;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseTcpSource.class);
 
     /**
-     * Internal actor to process requests.
+     * Internal base actor to accept connections.
      */
-    abstract static class BaseTcpListenerActor extends AbstractActor {
+    protected abstract static class BaseTcpListenerActor extends AbstractActor {
         /**
-         * Creates a {@link Props} for this actor.
+         * Creates a {@code Props} for this actor.
          *
          * @param source The {@link BaseTcpSource} to send notifications through.
-         * @return A new {@link Props}
+         * @return A new {@code Props}
          */
-        static Props props(final BaseTcpSource source) {
+        protected static Props props(final BaseTcpSource source) {
             return Props.create(BaseTcpListenerActor.class, source);
         }
 
@@ -77,7 +78,7 @@ public abstract class BaseTcpSource extends ActorSource {
                     TcpMessage.bind(
                             getSelf(),
                             new InetSocketAddress(_host, _port),
-                            _acceptQueue),
+                            _listenQueue),
                     getSelf());
         }
 
@@ -90,7 +91,7 @@ public abstract class BaseTcpSource extends ActorSource {
                     .match(Tcp.Bound.class, tcpBound -> {
                         LOGGER.info()
                                 .setMessage("Tcp server binding complete")
-                                .addData("name", _sink.getName())
+                                .addData("name", _source.getName())
                                 .addData("address", tcpBound.localAddress().getAddress().getHostAddress())
                                 .addData("port", tcpBound.localAddress().getPort())
                                 .log();
@@ -100,7 +101,7 @@ public abstract class BaseTcpSource extends ActorSource {
                     .match(Tcp.CommandFailed.class, failed -> {
                         LOGGER.warn()
                                 .setMessage("Tcp server bad command")
-                                .addData("name", _sink.getName())
+                                .addData("name", _source.getName())
                                 .log();
 
                         getContext().stop(getSelf());
@@ -108,12 +109,12 @@ public abstract class BaseTcpSource extends ActorSource {
                     .match(Tcp.Connected.class, tcpConnected -> {
                         LOGGER.debug()
                                 .setMessage("Tcp connection established")
-                                .addData("name", _sink.getName())
+                                .addData("name", _source.getName())
                                 .addData("remoteAddress", tcpConnected.remoteAddress().getAddress().getHostAddress())
                                 .addData("remotePort", tcpConnected.remoteAddress().getPort())
                                 .log();
 
-                        final ActorRef handler = createHandler(_sink, tcpConnected);
+                        final ActorRef handler = createHandler(tcpConnected);
                         getSender().tell(TcpMessage.register(handler), getSelf());
                     })
                     .build();
@@ -122,14 +123,13 @@ public abstract class BaseTcpSource extends ActorSource {
         /**
          * Abstract method to create tcp message actor instance for each connection.
          *
-         * @param sink the source to bind the actor to
          * @param connected the connected message
          * @return the actor reference
          */
-        protected abstract ActorRef createHandler(BaseTcpSource sink, Tcp.Connected connected);
+        protected abstract ActorRef createHandler(Tcp.Connected connected);
 
-        protected BaseTcpSource getSink() {
-            return _sink;
+        protected BaseTcpSource getSource() {
+            return _source;
         }
 
         /**
@@ -138,19 +138,97 @@ public abstract class BaseTcpSource extends ActorSource {
          * @param source The {@link BaseTcpSource} to send notifications through.
          */
         protected BaseTcpListenerActor(final BaseTcpSource source) {
-            _sink = source;
+            _source = source;
             _host = source._host;
             _port = source._port;
-            _acceptQueue = source._acceptQueue;
+            _listenQueue = source._listenQueue;
         }
 
         private boolean _isReady = false;
-        private final BaseTcpSource _sink;
+        private final BaseTcpSource _source;
         private final String _host;
         private final int _port;
-        private final int _acceptQueue;
+        private final int _listenQueue;
 
         private static final String IS_READY = "IsReady";
+    }
+
+    /**
+     * Internal base actor to process data.
+     */
+    protected abstract static class BaseTcpDataHandlerActor extends AbstractActor {
+
+        /**
+         * Protected constructor.
+         *
+         * @param source the source to bind the actor to
+         * @param remoteAddress the remote address of the client
+         */
+        protected BaseTcpDataHandlerActor(
+                final BaseTcpSource source,
+                final InetSocketAddress remoteAddress) {
+            _source = source;
+            _remoteAddress = remoteAddress;
+        }
+
+        @Override
+        public Receive createReceive() {
+            return receiveBuilder()
+                    .match(Tcp.Received.class, message -> {
+                        final ByteString data = message.data();
+
+                        LOGGER.trace()
+                                .setMessage("Tcp data received")
+                                .addData("name", _source.getName())
+                                .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
+                                .addData("remotePort", _remoteAddress.getPort())
+                                .addData("data", data)
+                                .log();
+
+                        try {
+                            processData(data);
+                            // CHECKSTYLE.OFF: IllegalCatch - Ensure all exceptions are logged (this is top level)
+                        } catch (final RuntimeException e) {
+                            // CHECKSTYLE.ON: IllegalCatch
+                            LOGGER.error()
+                                    .setMessage("Error processing data")
+                                    .addData("name", _source.getName())
+                                    .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
+                                    .addData("remotePort", _remoteAddress.getPort())
+                                    .addData("data", data)
+                                    .setThrowable(e)
+                                    .log();
+                        }
+                    })
+                    .match(Tcp.ConnectionClosed.class, message -> {
+                        getContext().stop(getSelf());
+                        LOGGER.debug()
+                                .setMessage("Tcp connection close")
+                                .addData("name", _source.getName())
+                                .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
+                                .addData("remotePort", _remoteAddress.getPort())
+                                .log();
+                    })
+                    .build();
+        }
+
+        protected BaseTcpSource getSource() {
+            return _source;
+        }
+
+        protected InetSocketAddress getRemoteAddress() {
+            return _remoteAddress;
+        }
+
+        /**
+         * Parse and act on the received data. This method should not throw.
+         *
+         * @param data the received {@code ByteString} to process
+         */
+        protected abstract void processData(ByteString data);
+
+        private final BaseTcpSource _source;
+        private final InetSocketAddress _remoteAddress;
     }
 
     /**
@@ -165,7 +243,7 @@ public abstract class BaseTcpSource extends ActorSource {
             extends ActorSource.Builder<B, S> {
 
         /**
-         * Public constructor.
+         * Protected constructor.
          *
          * @param targetConstructor the concrete source constructor to build through
          */
@@ -198,14 +276,14 @@ public abstract class BaseTcpSource extends ActorSource {
         }
 
         /**
-         * Sets the accept queue length. Optional. Cannot be null. Must be at
-         * least 0. Default is 100.
+         * Sets the listen queue length. Optional. Default is 100. Cannot be
+         * null and must be at least 0.
          *
          * @param value the port to listen on
          * @return This builder
          */
-        public B setAcceptQueue(final Integer value) {
-            _acceptQueue = value;
+        public B setListenQueue(final Integer value) {
+            _listenQueue = value;
             return self();
         }
 
@@ -217,6 +295,6 @@ public abstract class BaseTcpSource extends ActorSource {
         private Integer _port;
         @NotNull
         @Min(0)
-        private Integer _acceptQueue = 100;
+        private Integer _listenQueue = 100;
     }
 }
