@@ -25,7 +25,6 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.inscopemetrics.mad.model.Record;
 import com.inscopemetrics.mad.parsers.Parser;
 import com.inscopemetrics.mad.parsers.exceptions.ParsingException;
-import net.sf.oval.constraint.NotNull;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
