@@ -171,5 +171,4 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
         @NotNull
         private TimestampUnit _timestampUnit = TimestampUnit.SECONDS;
     }
-
 }
