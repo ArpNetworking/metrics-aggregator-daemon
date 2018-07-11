@@ -16,6 +16,7 @@
 package com.inscopemetrics.mad.sources;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
 import akka.http.javadsl.model.HttpRequest;
 import akka.http.javadsl.model.HttpResponse;
 import akka.http.javadsl.model.headers.RawHeader;
@@ -56,6 +57,7 @@ public final class CollectdHttpSourceV1Test extends BaseActorSourceTest {
         MockitoAnnotations.initMocks(this);
         _source = new CollectdHttpSourceV1.Builder()
                 .setActorName("collectd")
+                .setActorSystem(Mockito.mock(ActorSystem.class))
                 .setName("collectd_source")
                 .setParser(_parser)
                 .build();
