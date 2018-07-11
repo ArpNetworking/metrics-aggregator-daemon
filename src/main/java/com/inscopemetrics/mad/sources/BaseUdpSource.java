@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Inscope Metrics, Inc
+ * Copyright 2018 Inscope Metrics, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,42 +17,32 @@ package com.inscopemetrics.mad.sources;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
-import akka.actor.Props;
 import akka.io.Udp;
 import akka.io.UdpMessage;
+import akka.util.ByteString;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.inscopemetrics.mad.model.Record;
-import com.inscopemetrics.mad.parsers.Parser;
-import com.inscopemetrics.mad.parsers.StatsdToRecordParser;
-import com.inscopemetrics.mad.parsers.exceptions.ParsingException;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
 
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.time.Duration;
-import java.util.List;
+import java.util.function.Function;
 
 /**
- * Source that uses Statsd as input.
+ * Base source that receives data over udp. Subclasses should set appropriate
+ * defaults on the abstract builder.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
-public final class StatsdSource extends ActorSource {
-
-    @Override
-    protected Props createProps() {
-        return Actor.props(this);
-    }
+public abstract class BaseUdpSource extends ActorSource {
 
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
-    private StatsdSource(final Builder builder) {
+    protected BaseUdpSource(final Builder<?, ?> builder) {
         super(builder);
         _host = builder._host;
         _port = builder._port;
@@ -61,27 +51,12 @@ public final class StatsdSource extends ActorSource {
     private final String _host;
     private final int _port;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StatsdSource.class);
-    private static final Parser<List<Record>, ByteBuffer> PARSER = new StatsdToRecordParser();
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseUdpSource.class);
 
     /**
-     * Name of the actor created to receive the Statsd datagrams.
+     * Internal actor to process connections and data.
      */
-    public static final String ACTOR_NAME = "statsd";
-
-    /**
-     * Internal actor to process requests.
-     */
-    static final class Actor extends AbstractActor {
-        /**
-         * Creates a {@link Props} for this actor.
-         *
-         * @param source The {@link StatsdSource} to send notifications through.
-         * @return A new {@link Props}
-         */
-        static Props props(final StatsdSource source) {
-            return Props.create(Actor.class, source);
-        }
+    protected abstract static class BaseUdpSourceActor extends AbstractActor {
 
         @Override
         public Receive createReceive() {
@@ -93,42 +68,49 @@ public final class StatsdSource extends ActorSource {
                         _socket = getSender();
                         _isReady = true;
                         LOGGER.info()
-                                .setMessage("Statsd server binding complete")
+                                .setMessage("Udp server binding complete")
+                                .addData("name", _source.getName())
                                 .addData("address", updBound.localAddress().getAddress().getHostAddress())
                                 .addData("port", updBound.localAddress().getPort())
                                 .addData("socket", _socket)
                                 .log();
                     })
                     .match(Udp.Received.class, updReceived -> {
+                        final ByteString data = updReceived.data();
+
                         LOGGER.trace()
-                                .setMessage("Statsd received datagram")
+                                .setMessage("Udp received datagram")
+                                .addData("name", _source.getName())
                                 .addData("bytes", updReceived.data().size())
                                 .addData("socket", _socket)
                                 .log();
 
                         try {
-                            // NOTE: The parsing occurs in the actor itself which can become a bottleneck
-                            // if there are more records to be parsed then a single thread can handle.
-                            final List<Record> records = PARSER.parse(updReceived.data().toByteBuffer());
-                            records.forEach(_sink::notify);
-                        } catch (final ParsingException e) {
-                            BAD_REQUEST_LOGGER.warn()
-                                    .setMessage("Error handling statsd datagram")
+                            processData(data);
+                            // CHECKSTYLE.OFF: IllegalCatch - Ensure all exceptions are logged (this is top level)
+                        } catch (final RuntimeException e) {
+                            // CHECKSTYLE.ON: IllegalCatch
+                            LOGGER.error()
+                                    .setMessage("Error processing data")
+                                    .addData("name", _source.getName())
                                     .addData("socket", _socket)
+                                    .addData("data", data)
                                     .setThrowable(e)
                                     .log();
                         }
                     })
                     .matchEquals(UdpMessage.unbind(), message -> {
                         LOGGER.debug()
-                                .setMessage("Statsd unbind")
+                                .setMessage("Udp unbind")
+                                .addData("name", _source.getName())
                                 .addData("socket", _socket)
                                 .log();
                         _socket.tell(message, getSelf());
                     })
                     .match(Udp.Unbound.class, message -> {
                         LOGGER.debug()
-                                .setMessage("Statsd unbound")
+                                .setMessage("Udp unbound")
+                                .addData("name", _source.getName())
                                 .addData("socket", _socket)
                                 .log();
                         getContext().stop(getSelf());
@@ -136,13 +118,28 @@ public final class StatsdSource extends ActorSource {
                     .build();
         }
 
+        protected BaseUdpSource getSource() {
+            return _source;
+        }
+
+        protected ActorRef getSocket() {
+            return _socket;
+        }
+
+        /**
+         * Parse the received data. This method should not throw.
+         *
+         * @param data the received {@code ByteString} to process
+         */
+        protected abstract void processData(ByteString data);
+
         /**
          * Constructor.
          *
-         * @param source The {@link StatsdSource} to send notifications through.
+         * @param source The {@link BaseUdpSource} to send notifications through.
          */
-        Actor(final StatsdSource source) {
-            _sink = source;
+        protected BaseUdpSourceActor(final BaseUdpSource source) {
+            _source = source;
             _host = source._host;
             _port = source._port;
 
@@ -152,30 +149,33 @@ public final class StatsdSource extends ActorSource {
                     getSelf());
         }
 
-        private boolean _isReady = false;
-        private ActorRef _socket;
-        private final StatsdSource _sink;
+        private final BaseUdpSource _source;
         private final String _host;
         private final int _port;
+        private boolean _isReady = false;
+        private ActorRef _socket;
 
         private static final String IS_READY = "IsReady";
-        private static final Logger BAD_REQUEST_LOGGER =
-                LoggerFactory.getRateLimitLogger(StatsdSource.class, Duration.ofSeconds(30));
     }
 
     /**
-     * StatsdSource {@link BaseSource.Builder} implementation.
+     * BaseUdpSource {@link Builder} implementation.
+     *
+     * @param <B> type of the builder
+     * @param <S> type of the object to be built
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
-    public static final class Builder extends ActorSource.Builder<Builder, StatsdSource> {
+    public abstract static class Builder<B extends Builder<B, S>, S extends BaseUdpSource>
+            extends ActorSource.Builder<B, S> {
 
         /**
-         * Public constructor.
+         * Protected constructor.
+         *
+         * @param targetConstructor the concrete source constructor to build through
          */
-        public Builder() {
-            super(StatsdSource::new);
-            setActorName(ACTOR_NAME);
+        public Builder(final Function<B, S> targetConstructor) {
+            super(targetConstructor);
         }
 
         /**
@@ -184,7 +184,7 @@ public final class StatsdSource extends ActorSource {
          * @param value the port to listen on
          * @return This builder
          */
-        public Builder setHost(final String value) {
+        public B setHost(final String value) {
             _host = value;
             return self();
         }
@@ -196,14 +196,9 @@ public final class StatsdSource extends ActorSource {
          * @param value the port to listen on
          * @return This builder
          */
-        public Builder setPort(final Integer value) {
+        public B setPort(final Integer value) {
             _port = value;
             return self();
-        }
-
-        @Override
-        protected Builder self() {
-            return this;
         }
 
         @NotNull
@@ -211,6 +206,6 @@ public final class StatsdSource extends ActorSource {
         private String _host = "localhost";
         @NotNull
         @Range(min = 1, max = 65535)
-        private Integer _port = 8125;
+        private Integer _port;
     }
 }
