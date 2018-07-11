@@ -110,7 +110,7 @@ public abstract class ActorSource extends BaseSource {
 
         /**
          * Sets the actor path. Optional. Default is a actor safe version of
-         * the source name. Cannot be null or empty.
+         * the source name. Cannot be empty.
          *
          * @param value the actor name
          * @return this instance of {@link Builder}
@@ -131,9 +131,9 @@ public abstract class ActorSource extends BaseSource {
             return self();
         }
 
-        @NotNull
         @NotEmpty
         private String _actorName;
+        @NotNull
         @JacksonInject
         private ActorSystem _actorSystem;
     }
