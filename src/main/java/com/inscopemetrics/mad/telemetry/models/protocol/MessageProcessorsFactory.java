@@ -17,7 +17,7 @@
 package com.inscopemetrics.mad.telemetry.models.protocol;
 
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
-import com.inscopemetrics.mad.telemetry.actors.Connection;
+import com.inscopemetrics.mad.telemetry.actors.ConnectionActor;
 
 import java.util.List;
 
@@ -35,5 +35,5 @@ public interface MessageProcessorsFactory {
      * @param metrics {@link PeriodicMetrics} instance to record metrics to
      * @return a list of <code>MessagesProcessor</code>
      */
-    List<MessagesProcessor> create(Connection connection, PeriodicMetrics metrics);
+    List<MessagesProcessor> create(ConnectionActor connection, PeriodicMetrics metrics);
 }

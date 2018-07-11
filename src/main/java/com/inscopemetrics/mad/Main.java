@@ -55,7 +55,6 @@ import com.inscopemetrics.mad.configuration.jackson.JsonNodeSource;
 import com.inscopemetrics.mad.configuration.triggers.FileTrigger;
 import com.inscopemetrics.mad.http.Routes;
 import com.inscopemetrics.mad.http.SupplementalRoutes;
-import com.inscopemetrics.mad.telemetry.actors.Telemetry;
 import com.inscopemetrics.mad.utility.Configurator;
 import com.inscopemetrics.mad.utility.Launchable;
 import com.typesafe.config.Config;
@@ -208,9 +207,6 @@ public final class Main implements Launchable {
         // Create the status actor
         actorSystem.actorOf(Props.create(Status.class), "status");
 
-        // Create the telemetry connection actor
-        actorSystem.actorOf(Props.create(Telemetry.class, injector.getInstance(MetricsFactory.class)), "telemetry");
-
         // Load supplemental routes
         final ImmutableList.Builder<SupplementalRoutes> supplementalHttpRoutes = ImmutableList.builder();
         _configuration.getSupplementalHttpRoutesClass().ifPresent(
@@ -239,12 +235,6 @@ public final class Main implements Launchable {
         LOGGER.info().setMessage("Launching guice").log();
 
         // Create directories
-        if (_configuration.getLogDirectory().mkdirs()) {
-            LOGGER.info()
-                    .setMessage("Created log directory")
-                    .addData("directory", _configuration.getLogDirectory())
-                    .log();
-        }
         if (_configuration.getPipelinesDirectory().mkdirs()) {
             LOGGER.info()
                     .setMessage("Created pipelines directory")

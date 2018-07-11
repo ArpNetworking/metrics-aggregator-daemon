@@ -19,6 +19,8 @@ package com.inscopemetrics.mad.telemetry.models.messages;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.inscopemetrics.mad.model.Key;
 import com.inscopemetrics.mad.model.Unit;
 
 import java.time.ZonedDateTime;
@@ -35,8 +37,7 @@ public final class MetricReport {
     /**
      * Public constructor.
      *
-     * @param service name of the service
-     * @param host name of the host
+     * @param dimensions dimensions
      * @param statistic name of the statistic
      * @param metric name of the metric
      * @param value value
@@ -44,15 +45,13 @@ public final class MetricReport {
      * @param periodStart start of the period
      */
     public MetricReport(
-            final String service,
-            final String host,
+            final ImmutableMap<String, String> dimensions,
             final String statistic,
             final String metric,
             final double value,
             final Optional<Unit> unit,
             final ZonedDateTime periodStart) {
-        _service = service;
-        _host = host;
+        _dimensions = dimensions;
         _statistic = statistic;
         _metric = metric;
         _value = value;
@@ -60,12 +59,18 @@ public final class MetricReport {
         _periodStart = periodStart;
     }
 
-    public String getService() {
-        return _service;
+    public ImmutableMap<String, String> getDimensions() {
+        return _dimensions;
     }
 
+    @Deprecated
+    public String getService() {
+        return _dimensions.get(Key.SERVICE_DIMENSION_KEY);
+    }
+
+    @Deprecated
     public String getHost() {
-        return _host;
+        return _dimensions.get(Key.HOST_DIMENSION_KEY);
     }
 
     public String getStatistic() {
@@ -97,8 +102,7 @@ public final class MetricReport {
         return MoreObjects.toStringHelper(this)
                 .add("id", Integer.toHexString(System.identityHashCode(this)))
                 .add("class", this.getClass())
-                .add("Service", _service)
-                .add("Host", _host)
+                .add("Dimensions", _dimensions)
                 .add("Statistic", _statistic)
                 .add("Metric", _metric)
                 .add("Value", _value)
@@ -108,8 +112,7 @@ public final class MetricReport {
                 .toString();
     }
 
-    private final String _service;
-    private final String _host;
+    private final ImmutableMap<String, String> _dimensions;
     private final String _statistic;
     private final String _metric;
     private final double _value;

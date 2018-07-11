@@ -31,8 +31,8 @@ public final class Connect {
     /**
      * Public constructor.
      *
-     * @param telemetry Actor reference to the {@code Telemetry} actor.
-     * @param connection Actor reference to the {@code Connection} actor.
+     * @param telemetry Actor reference to the {@code TelemetryActor} actor.
+     * @param connection Actor reference to the {@code ConnectionActor} actor.
      * @param channel Actor reference to the {@code Source<Message, ActorRef>} actor.
      */
     public Connect(final ActorRef telemetry, final ActorRef connection, final ActorRef channel) {
@@ -58,8 +58,8 @@ public final class Connect {
         return MoreObjects.toStringHelper(this)
                 .add("id", Integer.toHexString(System.identityHashCode(this)))
                 .add("class", this.getClass())
-                .add("Telemetry", _telemetry)
-                .add("Connection", _connection)
+                .add("TelemetryActor", _telemetry)
+                .add("ConnectionActor", _connection)
                 .add("Channel", _channel)
                 .toString();
     }

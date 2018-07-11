@@ -45,10 +45,6 @@ public final class AggregatorConfiguration {
         return _monitoringService;
     }
 
-    public File getLogDirectory() {
-        return _logDirectory;
-    }
-
     public File getPipelinesDirectory() {
         return _pipelinesDirectory;
     }
@@ -95,7 +91,6 @@ public final class AggregatorConfiguration {
                 .add("id", Integer.toHexString(System.identityHashCode(this)))
                 .add("MonitoringCluster", _monitoringCluster)
                 .add("MonitoringService", _monitoringService)
-                .add("LogDirectory", _logDirectory)
                 .add("PipelinesDirectory", _pipelinesDirectory)
                 .add("HttpHost", _httpHost)
                 .add("HttpPort", _httpPort)
@@ -112,7 +107,6 @@ public final class AggregatorConfiguration {
     private AggregatorConfiguration(final Builder builder) {
         _monitoringCluster = builder._monitoringCluster;
         _monitoringService = builder._monitoringService;
-        _logDirectory = builder._logDirectory;
         _pipelinesDirectory = builder._pipelinesDirectory;
         _httpHost = builder._httpHost;
         _httpPort = builder._httpPort;
@@ -128,7 +122,6 @@ public final class AggregatorConfiguration {
 
     private final String _monitoringCluster;
     private final String _monitoringService;
-    private final File _logDirectory;
     private final File _pipelinesDirectory;
     private final String _httpHost;
     private final String _httpHealthCheckPath;
@@ -174,17 +167,6 @@ public final class AggregatorConfiguration {
          */
         public Builder setMonitoringService(final String value) {
             _monitoringService = value;
-            return this;
-        }
-
-        /**
-         * The log directory. Cannot be null.
-         *
-         * @param value The log directory.
-         * @return This instance of <code>Builder</code>.
-         */
-        public Builder setLogDirectory(final File value) {
-            _logDirectory = value;
             return this;
         }
 
@@ -315,8 +297,6 @@ public final class AggregatorConfiguration {
         @NotEmpty
         private String _monitoringService = "mad";
         @NotNull
-        private File _logDirectory;
-        @NotNull
         private File _pipelinesDirectory;
         @NotNull
         @NotEmpty
@@ -336,7 +316,7 @@ public final class AggregatorConfiguration {
         @Range(min = 1, max = 65535)
         private Integer _metricsClientPort;
         @NotNull
-        private Duration _jvmMetricsCollectionInterval = Duration.ofMillis(500);
+        private Duration _jvmMetricsCollectionInterval = Duration.ofMillis(1000);
         @NotNull
         private Map<String, ?> _akkaConfiguration;
     }

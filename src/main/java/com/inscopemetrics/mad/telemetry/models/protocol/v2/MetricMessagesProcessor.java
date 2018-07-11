@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
-import com.inscopemetrics.mad.telemetry.actors.Connection;
+import com.inscopemetrics.mad.telemetry.actors.ConnectionActor;
 import com.inscopemetrics.mad.telemetry.models.messages.Command;
 import com.inscopemetrics.mad.telemetry.models.messages.MetricReport;
 import com.inscopemetrics.mad.telemetry.models.messages.MetricsList;
@@ -47,7 +47,7 @@ public class MetricMessagesProcessor implements MessagesProcessor {
      * @param connection ConnectionContext where processing takes place
      * @param metrics {@link PeriodicMetrics} instance to record metrics to
      */
-    public MetricMessagesProcessor(final Connection connection, final PeriodicMetrics metrics) {
+    public MetricMessagesProcessor(final ConnectionActor connection, final PeriodicMetrics metrics) {
         _connection = connection;
         _metrics = metrics;
     }
@@ -127,9 +127,11 @@ public class MetricMessagesProcessor implements MessagesProcessor {
         _connection.sendCommand(COMMAND_NEW_METRIC, n);
     }
 
+    @SuppressWarnings("deprecation")
     private void processMetricReport(final MetricReport report) {
         //TODO(barp): Map with a POJO mapper [MAI-184]
         final ObjectNode event = new ObjectNode(OBJECT_MAPPER.getNodeFactory());
+        event.put("dimensions", OBJECT_MAPPER.valueToTree(report.getDimensions()));
         event.put("server", report.getHost());
         event.put("service", report.getService());
         event.put("metric", report.getMetric());
@@ -176,7 +178,7 @@ public class MetricMessagesProcessor implements MessagesProcessor {
         _connection.sendCommand(COMMAND_METRICS_LIST, dataNode);
     }
 
-    private final Connection _connection;
+    private final ConnectionActor _connection;
     private PeriodicMetrics _metrics;
 
     private static final String COMMAND_METRICS_LIST = "metricsList";
