@@ -137,7 +137,6 @@ public abstract class ActorSource extends BaseSource {
 
         @NotEmpty
         private String _actorName;
-        @NotNull
         @JacksonInject
         @NotNull
         private ActorSystem _actorSystem;
