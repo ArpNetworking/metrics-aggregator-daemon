@@ -32,8 +32,9 @@ import java.util.Set;
  * Base class for percentile based statistics.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Ville Koskela (vkoskela dot arp at inscopemetrics dot com)
  */
-public abstract class TPStatistic extends BaseStatistic implements OrderedStatistic {
+public class TPStatistic extends BaseStatistic implements OrderedStatistic {
 
     /**
      * Accessor for the percentile from 0 to 100 (inclusive).
@@ -69,7 +70,7 @@ public abstract class TPStatistic extends BaseStatistic implements OrderedStatis
      *
      * @param percentile The percentile value to compute.
      */
-    protected TPStatistic(final double percentile) {
+    public TPStatistic(final double percentile) {
         _percentile = percentile;
         _defaultName = "tp" + FORMAT.format(_percentile);
         _aliases = Sets.newHashSet();

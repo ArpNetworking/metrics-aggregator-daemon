@@ -47,11 +47,11 @@ public class StatisticFactoryTest {
                 a(l("count", "n"), CountStatistic.class),
                 a(l("p0", "tp0", "min"), MinStatistic.class),
                 a(l("p50", "tp50", "median"), MedianStatistic.class),
-                a(l("p75", "tp75"), TP75Statistic.class),
-                a(l("p90", "tp90"), TP90Statistic.class),
-                a(l("p95", "tp95"), TP95Statistic.class),
-                a(l("p99", "tp99"), TP99Statistic.class),
-                a(l("p99.9", "tp99.9", "p99p9", "tp99p9"), TP99p9Statistic.class),
+                a(l("p75", "tp75"), TPStatistic.class),
+                a(l("p90", "tp90"), TPStatistic.class),
+                a(l("p95", "tp95"), TPStatistic.class),
+                a(l("p99", "tp99"), TPStatistic.class),
+                a(l("p99.9", "tp99.9", "p99p9", "tp99p9"), TPStatistic.class),
                 a(l("p100", "tp100", "max"), MaxStatistic.class)
         );
     }
