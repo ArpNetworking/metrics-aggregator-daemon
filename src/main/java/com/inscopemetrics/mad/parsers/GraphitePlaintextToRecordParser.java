@@ -48,37 +48,16 @@ import javax.annotation.Nullable;
  *
  * https://graphite.readthedocs.io/en/latest/feeding-carbon.html#the-plaintext-protocol
  *
- * The source also allows you to add dimensions in three ways:
+ * This parser also allows you to add dimensions in three ways:
  *
- * 1) Specifying global tags programmatically.
- * 2) Parsing tags from the metric name in Carbon format.
- *     See: http://graphite.readthedocs.io/en/latest/tags.html
- * 3) Parsing tags from the metric name in InfluxDb format.
+ * <ol>
+ * <li>Specifying global tags programmatically.</li>
+ * <li>Parsing tags from the metric name in Carbon format.
+ *     See: http://graphite.readthedocs.io/en/latest/tags.html</li>
+ * <li>Parsing tags from the metric name in InfluxDb format.
  *     See: https://github.com/influxdata/influxdb/issues/2996
- *     (this is not yet available)
- *
- * Sample MAD configuration:
- * <pre>
- * {
- *   type="com.arpnetworking.metrics.mad.sources.MappingSource"
- *   name="graphitetcp_mapping_source"
- *   actorName="graphite-tcp-source"
- *   findAndReplace={
- *     "\\."=["/"]
- *   }
- *   source={
- *     type="com.arpnetworking.metrics.common.sources.TcpLineSource"
- *     name="graphitetcp_source"
- *     host="0.0.0.0"
- *     port="2003"
- *   }
- * }
- * </pre>
- *
- * TODO(ville): Add pickle support.
- * See:
- * - https://graphite.readthedocs.io/en/latest/feeding-carbon.html#the-pickle-protocol
- * - https://github.com/irmen/Pyrolite
+ *     (this is not yet available)</li>
+ * </ol>
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */

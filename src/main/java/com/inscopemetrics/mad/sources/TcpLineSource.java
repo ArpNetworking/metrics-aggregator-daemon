@@ -15,7 +15,6 @@
  */
 package com.inscopemetrics.mad.sources;
 
-import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.io.Tcp;
@@ -26,62 +25,58 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.inscopemetrics.mad.model.Record;
 import com.inscopemetrics.mad.parsers.Parser;
 import com.inscopemetrics.mad.parsers.exceptions.ParsingException;
-import net.sf.oval.constraint.NotNull;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Source that uses line delimited data over tcp.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
-public final class TcpLineSource extends BaseTcpSource {
+public abstract class TcpLineSource extends BaseTcpSource {
 
-    @Override
-    protected Props createProps() {
-        return TcpListenerActor.props(this);
-    }
-
-    Parser<List<Record>, ByteBuffer> getParser() {
-        return _parser;
-    }
+    /**
+     * Provide the {@link Parser} to use to convert a line of data to
+     * a {@code List} of {@link Record} instances.
+     *
+     * @return the {@link Parser} to use
+     */
+    protected abstract Parser<List<Record>, ByteBuffer> getParser();
 
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
-    private TcpLineSource(final Builder builder) {
+    protected TcpLineSource(final Builder<?, ?> builder) {
         super(builder);
-        _parser = builder._parser;
     }
-
-    private final Parser<List<Record>, ByteBuffer> _parser;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TcpLineSource.class);
 
     /**
-     * Internal actor to processRecords requests.
+     * Internal actor to accept connections.
      */
     static final class TcpListenerActor extends BaseTcpListenerActor {
         /**
-         * Creates a {@link Props} for this actor.
+         * Creates a {@code Props} for this actor.
          *
          * @param source The {@link TcpLineSource} to send notifications through.
-         * @return A new {@link Props}
+         * @return A new {@code Props}
          */
         static Props props(final TcpLineSource source) {
             return Props.create(TcpListenerActor.class, source);
         }
 
         @Override
-        protected ActorRef createHandler(final BaseTcpSource source, final Tcp.Connected connected) {
+        protected ActorRef createHandler(final Tcp.Connected connected) {
             return getContext().actorOf(Props.create(
-                    TcpRequestHandlerActor.class,
-                    getSink(),
+                    TcpDataHandlerActor.class,
+                    getSource(),
                     connected.remoteAddress()));
         }
 
@@ -96,59 +91,25 @@ public final class TcpLineSource extends BaseTcpSource {
     }
 
     /**
-     * Internal actor to processRecords requests.
+     * Internal actor to process requests.
      */
-    static final class TcpRequestHandlerActor extends AbstractActor {
+    protected static final class TcpDataHandlerActor extends BaseTcpDataHandlerActor {
 
-        TcpRequestHandlerActor(
-                final TcpLineSource sink,
+        /**
+         * Protected constructor.
+         *
+         * @param source the source to bind the actor to
+         * @param remoteAddress the remote address of the client
+         */
+        protected TcpDataHandlerActor(
+                final TcpLineSource source,
                 final InetSocketAddress remoteAddress) {
-            _sink = sink;
-            _remoteAddress = remoteAddress;
+            super(source, remoteAddress);
+            _parser = source.getParser();
         }
 
         @Override
-        public Receive createReceive() {
-            return receiveBuilder()
-                    .match(Tcp.Received.class, message -> {
-                        final ByteString data = message.data();
-
-                        LOGGER.trace()
-                                .setMessage("Tcp data received")
-                                .addData("name", _sink.getName())
-                                .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
-                                .addData("remotePort", _remoteAddress.getPort())
-                                .addData("data", data)
-                                .log();
-
-                        try {
-                            processData(data);
-                            // CHECKSTYLE.OFF: IllegalCatch - Ensure all exceptions are logged (this is top level)
-                        } catch (final RuntimeException e) {
-                            // CHECKSTYLE.ON: IllegalCatch
-                            BAD_REQUEST_LOGGER.warn()
-                                    .setMessage("Error processing data")
-                                    .addData("name", _sink.getName())
-                                    .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
-                                    .addData("remotePort", _remoteAddress.getPort())
-                                    .addData("data", data)
-                                    .setThrowable(e)
-                                    .log();
-                        }
-                    })
-                    .match(Tcp.ConnectionClosed.class, message -> {
-                        getContext().stop(getSelf());
-                        LOGGER.debug()
-                                .setMessage("Tcp connection close")
-                                .addData("name", _sink.getName())
-                                .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
-                                .addData("remotePort", _remoteAddress.getPort())
-                                .log();
-                    })
-                    .build();
-        }
-
-        private void processData(final ByteString data) {
+        protected void processData(final ByteString data) {
             // Process buffer line by line buffering any partial lines
             int indexStart = 0;
             int indexEnd = data.indexOf('\n');
@@ -182,67 +143,54 @@ public final class TcpLineSource extends BaseTcpSource {
             try {
                 // NOTE: The parsing occurs in the actor itself which can become a bottleneck
                 // if there are more records to be parsed then a single thread can handle.
-                final List<Record> records = _sink.getParser().parse(data.toByteBuffer());
+                // TODO(ville): The parser should be an actor set.
+                final List<Record> records = _parser.parse(data.toByteBuffer());
 
-                LOGGER.trace()
+                LOGGER.debug()
                         .setMessage("Parsed records")
-                        .addData("name", _sink.getName())
+                        .addData("name", getSource().getName())
                         .addData("records", records.size())
-                        .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
-                        .addData("remotePort", _remoteAddress.getPort())
+                        .addData("remoteAddress", getRemoteAddress().getAddress().getHostAddress())
+                        .addData("remotePort", getRemoteAddress().getPort())
                         .log();
 
-                records.forEach(_sink::notify);
+                records.forEach(getSource()::notify);
             } catch (final ParsingException e) {
                 BAD_REQUEST_LOGGER.warn()
                         .setMessage("Error processing records")
-                        .addData("name", _sink.getName())
-                        .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
-                        .addData("remotePort", _remoteAddress.getPort())
+                        .addData("name", getSource().getName())
+                        .addData("remoteAddress", getRemoteAddress().getAddress().getHostAddress())
+                        .addData("remotePort", getRemoteAddress().getPort())
                         .setThrowable(e)
                         .log();
             }
         }
 
         private final ByteStringBuilder _buffer = new ByteStringBuilder();
-        private final TcpLineSource _sink;
-        private final InetSocketAddress _remoteAddress;
+        private final Parser<List<Record>, ByteBuffer> _parser;
 
         private static final Logger BAD_REQUEST_LOGGER =
                 LoggerFactory.getRateLimitLogger(TcpLineSource.class, Duration.ofSeconds(30));
     }
 
     /**
-     * TcpLineSource {@link BaseSource.Builder} implementation.
+     * TcpLineSource {@link Builder} implementation.
+     *
+     * @param <B> the builder type
+     * @param <S> the source type
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
-    public static final class Builder extends BaseTcpSource.Builder<Builder, TcpLineSource> {
+    public abstract static class Builder<B extends BaseTcpSource.Builder<B, S>, S extends TcpLineSource>
+            extends BaseTcpSource.Builder<B, S> {
 
         /**
-         * Public constructor.
-         */
-        public Builder() {
-            super(TcpLineSource::new);
-        }
-
-        /**
-         * Set the parser. Required. Cannot be null.
+         * Protected constructor.
          *
-         * @param value the parser
-         * @return this {@link Builder} instance
+         * @param targetConstructor the concrete source constructor to build through
          */
-        public Builder setParser(final Parser<List<Record>, ByteBuffer> value) {
-            _parser = value;
-            return self();
+        protected Builder(final Function<B, S> targetConstructor) {
+            super(targetConstructor);
         }
-
-        @Override
-        protected Builder self() {
-            return this;
-        }
-
-        @NotNull
-        private Parser<List<Record>, ByteBuffer> _parser;
     }
 }
