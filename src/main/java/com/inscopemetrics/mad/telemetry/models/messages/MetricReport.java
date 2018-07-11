@@ -63,11 +63,23 @@ public final class MetricReport {
         return _dimensions;
     }
 
+    /**
+     * Access the service dimension value.
+     *
+     * @return the service dimension value
+     * @deprecated Use {@code getDimensions} instead
+     */
     @Deprecated
     public String getService() {
         return _dimensions.get(Key.SERVICE_DIMENSION_KEY);
     }
 
+    /**
+     * Access the host dimension value.
+     *
+     * @return the host dimension value
+     * @deprecated Use {@code getDimensions} instead
+     */
     @Deprecated
     public String getHost() {
         return _dimensions.get(Key.HOST_DIMENSION_KEY);

@@ -35,7 +35,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.inscopemetrics.mad.model.AggregatedData;
-import com.inscopemetrics.mad.model.DefaultKey;
 import com.inscopemetrics.mad.model.Key;
 import com.inscopemetrics.mad.model.PeriodicData;
 import com.inscopemetrics.mad.model.Quantity;
@@ -54,7 +53,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 
 /**
  * Actor responsible for holding the set of connected websockets and publishing
@@ -199,7 +197,7 @@ public class TelemetryActor extends AbstractActor {
             final TPStatistic tpStatistic = (TPStatistic) statistic;
 
             final HistogramStatistic.HistogramSupportingData supportingData =
-                    (HistogramStatistic.HistogramSupportingData)value.getSupportingData();
+                    (HistogramStatistic.HistogramSupportingData) value.getSupportingData();
 
             final double percentile = supportingData.getHistogramSnapshot().getValueAtPercentile(
                     tpStatistic.getPercentile());
