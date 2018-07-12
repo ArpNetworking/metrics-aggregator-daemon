@@ -231,9 +231,9 @@ public final class StatsdToRecordParserTest {
 
     private final ZonedDateTime _now = ZonedDateTime.now(ZoneOffset.UTC);
     private final Parser<List<Record>, ByteBuffer> _parser =
-            new StatsdToRecordParser(
+            new StatsdToRecordParser.Builder(
                     Clock.fixed(
                             _now.toInstant(),
                             ZoneId.of("UTC")),
-                    () -> _random);
+                    () -> _random).build();
 }

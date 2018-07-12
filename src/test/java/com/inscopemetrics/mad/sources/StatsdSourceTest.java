@@ -43,7 +43,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Tests for the StatsdSource class.
+ * Tests for the StatsdUdpSource class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
@@ -68,7 +68,7 @@ public final class StatsdSourceTest {
     @Test
     @SuppressWarnings("deprecation")
     public void test() {
-        final StatsdSource statsdSource = new StatsdSource.Builder()
+        final StatsdUdpSource statsdSource = new StatsdUdpSource.Builder()
                 .setActorSystem(_actorSystem)
                 .setActorName("StatsdSourceTest.testActor")
                 .setName("StatsdSourceTest.test")
@@ -80,7 +80,8 @@ public final class StatsdSourceTest {
         // CHECKSTYLE.OFF: AnonInnerLength - This is the Akka test pattern
         new TestKit(_actorSystem) {{
             // Deploy the statsd source actor
-            final ActorRef statsdSourceActor = _actorSystem.actorOf(StatsdSource.Actor.props(statsdSource));
+            statsdSource.start();
+            final ActorRef statsdSourceActor = statsdSource.getActor();
 
             // Wait for it to be ready
             boolean isReady = false;

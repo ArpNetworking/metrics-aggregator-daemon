@@ -22,13 +22,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.inscopemetrics.mad.model.DefaultMetric;
 import com.inscopemetrics.mad.model.DefaultRecord;
-import com.inscopemetrics.mad.model.MetricType;
 import com.inscopemetrics.mad.model.Quantity;
 import com.inscopemetrics.mad.model.Record;
-import com.inscopemetrics.mad.model.Unit;
+import com.inscopemetrics.mad.model.statsd.StatsdType;
 import com.inscopemetrics.mad.parsers.exceptions.ParsingException;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -41,7 +39,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -55,11 +52,15 @@ import javax.annotation.Nullable;
 /**
  * Parses Statsd data as a {@link Record}.
  *
- * There are two Important differences compared to traditional statsd server
- * implementations. First, each counter or meter value, which is a delta,
- * is treated as a sample for that metric. Second, sets are not supported at
- * this time because they would need to be pushed down to our bucketing and
- * aggregation layer as a first-class metric type.
+ * There are two important differences compared to traditional statsd server
+ * implementations.
+ *
+ * First, each counter or meter value, which is a delta, is treated as a sample
+ * for that metric.
+ *
+ * Second, sets are not supported at this time because they would need to be
+ * pushed down to our bucketing and aggregation layer as a first-class metric
+ * type.
  *
  * Except for the differences described above this parser supports both the
  * traditional and Data Dog variants of the statsd protocol as defined here:
@@ -211,19 +212,9 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
                         .setTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(_clock.millis()), ZoneOffset.UTC)));
     }
 
-    /**
-     * Public constructor.
-     */
-    public StatsdToRecordParser() {
-        _clock = Clock.systemUTC();
-        _randomSupplier = ThreadLocalRandom::current;
-    }
-
-    StatsdToRecordParser(
-            final Clock clock,
-            final Supplier<Random> randomSupplier) {
-        _clock = clock;
-        _randomSupplier = randomSupplier;
+    private StatsdToRecordParser(final Builder builder) {
+        _clock = builder._clock;
+        _randomSupplier = builder._randomSupplier;
     }
 
     private final Clock _clock;
@@ -238,45 +229,28 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
     private static final Pattern STATSD_PATTERN = Pattern.compile(
             "^(?<NAME>[^:@|]+):(?<VALUE>[^|]+)\\|(?<TYPE>[^|]+)(\\|@(?<SAMPLERATE>[^|]+))?(\\|#(?<TAGS>.+))?$");
 
-    private enum StatsdType {
-        COUNTER("c", MetricType.COUNTER, null),
-        GAUGE("g", MetricType.GAUGE, null),
-        HISTOGRAM("h", MetricType.TIMER, null),
-        METERS("m", MetricType.COUNTER, null),
-        // NOTE: Sets are not supported as per class Javadoc.
-        //SET("s", null),
-        TIMER("ms", MetricType.TIMER, Unit.MILLISECOND);
+    /**
+     * Implementation of {@link Builder} for {@link StatsdToRecordParser}.
+     */
+    public static final class Builder extends ThreadLocalBuilder<StatsdToRecordParser> {
 
-        private final String _token;
-        private final MetricType _metricType;
-        private @Nullable final Unit _unit;
-
-        private static final Map<String, StatsdType> TOKEN_TO_TYPE = Maps.newHashMap();
-
-        StatsdType(
-                final String token,
-                final MetricType metricType,
-                @Nullable final Unit unit) {
-            _token = token;
-            _metricType = metricType;
-            _unit = unit;
+        /**
+         * Public constructor.
+         */
+        public Builder() {
+            super(StatsdToRecordParser::new);
         }
 
-        public MetricType getMetricType() {
-            return _metricType;
+        Builder(final Clock clock, final Supplier<Random> randomSupplier) {
+            super(StatsdToRecordParser::new);
+            _clock = clock;
+            _randomSupplier = randomSupplier;
         }
 
-        public @Nullable Unit getUnit() {
-            return _unit;
-        }
+        @Override
+        public void reset() {}
 
-        public static StatsdType fromToken(final String token) {
-            return TOKEN_TO_TYPE.get(token);
-        }
-
-        static {
-            for (final StatsdType statsdType : values()) {
-                TOKEN_TO_TYPE.put(statsdType._token, statsdType);
-            }
-        }
-    }}
+        private Clock _clock = Clock.systemUTC();
+        private Supplier<Random> _randomSupplier = ThreadLocalRandom::current;
+    }
+}

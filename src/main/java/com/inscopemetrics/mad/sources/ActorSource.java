@@ -48,6 +48,10 @@ public abstract class ActorSource extends BaseSource {
         }
     }
 
+    protected ActorRef getActor() {
+        return _actor;
+    }
+
     /**
      * Return the actor safe name of this source.
      *
@@ -133,8 +137,8 @@ public abstract class ActorSource extends BaseSource {
 
         @NotEmpty
         private String _actorName;
-        @NotNull
         @JacksonInject
+        @NotNull
         private ActorSystem _actorSystem;
     }
 }
