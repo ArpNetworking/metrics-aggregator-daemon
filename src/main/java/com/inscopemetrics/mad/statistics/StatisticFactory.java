@@ -71,9 +71,10 @@ public class StatisticFactory {
                     checkedPut(STATISTICS_BY_NAME_AND_ALIAS, statistic);
                     return Optional.of(statistic);
                 } catch (final NumberFormatException e) {
-                    LOGGER.error(String.format(
-                            "Invalid percentile statistic; name=%s",
-                            name));
+                    LOGGER.error()
+                            .setMessage("Invalid percentile statistic")
+                            .addData("name", name)
+                            .log();
                     return registeredStatistic;
                 }
             }
@@ -92,11 +93,12 @@ public class StatisticFactory {
         final Statistic existingStatistic =  map.get(key);
         if (existingStatistic != null) {
             if (!existingStatistic.equals(statistic)) {
-                LOGGER.error(String.format(
-                        "Statistic already registered; key=%s, existing=%s, new=%s",
-                        key,
-                        existingStatistic,
-                        statistic));
+                LOGGER.error()
+                        .setMessage("Statistic already registered")
+                        .addData("key", key)
+                        .addData("existing", existingStatistic)
+                        .addData("new", statistic)
+                        .log();
             }
             return;
         }
