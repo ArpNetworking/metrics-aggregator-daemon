@@ -17,19 +17,18 @@ package com.inscopemetrics.mad.statistics;
 
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.inscopemetrics.mad.utility.InterfaceDatabase;
-import com.inscopemetrics.mad.utility.ReflectionsDatabase;
+import com.google.common.reflect.ClassPath;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Creates statistics.
@@ -43,7 +42,7 @@ public class StatisticFactory {
      * Get a statistic by name.
      *
      * @param name The name of the desired statistic.
-     * @return A new <code>Statistic</code>.
+     * @return A new {@link Statistic}.
      */
     public Statistic getStatistic(final String name) {
         final Optional<Statistic> statistic = tryGetStatistic(name);
@@ -60,80 +59,89 @@ public class StatisticFactory {
      * @return A new <code>Statistic</code>.
      */
     public Optional<Statistic> tryGetStatistic(final String name) {
-        return Optional.ofNullable(STATISTICS_BY_NAME_AND_ALIAS.get(name));
+        final Optional<Statistic> registeredStatistic =
+                Optional.ofNullable(STATISTICS_BY_NAME_AND_ALIAS.get(name));
+        if (!registeredStatistic.isPresent()) {
+            final Matcher matcher = PERCENTILE_STATISTIC_PATTERN.matcher(name);
+            if (matcher.matches()) {
+                try {
+                    final String percentileString = matcher.group("percentile").replace('p', '.');
+                    final double percentile = Double.parseDouble(percentileString);
+                    final Statistic statistic = new TPStatistic(percentile);
+                    checkedPut(STATISTICS_BY_NAME_AND_ALIAS, statistic);
+                    return Optional.of(statistic);
+                } catch (final NumberFormatException e) {
+                    LOGGER.error()
+                            .setMessage("Invalid percentile statistic")
+                            .addData("name", name)
+                            .log();
+                    return registeredStatistic;
+                }
+            }
+        }
+        return registeredStatistic;
     }
 
-    /**
-     * Get all registered <code>Statistic</code> instances.
-     *
-     * @return A new <code>Statistic</code>.
-     */
-    public ImmutableSet<Statistic> getAllStatistics() {
-        return ALL_STATISTICS;
+    private static void checkedPut(final ConcurrentMap<String, Statistic> map, final Statistic statistic) {
+        checkedPut(map, statistic, statistic.getName());
+        for (final String alias : statistic.getAliases()) {
+            checkedPut(map, statistic, alias);
+        }
     }
 
-    /**
-     * Creates a statistic from a name.
-     *
-     * @param statistic The name of the desired statistic.
-     * @return A new <code>Statistic</code>.
-     * @deprecated Use <code>getStatistic</code> instead.
-     */
-    @Deprecated
-    public Optional<Statistic> createStatistic(final String statistic) {
-        return Optional.ofNullable(STATISTICS_BY_NAME_AND_ALIAS.get(statistic));
-    }
-
-    private static void checkedPut(final Map<String, Statistic> map, final Statistic statistic, final String key) {
+    private static void checkedPut(final ConcurrentMap<String, Statistic> map, final Statistic statistic, final String key) {
         final Statistic existingStatistic =  map.get(key);
         if (existingStatistic != null) {
             if (!existingStatistic.equals(statistic)) {
                 LOGGER.error()
-                    .setMessage("Statistic already registered")
-                    .addData("key", key)
-                    .addData("existing", existingStatistic)
-                    .addData("new", statistic)
-                    .log();
+                        .setMessage("Statistic already registered")
+                        .addData("key", key)
+                        .addData("existing", existingStatistic)
+                        .addData("new", statistic)
+                        .log();
             }
             return;
         }
         map.put(key, statistic);
     }
 
-    private static final ImmutableMap<String, Statistic> STATISTICS_BY_NAME_AND_ALIAS;
-    private static final ImmutableSet<Statistic> ALL_STATISTICS;
-    private static final InterfaceDatabase INTERFACE_DATABASE = ReflectionsDatabase.newInstance();
+    private static final Pattern PERCENTILE_STATISTIC_PATTERN = Pattern.compile("^[t]?p(?<percentile>[0-9]+(?:(\\.|p)[0-9]+)?)$");
+    private static final ConcurrentMap<String, Statistic> STATISTICS_BY_NAME_AND_ALIAS;
     private static final Logger LOGGER = LoggerFactory.getLogger(StatisticFactory.class);
 
     static {
         // NOTE: Do not put log messages in static blocks since they can lock the logger thread!
-        final Map<String, Statistic> statisticByNameAndAlias = Maps.newHashMap();
-        final Set<Statistic> allStatistics = Sets.newHashSet();
-        final Set<Class<? extends Statistic>> statisticClasses = INTERFACE_DATABASE.findClassesWithInterface(Statistic.class);
-        for (final Class<? extends Statistic> statisticClass : statisticClasses) {
-            if (!statisticClass.isInterface() && !Modifier.isAbstract(statisticClass.getModifiers())) {
-                try {
-                    final Constructor<? extends Statistic> constructor = statisticClass.getDeclaredConstructor();
-                    if (!constructor.isAccessible()) {
-                        constructor.setAccessible(true);
+        final ConcurrentMap<String, Statistic> statisticByNameAndAlias = Maps.newConcurrentMap();
+        try {
+            final ImmutableSet<ClassPath.ClassInfo> statisticClasses = ClassPath.from(StatisticFactory.class.getClassLoader())
+                    .getTopLevelClasses("com.inscopemetrics.mad.statistics");
+            for (final ClassPath.ClassInfo statisticClassInfo : statisticClasses) {
+                final Class<?> statisticClass = statisticClassInfo.load();
+                if (!statisticClass.isInterface() && !Modifier.isAbstract(statisticClass.getModifiers())
+                        && Statistic.class.isAssignableFrom(statisticClass)) {
+                    try {
+                        // The constructor type is implied by the assignability
+                        // of the statisticClass to the Statistic interface
+                        @SuppressWarnings("unchecked")
+                        final Constructor<? extends Statistic> constructor =
+                                (Constructor<? extends Statistic>) statisticClass.getDeclaredConstructor();
+                        if (!constructor.isAccessible()) {
+                            constructor.setAccessible(true);
+                        }
+                        checkedPut(statisticByNameAndAlias, constructor.newInstance());
+                    } catch (final InvocationTargetException | NoSuchMethodException
+                            | InstantiationException | IllegalAccessException e) {
+                        LOGGER.warn()
+                                .setMessage("Unable to load statistic")
+                                .addData("class", statisticClass)
+                                .setThrowable(e)
+                                .log();
                     }
-                    final Statistic statistic = constructor.newInstance();
-                    allStatistics.add(statistic);
-                    checkedPut(statisticByNameAndAlias, statistic, statistic.getName());
-                    for (final String alias : statistic.getAliases()) {
-                        checkedPut(statisticByNameAndAlias, statistic, alias);
-                    }
-                } catch (final InvocationTargetException | NoSuchMethodException
-                        | InstantiationException | IllegalAccessException e) {
-                    LOGGER.warn()
-                        .setMessage("Unable to load statistic")
-                        .addData("class", statisticClass)
-                        .setThrowable(e)
-                        .log();
                 }
             }
+        } catch (final IOException e) {
+            throw new RuntimeException("Statistic discovery failed", e);
         }
-        STATISTICS_BY_NAME_AND_ALIAS = ImmutableMap.copyOf(statisticByNameAndAlias);
-        ALL_STATISTICS = ImmutableSet.copyOf(allStatistics);
+        STATISTICS_BY_NAME_AND_ALIAS = statisticByNameAndAlias;
     }
 }

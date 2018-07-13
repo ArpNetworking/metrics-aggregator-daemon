@@ -15,14 +15,12 @@
  */
 package com.inscopemetrics.mad.statistics;
 
-import com.google.common.collect.Lists;
 import com.inscopemetrics.mad.model.CalculatedValue;
 import com.inscopemetrics.mad.model.Quantity;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Tests the TPStatistic class.
@@ -145,12 +143,11 @@ public class TPStatisticTest {
         return Math.abs(diff / expected.getValue()) <= 0.01;
     }
 
-    private static final List<Double> ONE_TO_FIVE = Lists.newArrayList(1d, 2d, 3d, 4d, 5d);
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic HISTOGRAM_STATISTIC = STATISTIC_FACTORY.getStatistic("histogram");
-    private static final TP75Statistic TP75_STATISTIC = (TP75Statistic) STATISTIC_FACTORY.getStatistic("tp75");
-    private static final TP90Statistic TP90_STATISTIC = (TP90Statistic) STATISTIC_FACTORY.getStatistic("tp90");
-    private static final TP95Statistic TP95_STATISTIC = (TP95Statistic) STATISTIC_FACTORY.getStatistic("tp95");
-    private static final TP99Statistic TP99_STATISTIC = (TP99Statistic) STATISTIC_FACTORY.getStatistic("tp99");
-    private static final TP99p9Statistic TP99P9_STATISTIC = (TP99p9Statistic) STATISTIC_FACTORY.getStatistic("tp99p9");
+    private static final TPStatistic TP75_STATISTIC = (TPStatistic) STATISTIC_FACTORY.getStatistic("tp75");
+    private static final TPStatistic TP90_STATISTIC = (TPStatistic) STATISTIC_FACTORY.getStatistic("tp90");
+    private static final TPStatistic TP95_STATISTIC = (TPStatistic) STATISTIC_FACTORY.getStatistic("tp95");
+    private static final TPStatistic TP99_STATISTIC = (TPStatistic) STATISTIC_FACTORY.getStatistic("tp99");
+    private static final TPStatistic TP99P9_STATISTIC = (TPStatistic) STATISTIC_FACTORY.getStatistic("tp99p9");
 }
