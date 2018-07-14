@@ -189,7 +189,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
             JsonToRecordParser.class,
             Duration.ofSeconds(30));
 
-    private static Quantity version2gSampleToQuantity(final Version2g.Sample sample) {
+    private static @Nullable Quantity version2gSampleToQuantity(final Version2g.Sample sample) {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
                 @Nullable final CompositeUnit sampleUnit = sample.getUnit2g() != null

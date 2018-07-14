@@ -24,6 +24,7 @@ import net.sf.oval.constraint.NotNull;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Represents a sample.
@@ -222,7 +223,7 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
          * @param value The unit.
          * @return This <code>Builder</code> instance.
          */
-        public Builder setUnit(final Unit value) {
+        public Builder setUnit(@Nullable final Unit value) {
             _unit = value;
             return this;
         }
