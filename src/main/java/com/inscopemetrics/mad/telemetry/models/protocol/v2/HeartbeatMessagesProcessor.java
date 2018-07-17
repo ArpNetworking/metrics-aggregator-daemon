@@ -18,7 +18,7 @@ package com.inscopemetrics.mad.telemetry.models.protocol.v2;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.inscopemetrics.mad.telemetry.actors.Connection;
+import com.inscopemetrics.mad.telemetry.actors.ConnectionActor;
 import com.inscopemetrics.mad.telemetry.models.messages.Command;
 import com.inscopemetrics.mad.telemetry.models.protocol.MessagesProcessor;
 
@@ -34,7 +34,7 @@ public class HeartbeatMessagesProcessor implements MessagesProcessor {
      * @param connection ConnectionContext where processing takes place
      * @param metrics {@link PeriodicMetrics} instance to record metrics to
      */
-    public HeartbeatMessagesProcessor(final Connection connection, final PeriodicMetrics metrics) {
+    public HeartbeatMessagesProcessor(final ConnectionActor connection, final PeriodicMetrics metrics) {
         _connection = connection;
         _metrics = metrics;
     }
@@ -56,7 +56,7 @@ public class HeartbeatMessagesProcessor implements MessagesProcessor {
     }
 
     private PeriodicMetrics _metrics;
-    private final Connection _connection;
+    private final ConnectionActor _connection;
 
     private static final String COMMAND_HEARTBEAT = "heartbeat";
     private static final ObjectNode OK_RESPONSE =

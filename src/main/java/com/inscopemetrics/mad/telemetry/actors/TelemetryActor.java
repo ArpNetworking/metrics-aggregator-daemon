@@ -18,8 +18,10 @@ package com.inscopemetrics.mad.telemetry.actors;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
+import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.ExecutionContexts;
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
@@ -27,26 +29,28 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.inscopemetrics.mad.model.AggregatedData;
 import com.inscopemetrics.mad.model.Key;
 import com.inscopemetrics.mad.model.PeriodicData;
+import com.inscopemetrics.mad.model.Quantity;
+import com.inscopemetrics.mad.statistics.HistogramStatistic;
+import com.inscopemetrics.mad.statistics.Statistic;
+import com.inscopemetrics.mad.statistics.StatisticFactory;
+import com.inscopemetrics.mad.statistics.TPStatistic;
 import com.inscopemetrics.mad.telemetry.models.messages.Connect;
-import com.inscopemetrics.mad.telemetry.models.messages.LogFileAppeared;
-import com.inscopemetrics.mad.telemetry.models.messages.LogFileDisappeared;
-import com.inscopemetrics.mad.telemetry.models.messages.LogLine;
-import com.inscopemetrics.mad.telemetry.models.messages.LogsList;
-import com.inscopemetrics.mad.telemetry.models.messages.LogsListRequest;
 import com.inscopemetrics.mad.telemetry.models.messages.MetricsList;
 import com.inscopemetrics.mad.telemetry.models.messages.MetricsListRequest;
-import com.inscopemetrics.mad.telemetry.models.messages.NewLog;
 import com.inscopemetrics.mad.telemetry.models.messages.NewMetric;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -57,16 +61,36 @@ import java.util.concurrent.TimeUnit;
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  * @author Mohammed Kamel (mkamel at groupon dot com)
  */
-public class Telemetry extends AbstractActor {
+public class TelemetryActor extends AbstractActor {
+
+    /**
+     * Factory for creating a {@code Props} with strong typing.
+     *
+     * @param metricsFactory instance of {@code MetricsFactory}
+     * @param histogramStatistics statistics to send in lieu of a histogram
+     * @return a new {@code Props} object to create a {@link TelemetryActor}
+     */
+    public static Props props(
+            final MetricsFactory metricsFactory,
+            final ImmutableSet<Statistic> histogramStatistics) {
+        return Props.create(
+                () -> new TelemetryActor(
+                        metricsFactory,
+                        histogramStatistics));
+    }
 
     /**
      * Public constructor.
      *
-     * @param metricsFactory Instance of <code>MetricsFactory</code>.
+     * @param metricsFactory instance of {@code MetricsFactory}.
+     * @param histogramStatistics statistics to send in lieu of a histogram
      */
     @Inject
-    public Telemetry(final MetricsFactory metricsFactory) {
+    public TelemetryActor(
+            final MetricsFactory metricsFactory,
+            final ImmutableSet<Statistic> histogramStatistics) {
         _metricsFactory = metricsFactory;
+        _histogramStatistics = histogramStatistics;
         _metrics = metricsFactory.create();
         _instrument = context().system().scheduler().schedule(
                 new FiniteDuration(0, TimeUnit.SECONDS), // Initial delay
@@ -83,11 +107,7 @@ public class Telemetry extends AbstractActor {
                 .matchEquals("instrument", message -> periodicInstrumentation())
                 .match(PeriodicData.class, this::executePeriodicData)
                 .match(Connect.class, this::executeConnect)
-                .match(LogLine.class, this::executeLogLine)
                 .match(MetricsListRequest.class, ignored -> executeMetricsListRequest())
-                .match(LogsListRequest.class, ignored -> executeLogsListRequest())
-                .match(LogFileAppeared.class, this::executeLogAdded)
-                .match(LogFileDisappeared.class, this::executeLogRemoved)
                 .match(Terminated.class, this::executeQuit)
                 .matchAny(message -> {
                     _metrics.incrementCounter(UNKNOWN_COUNTER);
@@ -126,33 +146,6 @@ public class Telemetry extends AbstractActor {
         return toLogValue().toString();
     }
 
-    private void executeLogRemoved(final LogFileDisappeared message) {
-        _metrics.incrementCounter(LOG_REMOVED_COUNTER);
-        if (_logs.contains(message.getFile())) {
-            _logs.remove(message.getFile());
-            broadcast(message);
-        }
-    }
-
-    private void executeLogAdded(final LogFileAppeared message) {
-        _metrics.incrementCounter(LOG_ADDED_COUNTER);
-        if (!_logs.contains(message.getFile())) {
-            _logs.add(message.getFile());
-            notifyNewLog(message.getFile());
-        }
-    }
-
-    private void executeLogsListRequest() {
-        _metrics.incrementCounter(METRICS_LIST_COUNTER);
-        getSender().tell(new LogsList(_logs), getSelf());
-    }
-
-    private void executeLogLine(final LogLine message) {
-        _metrics.incrementCounter(LOG_LINE_COUNTER);
-        registerLog(message.getFile());
-        broadcast(message);
-    }
-
     private void executeConnect(final Connect message) {
         _metrics.incrementCounter(CONNECT_COUNTER);
 
@@ -161,23 +154,66 @@ public class Telemetry extends AbstractActor {
         context().watch(message.getConnection());
 
         LOGGER.info()
-                .setMessage("Connection opened")
+                .setMessage("ConnectionActor opened")
                 .addData("actor", self())
                 .addData("connection", message.getConnection())
                 .log();
     }
 
-    private void executePeriodicData(final PeriodicData message) {
+    private void executePeriodicData(final PeriodicData periodicData) {
         _metrics.incrementCounter(PERIODIC_DATA_COUNTER);
 
-        // Ensure all the metrics are in the registry
-        final Key dimensions = message.getDimensions();
-        for (final Map.Entry<String, AggregatedData> entry : message.getData().entries()) {
-            registerMetric(dimensions.getService(), entry.getKey(), entry.getValue().getStatistic().getName());
+        // Ensure all the metrics are in the registry and replace histogram statistics
+        final PeriodicData.Builder modifiedPeriodicDataBuilder = ThreadLocalBuilder.clone(periodicData);
+        final ImmutableMultimap.Builder<String, AggregatedData> modifiedMetricsBuilder = ImmutableMultimap.builder();
+        final Key dimensions = periodicData.getDimensions();
+
+        for (final Map.Entry<String, AggregatedData> entry : periodicData.getData().entries()) {
+            if (!HISTOGRAM_STATISTIC.equals(entry.getValue().getStatistic())) {
+                registerMetric(dimensions.getService(), entry.getKey(), entry.getValue().getStatistic().getName());
+                modifiedMetricsBuilder.put(entry.getKey(), entry.getValue());
+            } else {
+                for (final Statistic statistic : _histogramStatistics) {
+                    registerMetric(dimensions.getService(), entry.getKey(), statistic.getName());
+
+                    final Optional<AggregatedData> percentileAggregatedData = computePercentile(
+                            entry.getValue(),
+                            statistic);
+                    if (percentileAggregatedData.isPresent()) {
+                        modifiedMetricsBuilder.put(entry.getKey(), percentileAggregatedData.get());
+                    }
+                }
+            }
         }
+        modifiedPeriodicDataBuilder.setData(modifiedMetricsBuilder.build());
 
         // Transmit the data to all members
-        broadcast(message);
+        broadcast(modifiedPeriodicDataBuilder.build());
+    }
+
+    private Optional<AggregatedData> computePercentile(final AggregatedData value, final Statistic statistic) {
+        if (value.getSupportingData() instanceof HistogramStatistic.HistogramSupportingData
+                && statistic instanceof TPStatistic) {
+            final TPStatistic tpStatistic = (TPStatistic) statistic;
+
+            final HistogramStatistic.HistogramSupportingData supportingData =
+                    (HistogramStatistic.HistogramSupportingData) value.getSupportingData();
+
+            final double percentile = supportingData.getHistogramSnapshot().getValueAtPercentile(
+                    tpStatistic.getPercentile());
+
+            return Optional.of(
+                    new AggregatedData.Builder()
+                            .setStatistic(statistic)
+                            .setIsSpecified(true)
+                            .setValue(ThreadLocalBuilder.build(
+                                    Quantity.Builder.class,
+                                    b -> b.setValue(percentile)
+                                            .setUnit(supportingData.getUnit().orElse(null))))
+                            .setPopulationSize(value.getPopulationSize())
+                            .build());
+        }
+        return Optional.empty();
     }
 
     private void executeQuit(final Terminated message) {
@@ -192,17 +228,6 @@ public class Telemetry extends AbstractActor {
 
         // Transmit a list of all registered metrics
         getSender().tell(new MetricsList(ImmutableMap.copyOf(_serviceMetrics)), getSelf());
-    }
-
-    private void registerLog(final Path logPath) {
-        if (!_logs.contains(logPath)) {
-            _logs.add(logPath);
-            notifyNewLog(logPath);
-        }
-    }
-
-    private void notifyNewLog(final Path logPath) {
-        broadcast(new NewLog(logPath));
     }
 
     private void broadcast(final Object message) {
@@ -242,6 +267,7 @@ public class Telemetry extends AbstractActor {
     private final Cancellable _instrument;
     private final Set<Path> _logs = Sets.newTreeSet();
     private final MetricsFactory _metricsFactory;
+    private final ImmutableSet<Statistic> _histogramStatistics;
     private final Set<ActorRef> _members = Sets.newHashSet();
     private final Map<String, Map<String, Set<String>>> _serviceMetrics = Maps.newHashMap();
 
@@ -252,10 +278,8 @@ public class Telemetry extends AbstractActor {
     private static final String QUIT_COUNTER = METRIC_PREFIX + "quit";
     private static final String PERIODIC_DATA_COUNTER = METRIC_PREFIX + "periodic_data";
     private static final String CONNECT_COUNTER = METRIC_PREFIX + "connect";
-    private static final String LOG_LINE_COUNTER = METRIC_PREFIX + "log_line";
-    private static final String METRICS_LIST_COUNTER = METRIC_PREFIX + "metrics_list";
-    private static final String LOG_ADDED_COUNTER = METRIC_PREFIX + "log_added";
-    private static final String LOG_REMOVED_COUNTER = METRIC_PREFIX + "log_removed";
     private static final String UNKNOWN_COUNTER = METRIC_PREFIX + "UNKNOWN";
-    private static final Logger LOGGER = LoggerFactory.getLogger(Telemetry.class);
+    private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
+    private static final Statistic HISTOGRAM_STATISTIC = STATISTIC_FACTORY.getStatistic("histogram");
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryActor.class);
 }

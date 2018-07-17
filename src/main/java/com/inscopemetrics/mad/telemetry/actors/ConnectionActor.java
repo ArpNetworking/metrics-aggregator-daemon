@@ -51,34 +51,35 @@ import java.util.Set;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
-public class Connection extends AbstractActor {
-    /**
-     * Public constructor.
-     *
-     * @param metrics Instance of <code>PeriodicMetrics</code>.
-     * @param processorsFactory Factory for producing the protocol's <code>MessagesProcessor</code>
-     */
-    public Connection(
-            final PeriodicMetrics metrics,
-            final MessageProcessorsFactory processorsFactory) {
-        _metrics = metrics;
-        _messageProcessors = processorsFactory.create(this, metrics);
-    }
+public class ConnectionActor extends AbstractActor {
 
     /**
-     * Factory for creating a <code>Props</code> with strong typing.
+     * Factory for creating a {@code Props} with strong typing.
      *
-     * @param metrics Instance of <code>PeriodicMetrics</code>.
-     * @param messageProcessorsFactory Factory to create a <code>Metrics</code> object.
-     * @return a new Props object to create a <code>ConnectionContext</code>.
+     * @param metrics Instance of {@code PeriodicMetrics}
+     * @param messageProcessorsFactory Factory for producing the protocol's {@link MessagesProcessor}
+     * @return a new Props object to create a {@link ConnectionActor}.
      */
     public static Props props(
             final PeriodicMetrics metrics,
             final MessageProcessorsFactory messageProcessorsFactory) {
         return Props.create(
-                Connection.class,
-                metrics,
-                messageProcessorsFactory);
+                () -> new ConnectionActor(
+                        metrics,
+                        messageProcessorsFactory));
+    }
+
+    /**
+     * Public constructor.
+     *
+     * @param metrics Instance of {@code PeriodicMetrics}.
+     * @param processorsFactory Factory for producing the protocol's {@link MessagesProcessor}
+     */
+    public ConnectionActor(
+            final PeriodicMetrics metrics,
+            final MessageProcessorsFactory processorsFactory) {
+        _metrics = metrics;
+        _messageProcessors = processorsFactory.create(this, metrics);
     }
 
     @Override
@@ -144,7 +145,7 @@ public class Connection extends AbstractActor {
                                     .log();
                             unhandled(message);
                         } else {
-                            _metrics.recordCounter("Actors/Connection/UNKNOWN", 1);
+                            _metrics.recordCounter("actors/connection/UNKNOWN", 1);
                             LOGGER.warn()
                                     .setMessage("Unable to process message")
                                     .addData("reason", "unsupported message")
@@ -237,9 +238,9 @@ public class Connection extends AbstractActor {
     }
 
     /**
-     * Accessor to this Connection's Telemetry actor.
+     * Accessor to this ConnectionActor's TelemetryActor actor.
      *
-     * @return This Connection's Telemetry actor.
+     * @return This ConnectionActor's TelemetryActor actor.
      */
     public ActorRef getTelemetry() {
         return _telemetry;
@@ -303,8 +304,7 @@ public class Connection extends AbstractActor {
             }
 
             final MetricReport metricReport = new MetricReport(
-                    service,
-                    host,
+                    dimensions.getParameters(),
                     statisticName,
                     metric,
                     datum.getValue().getValue(),
@@ -330,5 +330,5 @@ public class Connection extends AbstractActor {
     private static final String UNKNOWN_COUNTER = METRICS_PREFIX + "UNKNOWN";
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
-    private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionActor.class);
 }

@@ -50,9 +50,10 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import com.inscopemetrics.mad.actors.Status;
+import com.inscopemetrics.mad.sinks.TelemetrySink;
 import com.inscopemetrics.mad.sources.ClientHttpSourceV2;
 import com.inscopemetrics.mad.sources.CollectdHttpSourceV1;
-import com.inscopemetrics.mad.telemetry.actors.Connection;
+import com.inscopemetrics.mad.telemetry.actors.ConnectionActor;
 import com.inscopemetrics.mad.telemetry.models.messages.Connect;
 import com.inscopemetrics.mad.telemetry.models.protocol.MessageProcessorsFactory;
 import com.inscopemetrics.mad.telemetry.models.protocol.v2.ProcessorsV2Factory;
@@ -238,21 +239,23 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
             final akka.http.impl.engine.ws.UpgradeToWebSocketLowLevel lowLevelUpgradeToWebSocketHeader =
                     (akka.http.impl.engine.ws.UpgradeToWebSocketLowLevel) upgradeToWebSocketHeader.get();
 
-            final ActorRef connection = _actorSystem.actorOf(Connection.props(_metrics, messageProcessorsFactory));
+            final ActorRef connection = _actorSystem.actorOf(ConnectionActor.props(_metrics, messageProcessorsFactory));
             final Sink<Message, ?> inChannel = Sink.actorRef(connection, PoisonPill.getInstance());
             final Source<Message, ActorRef> outChannel = Source.<Message>actorRef(TELEMETRY_BUFFER_SIZE, OverflowStrategy.dropBuffer())
                     .mapMaterializedValue(channel -> {
-                        _actorSystem.actorSelection("/user/telemetry").resolveOne(Timeout.apply(1, TimeUnit.SECONDS)).onSuccess(
-                                new JavaPartialFunction<ActorRef, Object>() {
-                                    @Override
-                                    public Object apply(final ActorRef telemetry, final boolean isCheck) {
-                                        final Connect connectMessage = new Connect(telemetry, connection, channel);
-                                        connection.tell(connectMessage, ActorRef.noSender());
-                                        telemetry.tell(connectMessage, ActorRef.noSender());
-                                        return null;
-                                    }
-                                },
-                                _actorSystem.dispatcher()
+                        _actorSystem.actorSelection("/user/" + TelemetrySink.TELEMETRY_ACTOR_NAME)
+                                .resolveOne(Timeout.apply(1, TimeUnit.SECONDS))
+                                .onSuccess(
+                                        new JavaPartialFunction<ActorRef, Object>() {
+                                            @Override
+                                            public Object apply(final ActorRef telemetry, final boolean isCheck) {
+                                                final Connect connectMessage = new Connect(telemetry, connection, channel);
+                                                connection.tell(connectMessage, ActorRef.noSender());
+                                                telemetry.tell(connectMessage, ActorRef.noSender());
+                                                return null;
+                                            }
+                                        },
+                                        _actorSystem.dispatcher()
                         );
                         return channel;
                     });
@@ -298,7 +301,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Routes.class);
 
-    // Telemetry
+    // TelemetryActor
     private static final int TELEMETRY_BUFFER_SIZE = 256;
     private static final ProcessorsV2Factory TELEMETRY_V2_FACTORY = new ProcessorsV2Factory();
     private static final String TELEMETRY_STREAM_V2_PATH = "/telemetry/v2/stream";

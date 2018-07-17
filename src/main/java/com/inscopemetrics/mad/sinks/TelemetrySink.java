@@ -16,17 +16,19 @@
 package com.inscopemetrics.mad.sinks;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.fasterxml.jackson.annotation.JacksonInject;
+import com.google.common.collect.ImmutableSet;
 import com.inscopemetrics.mad.model.PeriodicData;
-import net.sf.oval.constraint.NotEmpty;
+import com.inscopemetrics.mad.statistics.Statistic;
+import com.inscopemetrics.mad.telemetry.actors.TelemetryActor;
 import net.sf.oval.constraint.NotNull;
 
 /**
- * A publisher that sends a message to the <code>Telemetry</code> actor.
+ * A publisher that sends a message to the {@link TelemetryActor} actor.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
@@ -53,13 +55,22 @@ public final class TelemetrySink extends BaseSink {
 
     private TelemetrySink(final Builder builder) {
         super(builder);
-        _telemetryActor = builder._actorSystem.actorSelection(builder._telemetryActorPath);
+
+        // Create the telemetry actor
+        _telemetryActor = builder._actorSystem.actorOf(
+                TelemetryActor.props(builder._metricsFactory, builder._histogramStatistics),
+                TELEMETRY_ACTOR_NAME);
     }
 
-    private final ActorSelection _telemetryActor;
+    private final ActorRef _telemetryActor;
 
     /**
-     * Base <code>Builder</code> implementation.
+     * The path to the {@link TelemetryActor} instance.
+     */
+    public static final String TELEMETRY_ACTOR_NAME = "telemetry";
+
+    /**
+     * TelemetrySink {@code Builder} implementation.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
      */
@@ -73,7 +84,8 @@ public final class TelemetrySink extends BaseSink {
         }
 
         /**
-         * Sets the actor system to create the sink actor in. Required. Cannot be null. Injected by default.
+         * Sets the actor system to create the sink actor in. Required. Cannot
+         * be null. Injected by default.
          *
          * @param value the actor system
          * @return this builder
@@ -84,13 +96,25 @@ public final class TelemetrySink extends BaseSink {
         }
 
         /**
-         * Sets the <code>Telemetry</code> actor path. Optional. Cannot be null or empty. "/users/telemetry" by default.
+         * Sets the metrics factory. Required. Cannot be null. Injected by default.
          *
-         * @param value the path to the <code>Telemetry</code> actor
+         * @param value the metrics factory
          * @return this builder
          */
-        public Builder setTelemetryActorPath(final String value) {
-            _telemetryActorPath = value;
+        public Builder setMetricsFactory(final MetricsFactory value) {
+            _metricsFactory = value;
+            return self();
+        }
+
+        /**
+         * Sets the set of statistics to send in lieu of a histogram. Optional.
+         * Cannot be null. Empty set by default.
+         *
+         * @param value the set of statistics to send in lieu of histogram
+         * @return this builder
+         */
+        public Builder setHistogramStatistics(final ImmutableSet<Statistic> value) {
+            _histogramStatistics = value;
             return self();
         }
 
@@ -102,8 +126,10 @@ public final class TelemetrySink extends BaseSink {
         @JacksonInject
         @NotNull
         private ActorSystem _actorSystem;
+        @JacksonInject
         @NotNull
-        @NotEmpty
-        private String _telemetryActorPath = "/user/telemetry";
+        private MetricsFactory _metricsFactory;
+        @NotNull
+        private ImmutableSet<Statistic> _histogramStatistics = ImmutableSet.of();
     }
 }
