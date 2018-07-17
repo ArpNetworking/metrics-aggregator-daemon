@@ -64,9 +64,9 @@ public class ConnectionActor extends AbstractActor {
             final PeriodicMetrics metrics,
             final MessageProcessorsFactory messageProcessorsFactory) {
         return Props.create(
-                ConnectionActor.class,
-                metrics,
-                messageProcessorsFactory);
+                () -> new ConnectionActor(
+                        metrics,
+                        messageProcessorsFactory));
     }
 
     /**

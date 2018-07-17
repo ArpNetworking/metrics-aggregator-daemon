@@ -74,9 +74,9 @@ public class TelemetryActor extends AbstractActor {
             final MetricsFactory metricsFactory,
             final ImmutableSet<Statistic> histogramStatistics) {
         return Props.create(
-                TelemetryActor.class,
-                metricsFactory,
-                histogramStatistics);
+                () -> new TelemetryActor(
+                        metricsFactory,
+                        histogramStatistics));
     }
 
     /**
