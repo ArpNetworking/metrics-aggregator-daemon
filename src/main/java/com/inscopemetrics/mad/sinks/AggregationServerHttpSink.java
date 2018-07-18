@@ -31,6 +31,7 @@ import com.inscopemetrics.mad.statistics.StatisticFactory;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.Nullable;
 
 /**
  * Publisher to send data to an upstream aggregation server over HTTP.
@@ -99,7 +100,7 @@ public final class AggregationServerHttpSink extends HttpPostSink {
                     .setUnit(unit)
                     .setUserSpecified(datum.isSpecified());
 
-            final ByteString supportingData = serializeSupportingData(datum);
+            @Nullable final ByteString supportingData = serializeSupportingData(datum);
             if (supportingData != null) {
                 entryBuilder.setSupportingData(supportingData);
             }
@@ -109,7 +110,7 @@ public final class AggregationServerHttpSink extends HttpPostSink {
         return builder.build();
     }
 
-    private ByteString serializeSupportingData(final AggregatedData datum) {
+    private @Nullable ByteString serializeSupportingData(final AggregatedData datum) {
         final Object data = datum.getSupportingData();
         final ByteString byteString;
         if (data instanceof HistogramStatistic.HistogramSupportingData) {

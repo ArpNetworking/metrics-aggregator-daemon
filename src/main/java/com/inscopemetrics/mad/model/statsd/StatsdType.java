@@ -80,7 +80,7 @@ public enum StatsdType {
      * @param token the statsd protocol token
      * @return the corresponding {@link StatsdType} or {@code null}
      */
-    public static @Nullable StatsdType fromToken(final String token) {
+    public static @Nullable StatsdType fromToken(@Nullable final String token) {
         return TOKEN_TO_TYPE.get(token);
     }
 

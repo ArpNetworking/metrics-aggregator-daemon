@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -133,7 +134,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             final String pluginInstance,
             final String type,
             final String typeInstance,
-            final String dsName) {
+            @Nullable final String dsName) {
         final StringBuilder builder = new StringBuilder();
         builder.append(plugin);
         if (!Strings.isNullOrEmpty(pluginInstance)) {
@@ -146,14 +147,17 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             builder.append("/");
             builder.append(typeInstance);
         }
-        if (!Strings.isNullOrEmpty(dsName) && !dsName.equals("value")) {
+        if (dsName != null && !dsName.isEmpty() && !Objects.equals(dsName, "value")) {
             builder.append("/");
             builder.append(dsName);
         }
         return builder.toString();
     }
 
-    private MetricType mapDsType(final String type) {
+    private MetricType mapDsType(@Nullable final String type) {
+        if (type == null) {
+            return MetricType.GAUGE;
+        }
         switch (type) {
             case "gauge":
                 return MetricType.GAUGE;
@@ -430,15 +434,15 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
          * Represents a single sample in a collectd metric post.
          */
         public static final class Sample {
-            public Double getValue() {
+            public @Nullable Double getValue() {
                 return _value;
             }
 
-            public String getDsType() {
+            public @Nullable String getDsType() {
                 return _dsType;
             }
 
-            public String getDsName() {
+            public @Nullable String getDsName() {
                 return _dsName;
             }
 
@@ -449,14 +453,17 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
              * @param dsType The DS type
              * @param dsName The DS name
              */
-            public Sample(final Double value, final String dsType, final String dsName) {
+            public Sample(@Nullable final Double value, @Nullable final String dsType, @Nullable final String dsName) {
                 _value = value;
                 _dsType = dsType;
                 _dsName = dsName;
             }
 
+            @Nullable
             private final Double _value;
+            @Nullable
             private final String _dsType;
+            @Nullable
             private final String _dsName;
         }
     }
