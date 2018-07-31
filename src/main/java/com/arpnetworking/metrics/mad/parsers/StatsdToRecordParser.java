@@ -77,39 +77,48 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         // CHECKSTYLE.OFF: IllegalInstantiation - This is the recommended way
         final String datagramAsString = new String(datagram.array(), Charsets.UTF_8);
         final ImmutableList.Builder<Record> recordListBuilder = ImmutableList.builder();
-        for (final String line : LINE_SPLITTER.split(datagramAsString)) {
-            // CHECKSTYLE.ON: IllegalInstantiation
-            final Matcher matcher = STATSD_PATTERN.matcher(line);
-            if (!matcher.matches()) {
-                throw new ParsingException("Invalid statsd line", line.getBytes(Charsets.UTF_8));
-            }
-
-            // Parse the name
-            final String name = parseName(datagram, matcher.group("NAME"));
-
-            // Parse the _metricType
-            final StatsdType type = parseStatsdType(datagram, matcher.group("TYPE"));
-
-            // Parse the value
-            final Number value = parseValue(datagram, matcher.group("VALUE"), type);
-
-            // Parse the sample rate
-            final Optional<Double> sampleRate = parseSampleRate(datagram, matcher.group("SAMPLERATE"), type);
-
-            // Parse the tags
-            final ImmutableMap<String, String> annotations = parseTags(matcher.group("TAGS"));
-
-            // Enforce sampling
-            if (sampleRate.isPresent() && sampleRate.get().compareTo(1.0) != 0) {
-                if (sampleRate.get().compareTo(0.0) == 0) {
-                    return Collections.emptyList();
+        try {
+            for (final String line : LINE_SPLITTER.split(datagramAsString)) {
+                // CHECKSTYLE.ON: IllegalInstantiation
+                final Matcher matcher = STATSD_PATTERN.matcher(line);
+                if (!matcher.matches()) {
+                    throw new ParsingException("Invalid statsd line", line.getBytes(Charsets.UTF_8));
                 }
-                if (Double.compare(_randomSupplier.get().nextDouble(), sampleRate.get()) > 0) {
-                    return Collections.emptyList();
-                }
-            }
 
-            recordListBuilder.add(createRecord(name, value, type, annotations));
+                // Parse the name
+                final String name = parseName(datagram, matcher.group("NAME"));
+
+                // Parse the _metricType
+                final StatsdType type = parseStatsdType(datagram, matcher.group("TYPE"));
+
+                // Parse the value
+                final Number value = parseValue(datagram, matcher.group("VALUE"), type);
+
+                // Parse the sample rate
+                final Optional<Double> sampleRate = parseSampleRate(datagram, matcher.group("SAMPLERATE"), type);
+
+                // Parse the tags
+                final ImmutableMap<String, String> annotations = ImmutableMap.<String, String>builder()
+                        .putAll(parseTags(matcher.group("TAGS")))
+                        .putAll(parseInfluxStyleTags(matcher.group("INFLUXTAGS")))
+                        .build();
+
+                // Enforce sampling
+                if (sampleRate.isPresent() && sampleRate.get().compareTo(1.0) != 0) {
+                    if (sampleRate.get().compareTo(0.0) == 0) {
+                        return Collections.emptyList();
+                    }
+                    if (Double.compare(_randomSupplier.get().nextDouble(), sampleRate.get()) > 0) {
+                        return Collections.emptyList();
+                    }
+                }
+
+                recordListBuilder.add(createRecord(name, value, type, annotations));
+            }
+        // CHECKSTYLE.OFF: IllegalCatch - We want to turn any exceptions we catch into a ParsingException
+        } catch (final RuntimeException e) {
+            // CHECKSTYLE.ON: IllegalCatch
+            throw new ParsingException("Error pasring record", datagram.array(), e);
         }
 
         return recordListBuilder.build();
@@ -153,17 +162,20 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
 
     @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
     // See: https://github.com/findbugsproject/findbugs/issues/79
-    private ImmutableMap<String, String> parseTags(@Nullable final String taqsAsString) {
-        final ImmutableMap.Builder<String, String> annotations = ImmutableMap.builder();
-        if (null != taqsAsString) {
-            for (final String keyValue : taqsAsString.split(",")) {
-                final int pivot = keyValue.indexOf(':');
-                annotations.put(
-                        keyValue.substring(0, pivot),
-                        keyValue.substring(pivot + 1));
-            }
+    private ImmutableMap<String, String> parseTags(@Nullable final String tagsAsString) {
+        if (null != tagsAsString) {
+            return ImmutableMap.copyOf(Splitter.on(',').withKeyValueSeparator(':').split(tagsAsString));
         }
-        return annotations.build();
+        return ImmutableMap.of();
+    }
+
+    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
+    // See: https://github.com/findbugsproject/findbugs/issues/79
+    private ImmutableMap<String, String> parseInfluxStyleTags(@Nullable final String tagsAsString) {
+        if (null != tagsAsString) {
+            return ImmutableMap.copyOf(Splitter.on(',').withKeyValueSeparator('=').split(tagsAsString));
+        }
+        return ImmutableMap.of();
     }
 
     private Optional<Double> parseSampleRate(
@@ -237,7 +249,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
     private static final Splitter LINE_SPLITTER = Splitter.on('\n').omitEmptyStrings();
     private static final ThreadLocal<NumberFormat> NUMBER_FORMAT = ThreadLocal.withInitial(NumberFormat::getInstance);
     private static final Pattern STATSD_PATTERN = Pattern.compile(
-            "^(?<NAME>[^:@|]+):(?<VALUE>[^|]+)\\|(?<TYPE>[^|]+)(\\|@(?<SAMPLERATE>[^|]+))?(\\|#(?<TAGS>.+))?$");
+            "^(?<NAME>[^:@|,]+)(,(?<INFLUXTAGS>[^:@|]+))?:(?<VALUE>[^|]+)\\|(?<TYPE>[^|]+)(\\|@(?<SAMPLERATE>[^|]+))?(\\|#(?<TAGS>.+))?$");
 
     private enum StatsdType {
         COUNTER("c", MetricType.COUNTER, null),
