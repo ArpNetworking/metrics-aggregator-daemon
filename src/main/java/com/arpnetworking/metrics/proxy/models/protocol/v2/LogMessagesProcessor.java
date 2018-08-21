@@ -222,7 +222,6 @@ public class LogMessagesProcessor implements MessagesProcessor {
     private static final String LOG_LINE_COUNTER = METRICS_PREFIX + "log_line";
     private static final String LOGS_LIST_COUNTER = METRICS_PREFIX + "list_log";
     private static final String NEW_LOG_COUNTER = METRICS_PREFIX + "new_log";
-    private static final String LOG_REPORT_COUNTER = METRICS_PREFIX + "log_report";
     private static final String SUBSCRIBE_COUNTER = METRICS_PREFIX + "subscribe";
     private static final String UNSUBSCRIBE_COUNTER = METRICS_PREFIX + "unsubscribe";
     private static final String GET_LOGS_COUNTER = METRICS_PREFIX + "command/get_logs";

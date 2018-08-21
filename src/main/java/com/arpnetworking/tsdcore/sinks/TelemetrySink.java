@@ -45,7 +45,7 @@ public final class TelemetrySink extends BaseSink {
     @LogValue
     @Override
     public Object toLogValue() {
-        return LogValueMapFactory.<String, Object>builder()
+        return LogValueMapFactory.builder()
                 .put("super", super.toLogValue())
                 .put("telemetryActor", _telemetryActor)
                 .build();
