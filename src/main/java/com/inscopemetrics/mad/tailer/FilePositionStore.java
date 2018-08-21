@@ -89,7 +89,7 @@ public final class FilePositionStore implements PositionStore {
      */
     @LogValue
     public Object toLogValue() {
-        return LogValueMapFactory.<String, Object>builder()
+        return LogValueMapFactory.builder(this)
                 .put("file", _file)
                 .put("flushInterval", _flushInterval)
                 .put("flushThreshold", _flushThreshold)

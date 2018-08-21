@@ -120,7 +120,6 @@ public final class TimeThresholdSink extends BaseSink {
         }
 
         public ImmutableMultimap<String, AggregatedData> filter(final PeriodicData periodicData) {
-            final ImmutableMultimap.Builder<String, AggregatedData> retainedDataBuilder = ImmutableMultimap.builder();
             if (!periodicData.getStart().plus(periodicData.getPeriod()).plus(_freshnessThreshold).isAfter(ZonedDateTime.now())
                     && !_excludedServices.contains(periodicData.getDimensions().getService())) {
                 // Exclude all data
