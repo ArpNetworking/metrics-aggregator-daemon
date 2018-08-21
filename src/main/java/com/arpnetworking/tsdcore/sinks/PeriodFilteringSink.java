@@ -53,7 +53,7 @@ public final class PeriodFilteringSink extends BaseSink {
     @LogValue
     @Override
     public Object toLogValue() {
-        return LogValueMapFactory.builder()
+        return LogValueMapFactory.builder(this)
                 .put("super", super.toLogValue())
                 .put("include", _include)
                 .put("exclude", _exclude)

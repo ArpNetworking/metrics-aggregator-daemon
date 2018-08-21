@@ -85,7 +85,7 @@ public final class StatefulTailer implements Tailer {
      */
     @LogValue
     public Object toLogValue() {
-        return LogValueMapFactory.builder()
+        return LogValueMapFactory.builder(this)
                 .put("file", _file)
                 .put("positionStore", _positionStore)
                 .put("listener", _listener)
