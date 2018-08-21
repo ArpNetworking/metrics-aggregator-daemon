@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017 Inscope Metrics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,6 @@ import java.util.UUID;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
-@SuppressWarnings("deprecation")
 public final class ProtobufV1ToRecordParserTest {
 
     @Test
