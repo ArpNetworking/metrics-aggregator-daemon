@@ -15,14 +15,12 @@
  */
 package com.inscopemetrics.mad.statistics;
 
-import com.google.common.collect.Lists;
 import com.inscopemetrics.mad.model.CalculatedValue;
 import com.inscopemetrics.mad.model.Quantity;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Tests the MinStatistic class.
@@ -58,7 +56,6 @@ public class MinStatisticTest {
         Assert.assertEquals(calculated.getValue(), new Quantity.Builder().setValue(5.0).build());
     }
 
-    private static final List<Double> ONE_TO_FIVE = Lists.newArrayList(1d, 2d, 3d, 4d, 5d);
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final MinStatistic MIN_STATISTIC = (MinStatistic) STATISTIC_FACTORY.getStatistic("min");
 }

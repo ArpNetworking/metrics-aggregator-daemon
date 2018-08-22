@@ -18,7 +18,6 @@ package com.inscopemetrics.mad.sources;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
-import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.base.Charsets;
 import com.inscopemetrics.mad.parsers.Parser;
 import com.inscopemetrics.mad.parsers.exceptions.ParsingException;
@@ -547,7 +546,6 @@ public class FileSourceTest {
         source.stop();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testTailerLogRotationRenameDroppedData() throws IOException, InterruptedException, ParsingException {
         final Path file = _directory.resolve("testTailerLogRotationRenameDroppedData.log");
@@ -622,7 +620,6 @@ public class FileSourceTest {
     // of the file rotation scheme (to look for the copied file) or may be able
     // to discover this file with a file system watcher.
     @Ignore
-    @SuppressWarnings("unchecked")
     @Test
     public void testTailerLogCopyTruncateRenameDroppedData() throws IOException, InterruptedException, ParsingException {
         final long interval = 500;
@@ -692,7 +689,6 @@ public class FileSourceTest {
         source.stop();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testTailerLogRotationRenameSmallToLarge() throws IOException, InterruptedException, ParsingException {
         final Path file = _directory.resolve("testTailerLogRotationRenameSmallToLarge.log");
@@ -761,7 +757,6 @@ public class FileSourceTest {
     // detect the copy truncate are hash prefix comparison or inode comparison
     // before every read.
     @Ignore
-    @SuppressWarnings("unchecked")
     @Test
     public void testTailerLogRotationCopyTruncateSmallToLarge() throws IOException, InterruptedException, ParsingException {
         final long sleepInterval = 600;
@@ -869,5 +864,4 @@ public class FileSourceTest {
     private static final long INTERVAL = 50;
     private static final long SLEEP_INTERVAL = INTERVAL + 25;
     private static final int TIMEOUT = 10000;
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileSourceTest.class);
 }

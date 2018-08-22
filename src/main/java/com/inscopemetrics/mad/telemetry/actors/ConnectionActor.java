@@ -267,7 +267,6 @@ public class ConnectionActor extends AbstractActor {
 
     private void processPeriodicData(final PeriodicData message) {
         final Key dimensions = message.getDimensions();
-        final String host = dimensions.getHost();
         final String service = dimensions.getService();
         final Map<String, Set<String>> metrics = _subscriptions.get(service);
         if (metrics == null) {

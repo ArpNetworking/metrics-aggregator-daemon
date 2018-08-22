@@ -124,7 +124,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                 .addData("url", request.getUri())
                 .addData("headers", request.getHeaders())
                 .log();
-        return process(request).<HttpResponse>whenComplete(
+        return process(request).whenComplete(
                 (response, failure) -> {
                     requestTimer.stop();
                     _metrics.recordTimer(

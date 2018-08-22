@@ -51,7 +51,6 @@ public class Configurator<T extends Launchable, S> implements Listener, Launchab
         _offeredConfiguration = configuration.getAs(_configurationClass);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public synchronized void applyConfiguration() {
         // Shutdown

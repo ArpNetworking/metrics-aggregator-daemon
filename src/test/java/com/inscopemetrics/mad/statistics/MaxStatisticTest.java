@@ -15,14 +15,12 @@
  */
 package com.inscopemetrics.mad.statistics;
 
-import com.google.common.collect.Lists;
 import com.inscopemetrics.mad.model.CalculatedValue;
 import com.inscopemetrics.mad.model.Quantity;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Tests the TPStatistic class.
@@ -58,7 +56,6 @@ public class MaxStatisticTest {
         Assert.assertEquals(calculated.getValue(), new Quantity.Builder().setValue(18.0).build());
     }
 
-    private static final List<Double> ONE_TO_FIVE = Lists.newArrayList(1d, 2d, 3d, 4d, 5d);
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final MaxStatistic MAX_STATISTIC = (MaxStatistic) STATISTIC_FACTORY.getStatistic("max");
 }
