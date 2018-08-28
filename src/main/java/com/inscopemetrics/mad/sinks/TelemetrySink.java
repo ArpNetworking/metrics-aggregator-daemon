@@ -32,8 +32,8 @@ import com.inscopemetrics.mad.statistics.Statistic;
 import com.inscopemetrics.mad.telemetry.actors.TelemetryActor;
 import net.sf.oval.constraint.NotNull;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * A publisher that sends a message to the {@link TelemetryActor} actor.
@@ -62,7 +62,7 @@ public final class TelemetrySink extends BaseSink {
     public Object toLogValue() {
         return LogValueMapFactory.builder(this)
                 .put("super", super.toLogValue())
-                .put("telemetryActor", _telemetryActor)
+                .put("telemetryActor", getTelemetryActor())
                 .build();
     }
 

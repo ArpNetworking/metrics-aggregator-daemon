@@ -147,27 +147,7 @@ public class ConnectionActor extends AbstractActor {
                             unhandled(message);
                         } else {
                             _metrics.recordCounter("actors/connection/UNKNOWN", 1);
-                            final String contentAsString;
-                            if (message instanceof TextMessage) {
-                                final TextMessage textMessage = (TextMessage) message;
-                                if (textMessage.isStrict()) {
-                                    contentAsString = textMessage.getStrictText();
-                                } else {
-                                    // TODO(ville): Latest Akka TextMessage has toStrict
-                                    // - Upgrade Play to upprade Akka
-                                    contentAsString = "<STREAMED>";
-                                }
-                                // TODO(ville): Support binary messages (when needed)
-                            } else {
-                                contentAsString = "<UNKNOWN>";
-                            }
-                            LOGGER.warn()
-                                    .setMessage("Unable to process message")
-                                    .addData("reason", "unsupported message")
-                                    .addData("actor", self())
-                                    .addData("data", contentAsString)
-                                    .log();
-                            unhandled(message);
+                            handleUnknownMessage(message);
                         }
                     }
                 })
@@ -343,6 +323,30 @@ public class ConnectionActor extends AbstractActor {
                 }
             }
         }
+    }
+
+    private void handleUnknownMessage(final Object message) {
+        final String contentAsString;
+        if (message instanceof TextMessage) {
+            final TextMessage textMessage = (TextMessage) message;
+            if (textMessage.isStrict()) {
+                contentAsString = textMessage.getStrictText();
+            } else {
+                // TODO(ville): Latest Akka TextMessage has toStrict
+                // - Upgrade Play to upprade Akka
+                contentAsString = "<STREAMED>";
+            }
+            // TODO(ville): Support binary messages (when needed)
+        } else {
+            contentAsString = "<UNKNOWN>";
+        }
+        LOGGER.warn()
+                .setMessage("Unable to process message")
+                .addData("reason", "unsupported message")
+                .addData("actor", self())
+                .addData("data", contentAsString)
+                .log();
+        unhandled(message);
     }
 
     private ActorRef _telemetry;
