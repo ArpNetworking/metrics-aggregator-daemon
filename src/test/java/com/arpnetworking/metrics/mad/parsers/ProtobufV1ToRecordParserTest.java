@@ -41,7 +41,6 @@ import java.util.UUID;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
-@SuppressWarnings("deprecation")
 public final class ProtobufV1ToRecordParserTest {
 
     @Test

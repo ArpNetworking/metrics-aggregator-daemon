@@ -138,7 +138,7 @@ public final class DirectoryTrigger implements Trigger {
      */
     @LogValue
     public Object toLogValue() {
-        return LogValueMapFactory.<String, Object>builder()
+        return LogValueMapFactory.builder(this)
                 .put("directory", _directory)
                 .put("exists", _exists)
                 .put("fileNames", _fileNames)

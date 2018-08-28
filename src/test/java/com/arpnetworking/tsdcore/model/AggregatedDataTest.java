@@ -30,7 +30,6 @@ import org.junit.Test;
 public class AggregatedDataTest {
 
     @Test
-    @SuppressWarnings("deprecation")
     public void testBuilder() {
         final Statistic expectedStatistic = TP99_STATISTIC;
         final Quantity expectedValue = TestBeanFactory.createSample();
