@@ -64,6 +64,7 @@ public class ConnectionActor extends AbstractActor {
             final PeriodicMetrics metrics,
             final MessageProcessorsFactory messageProcessorsFactory) {
         return Props.create(
+                ConnectionActor.class,
                 () -> new ConnectionActor(
                         metrics,
                         messageProcessorsFactory));
@@ -99,7 +100,7 @@ public class ConnectionActor extends AbstractActor {
                     // This message is sent by the incoming stream when there is a failure
                     // in the stream (see akka.stream.javadsl.Sink.scala).
                     LOGGER.info()
-                            .setMessage("Closing stream")
+                            .setMessage("Closing connection")
                             .addData("actor", self())
                             .addData("data", message)
                             .log();
@@ -146,17 +147,44 @@ public class ConnectionActor extends AbstractActor {
                             unhandled(message);
                         } else {
                             _metrics.recordCounter("actors/connection/UNKNOWN", 1);
+                            final String contentAsString;
+                            if (message instanceof TextMessage) {
+                                final TextMessage textMessage = (TextMessage) message;
+                                if (textMessage.isStrict()) {
+                                    contentAsString = textMessage.getStrictText();
+                                } else {
+                                    // TODO(ville): Latest Akka TextMessage has toStrict
+                                    // - Upgrade Play to upprade Akka
+                                    contentAsString = "<STREAMED>";
+                                }
+                                // TODO(ville): Support binary messages (when needed)
+                            } else {
+                                contentAsString = "<UNKNOWN>";
+                            }
                             LOGGER.warn()
                                     .setMessage("Unable to process message")
                                     .addData("reason", "unsupported message")
                                     .addData("actor", self())
-                                    .addData("data", message)
+                                    .addData("data", contentAsString)
                                     .log();
                             unhandled(message);
                         }
                     }
                 })
             .build();
+    }
+
+    @Override
+    public void postStop() throws Exception {
+        if (_channel != null) {
+            LOGGER.info()
+                    .setMessage("Shutting down channel")
+                    .addData("actor", self())
+                    .addData("member", _channel)
+                    .log();
+            _channel.tell(PoisonPill.getInstance(), self());
+        }
+        super.postStop();
     }
 
     /**

@@ -30,7 +30,6 @@ import akka.http.javadsl.model.StatusCodes;
 import akka.http.javadsl.model.headers.CacheControl;
 import akka.http.javadsl.model.headers.CacheDirectives;
 import akka.http.javadsl.model.ws.Message;
-import akka.japi.JavaPartialFunction;
 import akka.japi.function.Function;
 import akka.japi.pf.PFBuilder;
 import akka.pattern.PatternsCS;
@@ -60,6 +59,7 @@ import com.inscopemetrics.mad.telemetry.models.protocol.v2.ProcessorsV2Factory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import scala.concurrent.duration.FiniteDuration;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -240,30 +240,30 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                     (akka.http.impl.engine.ws.UpgradeToWebSocketLowLevel) upgradeToWebSocketHeader.get();
 
             final ActorRef connection = _actorSystem.actorOf(ConnectionActor.props(_metrics, messageProcessorsFactory));
-            final Sink<Message, ?> inChannel = Sink.actorRef(connection, PoisonPill.getInstance());
-            final Source<Message, ActorRef> outChannel = Source.<Message>actorRef(TELEMETRY_BUFFER_SIZE, OverflowStrategy.dropBuffer())
-                    .mapMaterializedValue(channel -> {
-                        _actorSystem.actorSelection("/user/" + TelemetrySink.TELEMETRY_ACTOR_NAME)
-                                .resolveOne(Timeout.apply(1, TimeUnit.SECONDS))
-                                .onSuccess(
-                                        new JavaPartialFunction<ActorRef, Object>() {
-                                            @Override
-                                            public Object apply(final ActorRef telemetry, final boolean isCheck) {
-                                                final Connect connectMessage = new Connect(telemetry, connection, channel);
-                                                connection.tell(connectMessage, ActorRef.noSender());
-                                                telemetry.tell(connectMessage, ActorRef.noSender());
-                                                return null;
-                                            }
-                                        },
-                                        _actorSystem.dispatcher()
-                        );
-                        return channel;
-                    });
 
-            return CompletableFuture.completedFuture(
-                    lowLevelUpgradeToWebSocketHeader.handleMessagesWith(
-                            inChannel,
-                            outChannel));
+            return _actorSystem.actorSelection("/user/" + TelemetrySink.TELEMETRY_ACTOR_NAME)
+                    .resolveOneCS(Duration.ofSeconds(1))
+                    .thenApply(telemetry -> Source.<Message>actorRef(TELEMETRY_BUFFER_SIZE, OverflowStrategy.dropBuffer())
+                            .mapMaterializedValue(channel -> {
+                                final Connect connectMessage = new Connect(telemetry, connection, channel);
+                                telemetry.tell(connectMessage, ActorRef.noSender());
+                                connection.tell(connectMessage, ActorRef.noSender());
+                                return channel;
+                            }))
+                    .<HttpResponse>thenApply(outChannel -> {
+                                final Sink<Message, ?> inChannel = Sink.actorRef(connection, PoisonPill.getInstance());
+                                return lowLevelUpgradeToWebSocketHeader.handleMessagesWith(
+                                        inChannel,
+                                        outChannel);
+                    })
+                    .<HttpResponse>exceptionally(throwable -> {
+                        LOGGER.info()
+                                .setMessage("Rejecting telemetry connection; no telemetry actor found")
+                                .addData("connection", connection)
+                                .log();
+                        connection.tell(PoisonPill.getInstance(), ActorRef.noSender());
+                        return HttpResponse.create().withStatus(StatusCodes.NOT_FOUND);
+                    });
         }
         return CompletableFuture.completedFuture(HttpResponse.create().withStatus(StatusCodes.BAD_REQUEST));
     }

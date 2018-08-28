@@ -15,17 +15,25 @@
  */
 package com.inscopemetrics.mad.sinks;
 
+import akka.AkkaException;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.PoisonPill;
+import akka.actor.Props;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.steno.LogValueMapFactory;
+import com.arpnetworking.steno.Logger;
+import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.google.common.collect.ImmutableSet;
 import com.inscopemetrics.mad.model.PeriodicData;
 import com.inscopemetrics.mad.statistics.Statistic;
 import com.inscopemetrics.mad.telemetry.actors.TelemetryActor;
 import net.sf.oval.constraint.NotNull;
+
+import javax.annotation.Nullable;
+import java.util.Optional;
 
 /**
  * A publisher that sends a message to the {@link TelemetryActor} actor.
@@ -36,12 +44,17 @@ public final class TelemetrySink extends BaseSink {
 
     @Override
     public void recordAggregateData(final PeriodicData periodicData) {
-        _telemetryActor.tell(periodicData, ActorRef.noSender());
+        getTelemetryActor().ifPresent(a -> a.tell(periodicData, ActorRef.noSender()));
     }
 
     @Override
     public void close() {
-        // Nothing to do.
+        final Optional<ActorRef> actor = getTelemetryActor();
+        LOGGER.info()
+                .setMessage("Closing telemetry sink")
+                .addData("actor", actor)
+                .log();
+        actor.ifPresent(a -> a.tell(PoisonPill.getInstance(), ActorRef.noSender()));
     }
 
     @LogValue
@@ -53,16 +66,31 @@ public final class TelemetrySink extends BaseSink {
                 .build();
     }
 
-    private TelemetrySink(final Builder builder) {
-        super(builder);
-
-        // Create the telemetry actor
-        _telemetryActor = builder._actorSystem.actorOf(
-                TelemetryActor.props(builder._metricsFactory, builder._histogramStatistics),
-                TELEMETRY_ACTOR_NAME);
+    private synchronized Optional<ActorRef> getTelemetryActor() {
+        if (_telemetryActor == null) {
+            try {
+                // Create the telemetry actor
+                _telemetryActor = _actorSystem.actorOf(_telemetryActorProps, TELEMETRY_ACTOR_NAME);
+            } catch (final AkkaException e) {
+                // Ignore the problem for now; this is a race condition between shutting down the
+                // previous actor instance and starting the new one.
+            }
+        }
+        return Optional.ofNullable(_telemetryActor);
     }
 
-    private final ActorRef _telemetryActor;
+    private TelemetrySink(final Builder builder) {
+        super(builder);
+        _actorSystem = builder._actorSystem;
+        _telemetryActorProps = TelemetryActor.props(builder._metricsFactory, builder._histogramStatistics);
+    }
+
+    private final ActorSystem _actorSystem;
+    private final Props _telemetryActorProps;
+    @Nullable
+    private ActorRef _telemetryActor;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelemetrySink.class);
 
     /**
      * The path to the {@link TelemetryActor} instance.

@@ -15,6 +15,7 @@
  */
 package com.inscopemetrics.mad.sinks;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.inscopemetrics.mad.model.DefaultKey;
@@ -38,9 +39,11 @@ public final class DimensionInjectingSink extends BaseSink {
         final Map<String, String> mergedDimensions = Maps.newHashMap(_defaultDimensions);
         mergedDimensions.putAll(data.getDimensions().getParameters());
         mergedDimensions.putAll(_overrideDimensions);
-        final PeriodicData.Builder dataBuilder = PeriodicData.Builder.clone(data);
-        dataBuilder.setDimensions(new DefaultKey(ImmutableMap.copyOf(mergedDimensions)));
-        _sink.recordAggregateData(dataBuilder.build());
+        final PeriodicData updatedData = ThreadLocalBuilder.clone(
+                data,
+                PeriodicData.Builder.class,
+                b -> b.setDimensions(new DefaultKey(ImmutableMap.copyOf(mergedDimensions))));
+        _sink.recordAggregateData(updatedData);
     }
 
     /**
