@@ -213,10 +213,85 @@ public final class StatsdToRecordParserTest {
                         _parser.parse(ByteBuffer.wrap("users.online:1|c|@0.5|#country:china".getBytes(Charsets.UTF_8)))));
     }
 
+    @Test(expected = ParsingException.class)
+    public void testExampleTagsInvalid() throws ParsingException {
+        Mockito.doReturn(0.49).when(_random).nextDouble();
+        assertRecordEquality(
+                new DefaultRecord.Builder()
+                        .setTime(_now)
+                        .setId(UUID.randomUUID().toString())
+                        .setAnnotations(ImmutableMap.of())
+                        .setDimensions(ImmutableMap.of(
+                                "country", "china"))
+                        .setMetrics(ImmutableMap.of(
+                                "users.online",
+                                new DefaultMetric.Builder()
+                                        .setType(MetricType.COUNTER)
+                                        .setValues(ImmutableList.of(
+                                                new Quantity.Builder()
+                                                        .setValue(1.0)
+                                                        .build()))
+                                        .build()
+                        ))
+                        .build(),
+                Iterables.getOnlyElement(
+                        _parser.parse(ByteBuffer.wrap("users.online:1|c|@0.5|#country:china,anotherTag".getBytes(Charsets.UTF_8)))));
+    }
+
     @Test
     public void testExampleTagsSampledReject() throws ParsingException {
         Mockito.doReturn(0.51).when(_random).nextDouble();
         Assert.assertTrue(_parser.parse(ByteBuffer.wrap("users.online:1|c|@0.5|#country:china".getBytes(Charsets.UTF_8))).isEmpty());
+    }
+
+    @Test
+    public void testInfluxStyleTagFormat() throws ParsingException {
+        assertRecordEquality(
+                new DefaultRecord.Builder()
+                        .setTime(_now)
+                        .setId(UUID.randomUUID().toString())
+                        .setAnnotations(ImmutableMap.of())
+                        .setDimensions(ImmutableMap.of(
+                                "service", "statsd"))
+                        .setMetrics(ImmutableMap.of(
+                                "users.online",
+                                new DefaultMetric.Builder()
+                                        .setType(MetricType.COUNTER)
+                                        .setValues(ImmutableList.of(
+                                                new Quantity.Builder()
+                                                        .setValue(1.0)
+                                                        .build()))
+                                        .build()
+                        ))
+                        .build(),
+                Iterables.getOnlyElement(
+                        _parser.parse(ByteBuffer.wrap("users.online,service=statsd:1|c".getBytes(Charsets.UTF_8)))));
+
+    }
+
+    @Test(expected = ParsingException.class)
+    public void testInfluxStyleTagFormatInvalid() throws ParsingException {
+        assertRecordEquality(
+                new DefaultRecord.Builder()
+                        .setTime(_now)
+                        .setId(UUID.randomUUID().toString())
+                        .setAnnotations(ImmutableMap.of())
+                        .setDimensions(ImmutableMap.of(
+                                "service", "statsd"))
+                        .setMetrics(ImmutableMap.of(
+                                "users.online",
+                                new DefaultMetric.Builder()
+                                        .setType(MetricType.COUNTER)
+                                        .setValues(ImmutableList.of(
+                                                new Quantity.Builder()
+                                                        .setValue(1.0)
+                                                        .build()))
+                                        .build()
+                        ))
+                        .build(),
+                Iterables.getOnlyElement(
+                        _parser.parse(ByteBuffer.wrap("users.online,service=statsd,tag2:1|c".getBytes(Charsets.UTF_8)))));
+
     }
 
     private void assertRecordEquality(final Record expected, final Record actual) {
