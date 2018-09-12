@@ -63,10 +63,11 @@ import javax.annotation.Nullable;
  * type.
  *
  * Except for the differences described above this parser supports both the
- * traditional and Data Dog variants of the statsd protocol as defined here:
+ * traditional, Data Dog, and Influx variants of the statsd protocol as defined here:
  *
  * https://github.com/b/statsd_spec
  * https://docs.datadoghq.com/guides/dogstatsd/
+ * https://github.com/influxdata/telegraf/tree/master/plugins/inputs/statsd#influx-statsd
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
