@@ -63,10 +63,11 @@ import javax.annotation.Nullable;
  * aggregation layer as a first-class metric type.
  *
  * Except for the differences described above this parser supports both the
- * traditional and Data Dog variants of the statsd protocol as defined here:
+ * traditional, Data Dog, and Influx variants of the statsd protocol as defined here:
  *
  * https://github.com/b/statsd_spec
  * https://docs.datadoghq.com/guides/dogstatsd/
+ * https://github.com/influxdata/telegraf/tree/master/plugins/inputs/statsd#influx-statsd
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
@@ -164,7 +165,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
     // See: https://github.com/findbugsproject/findbugs/issues/79
     private ImmutableMap<String, String> parseTags(@Nullable final String tagsAsString) {
         if (null != tagsAsString) {
-            return ImmutableMap.copyOf(Splitter.on(',').withKeyValueSeparator(':').split(tagsAsString));
+            return ImmutableMap.copyOf(TAG_SPLITTER.split(tagsAsString));
         }
         return ImmutableMap.of();
     }
@@ -173,7 +174,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
     // See: https://github.com/findbugsproject/findbugs/issues/79
     private ImmutableMap<String, String> parseInfluxStyleTags(@Nullable final String tagsAsString) {
         if (null != tagsAsString) {
-            return ImmutableMap.copyOf(Splitter.on(',').withKeyValueSeparator('=').split(tagsAsString));
+            return ImmutableMap.copyOf(INFLUX_STYLE_TAGS_SPLITTER.split(tagsAsString));
         }
         return ImmutableMap.of();
     }
@@ -250,6 +251,8 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
     private static final ThreadLocal<NumberFormat> NUMBER_FORMAT = ThreadLocal.withInitial(NumberFormat::getInstance);
     private static final Pattern STATSD_PATTERN = Pattern.compile(
             "^(?<NAME>[^:@|,]+)(,(?<INFLUXTAGS>[^:@|]+))?:(?<VALUE>[^|]+)\\|(?<TYPE>[^|]+)(\\|@(?<SAMPLERATE>[^|]+))?(\\|#(?<TAGS>.+))?$");
+    private static final Splitter.MapSplitter INFLUX_STYLE_TAGS_SPLITTER = Splitter.on(',').withKeyValueSeparator('=');
+    private static final Splitter.MapSplitter TAG_SPLITTER = Splitter.on(',').withKeyValueSeparator(':');
 
     private enum StatsdType {
         COUNTER("c", MetricType.COUNTER, null),
