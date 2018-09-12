@@ -1,7 +1,6 @@
 package com.arpnetworking.metrics.mad.parsers;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
-import com.arpnetworking.commons.uuidfactory.UuidFactory;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.*;
@@ -10,8 +9,10 @@ import com.arpnetworking.metrics.prometheus.Types;
 import com.arpnetworking.metrics.prometheus.Types.TimeSeries;
 import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.Quantity;
+import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.InvalidProtocolBufferException;
 import net.sf.oval.exception.ConstraintsViolatedException;
@@ -25,6 +26,44 @@ import java.util.List;
 import java.util.UUID;
 
 public class PrometheusToRecordParser implements Parser<List<Record>, HttpRequest> {
+    private static final ImmutableMap<String, Unit> UNIT_MAP = ImmutableMap.of(
+            createUnitMapKey("seconds"), Unit.SECOND,
+            createUnitMapKey("celcius"), Unit.CELCIUS,
+            createUnitMapKey("bytes"), Unit.BYTE,
+            createUnitMapKey("bits"), Unit.BIT
+    );
+    private static final ImmutableSet<String> PROMETHEUS_AGGREGATION_KEYS = ImmutableSet.of(
+            createUnitMapKey("total"),
+            createUnitMapKey("bucket"),
+            createUnitMapKey("sum"),
+            createUnitMapKey("avg"),
+            createUnitMapKey("count")
+    );
+
+    private static String createUnitMapKey(String name) {
+        return new StringBuilder(name).reverse().toString();
+    }
+
+    private Unit extractUnit(final String name) {
+        if (name != null) {
+            StringBuilder builder = new StringBuilder();
+            for (int i = name.length() - 1; i >= 0; i--) {
+                char ch = name.charAt(i);
+                if (ch == '_') {
+                    final String key = builder.toString();
+                    if (PROMETHEUS_AGGREGATION_KEYS.contains(key)) {
+                        builder.setLength(0);//reset builder
+                    } else {
+                        return UNIT_MAP.get(key);
+                    }
+                } else {
+                    builder.append(ch);
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public List<Record> parse(HttpRequest data) throws ParsingException {
         final List<Record> records = Lists.newArrayList();
@@ -42,6 +81,7 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
                 }
                 final ImmutableMap<String, String> immutableDimensions = dimensionsBuilder.build();
                 final String metricName = name;
+                final Unit unit = extractUnit(name);
                 for (final Types.Sample sample : timeSeries.getSamplesList()) {
                     Record record = ThreadLocalBuilder.build(
                             DefaultRecord.Builder.class,
@@ -50,7 +90,7 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
                                             ZonedDateTime.ofInstant(
                                                     Instant.ofEpochMilli(sample.getTimestamp()),
                                                     ZoneOffset.UTC))
-                                    .setMetrics(createMetric(metricName, sample))
+                                    .setMetrics(createMetric(metricName, sample, unit))
                                     .setDimensions(immutableDimensions)
                     );
                     records.add(record);
@@ -66,23 +106,24 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
         return records;
     }
 
-    private ImmutableMap<String, ? extends Metric> createMetric(String name, Types.Sample sample) {
+    private ImmutableMap<String, ? extends Metric> createMetric(final String name, final Types.Sample sample, final Unit unit) {
 
         Metric metric = ThreadLocalBuilder.build(
                 DefaultMetric.Builder.class,
                 p -> p
                         .setType(MetricType.GAUGE)
-                        .setValues(ImmutableList.of(createQuantity(sample)))
+                        .setValues(ImmutableList.of(createQuantity(sample, unit)))
                         .build()
         );
         return ImmutableMap.of(name, metric);
     }
 
-    private Quantity createQuantity(Types.Sample sample) {
+    private Quantity createQuantity(final Types.Sample sample, final Unit unit) {
         return ThreadLocalBuilder.build(
                 Quantity.Builder.class,
                 p -> p
                         .setValue(sample.getValue())
+                        .setUnit(unit)
         );
     }
 
