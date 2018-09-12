@@ -19,7 +19,6 @@
         <encoder class="com.arpnetworking.logback.StenoEncoder">
             <injectContextLogger>true</injectContextLogger>
             <compressLoggerName>true</compressLoggerName>
-            <jacksonModule class="com.fasterxml.jackson.datatype.joda.JodaModule" />
             <jacksonModule class="com.fasterxml.jackson.datatype.guava.GuavaModule" />
             <jacksonModule class="com.fasterxml.jackson.datatype.jdk8.Jdk8Module" />
             <injectBeanIdentifier>true</injectBeanIdentifier>
