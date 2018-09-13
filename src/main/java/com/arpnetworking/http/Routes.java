@@ -32,7 +32,6 @@ import akka.http.javadsl.model.headers.CacheDirectives;
 import akka.http.javadsl.model.ws.Message;
 import akka.japi.JavaPartialFunction;
 import akka.japi.function.Function;
-import akka.japi.pf.PFBuilder;
 import akka.pattern.PatternsCS;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.Flow;
@@ -105,10 +104,10 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     public Flow<HttpRequest, HttpResponse, NotUsed> flow() {
         return Flow.<HttpRequest>create()
                 .mapAsync(1, this)
-                .recover(
-                        new PFBuilder<Throwable, HttpResponse>()
-                                .match(Exception.class, e -> HttpResponse.create().withStatus(StatusCodes.INTERNAL_SERVER_ERROR))
-                                .build());
+                .recoverWithRetries(
+                        0,
+                        Exception.class,
+                        () -> Source.single(HttpResponse.create().withStatus(StatusCodes.INTERNAL_SERVER_ERROR)));
     }
 
     @Override
