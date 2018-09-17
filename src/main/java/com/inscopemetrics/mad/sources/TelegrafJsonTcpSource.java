@@ -133,7 +133,7 @@ public final class TelegrafJsonTcpSource extends TcpLineSource {
         @NotNull
         private TimestampUnit _timestampUnit = TimestampUnit.SECONDS;
 
-        private static final int DEFAULT_PORT = 2003;
+        private static final int DEFAULT_PORT = 8094;
         private static final String DEFAULT_NAME = "telegraf_json_tcp_source";
     }
 }

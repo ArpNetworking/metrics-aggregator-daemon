@@ -17,6 +17,7 @@ package com.inscopemetrics.mad.statistics;
 
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.ClassPath;
@@ -62,24 +63,31 @@ public class StatisticFactory {
         final Optional<Statistic> registeredStatistic =
                 Optional.ofNullable(STATISTICS_BY_NAME_AND_ALIAS.get(name));
         if (!registeredStatistic.isPresent()) {
-            final Matcher matcher = PERCENTILE_STATISTIC_PATTERN.matcher(name);
-            if (matcher.matches()) {
-                try {
-                    final String percentileString = matcher.group("percentile").replace('p', '.');
-                    final double percentile = Double.parseDouble(percentileString);
-                    final Statistic statistic = new TPStatistic(percentile);
-                    checkedPut(STATISTICS_BY_NAME_AND_ALIAS, statistic);
-                    return Optional.of(statistic);
-                } catch (final NumberFormatException e) {
-                    LOGGER.error()
-                            .setMessage("Invalid percentile statistic")
-                            .addData("name", name)
-                            .log();
-                    return registeredStatistic;
-                }
+            final Optional<Statistic> statistic = getPercentileStatistic(name);
+            if (statistic.isPresent()) {
+                checkedPut(STATISTICS_BY_NAME_AND_ALIAS, statistic.get());
+                return statistic;
             }
         }
         return registeredStatistic;
+    }
+
+    private static Optional<Statistic> getPercentileStatistic(final String name) {
+        final Matcher matcher = PERCENTILE_STATISTIC_PATTERN.matcher(name);
+        if (matcher.matches()) {
+            try {
+                final String percentileString = matcher.group("percentile").replace('p', '.');
+                final double percentile = Double.parseDouble(percentileString);
+                final Statistic statistic = new TPStatistic(percentile);
+                return Optional.of(statistic);
+            } catch (final NumberFormatException e) {
+                LOGGER.error()
+                        .setMessage("Invalid percentile statistic")
+                        .addData("name", name)
+                        .log();
+            }
+        }
+        return Optional.empty();
     }
 
     private static void checkedPut(final ConcurrentMap<String, Statistic> map, final Statistic statistic) {
@@ -107,6 +115,7 @@ public class StatisticFactory {
 
     private static final Pattern PERCENTILE_STATISTIC_PATTERN = Pattern.compile("^[t]?p(?<percentile>[0-9]+(?:(\\.|p)[0-9]+)?)$");
     private static final ConcurrentMap<String, Statistic> STATISTICS_BY_NAME_AND_ALIAS;
+    private static final ImmutableList<String> PERCENTILE_STATISTICS_TO_PRELOAD = ImmutableList.of("p75", "p90", "p95", "p99", "p99.9");
     private static final Logger LOGGER = LoggerFactory.getLogger(StatisticFactory.class);
 
     static {
@@ -118,7 +127,8 @@ public class StatisticFactory {
             for (final ClassPath.ClassInfo statisticClassInfo : statisticClasses) {
                 final Class<?> statisticClass = statisticClassInfo.load();
                 if (!statisticClass.isInterface() && !Modifier.isAbstract(statisticClass.getModifiers())
-                        && Statistic.class.isAssignableFrom(statisticClass)) {
+                        && Statistic.class.isAssignableFrom(statisticClass)
+                        && !TPStatistic.class.equals(statisticClass)) {
                     try {
                         // The constructor type is implied by the assignability
                         // of the statisticClass to the Statistic interface
@@ -137,6 +147,17 @@ public class StatisticFactory {
                                 .setThrowable(e)
                                 .log();
                     }
+                }
+            }
+            for (final String percentileStatisticName : PERCENTILE_STATISTICS_TO_PRELOAD) {
+                final Optional<Statistic> statistic = getPercentileStatistic(percentileStatisticName);
+                if (statistic.isPresent()) {
+                    checkedPut(statisticByNameAndAlias, statistic.get());
+                } else {
+                    LOGGER.warn()
+                            .setMessage("Unable to load statistic")
+                            .addData("name", percentileStatisticName)
+                            .log();
                 }
             }
         } catch (final IOException e) {

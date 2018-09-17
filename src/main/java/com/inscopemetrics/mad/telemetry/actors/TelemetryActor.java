@@ -18,6 +18,7 @@ package com.inscopemetrics.mad.telemetry.actors;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.ExecutionContexts;
@@ -74,6 +75,7 @@ public class TelemetryActor extends AbstractActor {
             final MetricsFactory metricsFactory,
             final ImmutableSet<Statistic> histogramStatistics) {
         return Props.create(
+                TelemetryActor.class,
                 () -> new TelemetryActor(
                         metricsFactory,
                         histogramStatistics));
@@ -123,6 +125,14 @@ public class TelemetryActor extends AbstractActor {
 
     @Override
     public void postStop() throws Exception {
+        for (final ActorRef member : _members) {
+            LOGGER.info()
+                    .setMessage("Shutting down connection")
+                    .addData("actor", self())
+                    .addData("member", member)
+                    .log();
+            member.tell(PoisonPill.getInstance(), self());
+        }
         _instrument.cancel();
         super.postStop();
     }
@@ -164,7 +174,6 @@ public class TelemetryActor extends AbstractActor {
         _metrics.incrementCounter(PERIODIC_DATA_COUNTER);
 
         // Ensure all the metrics are in the registry and replace histogram statistics
-        final PeriodicData.Builder modifiedPeriodicDataBuilder = ThreadLocalBuilder.clone(periodicData);
         final ImmutableMultimap.Builder<String, AggregatedData> modifiedMetricsBuilder = ImmutableMultimap.builder();
         final Key dimensions = periodicData.getDimensions();
 
@@ -185,10 +194,14 @@ public class TelemetryActor extends AbstractActor {
                 }
             }
         }
-        modifiedPeriodicDataBuilder.setData(modifiedMetricsBuilder.build());
+
+        final PeriodicData modifiedPeriodicData = ThreadLocalBuilder.clone(
+                periodicData,
+                PeriodicData.Builder.class,
+                b -> b.setData(modifiedMetricsBuilder.build()));
 
         // Transmit the data to all members
-        broadcast(modifiedPeriodicDataBuilder.build());
+        broadcast(modifiedPeriodicData);
     }
 
     private Optional<AggregatedData> computePercentile(final AggregatedData value, final Statistic statistic) {
@@ -218,8 +231,6 @@ public class TelemetryActor extends AbstractActor {
 
     private void executeQuit(final Terminated message) {
         _metrics.incrementCounter(QUIT_COUNTER);
-
-        // Remove the connection from the pool
         _members.remove(message.getActor());
     }
 
