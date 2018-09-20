@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
+import com.typesafe.config.ConfigResolveOptions;
 import net.sf.oval.constraint.NotNull;
 
 import java.io.File;
@@ -69,8 +70,12 @@ public final class HoconFileSource extends BaseJsonNodeSource {
         if (_file.canRead()) {
             try {
                 final Config config = ConfigFactory.parseFile(_file);
-                final String hoconAsJson = config.resolve().root().render(ConfigRenderOptions.concise());
-                jsonNode = _objectMapper.readTree(hoconAsJson);
+                final String configHoconAsJson = config.withFallback(ConfigFactory.systemProperties())
+                        .resolve(ConfigResolveOptions.defaults())
+                        .root()
+                        .render(ConfigRenderOptions.concise());
+
+                jsonNode = _objectMapper.readTree(configHoconAsJson);
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
