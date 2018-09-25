@@ -62,9 +62,12 @@ import scala.concurrent.duration.FiniteDuration;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Http server routes.
@@ -117,7 +120,21 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                 createMetricName(request, BODY_SIZE_METRIC),
                 request.entity().getContentLengthOption().orElse(0L),
                 Optional.of(Units.BYTE));
-        // TODO(vkoskela): Add a request UUID and include in MDC. [MAI-462]
+        final UUID requestId = UUID.randomUUID();
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace()
+                    .setEvent("http.in.start")
+                    .addContext("requestId", requestId)
+                    .addData("method", request.method().toString())
+                    .addData("url", request.getUri().toString())
+                    .addData(
+                            "headers",
+                            StreamSupport.stream(request.getHeaders().spliterator(), false)
+                                    .map(h -> h.name() + "=" + h.value())
+                                    .collect(Collectors.toList()))
+                    .log();
+        }
+        // TODO(ville): Add a request UUID and include in MDC.
         LOGGER.trace()
                 .setEvent("http.in.start")
                 .addData("method", request.method())
@@ -132,23 +149,41 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                             requestTimer.elapsed(TimeUnit.NANOSECONDS),
                             Optional.of(Units.NANOSECOND));
 
-                    final int responseStatusClass = response.status().intValue() / 100;
+                    final int responseStatus;
+                    if (response != null) {
+                        responseStatus = response.status().intValue();
+                    } else {
+                        // TODO(ville): Figure out how to intercept post-exception mapping.
+                        responseStatus = 599;
+                    }
+                    final int responseStatusClass = responseStatus / 100;
                     for (final int i : STATUS_CLASSES) {
                         _metrics.recordCounter(
                                 createMetricName(request, String.format("%s/%dxx", STATUS_METRIC, i)),
                                 responseStatusClass == i ? 1 : 0);
                     }
 
-                    final LogBuilder log = LOGGER.trace()
-                            .setEvent("http.in")
-                            .addData("method", request.method())
-                            .addData("url", request.getUri())
-                            .addData("status", response.status().intValue())
-                            .addData("headers", request.getHeaders());
-                    if (failure != null) {
-                        log.setEvent("http.in.error").addData("exception", failure);
+                    final LogBuilder log;
+                    if (failure != null || responseStatusClass == 5) {
+                        log = LOGGER.info().setEvent("http.in.failure");
+                        if (failure != null) {
+                            log.setThrowable(failure);
+                        }
+                        if (!LOGGER.isTraceEnabled() && LOGGER.isInfoEnabled()) {
+                            log.addData("method", request.method().toString())
+                                    .addData("url", request.getUri().toString())
+                                    .addData(
+                                            "headers",
+                                            StreamSupport.stream(request.getHeaders().spliterator(), false)
+                                                    .map(h -> h.name() + "=" + h.value())
+                                                    .collect(Collectors.toList()));
+                        }
+                    } else {
+                        log = LOGGER.trace().setEvent("http.in.complete");
                     }
-                    log.log();
+                    log.addContext("requestId", requestId)
+                            .addData("status", responseStatus)
+                            .log();
                 });
     }
 

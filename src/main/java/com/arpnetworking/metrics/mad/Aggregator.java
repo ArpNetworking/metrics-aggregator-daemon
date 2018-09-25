@@ -161,7 +161,7 @@ public final class Aggregator implements Observer, Launchable {
             periodWorkerList.add(periodWorker);
             _periodWorkerExecutor.execute(periodWorker);
         }
-        LOGGER.info()
+        LOGGER.debug()
                 .setMessage("Created period workers")
                 .addData("key", key)
                 .addData("periodWorkersSize", periodWorkerList.size())

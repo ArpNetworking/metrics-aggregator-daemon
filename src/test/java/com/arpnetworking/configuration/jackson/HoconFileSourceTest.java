@@ -17,6 +17,7 @@ package com.arpnetworking.configuration.jackson;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
+import com.typesafe.config.impl.ConfigImpl;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,6 +37,9 @@ public class HoconFileSourceTest {
     @BeforeClass
     public static void setUpClass() throws IOException {
         Files.createDirectories(new File("./target/tmp/filter/HoconFileSourceTest").toPath());
+        System.setProperty("HoconFileSourceTest_testSystemPropertyDirect_foo", "bar");
+        System.setProperty("HoconFileSourceTest_testSystemPropertyReference_foo", "bar");
+        ConfigImpl.reloadSystemPropertiesConfig();
     }
 
     @Test
@@ -68,6 +72,28 @@ public class HoconFileSourceTest {
         Assert.assertTrue(source.getJsonNode().isPresent());
         Assert.assertEquals("bar", source.getValue("foo").get().textValue());
         Assert.assertFalse(source.getValue("does-not-exist").isPresent());
+    }
+
+    @Test
+    public void testSystemPropertyDirect() throws IOException {
+        final File file = new File("./target/tmp/filter/HoconFileSourceTest/testSystemPropertyDirect.hocon");
+        Files.write(file.toPath(), "".getBytes(Charsets.UTF_8));
+        final HoconFileSource source = new HoconFileSource.Builder()
+                .setFile(file)
+                .build();
+        Assert.assertTrue(source.getJsonNode().isPresent());
+        Assert.assertEquals("bar", source.getValue("HoconFileSourceTest_testSystemPropertyDirect_foo").get().textValue());
+    }
+
+    @Test
+    public void testSystemPropertyReference() throws IOException {
+        final File file = new File("./target/tmp/filter/HoconFileSourceTest/testSystemPropertyReference.hocon");
+        Files.write(file.toPath(), "foo:${HoconFileSourceTest_testSystemPropertyReference_foo}".getBytes(Charsets.UTF_8));
+        final HoconFileSource source = new HoconFileSource.Builder()
+                .setFile(file)
+                .build();
+        Assert.assertTrue(source.getJsonNode().isPresent());
+        Assert.assertEquals("bar", source.getValue("foo").get().textValue());
     }
 
     @Test(expected = RuntimeException.class)
