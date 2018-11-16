@@ -68,7 +68,7 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
         return new StringBuilder(name).reverse().toString();
     }
 
-    private Unit extractUnit(final String name) {
+    Unit parseUnit(final String name) {
         if (name != null) {
             final StringBuilder builder = new StringBuilder();
             for (int i = name.length() - 1; i >= 0; i--) {
@@ -84,6 +84,7 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
                     builder.append(ch);
                 }
             }
+            return UNIT_MAP.get(builder.toString());
         }
         return null;
     }
@@ -106,7 +107,7 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
                 }
                 final ImmutableMap<String, String> immutableDimensions = dimensionsBuilder.build();
                 final String metricName = name;
-                final Unit unit = extractUnit(name);
+                final Unit unit = parseUnit(name);
                 for (final Types.Sample sample : timeSeries.getSamplesList()) {
                     final Record record = ThreadLocalBuilder.build(
                             DefaultRecord.Builder.class,
