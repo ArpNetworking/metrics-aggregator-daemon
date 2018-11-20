@@ -93,47 +93,47 @@ public final class PrometheusToRecordParserTest {
     }
 
     @Test
-    public void testUnitParserNull() {
-        Assert.assertNull(createParser().parseUnit(null));
+    public void testUnitParserEmpty() {
+        Assert.assertEquals(Optional.empty(), createParser().parseUnit(Optional.empty()));
     }
 
     @Test
     public void testUnitParserInvalidUnit() {
-        Assert.assertNull(createParser().parseUnit("foo_bar"));
-        Assert.assertNull(createParser().parseUnit("foo_seconds_bar"));
-        Assert.assertNull(createParser().parseUnit("seconds_bar"));
+        Assert.assertEquals(Optional.empty(), createParser().parseUnit(Optional.of("foo_bar")));
+        Assert.assertEquals(Optional.empty(), createParser().parseUnit(Optional.of("foo_seconds_bar")));
+        Assert.assertEquals(Optional.empty(), createParser().parseUnit(Optional.of("seconds_bar")));
     }
 
     @Test
     public void testUnitParserSeconds() {
-        testUnitParsing("seconds", Unit.SECOND);
+        testUnitParsing("seconds", Optional.of(Unit.SECOND));
     }
 
     @Test
     public void testUnitParserCelcius() {
-        testUnitParsing("celcius", Unit.CELCIUS);
+        testUnitParsing("celcius", Optional.of(Unit.CELCIUS));
     }
 
     @Test
     public void testUnitParserBytes() {
-        testUnitParsing("bytes", Unit.BYTE);
+        testUnitParsing("bytes", Optional.of(Unit.BYTE));
     }
 
     @Test
     public void testUnitParserBits() {
-        testUnitParsing("bits", Unit.BIT);
+        testUnitParsing("bits", Optional.of(Unit.BIT));
     }
 
-    private static void testUnitParsing(final String name, final Unit expected) {
+    private static void testUnitParsing(final String name, final Optional<Unit> expected) {
         final PrometheusToRecordParser parser = createParser();
-        Assert.assertEquals(expected, parser.parseUnit(name));
-        Assert.assertEquals(expected, parser.parseUnit("foo_" + name));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_total"));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_bucket"));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_sum"));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_avg"));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_count"));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_total_count"));
+        Assert.assertEquals(expected, parser.parseUnit(Optional.of(name)));
+        Assert.assertEquals(expected, parser.parseUnit(Optional.of("foo_" + name)));
+        Assert.assertEquals(expected, parser.parseUnit(Optional.of(name + "_total")));
+        Assert.assertEquals(expected, parser.parseUnit(Optional.of(name + "_bucket")));
+        Assert.assertEquals(expected, parser.parseUnit(Optional.of(name + "_sum")));
+        Assert.assertEquals(expected, parser.parseUnit(Optional.of(name + "_avg")));
+        Assert.assertEquals(expected, parser.parseUnit(Optional.of(name + "_count")));
+        Assert.assertEquals(expected, parser.parseUnit(Optional.of(name + "_total_count")));
     }
 
     private static List<Record> parseRecords(final String fileName) throws ParsingException, IOException {

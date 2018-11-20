@@ -42,6 +42,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -68,8 +69,9 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
         return new StringBuilder(name).reverse().toString();
     }
 
-    Unit parseUnit(final String name) {
-        if (name != null) {
+    Optional<Unit> parseUnit(final Optional<String> nameOpt) {
+        if (nameOpt.isPresent()) {
+            final String name = nameOpt.get();
             final StringBuilder builder = new StringBuilder();
             for (int i = name.length() - 1; i >= 0; i--) {
                 final char ch = name.charAt(i);
@@ -78,15 +80,23 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
                     if (PROMETHEUS_AGGREGATION_KEYS.contains(key)) {
                         builder.setLength(0); //reset builder
                     } else {
-                        return UNIT_MAP.get(key);
+                        final Unit value = UNIT_MAP.get(key);
+                        if (value != null) {
+                            return Optional.of(value);
+                        } else {
+                            return Optional.empty();
+                        }
                     }
                 } else {
                     builder.append(ch);
                 }
             }
-            return UNIT_MAP.get(builder.toString());
+            final Unit value = UNIT_MAP.get(builder.toString());
+            if (value != null) {
+                return Optional.of(value);
+            }
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
@@ -96,18 +106,24 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
             final byte[] uncompressed = Snappy.uncompress(data.getBody().toArray());
             final Remote.WriteRequest writeRequest = Remote.WriteRequest.parseFrom(uncompressed);
             for (final TimeSeries timeSeries : writeRequest.getTimeseriesList()) {
-                String name = null;
+                Optional<String> nameOpt = Optional.empty();
                 final ImmutableMap.Builder<String, String> dimensionsBuilder = ImmutableMap.builder();
                 for (Types.Label label : timeSeries.getLabelsList()) {
                     if (label.getName().equals("__name__")) {
-                        name = label.getValue();
+                        final String value = label.getValue();
+                        if (value != null) {
+                            nameOpt = Optional.of(value);
+                        }
                     } else {
                         dimensionsBuilder.put(label.getName(), label.getValue());
                     }
                 }
                 final ImmutableMap<String, String> immutableDimensions = dimensionsBuilder.build();
-                final String metricName = name;
-                final Unit unit = parseUnit(name);
+                if (!nameOpt.isPresent()) { //skipping unnamed metric
+                    continue;
+                }
+                final String metricName = nameOpt.get();
+                final Optional<Unit> unit = parseUnit(nameOpt);
                 for (final Types.Sample sample : timeSeries.getSamplesList()) {
                     final Record record = ThreadLocalBuilder.build(
                             DefaultRecord.Builder.class,
@@ -132,7 +148,7 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
         return records;
     }
 
-    private ImmutableMap<String, ? extends Metric> createMetric(final String name, final Types.Sample sample, final Unit unit) {
+    private ImmutableMap<String, ? extends Metric> createMetric(final String name, final Types.Sample sample, final Optional<Unit> unit) {
         final Metric metric = ThreadLocalBuilder.build(
                 DefaultMetric.Builder.class,
                 p -> p
@@ -143,12 +159,12 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
         return ImmutableMap.of(name, metric);
     }
 
-    private Quantity createQuantity(final Types.Sample sample, final Unit unit) {
+    private Quantity createQuantity(final Types.Sample sample, final Optional<Unit> unit) {
         return ThreadLocalBuilder.build(
                 Quantity.Builder.class,
                 p -> p
                         .setValue(sample.getValue())
-                        .setUnit(unit)
+                        .setUnit(unit.orElse(null))
         );
     }
 
