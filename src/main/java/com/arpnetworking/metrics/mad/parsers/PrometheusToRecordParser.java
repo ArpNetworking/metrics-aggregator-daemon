@@ -51,52 +51,25 @@ import java.util.UUID;
  * @author Bruno Green (bruno dot green at gmail dot com)
  */
 public class PrometheusToRecordParser implements Parser<List<Record>, HttpRequest> {
-    private static final ImmutableMap<String, Unit> UNIT_MAP = ImmutableMap.of(
-            createUnitMapKey("seconds"), Unit.SECOND,
-            createUnitMapKey("celcius"), Unit.CELCIUS,
-            createUnitMapKey("bytes"), Unit.BYTE,
-            createUnitMapKey("bits"), Unit.BIT
-    );
-    private static final ImmutableSet<String> PROMETHEUS_AGGREGATION_KEYS = ImmutableSet.of(
-            createUnitMapKey("total"),
-            createUnitMapKey("bucket"),
-            createUnitMapKey("sum"),
-            createUnitMapKey("avg"),
-            createUnitMapKey("count")
-    );
 
-    private static String createUnitMapKey(final String name) {
-        return new StringBuilder(name).reverse().toString();
-    }
-
-    Optional<Unit> parseUnit(final Optional<String> nameOpt) {
-        if (nameOpt.isPresent()) {
-            final String name = nameOpt.get();
-            final StringBuilder builder = new StringBuilder();
-            for (int i = name.length() - 1; i >= 0; i--) {
-                final char ch = name.charAt(i);
-                if (ch == '_') {
-                    final String key = builder.toString();
-                    if (PROMETHEUS_AGGREGATION_KEYS.contains(key)) {
-                        builder.setLength(0); //reset builder
-                    } else {
-                        final Unit value = UNIT_MAP.get(key);
-                        if (value != null) {
-                            return Optional.of(value);
-                        } else {
-                            return Optional.empty();
-                        }
-                    }
+    Optional<Unit> parseUnit(final String name) {
+        final StringBuilder builder = new StringBuilder();
+        for (int i = name.length() - 1; i >= 0; i--) {
+            final char ch = name.charAt(i);
+            if (ch == '_') {
+                final String key = builder.toString();
+                if (PROMETHEUS_AGGREGATION_KEYS.contains(key)) {
+                    builder.setLength(0); //reset builder
                 } else {
-                    builder.append(ch);
+                    final Unit value = UNIT_MAP.get(key);
+                    return Optional.ofNullable(value);
                 }
-            }
-            final Unit value = UNIT_MAP.get(builder.toString());
-            if (value != null) {
-                return Optional.of(value);
+            } else {
+                builder.append(ch);
             }
         }
-        return Optional.empty();
+        final Unit value = UNIT_MAP.get(builder.toString());
+        return Optional.ofNullable(value);
     }
 
     @Override
@@ -109,21 +82,22 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
                 Optional<String> nameOpt = Optional.empty();
                 final ImmutableMap.Builder<String, String> dimensionsBuilder = ImmutableMap.builder();
                 for (Types.Label label : timeSeries.getLabelsList()) {
-                    if (label.getName().equals("__name__")) {
+                    if ("__name__".equals(label.getName())) {
                         final String value = label.getValue();
-                        if (value != null) {
-                            nameOpt = Optional.of(value);
-                        }
+                        nameOpt = Optional.ofNullable(value);
                     } else {
                         dimensionsBuilder.put(label.getName(), label.getValue());
                     }
                 }
-                final ImmutableMap<String, String> immutableDimensions = dimensionsBuilder.build();
-                if (!nameOpt.isPresent()) { //skipping unnamed metric
-                    continue;
+                if (!nameOpt.isPresent()) {
+                    throw new ParsingException("Could not find the metric name", data.getBody().toArray());
                 }
-                final String metricName = nameOpt.get();
-                final Optional<Unit> unit = parseUnit(nameOpt);
+                final String metricName = nameOpt.get().trim();
+                if (metricName.isEmpty()) {
+                    throw new ParsingException("Found a metric with an empty name", data.getBody().toArray());
+                }
+                final Optional<Unit> unit = parseUnit(metricName);
+                final ImmutableMap<String, String> immutableDimensions = dimensionsBuilder.build();
                 for (final Types.Sample sample : timeSeries.getSamplesList()) {
                     final Record record = ThreadLocalBuilder.build(
                             DefaultRecord.Builder.class,
@@ -168,4 +142,21 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
         );
     }
 
+    private static String createUnitMapKey(final String name) {
+        return new StringBuilder(name).reverse().toString();
+    }
+
+    private static final ImmutableMap<String, Unit> UNIT_MAP = ImmutableMap.of(
+            createUnitMapKey("seconds"), Unit.SECOND,
+            createUnitMapKey("celcius"), Unit.CELCIUS,
+            createUnitMapKey("bytes"), Unit.BYTE,
+            createUnitMapKey("bits"), Unit.BIT
+    );
+    private static final ImmutableSet<String> PROMETHEUS_AGGREGATION_KEYS = ImmutableSet.of(
+            createUnitMapKey("total"),
+            createUnitMapKey("bucket"),
+            createUnitMapKey("sum"),
+            createUnitMapKey("avg"),
+            createUnitMapKey("count")
+    );
 }
