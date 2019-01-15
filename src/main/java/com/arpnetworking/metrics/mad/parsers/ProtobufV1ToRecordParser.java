@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.inscopemetrics.client.protocol.ClientV1;
 import net.sf.oval.exception.ConstraintsViolatedException;
 
 import java.nio.ByteBuffer;
@@ -51,9 +50,10 @@ public final class ProtobufV1ToRecordParser implements Parser<List<Record>, Http
     @Override
     public List<Record> parse(final HttpRequest data) throws ParsingException {
         try {
-            final ClientV1.RecordSet request = ClientV1.RecordSet.parseFrom(data.getBody().asByteBuffer());
+            final com.inscopemetrics.client.protocol.ClientV1.RecordSet request = 
+                    com.inscopemetrics.client.protocol.ClientV1.RecordSet.parseFrom(data.getBody().asByteBuffer());
             final List<Record> records = Lists.newArrayList();
-            for (final ClientV1.Record record : request.getRecordsList()) {
+            for (final com.inscopemetrics.client.protocol.ClientV1.Record record : request.getRecordsList()) {
                 final ByteBuffer byteBuffer = ByteBuffer.wrap(record.getId().toByteArray());
                 final Long high = byteBuffer.getLong();
                 final Long low = byteBuffer.getLong();
@@ -78,7 +78,8 @@ public final class ProtobufV1ToRecordParser implements Parser<List<Record>, Http
         }
     }
 
-    private ImmutableMap<String, ? extends Metric> buildMetrics(final ClientV1.Record record) {
+    private ImmutableMap<String, ? extends Metric> buildMetrics(
+            final com.inscopemetrics.client.protocol.ClientV1.Record record) {
         final ImmutableMap.Builder<String, Metric> metrics = ImmutableMap.builder();
         processEntries(metrics, record.getCountersList(), MetricType.COUNTER);
         processEntries(metrics, record.getTimersList(), MetricType.TIMER);
@@ -88,12 +89,12 @@ public final class ProtobufV1ToRecordParser implements Parser<List<Record>, Http
 
     private void processEntries(
             final ImmutableMap.Builder<String, Metric> metrics,
-            final List<ClientV1.MetricEntry> entries,
+            final List<com.inscopemetrics.client.protocol.ClientV1.MetricEntry> entries,
             final MetricType metricType) {
-        for (final ClientV1.MetricEntry metricEntry : entries) {
+        for (final com.inscopemetrics.client.protocol.ClientV1.MetricEntry metricEntry : entries) {
             final ImmutableList.Builder<Quantity> quantities =
                     ImmutableList.builderWithExpectedSize(metricEntry.getSamplesCount());
-            for (final ClientV1.DoubleQuantity quantity : metricEntry.getSamplesList()) {
+            for (final com.inscopemetrics.client.protocol.ClientV1.DoubleQuantity quantity : metricEntry.getSamplesList()) {
                 quantities.add(
                         ThreadLocalBuilder.build(
                                 Quantity.Builder.class,
@@ -110,15 +111,15 @@ public final class ProtobufV1ToRecordParser implements Parser<List<Record>, Http
     }
 
     @Nullable
-    private Unit baseUnit(final ClientV1.CompoundUnit compoundUnit) {
+    private Unit baseUnit(final com.inscopemetrics.client.protocol.ClientV1.CompoundUnit compoundUnit) {
         if (!compoundUnit.getNumeratorList().isEmpty()) {
-            final ClientV1.Unit selectedUnit = compoundUnit.getNumerator(0);
-            if (ClientV1.Unit.Type.UNRECOGNIZED.equals(selectedUnit.getType())) {
+            final com.inscopemetrics.client.protocol.ClientV1.Unit selectedUnit = compoundUnit.getNumerator(0);
+            if (com.inscopemetrics.client.protocol.ClientV1.Unit.Type.UNRECOGNIZED.equals(selectedUnit.getType())) {
                 return null;
             }
             final String unitName;
-            if (!ClientV1.Unit.Scale.UNIT.equals(selectedUnit.getScale())
-                    && !ClientV1.Unit.Scale.UNRECOGNIZED.equals(selectedUnit.getScale())) {
+            if (!com.inscopemetrics.client.protocol.ClientV1.Unit.Scale.UNIT.equals(selectedUnit.getScale())
+                    && !com.inscopemetrics.client.protocol.ClientV1.Unit.Scale.UNRECOGNIZED.equals(selectedUnit.getScale())) {
                 unitName = selectedUnit.getScale().name() + selectedUnit.getType().name();
             } else {
                 unitName = selectedUnit.getType().name();
@@ -129,17 +130,17 @@ public final class ProtobufV1ToRecordParser implements Parser<List<Record>, Http
         return null;
     }
 
-    private ImmutableMap<String, String> buildAnnotations(final ClientV1.Record record) {
+    private ImmutableMap<String, String> buildAnnotations(final com.inscopemetrics.client.protocol.ClientV1.Record record) {
         final ImmutableMap.Builder<String, String> annotations = ImmutableMap.builder();
-        for (final ClientV1.AnnotationEntry annotationEntry : record.getAnnotationsList()) {
+        for (final com.inscopemetrics.client.protocol.ClientV1.AnnotationEntry annotationEntry : record.getAnnotationsList()) {
             annotations.put(annotationEntry.getName(), annotationEntry.getValue());
         }
         return annotations.build();
     }
 
-    private ImmutableMap<String, String> buildDimensions(final ClientV1.Record record) {
+    private ImmutableMap<String, String> buildDimensions(final com.inscopemetrics.client.protocol.ClientV1.Record record) {
         final ImmutableMap.Builder<String, String> dimensions = ImmutableMap.builder();
-        for (final ClientV1.DimensionEntry dimensionEntry : record.getDimensionsList()) {
+        for (final com.inscopemetrics.client.protocol.ClientV1.DimensionEntry dimensionEntry : record.getDimensionsList()) {
             dimensions.put(dimensionEntry.getName(), dimensionEntry.getValue());
         }
         return dimensions.build();
