@@ -24,9 +24,7 @@
             <injectBeanIdentifier>true</injectBeanIdentifier>
         </encoder>
     </appender>
-
-    <logger name="org.reflections.Reflections" level="ERROR" />
-
+\
     <root level="INFO">
         <appender-ref ref="mad-logger"/>
     </root>

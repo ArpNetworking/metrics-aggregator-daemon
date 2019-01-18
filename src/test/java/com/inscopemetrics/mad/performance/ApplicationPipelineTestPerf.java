@@ -49,9 +49,9 @@ import java.util.List;
  */
 @RunWith(Parameterized.class)
 @BenchmarkOptions(callgc = true, benchmarkRounds = 1, warmupRounds = 0)
-public class ApplicationPipelinePT extends FilePerfTestBase {
+public class ApplicationPipelineTestPerf extends FilePerfTestBase {
 
-    public ApplicationPipelinePT(
+    public ApplicationPipelineTestPerf(
             final String name,
             final int uowCount,
             final int namesCount,
@@ -142,5 +142,5 @@ public class ApplicationPipelinePT extends FilePerfTestBase {
             Paths.get("target/site/perf/benchmark-application-mad.json"));
 
     private static final RandomGenerator RANDOM = new MersenneTwister(1298);
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationPipelinePT.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationPipelineTestPerf.class);
 }
