@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>1.1.7</version>
+    <version>1.1.10</version>
     <relativePath />
   </parent>
 
@@ -73,52 +73,52 @@
     <!--Dependency versions-->
     <akka.version>2.5.16</akka.version>
     <akka.http.version>10.1.5</akka.http.version>
-    <apache.httpclient.version>4.5.5</apache.httpclient.version>
-    <apache.httpcore.version>4.4.9</apache.httpcore.version>
-    <arpnetworking.commons.version>1.17.0</arpnetworking.commons.version>
-    <aspectjrt.version>1.9.1</aspectjrt.version>
-    <asynchttpclient.version>2.4.9</asynchttpclient.version>
-    <cglib.version>3.2.6</cglib.version>
-    <client.protocol.version>0.10.0</client.protocol.version>
-    <fastutil.version>8.2.1</fastutil.version>
+    <apache.httpclient.version>4.5.6</apache.httpclient.version>
+    <apache.httpcore.version>4.4.10</apache.httpcore.version>
+    <arpnetworking.commons.version>1.18.0</arpnetworking.commons.version>
+    <aspectjrt.version>1.9.2</aspectjrt.version>
+    <asynchttpclient.version>2.6.0</asynchttpclient.version>
+    <cglib.version>3.2.10</cglib.version>
+    <client.protocol.version>0.10.1</client.protocol.version>
+    <fastutil.version>8.2.2</fastutil.version>
     <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
     <guava.version>25.1-jre</guava.version>
-    <guice.version>4.2.0</guice.version>
-    <jackson.version>2.9.6</jackson.version>
-    <javassist.version>3.22.0-GA</javassist.version>
-    <javassist.maven.core.version>0.2.1</javassist.maven.core.version>
+    <guice.version>4.2.2</guice.version>
+    <jackson.version>2.9.8</jackson.version>
+    <javassist.version>3.24.1-GA</javassist.version>
+    <javassist.maven.core.version>0.2.2</javassist.maven.core.version>
     <jsr305.version>3.0.2</jsr305.version>
     <logback.version>1.2.3</logback.version>
-    <logback.steno.version>1.18.1</logback.steno.version>
-    <log4j.over.slf4j.version>1.7.12</log4j.over.slf4j.version>
-    <metrics.aggregator.protocol.version>1.0.5</metrics.aggregator.protocol.version>
-    <metrics.client.version>0.10.0</metrics.client.version>
-    <metrics.client.http.version>0.9.1</metrics.client.http.version>
-    <metrics.client.incubator.version>0.6.2</metrics.client.incubator.version>
-    <metrics.jvm.extra.version>0.10.0</metrics.jvm.extra.version>
+    <logback.steno.version>1.18.2</logback.steno.version>
+    <log4j.over.slf4j.version>1.7.25</log4j.over.slf4j.version>
+    <metrics.aggregator.protocol.version>1.0.6</metrics.aggregator.protocol.version>
+    <metrics.client.version>0.10.1</metrics.client.version>
+    <metrics.client.http.version>0.9.3</metrics.client.http.version>
+    <metrics.client.incubator.version>0.6.3</metrics.client.incubator.version>
+    <metrics.jvm.extra.version>0.10.1</metrics.jvm.extra.version>
     <oval.version>1.90</oval.version>
-    <protobuf.version>3.6.0</protobuf.version>
+    <protobuf.version>3.6.1</protobuf.version>
     <scala.version>2.11</scala.version>
-    <scala.library.version>2.11.7</scala.library.version>
+    <scala.library.version>2.11.12</scala.library.version>
     <slf4j.version>1.7.25</slf4j.version>
     <typesafe.config.version>1.3.3</typesafe.config.version>
 
     <!--Test dependency versions-->
     <commons.math3.version>3.6.1</commons.math3.version>
-    <hamcrest.version>2.0.0.0</hamcrest.version>
+    <hamcrest.version>2.1</hamcrest.version>
     <junit.benchmarks.version>0.7.2</junit.benchmarks.version>
     <junit.version>4.12</junit.version>
-    <metrics.generator.version>1.2.2</metrics.generator.version>
-    <mockito.version>2.19.0</mockito.version>
-    <performance.test.version>1.1.0</performance.test.version>
+    <metrics.generator.version>1.2.3</metrics.generator.version>
+    <mockito.version>2.23.4</mockito.version>
+    <performance.test.version>1.2.1</performance.test.version>
     <statsd.client.timgroup>3.1.0</statsd.client.timgroup>
-    <wiremock.version>2.18.0</wiremock.version>
+    <wiremock.version>2.20.0</wiremock.version>
 
     <!-- Additional Plugins -->
-    <aspectjtools.maven.plugin>1.9.1</aspectjtools.maven.plugin>
+    <aspectjtools.maven.plugin>1.9.2</aspectjtools.maven.plugin>
     <aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
     <docker.maven.plugin.version>0.26.0</docker.maven.plugin.version>
-    <javassist.maven.plugin.version>0.1.2</javassist.maven.plugin.version>
+    <javassist.maven.plugin.version>0.2.2</javassist.maven.plugin.version>
     <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
     <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
 
@@ -460,6 +460,13 @@
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
       <version>${guice.version}</version>
+      <exclusions>
+        <!-- TODO(ville): Guava is released for android and jre; guice depends on the former only -->
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.google.protobuf</groupId>
@@ -481,17 +488,46 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
+      <exclusions>
+        <!-- TODO(ville): Remove this exclusion once the annotations package is consistently depended upon:
+            https://github.com/FasterXML/jackson-bom/issues/15
+        -->
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-guava</artifactId>
       <version>${jackson.version}</version>
       <scope>runtime</scope>
+      <exclusions>
+        <!-- TODO(ville): Jackson has a very slow update policy towards Guava; see:
+            https://github.com/FasterXML/jackson-datatypes-collections/issues/23
+            https://github.com/FasterXML/jackson-datatypes-collections/issues/24
+            https://groups.google.com/forum/#!searchin/jackson-user/guava%7Csort:date/jackson-user/6AeY4UJMckE/_16cbhejAgAJ
+        -->
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-guice</artifactId>
       <version>${jackson.version}</version>
+      <exclusions>
+        <!-- TODO(ville): Remove this exclusion once the annotations package is consistently depended upon:
+            https://github.com/FasterXML/jackson-bom/issues/15
+        -->
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -504,6 +540,15 @@
       <artifactId>jackson-datatype-jsr310</artifactId>
       <version>${jackson.version}</version>
       <scope>runtime</scope>
+      <exclusions>
+        <!-- TODO(ville): Remove this exclusion once the annotations package is consistently depended upon:
+            https://github.com/FasterXML/jackson-bom/issues/15
+        -->
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
@@ -587,6 +632,9 @@
       <groupId>it.unimi.dsi</groupId>
       <artifactId>fastutil</artifactId>
       <version>${fastutil.version}</version>
+      <!-- Jackson support not yet available:
+          https://github.com/FasterXML/jackson-datatypes-collections/issues/38
+      -->
     </dependency>
     <dependency>
       <groupId>org.aspectj</groupId>
@@ -617,6 +665,21 @@
       <artifactId>junit</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <!-- TODO(ville): Remove once JUnit depends on modern hamcrest; see:
+            http://hamcrest.org/JavaHamcrest/distributables
+        -->
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>${hamcrest.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -625,14 +688,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>java-hamcrest</artifactId>
-      <version>${hamcrest.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>com.github.tomakehurst</groupId>
-      <artifactId>wiremock</artifactId>
+      <artifactId>wiremock-standalone</artifactId>
       <version>${wiremock.version}</version>
       <scope>test</scope>
     </dependency>
