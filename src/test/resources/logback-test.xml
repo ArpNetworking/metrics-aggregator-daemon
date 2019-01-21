@@ -24,8 +24,6 @@
       </encoder>
     </appender>
 
-    <logger name="org.reflections.Reflections" level="ERROR" />
-
     <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
     </root>

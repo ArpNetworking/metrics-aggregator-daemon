@@ -41,8 +41,6 @@
         <queueSize>500</queueSize>
     </appender>
 
-    <logger name="org.reflections.Reflections" level="ERROR" />
-
     <root level="INFO">
         <appender-ref ref="mad-async"/>
     </root>

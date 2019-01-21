@@ -41,7 +41,7 @@ import java.util.zip.GZIPInputStream;
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @BenchmarkOptions(callgc = true, benchmarkRounds = 1, warmupRounds = 0)
-public class CollectdPipelinePT extends FilePerfTestBase {
+public class CollectdPipelineTestPerf extends FilePerfTestBase {
 
     @BeforeClass
     public static void setUp() throws IOException, URISyntaxException {

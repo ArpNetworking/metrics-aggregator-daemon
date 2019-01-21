@@ -24,7 +24,6 @@
     </encoder>
   </appender>
 
-  <logger name="org.reflections.Reflections" level="ERROR" />
   <logger name="com.arpnetworking.metrics.mad.performance" level="DEBUG" />
 
   <root level="WARN">
