@@ -75,8 +75,13 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
     @Override
     public List<Record> parse(final HttpRequest data) throws ParsingException {
         final List<Record> records = Lists.newArrayList();
+        final byte[] uncompressed;
         try {
-            final byte[] uncompressed = Snappy.uncompress(data.getBody().toArray());
+            uncompressed = Snappy.uncompress(data.getBody().toArray());
+        } catch (final IOException e) {
+            throw new ParsingException("Failed to decompress snappy stream", data.getBody().toArray(), e);
+        }
+        try {
             final Remote.WriteRequest writeRequest = Remote.WriteRequest.parseFrom(uncompressed);
             for (final TimeSeries timeSeries : writeRequest.getTimeseriesList()) {
                 Optional<String> nameOpt = Optional.empty();
@@ -116,8 +121,6 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
             throw new ParsingException("Could not create Request message from data", data.getBody().toArray(), e);
         } catch (final ConstraintsViolatedException | IllegalArgumentException e) {
             throw new ParsingException("Could not build record", data.getBody().toArray(), e);
-        } catch (final IOException e) {
-            throw new ParsingException("Could not read data", data.getBody().toArray(), e);
         }
         return records;
     }
