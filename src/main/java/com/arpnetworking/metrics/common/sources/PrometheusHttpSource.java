@@ -42,13 +42,25 @@ public final class PrometheusHttpSource extends HttpSource{
         public Builder() {
             super(PrometheusHttpSource::new);
             setActorName(ACTOR_NAME);
-            setParser(new PrometheusToRecordParser());
+            setParser(new PrometheusToRecordParser(_interpretUnits));
+        }
+
+        /**
+         * Whether to interpret units in the metric name. Optional. Defaults to false. Cannot be null.
+         * @param value the value
+         * @return this {@link Builder}
+         */
+        public Builder setInterpretUnits(final Boolean value) {
+            _interpretUnits = value;
+            return this;
         }
 
         @Override
         protected Builder self() {
             return this;
         }
+
+        private Boolean _interpretUnits = false;
     }
 
 }

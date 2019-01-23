@@ -34,8 +34,10 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Tests for the prometheus parser.
@@ -65,7 +67,7 @@ public final class PrometheusToRecordParserTest {
         final ImmutableMap<String, ? extends Metric> metrics = record.getMetrics();
         Assert.assertEquals(1, metrics.size());
 
-        final Metric gauge = metrics.get("rpc_durations_histogram_seconds_count");
+        final Metric gauge = metrics.get("rpc_durations_histogram_count");
         Assert.assertNotNull(gauge);
         Assert.assertEquals(MetricType.GAUGE, gauge.getType());
         Assert.assertEquals(1, gauge.getValues().size());
@@ -80,6 +82,21 @@ public final class PrometheusToRecordParserTest {
         Assert.assertEquals("localhost:12345", record.getDimensions().get("instance"));
         Assert.assertEquals("example-random", record.getDimensions().get("job"));
         Assert.assertEquals("codelab-monitor", record.getDimensions().get("monitor"));
+    }
+
+    @Test
+    public void testParseSingleRecordWithoutUnitInterpreter() throws ParsingException, IOException {
+        final List<Record> records = parseRecords("PrometheusParserTest/testSingleRecord", createParserWithoutInterpreter());
+        final Record record = records.get(0);
+        final ImmutableMap<String, ? extends Metric> metrics = record.getMetrics();
+        Assert.assertEquals(1, metrics.size());
+        final Metric gauge = metrics.get("rpc_durations_histogram_seconds_count");
+        Assert.assertNotNull(gauge);
+        Assert.assertEquals(MetricType.GAUGE, gauge.getType());
+        Assert.assertEquals(1, gauge.getValues().size());
+        final Quantity gaugeQuantity = gauge.getValues().get(0);
+        Assert.assertEquals(Optional.empty(), gaugeQuantity.getUnit());
+        Assert.assertEquals(493.0, gaugeQuantity.getValue(), 0.001);
     }
 
     @Test(expected = ParsingException.class)
@@ -116,34 +133,39 @@ public final class PrometheusToRecordParserTest {
 
     @Test
     public void testUnitParserSeconds() {
-        testUnitParsing("seconds", Optional.of(Unit.SECOND));
+        testUnitParsing("seconds", Unit.SECOND);
     }
 
     @Test
     public void testUnitParserCelcius() {
-        testUnitParsing("celcius", Optional.of(Unit.CELCIUS));
+        testUnitParsing("celcius", Unit.CELCIUS);
     }
 
     @Test
     public void testUnitParserBytes() {
-        testUnitParsing("bytes", Optional.of(Unit.BYTE));
+        testUnitParsing("bytes", Unit.BYTE);
     }
 
     @Test
     public void testUnitParserBits() {
-        testUnitParsing("bits", Optional.of(Unit.BIT));
+        testUnitParsing("bits", Unit.BIT);
     }
 
-    private static void testUnitParsing(final String name, final Optional<Unit> expected) {
+    private static void testUnitParsing(final String prometheusUnit, final Unit expected) {
+        assertUnitNewName(prometheusUnit, prometheusUnit, expected);
+        assertUnitNewName("foo_" + prometheusUnit, prometheusUnit, expected);
+        assertUnitNewName(prometheusUnit + "_total", prometheusUnit, expected);
+        assertUnitNewName(prometheusUnit + "_bucket", prometheusUnit, expected);
+        assertUnitNewName(prometheusUnit + "_sum", prometheusUnit, expected);
+        assertUnitNewName(prometheusUnit + "_avg", prometheusUnit, expected);
+        assertUnitNewName(prometheusUnit + "_count", prometheusUnit, expected);
+        assertUnitNewName(prometheusUnit + "_total_count", prometheusUnit, expected);
+        assertUnitNewName("foo_" + prometheusUnit + "_total_count", prometheusUnit, expected);
+    }
+    private static void assertUnitNewName(final String fullName, final String prometheusUnit, final Unit expectedUnit) {
         final PrometheusToRecordParser parser = createParser();
-        Assert.assertEquals(expected, parser.parseUnit(name));
-        Assert.assertEquals(expected, parser.parseUnit("foo_" + name));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_total"));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_bucket"));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_sum"));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_avg"));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_count"));
-        Assert.assertEquals(expected, parser.parseUnit(name + "_total_count"));
+        final String newName = Arrays.stream(fullName.split("_")).filter(x->!prometheusUnit.equals(x)).collect(Collectors.joining("_"));
+        Assert.assertEquals(Optional.of(new PrometheusToRecordParser.ParseResult(expectedUnit, newName)), parser.parseUnit(fullName));
     }
 
     private static List<Record> parseRecords(final String fileName) throws ParsingException, IOException {
@@ -160,6 +182,9 @@ public final class PrometheusToRecordParserTest {
     }
 
     private static PrometheusToRecordParser createParser() {
-        return new PrometheusToRecordParser();
+        return new PrometheusToRecordParser(true);
+    }
+    private static PrometheusToRecordParser createParserWithoutInterpreter() {
+        return new PrometheusToRecordParser(false);
     }
 }
