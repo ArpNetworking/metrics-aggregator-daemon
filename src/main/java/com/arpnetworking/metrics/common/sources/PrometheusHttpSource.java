@@ -23,11 +23,6 @@ import com.arpnetworking.metrics.mad.parsers.PrometheusToRecordParser;
  * @author Bruno Green (bruno dot green at gmail dot com)
  */
 public final class PrometheusHttpSource extends HttpSource{
-    /**
-     * Protected constructor.
-     *
-     * @param builder Instance of <code>Builder</code>.
-     */
     private PrometheusHttpSource(final HttpSource.Builder<?, ? extends HttpSource> builder) {
         super(builder);
     }
