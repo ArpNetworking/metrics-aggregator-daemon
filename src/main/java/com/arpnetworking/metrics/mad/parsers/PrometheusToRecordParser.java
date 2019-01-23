@@ -52,6 +52,14 @@ import java.util.UUID;
  */
 public class PrometheusToRecordParser implements Parser<List<Record>, HttpRequest> {
 
+    /**
+     * Parses a unit from the name of a metric.
+     * Prometheus will, by default, add unit names to the end of a metric name.
+     * We want to parse that name and apply that unit to the metric.
+     * An unit suffix might be added to the name of the metric, we currently have a set of
+     * whitelisted suffixes that is most likely not exhaustive.
+     * For more information see: https://prometheus.io/docs/practices/naming/
+     * */
     Optional<Unit> parseUnit(final String name) {
         final StringBuilder builder = new StringBuilder();
         for (int i = name.length() - 1; i >= 0; i--) {
