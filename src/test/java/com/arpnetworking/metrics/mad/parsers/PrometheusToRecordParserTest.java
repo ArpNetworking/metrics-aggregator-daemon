@@ -125,10 +125,15 @@ public final class PrometheusToRecordParserTest {
     }
 
     @Test
-    public void testUnitParserInvalidUnit() {
-        Assert.assertEquals(Optional.empty(), createParser().parseUnit("foo_bar"));
-        Assert.assertEquals(Optional.empty(), createParser().parseUnit("foo_seconds_bar"));
-        Assert.assertEquals(Optional.empty(), createParser().parseUnit("seconds_bar"));
+    public void testUnitParserNoUnit() {
+        testUnitParserNoUnitHelper("foo_bar");
+        testUnitParserNoUnitHelper("foo_seconds_bar");
+        testUnitParserNoUnitHelper("seconds_bar");
+    }
+    private void testUnitParserNoUnitHelper(final String name) {
+        final PrometheusToRecordParser.ParseResult expectedResult
+                = new PrometheusToRecordParser.ParseResult(name, Optional.empty());
+        Assert.assertEquals(expectedResult, createParser().parseNameAndUnit(name));
     }
 
     @Test
@@ -164,8 +169,13 @@ public final class PrometheusToRecordParserTest {
     }
     private static void assertUnitNewName(final String fullName, final String prometheusUnit, final Unit expectedUnit) {
         final PrometheusToRecordParser parser = createParser();
-        final String newName = Arrays.stream(fullName.split("_")).filter(x->!prometheusUnit.equals(x)).collect(Collectors.joining("_"));
-        Assert.assertEquals(Optional.of(new PrometheusToRecordParser.ParseResult(expectedUnit, newName)), parser.parseUnit(fullName));
+        final String newName
+                = Arrays.stream(fullName.split("_"))
+                .filter(x->!prometheusUnit.equals(x))
+                .collect(Collectors.joining("_"));
+        final PrometheusToRecordParser.ParseResult expectedResult
+                = new PrometheusToRecordParser.ParseResult(newName, Optional.of(expectedUnit));
+        Assert.assertEquals(expectedResult, parser.parseNameAndUnit(fullName));
     }
 
     private static List<Record> parseRecords(final String fileName) throws ParsingException, IOException {

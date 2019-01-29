@@ -350,7 +350,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private static final String COLLECTD_V1_SOURCE_PREFIX = "/metrics/v1/collectd";
     private static final String APP_V1_SOURCE_PREFIX = "/metrics/v1/application";
     private static final String APP_V2_SOURCE_PREFIX = "/metrics/v2/application";
-    private static final String PROMETHEUS_SOURCE_PREFIX = "/metrics/prometheus/application";
+    private static final String PROMETHEUS_SOURCE_PREFIX = "/metrics/prometheus";
     private static final String ACTOR_COLLECTD_V1 = "/user/" + CollectdHttpSourceV1.ACTOR_NAME;
     private static final String ACTOR_APP_V1 = "/user/" + ClientHttpSourceV1.ACTOR_NAME;
     private static final String ACTOR_APP_V2 = "/user/" + ClientHttpSourceV2.ACTOR_NAME;

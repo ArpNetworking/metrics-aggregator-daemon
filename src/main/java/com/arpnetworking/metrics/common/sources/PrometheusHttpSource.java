@@ -47,6 +47,7 @@ public final class PrometheusHttpSource extends HttpSource{
 
         /**
          * Whether to interpret units in the metric name. Optional. Defaults to false. Cannot be null.
+         *
          * @param value the value
          * @return this {@link Builder}
          */

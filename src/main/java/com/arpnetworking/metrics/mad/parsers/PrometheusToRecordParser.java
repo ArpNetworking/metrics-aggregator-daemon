@@ -52,25 +52,28 @@ import java.util.UUID;
  *
  * @author Bruno Green (bruno dot green at gmail dot com)
  */
-public class PrometheusToRecordParser implements Parser<List<Record>, HttpRequest> {
+public final class PrometheusToRecordParser implements Parser<List<Record>, HttpRequest> {
+
     /**
      * public constructor.
+     *
      * @param interpretUnits specifies whether or not to interpret units.
      */
     public PrometheusToRecordParser(final boolean interpretUnits) {
         _interpretUnits = interpretUnits;
     }
-    /**
-     * Parses a unit from the name of a metric.
+
+    /*
+     * Parses a unit and the new name from the name of a metric.
      * Prometheus will, by default, add unit names to the end of a metric name.
      * We want to parse that name and apply that unit to the metric.
      * An unit suffix might be added to the name of the metric, we currently have a set of
      * whitelisted suffixes that is most likely not exhaustive.
      * For more information see: https://prometheus.io/docs/practices/naming/
-     * */
-    Optional<ParseResult> parseUnit(final String name) {
+     */
+    ParseResult parseNameAndUnit(final String name) {
         if (!_interpretUnits) {
-            return Optional.empty();
+            return new ParseResult(name, Optional.empty());
         }
         final StringBuilder builder = new StringBuilder();
         for (int i = name.length() - 1; i >= 0; i--) {
@@ -83,9 +86,9 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
                     final Unit value = UNIT_MAP.get(key);
                     if (value != null) {
                         final String newName = name.substring(0, i).concat(name.substring(i + 1 + key.length()));
-                        return Optional.of(new ParseResult(value, newName));
+                        return new ParseResult(newName, Optional.of(value));
                     } else {
-                        return Optional.empty();
+                        return new ParseResult(name, Optional.empty());
                     }
                 }
             } else {
@@ -96,9 +99,9 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
         final Unit value = UNIT_MAP.get(possibleUnit);
         if (value != null) {
             final String newName = name.substring(Math.min(possibleUnit.length() + 1, name.length()));
-            return Optional.of(new ParseResult(value, newName));
+            return new ParseResult(newName, Optional.of(value));
         } else {
-            return Optional.empty();
+            return new ParseResult(name, Optional.empty());
         }
     }
 
@@ -116,7 +119,7 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
             for (final TimeSeries timeSeries : writeRequest.getTimeseriesList()) {
                 Optional<String> nameOpt = Optional.empty();
                 final ImmutableMap.Builder<String, String> dimensionsBuilder = ImmutableMap.builder();
-                for (Types.Label label : timeSeries.getLabelsList()) {
+                for (final Types.Label label : timeSeries.getLabelsList()) {
                     if ("__name__".equals(label.getName())) {
                         final String value = label.getValue();
                         nameOpt = Optional.ofNullable(value);
@@ -124,14 +127,11 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
                         dimensionsBuilder.put(label.getName(), label.getValue());
                     }
                 }
-                if (!nameOpt.isPresent()) {
-                    throw new ParsingException("Could not find the metric name", data.getBody().toArray());
-                }
-                final String metricName = nameOpt.get().trim();
+                final ParseResult result = parseNameAndUnit(nameOpt.orElse("").trim());
+                final String metricName = result.getName();
                 if (metricName.isEmpty()) {
                     throw new ParsingException("Found a metric with an empty name", data.getBody().toArray());
                 }
-                final Optional<ParseResult> result = parseUnit(metricName);
                 final ImmutableMap<String, String> immutableDimensions = dimensionsBuilder.build();
                 for (final Types.Sample sample : timeSeries.getSamplesList()) {
                     final Record record = ThreadLocalBuilder.build(
@@ -143,9 +143,9 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
                                                     ZoneOffset.UTC))
                                     .setMetrics(
                                             createMetric(
-                                                    result.map(ParseResult::getNewName).orElse(metricName),
+                                                    metricName,
                                                     sample,
-                                                    result.map(ParseResult::getUnit)))
+                                                    result.getUnit()))
                                     .setDimensions(immutableDimensions)
                     );
                     records.add(record);
@@ -199,8 +199,7 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
             createUnitMapKey("count")
     );
 
-    static class ParseResult{
-        private final Unit _unit;
+    static final class ParseResult {
 
         @Override
         public boolean equals(final Object o) {
@@ -211,35 +210,37 @@ public class PrometheusToRecordParser implements Parser<List<Record>, HttpReques
                 return false;
             }
             final ParseResult that = (ParseResult) o;
-            return _unit == that._unit
-                    && _newName.equals(that._newName);
+            return _unit.equals(that._unit)
+                    && _name.equals(that._name);
         }
 
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
                     .add("unit", _unit)
-                    .add("newName", _newName)
+                    .add("name", _name)
                     .toString();
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(_unit, _newName);
+            return Objects.hash(_unit, _name);
         }
 
-        private final String _newName;
-        ParseResult(final Unit unit, final String newName) {
-            _unit = unit;
-            _newName = newName;
-        }
-
-        public Unit getUnit() {
+        public Optional<Unit> getUnit() {
             return _unit;
         }
 
-        public String getNewName() {
-            return _newName;
+        public String getName() {
+            return _name;
         }
+
+        ParseResult(final String name, final Optional<Unit> unit) {
+            _unit = unit;
+            _name = name;
+        }
+
+        private final String _name;
+        private final Optional<Unit> _unit;
     }
 }
