@@ -65,6 +65,23 @@ public class TPStatistic extends BaseStatistic implements OrderedStatistic {
         return DEPENDENCIES.get();
     }
 
+    @Override
+    public int hashCode() {
+        return getName().hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TPStatistic)) {
+            return false;
+        }
+        final TPStatistic otherTPStatistic = (TPStatistic) o;
+        return getName().equals(otherTPStatistic.getName());
+    }
+
     /**
      * Protected constructor.
      *
