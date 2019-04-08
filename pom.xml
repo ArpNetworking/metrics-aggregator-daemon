@@ -212,7 +212,7 @@
           <programs>
             <program>
               <id>mad</id>
-              <mainClass>com.inscopemetrics.mad.Main</mainClass>
+              <mainClass>io.inscopemetrics.mad.Main</mainClass>
             </program>
           </programs>
           <unixScriptTemplate>${project.build.directory}/appAssemblerUnixBinTemplate</unixScriptTemplate>
