@@ -263,8 +263,7 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         }
 
         @Override
-        public void reset() {
-        }
+        public void reset() {}
 
         private Clock _clock = Clock.systemUTC();
         private Supplier<Random> _randomSupplier = ThreadLocalRandom::current;

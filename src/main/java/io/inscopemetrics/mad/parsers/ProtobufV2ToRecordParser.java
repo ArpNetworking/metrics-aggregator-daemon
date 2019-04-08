@@ -55,13 +55,13 @@ public final class ProtobufV2ToRecordParser implements Parser<List<Record>, Http
                 final ByteBuffer byteBuffer = ByteBuffer.wrap(record.getId().toByteArray());
                 final Long high = byteBuffer.getLong();
                 final Long low = byteBuffer.getLong();
-                records.add(ThreadLocalBuilder.build(DefaultRecord.Builder.class, builder -> {
-                    builder.setId(new UUID(high, low).toString())
-                            .setTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getEndMillisSinceEpoch()), ZoneOffset.UTC))
-                            .setAnnotations(buildAnnotations(record))
-                            .setDimensions(buildDimensions(record))
-                            .setMetrics(buildMetrics(record));
-                }));
+                records.add(ThreadLocalBuilder.build(
+                        DefaultRecord.Builder.class,
+                        builder -> builder.setId(new UUID(high, low).toString())
+                                .setTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getEndMillisSinceEpoch()), ZoneOffset.UTC))
+                                .setAnnotations(buildAnnotations(record))
+                                .setDimensions(buildDimensions(record))
+                                .setMetrics(buildMetrics(record))));
             }
             return records;
         } catch (final InvalidProtocolBufferException e) {

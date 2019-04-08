@@ -110,8 +110,7 @@ public final class AggregationServerHttpSink extends HttpPostSink {
         return builder.build();
     }
 
-    private @Nullable
-    ByteString serializeSupportingData(final AggregatedData datum) {
+    private @Nullable ByteString serializeSupportingData(final AggregatedData datum) {
         final Object data = datum.getSupportingData();
         final ByteString byteString;
         if (data instanceof HistogramStatistic.HistogramSupportingData) {

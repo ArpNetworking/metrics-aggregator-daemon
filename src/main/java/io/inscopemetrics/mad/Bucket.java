@@ -272,11 +272,11 @@ final class Bucket {
                 populationSize = ThreadLocalBuilder.<
                         CalculatedValue<Object>,
                         CalculatedValue.Builder<Object>>buildGeneric(
-                        CalculatedValue.Builder.class,
-                        b -> b.setValue(
-                                ThreadLocalBuilder.build(
-                                        Quantity.Builder.class,
-                                        builder -> builder.setValue(-1.0))));
+                                CalculatedValue.Builder.class,
+                                b -> b.setValue(
+                                        ThreadLocalBuilder.build(
+                                                Quantity.Builder.class,
+                                                builder -> builder.setValue(-1.0))));
             }
 
             // Compute each calculated value requested by the client

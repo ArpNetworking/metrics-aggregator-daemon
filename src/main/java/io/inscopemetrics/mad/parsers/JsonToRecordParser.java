@@ -144,8 +144,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         }
     }
 
-    private JsonToRecordParser(final Builder builder) {
-    }
+    private JsonToRecordParser(final Builder builder) {}
 
     private static final ImmutableMap<CompositeUnit, Unit> LEGACY_UNIT_MAP = new ImmutableMap.Builder<CompositeUnit, Unit>()
             .put(new CompositeUnit(CompositeUnit.Scale.NANO, CompositeUnit.Type.SECOND), Unit.NANOSECOND)
@@ -190,8 +189,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
             JsonToRecordParser.class,
             Duration.ofSeconds(30));
 
-    private static @Nullable
-    Quantity version2gSampleToQuantity(final Version2g.Sample sample) {
+    private static @Nullable Quantity version2gSampleToQuantity(final Version2g.Sample sample) {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
                 @Nullable final CompositeUnit sampleUnit = sample.getUnit2g() != null
@@ -254,7 +252,6 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         }
 
         @Override
-        protected void reset() {
-        }
+        protected void reset() { }
     }
 }

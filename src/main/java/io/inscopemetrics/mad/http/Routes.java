@@ -297,10 +297,11 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
 
     @SuppressWarnings("unchecked")
     private <T> CompletionStage<T> ask(final String actorPath, final Object request, final T defaultValue) {
-        return (CompletionStage<T>) PatternsCS.ask(
-                _actorSystem.actorSelection(actorPath),
-                request,
-                Timeout.apply(1, TimeUnit.SECONDS))
+        return (CompletionStage<T>)
+                PatternsCS.ask(
+                        _actorSystem.actorSelection(actorPath),
+                        request,
+                        Timeout.apply(1, TimeUnit.SECONDS))
                 .exceptionally(throwable -> defaultValue);
     }
 

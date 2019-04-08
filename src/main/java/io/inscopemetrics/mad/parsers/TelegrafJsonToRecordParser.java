@@ -138,8 +138,7 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
     private static final ThreadLocal<NumberFormat> NUMBER_FORMAT = ThreadLocal.withInitial(NumberFormat::getInstance);
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
     private static final TypeReference<ImmutableList<TelegrafJson>> TELEGRAF_LIST_TYPE_REFERENCE =
-            new TypeReference<ImmutableList<TelegrafJson>>() {
-            };
+            new TypeReference<ImmutableList<TelegrafJson>>() {};
     private static final String METRICS_JSON_KEY = "metrics";
 
     /**

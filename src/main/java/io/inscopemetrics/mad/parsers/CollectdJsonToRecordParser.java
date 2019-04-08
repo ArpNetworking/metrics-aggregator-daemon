@@ -194,8 +194,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
     }
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.createInstance();
-    private static final TypeReference<List<CollectdRecord>> COLLECTD_RECORD_LIST = new TypeReference<List<CollectdRecord>>() {
-    };
+    private static final TypeReference<List<CollectdRecord>> COLLECTD_RECORD_LIST = new TypeReference<List<CollectdRecord>>() {};
     private static final String TAG_PREFIX = "x-tag-";
 
     static {

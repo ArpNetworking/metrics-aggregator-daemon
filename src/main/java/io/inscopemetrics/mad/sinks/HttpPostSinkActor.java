@@ -345,8 +345,7 @@ public class HttpPostSinkActor extends AbstractActor {
     /**
      * Message class to indicate that we are now able to send data.
      */
-    private static final class WaitTimeExpired {
-    }
+    private static final class WaitTimeExpired { }
 
     private static final class ResponseAsyncCompletionHandler extends AsyncCompletionHandler<Response> {
 
