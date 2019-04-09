@@ -24,7 +24,7 @@ export JVM_XMS="64m"
 export JVM_XMX="1024m"
 export LOGBACK_CONFIG="-Dlogback.configurationFile=/opt/mad/config/logback.xml"
 export MAD_CONFIG="/opt/mad/config/config.conf"
-export JAVA_OPTS="${LOGBACK_CONFIG}\
+export JAVA_OPTS="\
     -XX:+HeapDumpOnOutOfMemoryError \
     -XX:HeapDumpPath=/opt/mad/logs/mad.oom.hprof \
     -XX:+PrintGCDetails \
@@ -33,12 +33,9 @@ export JAVA_OPTS="${LOGBACK_CONFIG}\
     -XX:NumberOfGCLogFiles=2 \
     -XX:GCLogFileSize=50M \
     -XX:+UseGCLogFileRotation \
-    -Xms${JVM_XMS} \
-    -Xmx${JVM_XMX} \
     -XX:+UseStringDeduplication \
     -XX:+UseG1GC \
-    -Duser.timezone=UTC \
-    ${ADDITIONAL_JAVA_OPTS}"
+    -Duser.timezone=UTC"
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
 
