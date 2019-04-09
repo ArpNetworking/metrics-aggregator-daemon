@@ -24,7 +24,19 @@ ENV JVM_XMS="64m"
 ENV JVM_XMX="1024m"
 ENV LOGBACK_CONFIG="-Dlogback.configurationFile=/opt/mad/config/logback.xml"
 ENV MAD_CONFIG="/opt/mad/config/config.conf"
-ENV JAVA_OPTS=""
+ENV JAVA_OPTS="\
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath=/opt/mad/logs/mad.oom.hprof \
+    -XX:+PrintGCDetails \
+    -XX:+PrintGCDateStamps \
+    -Xloggc:/opt/mad/logs/mad.gc.log \
+    -XX:NumberOfGCLogFiles=2 \
+    -XX:GCLogFileSize=50M \
+    -XX:+UseGCLogFileRotation \
+    -XX:+UseStringDeduplication \
+    -XX:+UseG1GC \
+    -Duser.timezone=UTC"
+
 
 # Build
 RUN mkdir -p /opt/mad/lib/ext && \
@@ -39,18 +51,7 @@ ADD lib /opt/mad/lib/
 ENTRYPOINT [ \
     "/opt/mad/bin/mad", \
     "${LOGBACK_CONFIG}", \
-    "-XX:+HeapDumpOnOutOfMemoryError", \
-    "-XX:HeapDumpPath=/opt/mad/logs/mad.oom.hprof", \
-    "-XX:+PrintGCDetails", \
-    "-XX:+PrintGCDateStamps", \
-    "-Xloggc:/opt/mad/logs/mad.gc.log", \
-    "-XX:NumberOfGCLogFiles=2", \
-    "-XX:GCLogFileSize=50M", \
-    "-XX:+UseGCLogFileRotation", \
     "-Xms${JVM_XMS}", \
     "-Xmx${JVM_XMX}", \
-    "-XX:+UseStringDeduplication", \
-    "-XX:+UseG1GC", \
-    "-Duser.timezone=UTC", \
     "--", \
     "${MAD_CONFIG}" ]

@@ -19,34 +19,28 @@ dir="/opt/mad"
 log_dir="$dir/logs"
 exec="/opt/mad/bin/mad"
 pid_file="/var/run/mad.pid"
-export CONFIG_FILE="/opt/mad/config/config.conf"
 export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which java))))"
 export JVM_XMS="64m"
 export JVM_XMX="1024m"
 export LOGBACK_CONFIG="-Dlogback.configurationFile=/opt/mad/config/logback.xml"
-export ADDITIONAL_JAVA_OPTS=""
-export APP_PARAMS="${CONFIG_FILE}"
-export ADDITIONAL_APP_PARAMS=""
+export MAD_CONFIG="/opt/mad/config/config.conf"
+export JAVA_OPTS="${LOGBACK_CONFIG}\
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath=/opt/mad/logs/mad.oom.hprof \
+    -XX:+PrintGCDetails \
+    -XX:+PrintGCDateStamps \
+    -Xloggc:/opt/mad/logs/mad.gc.log \
+    -XX:NumberOfGCLogFiles=2 \
+    -XX:GCLogFileSize=50M \
+    -XX:+UseGCLogFileRotation \
+    -Xms${JVM_XMS} \
+    -Xmx${JVM_XMX} \
+    -XX:+UseStringDeduplication \
+    -XX:+UseG1GC \
+    -Duser.timezone=UTC \
+    ${ADDITIONAL_JAVA_OPTS}"
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
-
-if [ -z "$JAVA_OPTS" ]; then
-    export JAVA_OPTS="${LOGBACK_CONFIG}\
-        -XX:+HeapDumpOnOutOfMemoryError \
-        -XX:HeapDumpPath=/opt/mad/logs/mad.oom.hprof \
-        -XX:+PrintGCDetails \
-        -XX:+PrintGCDateStamps \
-        -Xloggc:logs/mad.gc.log \
-        -XX:NumberOfGCLogFiles=2 \
-        -XX:GCLogFileSize=50M \
-        -XX:+UseGCLogFileRotation \
-        -Xms${JVM_XMS} \
-        -Xmx${JVM_XMX} \
-        -XX:+UseStringDeduplication \
-        -XX:+UseG1GC \
-        -Duser.timezone=UTC \
-        ${ADDITIONAL_JAVA_OPTS}"
-fi
 
 lockfile=/var/lock/$prog
 
@@ -69,7 +63,7 @@ start() {
         warning "$prog: already running"
     else
         cd "$dir"
-        su "$user" -s /bin/sh -c "nice $exec ${APP_PARAMS} ${ADDITIONAL_APP_PARAMS} >> $log_dir/system.out 2>&1 & echo \$!" > $pid_file
+        su "$user" -s /bin/sh -c "nice $exec ${LOGBACK_CONFIG} -Xms${JVM_XMS} -Xmx${JVM_XMX} -- ${MAD_CONFIG} >> $log_dir/system.out 2>&1 & echo \$!" > $pid_file
         if ! is_running; then
             failure "$prog did not start"
             retval=1
