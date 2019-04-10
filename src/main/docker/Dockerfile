@@ -12,14 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:8u151-jre-alpine
+FROM openjdk:8u201-jre-alpine
 
-MAINTAINER arpnetworking
+MAINTAINER inscopemetrics
 
 EXPOSE 7090
 WORKDIR /opt/mad
 
 # Configuration
+#
+# There are two groups of arguments:
+#   1) JVM (e.g. JVM_XMS, JAVA_OPTS, ADDITIONAL_JAVA_OPTS)
+#   2) Application (e.g. MAD_CONFIG, APP_OPTS, ADDITIONAL_APP_OPTS)
+#
+# Each group has three flavors of arguments:
+#   1) Explicit (e.g. JVM_XMS)
+#   2) Default (e.g. JAVA_OPTS)
+#   3) Additional (e.g. ADDITIONAL_JAVA_OPTS)
+#
+# The explicit arguments are commonly modified and should be used for these
+# parameters instead of relying on default or additional arguments to set them.
+#
+# The default arguments are less common and rarely need to be modified. When
+# you override the default you override all the defaults. You should not use
+# defaults to change explicit arguments.
+#
+# The additional arguments let you add to and in some cases override default
+# arguments without specifying all default arguments.
+#
+# Implementation note: the $JAVA_OPTS setting is added by automatically by the
+# run script which is why you don't see it passed explicitly.
+
 ENV JVM_XMS="64m"
 ENV JVM_XMX="1024m"
 ENV LOGBACK_CONFIG="-Dlogback.configurationFile=/opt/mad/config/logback.xml"
@@ -36,7 +59,9 @@ ENV JAVA_OPTS="\
     -XX:+UseStringDeduplication \
     -XX:+UseG1GC \
     -Duser.timezone=UTC"
-
+ENV ADDITIONAL_JAVA_OPTS=""
+ENV APP_OPTS=""
+ENV ADDITIONAL_APP_OPTS=""
 
 # Build
 RUN mkdir -p /opt/mad/lib/ext && \
@@ -53,5 +78,8 @@ ENTRYPOINT [ \
     "${LOGBACK_CONFIG}", \
     "-Xms${JVM_XMS}", \
     "-Xmx${JVM_XMX}", \
+    "${ADDITIONAL_JAVA_OPTS}", \
     "--", \
-    "${MAD_CONFIG}" ]
+    "${APP_OPTS}", \
+    "${MAD_CONFIG}", \
+    "${ADDITIONAL_APP_OPTS}" ]
