@@ -41,6 +41,11 @@ pid_file="/var/run/mad.pid"
 #
 # Implementation note: the $JAVA_OPTS setting is added by automatically by the
 # run script which is why you don't see it passed explicitly.
+#
+# Implementation note: when passing arguments with evaluated contents the
+# result of the evaluation is not quoted because it cannot be determined
+# whether the intention was to result in one or many arguments. Therefore, when
+# using evaluated arguments always perform the quoting (if any) yourself.
 
 export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which java))))"
 export JVM_XMS="64m"

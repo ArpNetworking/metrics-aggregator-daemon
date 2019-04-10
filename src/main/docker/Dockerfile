@@ -14,7 +14,7 @@
 
 FROM openjdk:8u201-jre-alpine
 
-MAINTAINER inscopemetrics
+MAINTAINER inscopemetrics.io
 
 EXPOSE 7090
 WORKDIR /opt/mad
@@ -42,6 +42,11 @@ WORKDIR /opt/mad
 #
 # Implementation note: the $JAVA_OPTS setting is added by automatically by the
 # run script which is why you don't see it passed explicitly.
+#
+# Implementation note: when passing arguments with evaluated contents the
+# result of the evaluation is not quoted because it cannot be determined
+# whether the intention was to result in one or many arguments. Therefore, when
+# using evaluated arguments always perform the quoting (if any) yourself.
 
 ENV JVM_XMS="64m"
 ENV JVM_XMX="1024m"

@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>1.1.10</version>
+    <version>1.1.13</version>
     <relativePath />
   </parent>
 
@@ -43,9 +43,9 @@
     <developer>
       <id>barp</id>
       <name>Brandon Arp</name>
-      <email>brandon.arp@inscopemetrics.com</email>
+      <email>brandon.arp@inscopemetrics.io</email>
       <organization>Inscope Metrics</organization>
-      <organizationUrl>http://www.inscopemetrics.com</organizationUrl>
+      <organizationUrl>http://www.inscopemetrics.io</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>
@@ -53,9 +53,9 @@
     <developer>
       <id>vkoskela</id>
       <name>Ville Koskela</name>
-      <email>ville.koskela@inscopemetrics.com</email>
+      <email>ville.koskela@inscopemetrics.io</email>
       <organization>Inscope Metrics</organization>
-      <organizationUrl>http://www.inscopemetrics.com</organizationUrl>
+      <organizationUrl>http://www.inscopemetrics.io</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>
@@ -138,6 +138,9 @@
 
     <!-- Project Overrides -->
     <buildDirectory>${project.basedir}/target</buildDirectory>
+
+    <!-- TODO(ville): Remove with next parent pom upgrade -->
+    <checkstyleExtraSuppressions>${project.build.directory}/checkstyle-extra-suppressions.xml</checkstyleExtraSuppressions>
   </properties>
 
   <build>
