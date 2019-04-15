@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>1.1.10</version>
+    <version>1.1.14-SNAPSHOT</version>
     <relativePath />
   </parent>
 
@@ -81,7 +81,7 @@
     <cglib.version>3.2.10</cglib.version>
     <client.protocol.version>0.10.1</client.protocol.version>
     <fastutil.version>8.2.2</fastutil.version>
-    <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
+    <spotbugs.annotations.version>3.1.12</spotbugs.annotations.version>
     <guava.version>25.1-jre</guava.version>
     <guice.version>4.2.2</guice.version>
     <jackson.version>2.9.8</jackson.version>
@@ -163,8 +163,8 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -434,21 +434,49 @@
       <groupId>com.arpnetworking.metrics</groupId>
       <artifactId>metrics-client</artifactId>
       <version>${metrics.client.version}</version>
+      <exclusions>
+        <!-- TODO(ville): Remove suppression once findbugs to spotbugs migration is complete -->
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>findbugs-annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.arpnetworking.metrics.extras</groupId>
       <artifactId>apache-http-sink-extra</artifactId>
       <version>${metrics.client.http.version}</version>
+      <exclusions>
+        <!-- TODO(ville): Remove suppression once findbugs to spotbugs migration is complete -->
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>findbugs-annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.arpnetworking.metrics.extras</groupId>
       <artifactId>incubator-extra</artifactId>
       <version>${metrics.client.incubator.version}</version>
+      <exclusions>
+        <!-- TODO(ville): Remove suppression once findbugs to spotbugs migration is complete -->
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>findbugs-annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.arpnetworking.metrics.extras</groupId>
       <artifactId>jvm-extra</artifactId>
       <version>${metrics.jvm.extra.version}</version>
+      <exclusions>
+        <!-- TODO(ville): Remove suppression once findbugs to spotbugs migration is complete -->
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>findbugs-annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- Google -->
     <dependency>
@@ -581,6 +609,13 @@
       <groupId>com.arpnetworking.commons</groupId>
       <artifactId>commons</artifactId>
       <version>${arpnetworking.commons.version}</version>
+      <exclusions>
+        <!-- TODO(ville): Remove suppression once findbugs to spotbugs migration is complete -->
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>findbugs-annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>net.sf.oval</groupId>
@@ -604,9 +639,9 @@
       <version>${jsr305.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>findbugs-annotations</artifactId>
-      <version>${findbugs.annotations.version}</version>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <version>${spotbugs.annotations.version}</version>
     </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>
@@ -705,12 +740,26 @@
       <artifactId>generator</artifactId>
       <version>${metrics.generator.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <!-- TODO(ville): Remove suppression once findbugs to spotbugs migration is complete -->
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>findbugs-annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.arpnetworking.test</groupId>
       <artifactId>performance-test</artifactId>
       <version>${performance.test.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <!-- TODO(ville): Remove suppression once findbugs to spotbugs migration is complete -->
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>findbugs-annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.carrotsearch</groupId>
