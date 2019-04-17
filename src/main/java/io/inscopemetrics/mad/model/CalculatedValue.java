@@ -18,6 +18,8 @@ package io.inscopemetrics.mad.model;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import net.sf.oval.constraint.NotNull;
 
+import javax.annotation.Nullable;
+
 /**
  * Represents a value that is reaggregatable.
  *
@@ -30,7 +32,7 @@ public final class CalculatedValue<T> {
         return _value;
     }
 
-    public T getData() {
+    public @Nullable T getData() {
         return _data;
     }
 

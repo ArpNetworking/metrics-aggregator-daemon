@@ -23,6 +23,7 @@ import io.inscopemetrics.mad.statistics.Statistic;
 import net.sf.oval.constraint.NotNull;
 
 import java.io.Serializable;
+import javax.annotation.Nullable;
 
 /**
  * Serves as a data class for storing data for aggregated values after
@@ -186,7 +187,7 @@ public final class AggregatedData implements Serializable {
          * @param value The supporting data.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setSupportingData(final Object value) {
+        public Builder setSupportingData(@Nullable final Object value) {
             _supportingData = value;
             return this;
         }
