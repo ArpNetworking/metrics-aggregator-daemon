@@ -138,6 +138,9 @@
 
     <!-- Project Overrides -->
     <buildDirectory>${project.basedir}/target</buildDirectory>
+
+    <!-- TODO(ville): Remove with next parent pom upgrade -->
+    <checkstyleExtraSuppressions>${project.build.directory}/checkstyle-extra-suppressions.xml</checkstyleExtraSuppressions>
   </properties>
 
   <build>
