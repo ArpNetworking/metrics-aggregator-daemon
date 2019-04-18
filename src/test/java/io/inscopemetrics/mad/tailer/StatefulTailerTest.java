@@ -69,11 +69,11 @@ public class StatefulTailerTest {
 
     @Test
     public void testReadData() throws IOException, InterruptedException {
-        final BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writer, 10, expectedValues);
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 10, expectedValues);
+        }
 
-        writer.close();
         _executor.execute(_tailer);
         _readTrigger.waitForWait();
         _readTrigger.disable();
@@ -97,10 +97,10 @@ public class StatefulTailerTest {
         _executor.execute(_tailer);
         _readTrigger.waitForWait();
 
-        final BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writer, 10, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 10, expectedValues);
+        }
 
         _readTrigger.releaseTrigger();
         // Make sure we read the file
@@ -122,21 +122,21 @@ public class StatefulTailerTest {
 
     @Test
     public void testReadDataDifferentLineTerminators() throws IOException, InterruptedException {
-        final BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        for (int i = 0; i < 12; ++i) {
-            final String value = UUID.randomUUID().toString();
-            expectedValues.add(value);
-            if (i % 3 == 0) {
-                writer.write(value + "\n");
-            } else if (i % 3 == 1) {
-                writer.write(value + "\r");
-            } else {
-                writer.write(value + "\r\n");
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            for (int i = 0; i < 12; ++i) {
+                final String value = UUID.randomUUID().toString();
+                expectedValues.add(value);
+                if (i % 3 == 0) {
+                    writer.write(value + "\n");
+                } else if (i % 3 == 1) {
+                    writer.write(value + "\r");
+                } else {
+                    writer.write(value + "\r\n");
+                }
             }
         }
 
-        writer.close();
         _executor.execute(_tailer);
         _readTrigger.waitForWait();
         _readTrigger.disable();
@@ -156,24 +156,24 @@ public class StatefulTailerTest {
 
     @Test
     public void testTailData() throws IOException, InterruptedException {
-        final BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        _executor.execute(_tailer);
-        Mockito.verify(_listener).initialize(_tailer);
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            _executor.execute(_tailer);
+            Mockito.verify(_listener).initialize(_tailer);
 
-        // Offset the sleep schedules (this is very brittle)
-        _readTrigger.waitForWait();
-
-        for (int i = 0; i < 10; ++i) {
-            final String value = UUID.randomUUID().toString();
-            writer.write(value + "\n");
-            writer.flush();
-            _readTrigger.releaseTrigger();
+            // Offset the sleep schedules (this is very brittle)
             _readTrigger.waitForWait();
-            Mockito.verify(_listener).handle(value.getBytes(Charsets.UTF_8));
-        }
 
-        _readTrigger.disable();
-        writer.close();
+            for (int i = 0; i < 10; ++i) {
+                final String value = UUID.randomUUID().toString();
+                writer.write(value + "\n");
+                writer.flush();
+                _readTrigger.releaseTrigger();
+                _readTrigger.waitForWait();
+                Mockito.verify(_listener).handle(value.getBytes(Charsets.UTF_8));
+            }
+
+            _readTrigger.disable();
+        }
         _tailer.stop();
         _executor.shutdown();
         _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
@@ -287,10 +287,10 @@ public class StatefulTailerTest {
 
     @Test
     public void testRotateCopyTruncateLessData() throws IOException, InterruptedException {
-        BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 5, expectedValues);
+        }
 
         _executor.execute(_tailer);
         _readTrigger.waitForWait();
@@ -304,9 +304,9 @@ public class StatefulTailerTest {
         // NOTE: This ensures the reader does not read duplicate data either from the old or new file
 
         // Write _less_ data to the new file
-        writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
-        writeUuids(writer, 4, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)) {
+            writeUuids(writer, 4, expectedValues);
+        }
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();
@@ -331,10 +331,10 @@ public class StatefulTailerTest {
 
     @Test
     public void testRotateCopyTruncateEqualLengthData() throws IOException, InterruptedException {
-        BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 5, expectedValues);
+        }
         final BasicFileAttributes attributes = Files.readAttributes(_file, BasicFileAttributes.class);
 
         _executor.execute(_tailer);
@@ -353,9 +353,9 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write _same length_ of data to the new file
-        writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)) {
+            writeUuids(writer, 5, expectedValues);
+        }
 
         // Ensure modified time stamps match
         // NOTE: This simulates a fast copy truncate within the precision of the file system time
@@ -392,10 +392,10 @@ public class StatefulTailerTest {
         // This filter demonstrates the broken functionality.
         // ** IMPORTANT **
 
-        BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 5, expectedValues);
+        }
 
         _executor.execute(_tailer);
         _readTrigger.waitForWait();
@@ -413,12 +413,12 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write _same_ data to the new file
-        writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
-        for (int i = 0; i < 5; ++i) {
-            writer.write(UUID.randomUUID().toString() + "\n");
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)) {
+            for (int i = 0; i < 5; ++i) {
+                writer.write(UUID.randomUUID().toString() + "\n");
+            }
+            writeUuids(writer, 5, expectedValues);
         }
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();
@@ -442,10 +442,10 @@ public class StatefulTailerTest {
 
     @Test
     public void testRotateRenameRecreateLessData() throws IOException, InterruptedException {
-        BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 5, expectedValues);
+        }
 
         _executor.execute(_tailer);
         _readTrigger.waitForWait();
@@ -463,9 +463,9 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write _less_ data to the new file
-        writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        writeUuids(writer, 4, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 4, expectedValues);
+        }
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();
@@ -511,9 +511,9 @@ public class StatefulTailerTest {
         writerOld.close();
 
         // Write _less_ data to the new file
-        final BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        writeUuids(writerNew, 4, expectedValues);
-        writerNew.close();
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writerNew, 4, expectedValues);
+        }
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();
@@ -555,9 +555,9 @@ public class StatefulTailerTest {
         writerOld.close();
 
         // Write _less_ data to the new file
-        final BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        writeUuids(writerNew, 4, expectedValues);
-        writerNew.close();
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writerNew, 4, expectedValues);
+        }
 
         // There is one interval for reading from the old file, another
         // interval for reading from the new file and then up to half an
@@ -586,10 +586,10 @@ public class StatefulTailerTest {
 
     @Test
     public void testRotateRenameRecreateEqualData() throws IOException, InterruptedException {
-        BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 5, expectedValues);
+        }
         final BasicFileAttributes attributes = Files.readAttributes(_file, BasicFileAttributes.class);
 
         _executor.execute(_tailer);
@@ -608,9 +608,9 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write _less_ data to the new file
-        writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 5, expectedValues);
+        }
 
         // Ensure modified time stamps match
         // NOTE: This simulates a fast rename-recreate within the precision of the file system time
@@ -639,30 +639,30 @@ public class StatefulTailerTest {
 
     @Test
     public void testRotateRenameRecreateEqualDataWriteToOldAfterRotate() throws IOException, InterruptedException {
-        final BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writerOld, 5, expectedValues);
+        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writerOld, 5, expectedValues);
 
-        _executor.execute(_tailer);
-        _readTrigger.waitForWait();
+            _executor.execute(_tailer);
+            _readTrigger.waitForWait();
 
-        // Rotate files using rename-recreate (recreate is delayed; see below)
-        final File oldFile = Files.createTempFile(_directory, "", "").toFile();
-        Files.deleteIfExists(oldFile.toPath());
-        Files.move(_file, oldFile.toPath());
+            // Rotate files using rename-recreate (recreate is delayed; see below)
+            final File oldFile = Files.createTempFile(_directory, "", "").toFile();
+            Files.deleteIfExists(oldFile.toPath());
+            Files.move(_file, oldFile.toPath());
 
-        // Delay creating the new file, causing a fileNotFound call
-        _readTrigger.releaseTrigger();
-        _readTrigger.waitForWait();
+            // Delay creating the new file, causing a fileNotFound call
+            _readTrigger.releaseTrigger();
+            _readTrigger.waitForWait();
 
-        // Write some _more_ data to the old file
-        writeUuids(writerOld, 5, expectedValues);
-        writerOld.close();
+            // Write some _more_ data to the old file
+            writeUuids(writerOld, 5, expectedValues);
+        }
 
         // Write _equal_ data to the new file
-        final BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        writeUuids(writerNew, 10, expectedValues);
-        writerNew.close();
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writerNew, 10, expectedValues);
+        }
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();
@@ -687,26 +687,26 @@ public class StatefulTailerTest {
 
     @Test
     public void testRotateRenameRecreateEqualDataWriteToOldAfterRotateNoDelay() throws IOException, InterruptedException {
-        final BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writerOld, 5, expectedValues);
+        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writerOld, 5, expectedValues);
 
-        _executor.execute(_tailer);
-        _readTrigger.waitForWait();
+            _executor.execute(_tailer);
+            _readTrigger.waitForWait();
 
-        // Rotate files using rename-recreate
-        final File oldFile = Files.createTempFile(_directory, "", "").toFile();
-        Files.deleteIfExists(oldFile.toPath());
-        Files.move(_file, oldFile.toPath());
+            // Rotate files using rename-recreate
+            final File oldFile = Files.createTempFile(_directory, "", "").toFile();
+            Files.deleteIfExists(oldFile.toPath());
+            Files.move(_file, oldFile.toPath());
 
-        // Write some _more_ data to the old file
-        writeUuids(writerOld, 5, expectedValues);
-        writerOld.close();
+            // Write some _more_ data to the old file
+            writeUuids(writerOld, 5, expectedValues);
+        }
 
         // Write _equal_ data to the new file
-        final BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        writeUuids(writerNew, 10, expectedValues);
-        writerNew.close();
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writerNew, 10, expectedValues);
+        }
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();
@@ -731,10 +731,10 @@ public class StatefulTailerTest {
 
     @Test
     public void testRotateRenameRecreateMoreData() throws IOException, InterruptedException {
-        BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 5, expectedValues);
+        }
 
         _executor.execute(_tailer);
 
@@ -753,9 +753,9 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write _more_ data to the new file
-        writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        writeUuids(writer, 10, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 10, expectedValues);
+        }
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();
@@ -780,10 +780,10 @@ public class StatefulTailerTest {
 
     @Test
     public void testRotateRenameRecreateMoreDataWithCheckpointing() throws IOException, InterruptedException {
-        BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 5, expectedValues);
+        }
 
         _executor.execute(_tailer);
         _readTrigger.waitForWait();
@@ -801,9 +801,9 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write data to the new file sufficient to checkpoint
-        writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        writeUuids(writer, 15, expectedValues);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writer, 15, expectedValues);
+        }
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();
@@ -828,27 +828,27 @@ public class StatefulTailerTest {
 
     @Test
     public void testRotateRenameRecreateMoreDataWriteToOldAfterRotate() throws IOException, InterruptedException {
-        final BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writerOld, 5, expectedValues);
+        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writerOld, 5, expectedValues);
 
-        _executor.execute(_tailer);
+            _executor.execute(_tailer);
 
-        _readTrigger.waitForWait();
+            _readTrigger.waitForWait();
 
-        // Rotate files using copy rename-recreate (recreate is delayed; see below)
-        final File oldFile = Files.createTempFile(_directory, "", "").toFile();
-        Files.deleteIfExists(oldFile.toPath());
-        Files.move(_file, oldFile.toPath());
+            // Rotate files using copy rename-recreate (recreate is delayed; see below)
+            final File oldFile = Files.createTempFile(_directory, "", "").toFile();
+            Files.deleteIfExists(oldFile.toPath());
+            Files.move(_file, oldFile.toPath());
 
-        // Write some _more_ data to the old file
-        writeUuids(writerOld, 5, expectedValues);
-        writerOld.close();
+            // Write some _more_ data to the old file
+            writeUuids(writerOld, 5, expectedValues);
+        }
 
         // Write data to the new file
-        final BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        writeUuids(writerNew, 11, expectedValues);
-        writerNew.close();
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writerNew, 11, expectedValues);
+        }
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();
@@ -872,27 +872,27 @@ public class StatefulTailerTest {
 
     @Test
     public void testRotateRenameRecreateMoreDataWriteToOldAfterRotateNoDelay() throws IOException, InterruptedException {
-        final BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writerOld, 5, expectedValues);
+        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writerOld, 5, expectedValues);
 
-        _executor.execute(_tailer);
+            _executor.execute(_tailer);
 
-        _readTrigger.waitForWait();
+            _readTrigger.waitForWait();
 
-        // Rotate files using copy rename-recreate
-        final File oldFile = Files.createTempFile(_directory, "", "").toFile();
-        Files.deleteIfExists(oldFile.toPath());
-        Files.move(_file, oldFile.toPath());
+            // Rotate files using copy rename-recreate
+            final File oldFile = Files.createTempFile(_directory, "", "").toFile();
+            Files.deleteIfExists(oldFile.toPath());
+            Files.move(_file, oldFile.toPath());
 
-        // Write some _more_ data to the old file
-        writeUuids(writerOld, 5, expectedValues);
-        writerOld.close();
-        final BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
+            // Write some _more_ data to the old file
+            writeUuids(writerOld, 5, expectedValues);
+        }
 
-        // Write _more_ data to the new file
-        writeUuids(writerNew, 11, expectedValues);
-        writerNew.close();
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            // Write _more_ data to the new file
+            writeUuids(writerNew, 11, expectedValues);
+        }
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();
@@ -926,10 +926,10 @@ public class StatefulTailerTest {
         // file is rotated again without ever being read that data is lost.
         // ** IMPORTANT **
 
-        final BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writerOld, 5, expectedValues);
-        writerOld.close();
+        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(writerOld, 5, expectedValues);
+        }
         final BasicFileAttributes attributes = Files.readAttributes(_file, BasicFileAttributes.class);
 
         _executor.execute(_tailer);
@@ -942,11 +942,11 @@ public class StatefulTailerTest {
         Files.move(_file, oldFile.toPath());
 
         // Write _exact same_ data to the new file
-        final BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        for (int i = 0; i < 5; ++i) {
-            writerNew.write(expectedValues.get(i) + "\n");
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            for (int i = 0; i < 5; ++i) {
+                writerNew.write(expectedValues.get(i) + "\n");
+            }
         }
-        writerNew.close();
 
         // Ensure modified time stamps match
         // NOTE: This simulates a fast rename/recreate + write within the precision of the file system time
@@ -993,21 +993,20 @@ public class StatefulTailerTest {
                 .setInitialPosition(InitialPosition.END)
                 .setReadInterval(READ_INTERVAL);
 
+        final List<String> expectedValues = Lists.newArrayList();
         _tailer = new StatefulTailer(builder, _readTrigger);
         Mockito.doNothing().when(_positionStore).setPosition(Mockito.anyString(), Mockito.anyLong());
-        final BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            for (int i = 0; i < 15; ++i) {
+                writer.write(UUID.randomUUID().toString() + "\n");
+            }
+            writer.flush();
 
-        for (int i = 0; i < 15; ++i) {
-            writer.write(UUID.randomUUID().toString() + "\n");
+            _executor.execute(_tailer);
+            _readTrigger.waitForWait();
+
+            writeUuids(writer, 5, expectedValues);
         }
-        writer.flush();
-
-        _executor.execute(_tailer);
-        _readTrigger.waitForWait();
-
-        final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();
@@ -1029,6 +1028,8 @@ public class StatefulTailerTest {
 
     @Test
     public void testTailFromEndFirstFileOnly() throws IOException, InterruptedException {
+        final List<String> expectedValues = Lists.newArrayList();
+
         // Ignore the first initialize invocation
         Mockito.verify(_listener).initialize(_tailer);
         final StatefulTailer.Builder builder = new StatefulTailer.Builder()
@@ -1040,19 +1041,18 @@ public class StatefulTailerTest {
 
         _tailer = new StatefulTailer(builder, _readTrigger);
         Mockito.doNothing().when(_positionStore).setPosition(Mockito.anyString(), Mockito.anyLong());
-        BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
 
-        for (int i = 0; i < 15; ++i) {
-            writer.write(UUID.randomUUID().toString() + "\n");
+            for (int i = 0; i < 15; ++i) {
+                writer.write(UUID.randomUUID().toString() + "\n");
+            }
+            writer.flush();
+
+            _executor.execute(_tailer);
+            _readTrigger.waitForWait();
+
+            writeUuids(writer, 5, expectedValues);
         }
-        writer.flush();
-
-        _executor.execute(_tailer);
-        _readTrigger.waitForWait();
-
-        final List<String> expectedValues = Lists.newArrayList();
-        writeUuids(writer, 5, expectedValues);
-        writer.close();
 
         // Rotate files using rename-recreate
         final File oldFile = Files.createTempFile(_directory, "", "").toFile();
@@ -1060,9 +1060,9 @@ public class StatefulTailerTest {
         Files.move(_file, oldFile.toPath());
 
         // Write _more_ data to the new file
-        writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
-        writeUuids(writer, 10, expectedValues);
-        writer.close();
+        try (BufferedWriter newWriter = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+            writeUuids(newWriter, 10, expectedValues);
+        }
 
         _readTrigger.releaseTrigger();
         _readTrigger.waitForWait();

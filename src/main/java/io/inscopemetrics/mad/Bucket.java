@@ -284,8 +284,7 @@ final class Bucket {
                 final CalculatedValue<?> calculatedValue = calculator.calculate(dependencies);
                 final AggregatedData datum = ThreadLocalBuilder.build(
                         AggregatedData.Builder.class,
-                        b -> b.setSupportingData(null)
-                                .setValue(calculatedValue.getValue())
+                        b -> b.setValue(calculatedValue.getValue())
                                 .setIsSpecified(specified.apply(metric, calculator.getStatistic()))
                                 .setPopulationSize((long) populationSize.getValue().getValue())
                                 .setSupportingData(calculatedValue.getData())
