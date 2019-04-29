@@ -13,7 +13,9 @@ Metrics Aggregator Daemon
     <img src="https://img.shields.io/maven-central/v/com.arpnetworking.metrics/metrics-aggregator-daemon.svg"
          alt="Maven Artifact">
 </a>
-[![Docker Pulls](https://img.shields.io/docker/pulls/arpnetworking/mad.svg?maxAge=2592000)]()
+<a href="https://hub.docker.com/r/arpnetworking/mad">
+    <img src="https://img.shields.io/docker/pulls/arpnetworking/mad.svg" alt="Docker">
+</a>
 
 Aggregates samples into configurable time buckets (e.g. 1 second, 1 minute, etc.) published by metrics client libraries
 (e.g. [Java](https://github.com/ArpNetworking/metrics-client-java),
