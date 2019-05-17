@@ -218,7 +218,7 @@ public final class Main implements Launchable {
                 actorSystem,
                 injector.getInstance(PeriodicMetrics.class),
                 _configuration.getHttpHealthCheckPath(),
-                _configuration.getHttpStatusPath(),
+                _configuration.getHttpVersionPath(),
                 supplementalHttpRoutes.build());
         final Http http = Http.get(actorSystem);
         final Source<IncomingConnection, CompletionStage<ServerBinding>> binding = http.bind(

@@ -61,8 +61,8 @@ public final class AggregatorConfiguration {
         return _httpHealthCheckPath;
     }
 
-    public String getHttpStatusPath() {
-        return _httpStatusPath;
+    public String getHttpVersionPath() {
+        return _httpVersionPath;
     }
 
     public Optional<Class<? extends SupplementalRoutes>> getSupplementalHttpRoutesClass() {
@@ -95,7 +95,7 @@ public final class AggregatorConfiguration {
                 .add("HttpHost", _httpHost)
                 .add("HttpPort", _httpPort)
                 .add("HttpHealthCheckPath", _httpHealthCheckPath)
-                .add("HttpStatusPath", _httpStatusPath)
+                .add("HttpVersionPath", _httpVersionPath)
                 .add("SupplementalHttpRoutesClass", _supplementalHttpRoutesClass)
                 .add("AkkaConfiguration", _akkaConfiguration)
                 .add("MetricsClientHost", _metricsClientHost)
@@ -111,7 +111,7 @@ public final class AggregatorConfiguration {
         _httpHost = builder._httpHost;
         _httpPort = builder._httpPort;
         _httpHealthCheckPath = builder._httpHealthCheckPath;
-        _httpStatusPath = builder._httpStatusPath;
+        _httpVersionPath = builder._httpVersionPath;
         _supplementalHttpRoutesClass = Optional.ofNullable(builder._supplementalHttpRoutesClass);
         _metricsClientHost = Optional.ofNullable(builder._metricsClientHost).orElse(
                 "0.0.0.0".equals(_httpHost) ? "localhost" : _httpHost);
@@ -125,7 +125,7 @@ public final class AggregatorConfiguration {
     private final File _pipelinesDirectory;
     private final String _httpHost;
     private final String _httpHealthCheckPath;
-    private final String _httpStatusPath;
+    private final String _httpVersionPath;
     private final int _httpPort;
     private Optional<Class<? extends SupplementalRoutes>> _supplementalHttpRoutesClass;
     private final String _metricsClientHost;
@@ -204,13 +204,13 @@ public final class AggregatorConfiguration {
         }
 
         /**
-         * The http status path. Cannot be null or empty. Optional. Default is "/status".
+         * The http version path. Cannot be null or empty. Optional. Default is "/version".
          *
          * @param value The status path.
          * @return This instance of <code>Builder</code>.
          */
-        public Builder setHttpStatusPath(final String value) {
-            _httpStatusPath = value;
+        public Builder setHttpVersionPath(final String value) {
+            _httpVersionPath = value;
             return this;
         }
 
@@ -309,7 +309,7 @@ public final class AggregatorConfiguration {
         private String _httpHealthCheckPath = "/ping";
         @NotNull
         @NotEmpty
-        private String _httpStatusPath = "/status";
+        private String _httpVersionPath = "/version";
         private Class<? extends SupplementalRoutes> _supplementalHttpRoutesClass;
         @NotEmpty
         private String _metricsClientHost;
