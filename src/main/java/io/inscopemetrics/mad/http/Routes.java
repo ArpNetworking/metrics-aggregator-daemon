@@ -82,19 +82,19 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
      * @param actorSystem Instance of <code>ActorSystem</code>.
      * @param metrics Instance of <code>PeriodicMetrics</code>.
      * @param healthCheckPath The path for the health check.
-     * @param statusPath The path for the status.
+     * @param versionPath The path for the version.
      * @param supplementalRoutes List of supplemental routes in priority order.
      */
     public Routes(
             final ActorSystem actorSystem,
             final PeriodicMetrics metrics,
             final String healthCheckPath,
-            final String statusPath,
+            final String versionPath,
             final ImmutableList<SupplementalRoutes> supplementalRoutes) {
         _actorSystem = actorSystem;
         _metrics = metrics;
         _healthCheckPath = healthCheckPath;
-        _statusPath = statusPath;
+        _versionPath = versionPath;
         _supplementalRoutes = supplementalRoutes;
     }
 
@@ -197,11 +197,11 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                                                         "{\"status\":\""
                                                                 + (isHealthy ? HEALTHY_STATE : UNHEALTHY_STATE)
                                                                 + "\"}")));
-            } else if (Objects.equals(_statusPath, path)) {
+            } else if (Objects.equals(_versionPath, path)) {
                 return CompletableFuture.completedFuture(
                         HttpResponse.create()
                                 .withStatus(StatusCodes.OK)
-                                .withEntity(JSON_CONTENT_TYPE, ByteString.fromString(STATUS_JSON)));
+                                .withEntity(JSON_CONTENT_TYPE, ByteString.fromString(VERSION_JSON)));
             }
         } else if (Objects.equals(HttpMethods.POST, request.method())) {
             if (Objects.equals(path, COLLECTD_V1_SOURCE_PREFIX)) {
@@ -323,7 +323,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     @SuppressFBWarnings("SE_BAD_FIELD")
     private final PeriodicMetrics _metrics;
     private final String _healthCheckPath;
-    private final String _statusPath;
+    private final String _versionPath;
     @SuppressFBWarnings("SE_BAD_FIELD")
     private final ImmutableList<SupplementalRoutes> _supplementalRoutes;
 
@@ -351,22 +351,22 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
             CacheDirectives.MUST_REVALIDATE);
     private static final String UNHEALTHY_STATE = "UNHEALTHY";
     private static final String HEALTHY_STATE = "HEALTHY";
-    private static final String STATUS_JSON;
+    private static final String VERSION_JSON;
 
     private static final ContentType JSON_CONTENT_TYPE = ContentTypes.APPLICATION_JSON;
 
     private static final long serialVersionUID = 4336082511110058019L;
 
     static {
-        String statusJson = "{}";
+        String versionJson = "{}";
         try {
-            statusJson = Resources.toString(Resources.getResource("status.json"), Charsets.UTF_8);
+            versionJson = Resources.toString(Resources.getResource("version.json"), Charsets.UTF_8);
             // CHECKSTYLE.OFF: IllegalCatch - Prevent program shutdown
         } catch (final Exception e) {
             // CHECKSTYLE.ON: IllegalCatch
             LOGGER.error("Resource load failure; resource=status.json", e);
         }
-        STATUS_JSON = statusJson;
+        VERSION_JSON = versionJson;
     }
 
 }

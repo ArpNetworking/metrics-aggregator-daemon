@@ -92,7 +92,7 @@ For example:
     "httpHost": "0.0.0.0",
     "httpPort": 7090,
     "httpHealthCheckPath": "/mad/healthcheck",
-    "httpStatusPath": "/mad/status",
+    "httpVersionPath": "/mad/version",
     "jvmMetricsCollectionInterval": "PT.5S",
     "akkaConfiguration": {
         "akka": {
