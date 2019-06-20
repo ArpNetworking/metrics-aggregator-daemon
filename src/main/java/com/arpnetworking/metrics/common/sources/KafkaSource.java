@@ -26,6 +26,7 @@ import net.sf.oval.constraint.NotNull;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -54,11 +55,16 @@ public final class KafkaSource<T> extends BaseSource {
 
     @Override
     public void stop() {
-        //TODO: handle exceptions
+        //TODO(jjackson): handle exceptions
         _runnableConsumer.stop();
         _consumerExecutor.shutdown();
     }
 
+    /**
+     * A log representation of this object.
+     *
+     * @return the log representation
+     */
     @LogValue
     public Object toLogValue() {
         return LogValueMapFactory.builder(this)
@@ -73,7 +79,7 @@ public final class KafkaSource<T> extends BaseSource {
     }
 
     @SuppressWarnings("unused")
-    private KafkaSource(final Builder builder) {
+    private KafkaSource(final Builder<T> builder) {
         this(builder, LOGGER);
     }
 
@@ -84,6 +90,7 @@ public final class KafkaSource<T> extends BaseSource {
         _runnableConsumer = new RunnableConsumerImpl.Builder<T>()
                 .setConsumer(builder._consumer)
                 .setListener(new LogConsumerListener<>())
+                .setPollTime(builder._pollTime)
                 .build();
         _consumerExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "KafkaConsumer"));
     }
@@ -91,21 +98,22 @@ public final class KafkaSource<T> extends BaseSource {
     private class LogConsumerListener<V> implements ConsumerListener<V> {
 
         @Override
-        public void handle(ConsumerRecord<?, V> record) {
-            //TODO: log events?
-            V value = record.value();
+        public void handle(final ConsumerRecord<?, V> record) {
+            //TODO(jjackson): log events?
+            final V value = record.value();
             KafkaSource.this.notify(value);
         }
 
         @Override
-        public void handle(Throwable throwable) {
-            //TODO: handle exceptions
+        public void handle(final Throwable throwable) {
+            //TODO(jjackson): handle exceptions
         }
     }
 
-
     /**
-     * Implementation of builder pattern for <code>KafkaSource</code>.
+     * Builder pattern class for <code>KafkaSource</code>.
+     *
+     * @param <T> the type of data created by the source
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
@@ -129,12 +137,25 @@ public final class KafkaSource<T> extends BaseSource {
             return this;
         }
 
+        /**
+         * Sets the duration the consumer will poll kafka for each consume. Cannot be null.
+         *
+         * @param millis The number of milliseconds to poll for.
+         * @return This instance of {@link RunnableConsumerImpl.Builder}
+         */
+        public final Builder<T> setPollTimeMillis(final int millis) {
+            _pollTime = Duration.ofMillis(millis);
+            return this;
+        }
+
         @Override
-        protected Builder self() {
+        protected Builder<T> self() {
             return this;
         }
 
         @NotNull
         private Consumer<?, T> _consumer;
+        @NotNull
+        private Duration _pollTime;
     }
 }

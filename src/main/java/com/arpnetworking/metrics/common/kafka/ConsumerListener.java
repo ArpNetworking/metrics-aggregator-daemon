@@ -19,7 +19,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 /**
  * Interface for classes that handle the records polled by a kafka
- * <code>Consumer</code>
+ * <code>Consumer</code>.
  *
  * @param <T> the type of the value in the consumer records being handled
  *
@@ -28,14 +28,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 public interface ConsumerListener<T> {
 
     /**
-     * Handles a consumer record from the consumer
+     * Handles a consumer record from the consumer.
      *
      * @param record the consumer record to be handled
      */
     void handle(ConsumerRecord<?, T> record);
 
     /**
-     * Handles a throwable from the consumer
+     * Handles a throwable from the consumer.
      *
      * @param throwable the throwable to be handled
      */

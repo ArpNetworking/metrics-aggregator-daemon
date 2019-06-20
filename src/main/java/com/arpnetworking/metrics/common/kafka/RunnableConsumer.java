@@ -17,14 +17,14 @@ package com.arpnetworking.metrics.common.kafka;
 
 /**
  * Interface for classes which use a kafka <code>Consumer</code> to
- * continually poll a kafka topic
+ * continually poll a kafka topic.
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public interface RunnableConsumer extends Runnable {
 
     /**
-     * Stop the <code>RunnableConsumer</code> instance
+     * Stop the <code>RunnableConsumer</code> instance.
      */
     void stop();
 }

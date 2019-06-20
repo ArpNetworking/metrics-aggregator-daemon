@@ -25,7 +25,7 @@ import java.time.Duration;
 
 /**
  * A runnable wrapper for a <code>Consumer</code> that will continually poll
- * the consumer
+ * the consumer.
  *
  * @param <T> the type of the values pulled from kafka records
  *
@@ -34,28 +34,30 @@ import java.time.Duration;
 public class RunnableConsumerImpl<T> implements RunnableConsumer {
     private ConsumerListener<T> _listener;
     private Consumer<?, T> _consumer;
+    private Duration _pollTime;
     private volatile boolean _isRunning;
 
     /* package private */ RunnableConsumerImpl(final Builder<T> builder) {
         _consumer = builder._consumer;
         _listener = builder._listener;
+        _pollTime = builder._pollTime;
         _isRunning = true;
 
-        // TODO: initialize listeners, etc
+        // TODO(jjackson): initialize listeners, etc
     }
 
     @Override
     public void run() {
-        //TODO: thread exception
+        //TODO(jjackson): thread exception
         while (_isRunning) {
 
-            ConsumerRecords<?, T> records = _consumer.poll(Duration.ofMillis(100) /* TODO(jjackson): Configurable duration */ );
+            final ConsumerRecords<?, T> records = _consumer.poll(_pollTime);
 
             for (ConsumerRecord<?, T> record : records) {
                 _listener.handle(record);
             }
         }
-        //TODO: handle exceptions
+        //TODO(jjackson): handle exceptions
     }
 
     @Override
@@ -76,7 +78,8 @@ public class RunnableConsumerImpl<T> implements RunnableConsumer {
          * Public constructor.
          */
         public Builder() {
-            super((java.util.function.Function<RunnableConsumerImpl.Builder<T>, RunnableConsumerImpl<T>>) RunnableConsumerImpl::new);
+            super((java.util.function.Function<RunnableConsumerImpl.Builder<T>,
+                    RunnableConsumerImpl<T>>) RunnableConsumerImpl::new);
         }
 
         /**
@@ -101,9 +104,22 @@ public class RunnableConsumerImpl<T> implements RunnableConsumer {
             return this;
         }
 
+        /**
+         * Sets the duration the consumer will poll kafka for each consume. Cannot be null.
+         *
+         * @param pollTime The <code>Duration</code> instance.
+         * @return This instance of {@link RunnableConsumerImpl.Builder}
+         */
+        public RunnableConsumerImpl.Builder<T> setPollTime(final Duration pollTime) {
+            _pollTime = pollTime;
+            return this;
+        }
+
         @NotNull
         private Consumer<?, T> _consumer;
         @NotNull
         private ConsumerListener<T> _listener;
+        @NotNull
+        private Duration _pollTime;
     }
 }
