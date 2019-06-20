@@ -16,6 +16,8 @@
 package com.arpnetworking.metrics.common.kafka;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.steno.Logger;
+import com.arpnetworking.steno.LoggerFactory;
 import net.sf.oval.constraint.NotNull;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -36,33 +38,50 @@ public class RunnableConsumerImpl<T> implements RunnableConsumer {
     private Consumer<?, T> _consumer;
     private Duration _pollTime;
     private volatile boolean _isRunning;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RunnableConsumerImpl.class);
 
     /* package private */ RunnableConsumerImpl(final Builder<T> builder) {
         _consumer = builder._consumer;
         _listener = builder._listener;
         _pollTime = builder._pollTime;
         _isRunning = true;
-
-        // TODO(jjackson): initialize listeners, etc
     }
 
     @Override
     public void run() {
-        //TODO(jjackson): thread exception
-        while (_isRunning) {
+        Thread.currentThread().setUncaughtExceptionHandler(
+                (thread, throwable) -> LOGGER.error()
+                        .setMessage("Unhandled exception")
+                        .setThrowable(throwable)
+                        .log());
 
-            final ConsumerRecords<?, T> records = _consumer.poll(_pollTime);
+        while (isRunning()) {
+            try {
+                final ConsumerRecords<?, T> records = _consumer.poll(_pollTime);
 
-            for (ConsumerRecord<?, T> record : records) {
-                _listener.handle(record);
+                for (ConsumerRecord<?, T> record : records) {
+                    _listener.handle(record);
+                }
+            // CHECKSTYLE.OFF: IllegalCatch - Allow clients to decide how to handle exceptions
+            } catch (final Exception e) {
+            // CHECKSTYLE.ON: IllegalCatch
+                _listener.handle(e);
             }
         }
-        //TODO(jjackson): handle exceptions
     }
 
     @Override
     public void stop() {
         _isRunning = false;
+    }
+
+    /**
+     * Determine whether the consumer thread is running.
+     *
+     * @return true if running false if not running.
+     */
+    protected boolean isRunning() {
+        return _isRunning;
     }
 
     /**

@@ -25,10 +25,12 @@ import com.arpnetworking.steno.LoggerFactory;
 import net.sf.oval.constraint.NotNull;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.KafkaException;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Produce instances of <code>Record</code> from the values of entries
@@ -55,15 +57,23 @@ public final class KafkaSource<T> extends BaseSource {
 
     @Override
     public void stop() {
-        //TODO(jjackson): handle exceptions
         _runnableConsumer.stop();
+
         _consumerExecutor.shutdown();
+        try {
+            _consumerExecutor.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            LOGGER.warn()
+                    .setMessage("Unable to shutdown kafka consumer executor")
+                    .setThrowable(e)
+                    .log();
+        }
     }
 
     /**
-     * A log representation of this object.
+     * Generate a Steno log compatible representation.
      *
-     * @return the log representation
+     * @return Steno log compatible representation.
      */
     @LogValue
     public Object toLogValue() {
@@ -99,14 +109,38 @@ public final class KafkaSource<T> extends BaseSource {
 
         @Override
         public void handle(final ConsumerRecord<?, V> record) {
-            //TODO(jjackson): log events?
             final V value = record.value();
             KafkaSource.this.notify(value);
         }
 
         @Override
         public void handle(final Throwable throwable) {
-            //TODO(jjackson): handle exceptions
+            if (throwable instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+                _logger.info()
+                        .setMessage("Consumer thread interrupted")
+                        .addData("source", KafkaSource.this)
+                        .addData("action", "stopping")
+                        .setThrowable(throwable)
+                        .log();
+                _runnableConsumer.stop();
+            } else if (throwable instanceof KafkaException) {
+                _logger.error()
+                        .setMessage("Consumer received Kafka Exception")
+                        .addData("source", KafkaSource.this)
+                        .addData("action", "stopping")
+                        .setThrowable(throwable)
+                        .log();
+                _runnableConsumer.stop();
+            } else {
+                _logger.error()
+                        .setMessage("Consumer thread error")
+                        .addData("source", KafkaSource.this)
+                        .addData("action", "stopping")
+                        .setThrowable(throwable)
+                        .log();
+                _runnableConsumer.stop();
+            }
         }
     }
 
