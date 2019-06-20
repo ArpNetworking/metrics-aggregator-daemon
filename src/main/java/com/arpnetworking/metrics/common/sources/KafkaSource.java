@@ -16,28 +16,31 @@
 package com.arpnetworking.metrics.common.sources;
 
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.common.kafka.ConsumerListener;
+import com.arpnetworking.metrics.common.kafka.RunnableConsumer;
+import com.arpnetworking.metrics.common.kafka.RunnableConsumerImpl;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import net.sf.oval.constraint.NotNull;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Produce instances of <code> TODO </code> from a Kafka topic.
+ * Produce instances of <code>Record</code> from the values of entries
+ * from a Kafka topic. The key from the entries gets discarded
  *
- * @param <K> The data type of the key field to deserialize from the <code>Source</code>.
- * @param <V> The data type of the value field to deserialize from the <code>Source</code>.
+ * @param <T> the type of data created by the source
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
-public final class KafkaSource<K, V> extends BaseSource {
+public final class KafkaSource<T> extends BaseSource {
 
-    private final KafkaConsumer<K, V> _consumer;
+    private final Consumer<?, T> _consumer;
+    private final RunnableConsumer _runnableConsumer;
     private final ExecutorService _consumerExecutor;
     private final Logger _logger;
 
@@ -46,24 +49,21 @@ public final class KafkaSource<K, V> extends BaseSource {
 
     @Override
     public void start() {
-        //TODO
-        //Executor.execute( kafka consumer loop )
+        _consumerExecutor.execute(_runnableConsumer);
     }
 
     @Override
     public void stop() {
-        //TODO
-        //Executor stop kafka loop
-        //Executor.shutdown
+        //TODO: handle exceptions
+        _runnableConsumer.stop();
+        _consumerExecutor.shutdown();
     }
 
     @LogValue
     public Object toLogValue() {
-        //TODO
         return LogValueMapFactory.builder(this)
                 .put("super", super.toLogValue())
-//                .put("parser", _parser)
-//                .put("tailer", _tailer)
+                .put("consumer", _consumer)
                 .build();
     }
 
@@ -73,28 +73,43 @@ public final class KafkaSource<K, V> extends BaseSource {
     }
 
     @SuppressWarnings("unused")
-    private KafkaSource(final Builder<K, V> builder) {
+    private KafkaSource(final Builder builder) {
         this(builder, LOGGER);
     }
 
-    /* package private */ KafkaSource(final Builder<K, V> builder, final Logger logger) {
-        //TODO
+    /* package private */ KafkaSource(final Builder<T> builder, final Logger logger) {
         super(builder);
         _logger = logger;
         _consumer = builder._consumer;
+        _runnableConsumer = new RunnableConsumerImpl.Builder<T>()
+                .setConsumer(builder._consumer)
+                .setListener(new LogConsumerListener<>())
+                .build();
         _consumerExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "KafkaConsumer"));
+    }
+
+    private class LogConsumerListener<V> implements ConsumerListener<V> {
+
+        @Override
+        public void handle(ConsumerRecord<?, V> record) {
+            //TODO: log events?
+            V value = record.value();
+            KafkaSource.this.notify(value);
+        }
+
+        @Override
+        public void handle(Throwable throwable) {
+            //TODO: handle exceptions
+        }
     }
 
 
     /**
      * Implementation of builder pattern for <code>KafkaSource</code>.
      *
-     * @param <K> the type of the key field deserialized from the consumer.
-     * @param <V> the type of the value field deserialized from the consumer.
-     *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
-    public static class Builder<K, V> extends BaseSource.Builder<Builder<K, V>, KafkaSource<K, V>> {
+    public static class Builder<T> extends BaseSource.Builder<Builder<T>, KafkaSource<T>> {
 
         /**
          * Public constructor.
@@ -103,49 +118,23 @@ public final class KafkaSource<K, V> extends BaseSource {
             super(KafkaSource::new);
         }
 
-        //TODO
-//        /**
-//         * Sets <code>Deserializer</code>. Cannot be null.
-//         *
-//         * @param value The <code>Deserializer</code>.
-//         * @return This instance of <code>Builder</code>.
-//         */
-//        public final Builder<K, V> setKeyDeserializer(final Deserializer<K> value) {
-//            _keyDeserializer = value;
-//            return this;
-//        }
-//
-//        /**
-//         * Sets <code>Deserializer</code>. Cannot be null.
-//         *
-//         * @param value The <code>Deserializer</code>.
-//         * @return This instance of <code>Builder</code>.
-//         */
-//        public final Builder<K, V> setValueDeserializer(final Deserializer<V> value) {
-//            _valueDeserializer = value;
-//            return this;
-//        }
-
+        /**
+         * Sets <code>Consumer</code>. Cannot be null.
+         *
+         * @param consumer The <code>Consumer</code>.
+         * @return This instance of <code>Builder</code>.
+         */
+        public final Builder<T> setConsumer(final Consumer<?, T> consumer) {
+            _consumer = consumer;
+            return this;
+        }
 
         @Override
-        protected Builder<K, V> self() {
+        protected Builder self() {
             return this;
         }
 
         @NotNull
-        private Deserializer<K> _keyDeserializer;
-        @NotNull
-        private Deserializer<V> _valueDeserializer;
-
-        //    Properties props = new Properties();
-        //    props.setProperty("bootstrap.servers", "localhost:9092");
-        //    props.setProperty("group.id", "test");
-        //    props.setProperty("enable.auto.commit", "true");
-        //    props.setProperty("auto.commit.interval.ms", "1000");
-        //    props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        //    props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        private Properties _props;
-
-        private KafkaConsumer<K, V> _consumer;
+        private Consumer<?, T> _consumer;
     }
 }
