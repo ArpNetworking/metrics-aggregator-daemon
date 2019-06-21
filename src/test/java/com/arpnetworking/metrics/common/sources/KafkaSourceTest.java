@@ -15,25 +15,25 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
-import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
+import com.arpnetworking.steno.LogBuilder;
+import com.arpnetworking.steno.Logger;
 import com.google.common.collect.Maps;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -47,9 +47,55 @@ public class KafkaSourceTest {
     private static final String TOPIC = "test_topic";
     private static final int PARTITION = 0;
     private static final int POLL_TIME_MILLIS = 1;
+    private static final int TIMEOUT = 1000;
+    private Logger _logger;
+    private LogBuilder _logBuilder;
 
     @Before
     public void setUp() {
+        _logger = Mockito.mock(Logger.class);
+        _logBuilder = Mockito.mock(LogBuilder.class);
+        Mockito.when(_logger.trace()).thenReturn(_logBuilder);
+        Mockito.when(_logger.debug()).thenReturn(_logBuilder);
+        Mockito.when(_logger.info()).thenReturn(_logBuilder);
+        Mockito.when(_logger.warn()).thenReturn(_logBuilder);
+        Mockito.when(_logger.error()).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.setMessage(Mockito.anyString())).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.addData(Mockito.anyString(), Mockito.any())).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.addContext(Mockito.anyString(), Mockito.any())).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.setEvent(Mockito.anyString())).thenReturn(_logBuilder);
+        Mockito.when(_logBuilder.setThrowable(Mockito.any(Throwable.class))).thenReturn(_logBuilder);
+    }
+
+    @Test
+    public void testSourceSuccess() {
+        createHealthySource();
+        final Observer observer = Mockito.mock(Observer.class);
+        _source.attach(observer);
+        _source.start();
+        for (String expected : EXPECTED) {
+            Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source, expected);
+        }
+        _source.stop();
+    }
+
+    @Test
+    public void testSourceKafkaException() {
+        createExceptionSource(KafkaException.class);
+        _source.start();
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Consumer received Kafka Exception");
+        _source.stop();
+    }
+
+    @Test
+    public void testSourceRuntimeException() {
+        createExceptionSource(RuntimeException.class);
+        _source.start();
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Consumer thread error");
+        _source.stop();
+    }
+
+    private void createHealthySource() {
         final MockConsumer<String, String> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
         consumer.assign(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
         long offset = 0L;
@@ -68,54 +114,24 @@ public class KafkaSourceTest {
                 .build();
     }
 
-    @Test(timeout = 1000)
-    public void testSourceSuccess() {
-        final List<String> actual = new ArrayList<>();
-        final Lock lock = new ReentrantLock();
-        final Condition received = lock.newCondition();
-        final SynchronizedObserver observer = new SynchronizedObserver(lock, received, actual);
 
-        try {
-            lock.lock();
-            _source.attach(observer);
-            try {
-                _source.start();
-
-                while (actual.size() != EXPECTED.size()) {
-                    received.await();
-                }
-            } catch (final InterruptedException ie) {
-            } finally {
-                _source.stop();
-            }
-            // CHECKSTYLE.OFF: IllegalCatch - Always release lock
-        } catch (final Exception e) {
-            // CHECKSTYLE.ON: IllegalCatch
-        } finally {
-            lock.unlock();
-        }
-        Assert.assertEquals(EXPECTED, actual);
+    private void createExceptionSource(final Class<? extends Exception> exception) {
+        final Consumer<String, String> consumer = Mockito.mock(ConsumerSS.class);
+        final Map<TopicPartition, List<ConsumerRecord<String, String>>> records = Maps.newHashMap();
+        records.put(new TopicPartition(TOPIC, PARTITION), Collections.singletonList(
+                new ConsumerRecord<>(TOPIC, PARTITION, 0, "0", "value0")));
+        Mockito.when(consumer.poll(Mockito.any()))
+                .thenReturn(new ConsumerRecords<>(records))
+                .thenThrow(exception);
+        _source = new KafkaSource<>(new KafkaSource.Builder<String>()
+                .setName("MockConsumerSource")
+                .setConsumer(consumer)
+                .setPollTimeMillis(POLL_TIME_MILLIS),
+                _logger);
     }
 
-    private static class SynchronizedObserver implements Observer {
-        private List<String> _values;
-        private Condition _cond;
-        private Lock _lock;
-
-        SynchronizedObserver(final Lock lock, final Condition cond, final List<String> values) {
-            _cond = cond;
-            _lock = lock;
-            _values = values;
-        }
-
-        @Override
-        public void notify(final Observable observable, final Object o) {
-            if (o instanceof String) {
-                _lock.lock();
-                _values.add((String) o);
-                _cond.signal();
-                _lock.unlock();
-            }
-        }
-    }
+    /**
+     * Interface needed to mock generic interface.
+     */
+    private interface ConsumerSS extends Consumer<String, String> {}
 }
