@@ -108,7 +108,7 @@ public class KafkaSourceTest {
         }
 
         _source = new KafkaSource.Builder<String>()
-                .setName("MockConsumerSource")
+                .setName("KafkaSource")
                 .setConsumer(consumer)
                 .setPollTimeMillis(POLL_TIME_MILLIS)
                 .build();
@@ -124,7 +124,7 @@ public class KafkaSourceTest {
                 .thenReturn(new ConsumerRecords<>(records))
                 .thenThrow(exception);
         _source = new KafkaSource<>(new KafkaSource.Builder<String>()
-                .setName("MockConsumerSource")
+                .setName("KafkaSource")
                 .setConsumer(consumer)
                 .setPollTimeMillis(POLL_TIME_MILLIS),
                 _logger);
