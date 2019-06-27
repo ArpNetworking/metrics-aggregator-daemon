@@ -15,9 +15,14 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
+import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.commons.observer.Observer;
+import com.arpnetworking.metrics.common.kafka.ConsumerDeserializer;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.Maps;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -30,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -93,6 +99,37 @@ public class KafkaSourceTest {
         _source.start();
         Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Consumer thread error");
         _source.stop();
+    }
+
+    @Test
+    public void testDeserializeKafkaSourceFromJson() throws IOException {
+        final String jsonString =
+                  "{\n"
+                + "\t\"type\":\"com.arpnetworking.metrics.common.sources.KafkaSource\",\n"
+                + "\t\"name\":\"kafka_source\",\n"
+                + "\t\"pollTimeMillis\":1000,\n"
+                + "\t\"consumer\":{\n"
+                + "\t\t\"type\":\"com.arpnetworking.metrics.common.kafka.KafkaConsumerWrapper\",\n"
+                + "\t\t\"topics\":[\"test\"],\n"
+                + "\t\t\"configs\":{\n"
+                + "\t\t\t\"bootstrap.servers\":\"localhost:9092\",\n"
+                + "\t\t\t\"group.id\":\"test\",\n"
+                + "\t\t\t\"client.id\":\"consumer0\",\n"
+                + "\t\t\t\"key.deserializer\":\"org.apache.kafka.common.serialization.StringDeserializer\",\n"
+                + "\t\t\t\"value.deserializer\":\"org.apache.kafka.common.serialization.StringDeserializer\",\n"
+                + "\t\t\t\"auto.offset.reset\":\"earliest\"\n"
+                + "\t\t}\n"
+                + "\t}\n"
+                + "}\n";
+
+        final ObjectMapper mapper = ObjectMapperFactory.createInstance();
+
+        final SimpleModule module = new SimpleModule("KafkaConsumer");
+        module.addDeserializer(Consumer.class, new ConsumerDeserializer<>());
+        mapper.registerModule(module);
+        final KafkaSource<String> source = mapper.readValue(jsonString, new TypeReference<KafkaSource<String>>() {});
+
+        System.out.println(source.toString());
     }
 
     private void createHealthySource() {

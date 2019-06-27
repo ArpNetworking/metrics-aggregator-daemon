@@ -18,6 +18,7 @@ package com.arpnetworking.metrics.mad.configuration;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.Loggable;
+import com.arpnetworking.metrics.common.kafka.ConsumerDeserializer;
 import com.arpnetworking.metrics.common.sources.Source;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
@@ -36,6 +37,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
+import org.apache.kafka.clients.consumer.Consumer;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -63,6 +65,7 @@ public final class PipelineConfiguration {
 
         final SimpleModule module = new SimpleModule("Pipeline");
         module.addDeserializer(Statistic.class, new StatisticDeserializer());
+        module.addDeserializer(Consumer.class, new ConsumerDeserializer<>());
 
         objectMapper.registerModules(module);
 
