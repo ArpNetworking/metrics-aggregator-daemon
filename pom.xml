@@ -366,6 +366,26 @@
           <showLogs>true</showLogs>
           <images>
             <image>
+              <name>joeyjackson/kafka:${project.version}</name>
+              <build>
+                <dockerFile>${project.basedir}/src/main/docker/kafka/Dockerfile</dockerFile>
+                <tags>
+                  <tag>${buildNumber}</tag>
+                </tags>
+              </build>
+              <run>
+                <env>
+                  <AUTO_CREATE_TOPICS>true</AUTO_CREATE_TOPICS>
+                  <ADVERTISED_HOST>localhost</ADVERTISED_HOST>
+                  <ADVERTISED_PORT>9092</ADVERTISED_PORT>
+                </env>
+                <ports>
+                  <port>2181:2181</port>
+                  <port>9092:9092</port>
+                </ports>
+              </run>
+            </image>
+            <image>
               <name>arpnetworking/mad:${project.version}</name>
               <build>
                 <dockerFile>${project.build.directory}/docker-assembly/Dockerfile</dockerFile>
