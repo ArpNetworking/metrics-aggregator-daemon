@@ -21,12 +21,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.KafkaException;
+import org.apache.kafka.common.config.ConfigException;
 
 import java.io.IOException;
 import java.util.List;
@@ -50,16 +54,55 @@ public class ConsumerDeserializer<K, V> extends JsonDeserializer<Consumer<K, V>>
         final JsonNode node = deserializer.deserialize(parser, context);
 
         // Pull out configs and topics fields and convert deserialize with standard mapper
+        final JsonNode configNode = node.get("configs");
+        final JsonNode topicsNode = node.get("topics");
+        if (configNode == null) {
+            throw MismatchedInputException.from(parser, Consumer.class,
+                    "Consumer object missing \"configs\" field");
+        }
+        if (topicsNode == null) {
+            throw MismatchedInputException.from(parser, Consumer.class,
+                    "Consumer object missing \"topics\" field");
+        }
+
         final ObjectMapper mapper = ObjectMapperFactory.getInstance();
 
         final TypeReference<Map<String, String>> configsType = new TypeReference<Map<String, String>>() {};
-        final Map<String, Object> configs = mapper.convertValue(node.get("configs"), configsType);
         final TypeReference<List<String>> topicsType = new TypeReference<List<String>>() {};
-        final List<String> topics = mapper.convertValue(node.get("topics"), topicsType);
+        final Map<String, Object> configs;
+        final List<String> topics;
+
+        try {
+            configs = mapper.convertValue(configNode, configsType);
+        } catch (final IllegalArgumentException e) {
+            throw new JsonMappingException(parser, "\"configs\" field must be an object", e);
+        }
+
+        try {
+            topics = mapper.convertValue(topicsNode, topicsType);
+        } catch (final IllegalArgumentException e) {
+            throw new JsonMappingException(parser, "\"topics\" field must be a list", e);
+        }
+
+        if (configs == null) {
+            throw MismatchedInputException.from(parser, Consumer.class,
+                    "\"configs\" field cannot have null value");
+        }
+        if (topics == null) {
+            throw MismatchedInputException.from(parser, Consumer.class,
+                    "\"topics\" field cannot have null value");
+        }
 
         // Create consumer
-        final KafkaConsumer<K, V> consumer = new KafkaConsumer<>(configs);
-        consumer.subscribe(topics);
-        return consumer;
+        try {
+            final KafkaConsumer<K, V> consumer = new KafkaConsumer<>(configs);
+            consumer.subscribe(topics);
+            return consumer;
+        } catch (final ConfigException e) {
+            throw new JsonMappingException(parser, "Error in Kafka Consumer configuration", e);
+        } catch (final KafkaException e) {
+            throw new JsonMappingException(parser, "Error creating Kafka Consumer", e);
+        }
+
     }
 }
