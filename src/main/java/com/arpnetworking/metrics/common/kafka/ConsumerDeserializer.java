@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -50,11 +51,28 @@ public class ConsumerDeserializer<K, V> extends JsonDeserializer<Consumer<K, V>>
         final JsonNode node = deserializer.deserialize(parser, context);
 
         // Pull out configs and topics fields and convert deserialize with standard mapper
+        final JsonNode configNode = node.get("configs");
+        final JsonNode topicsNode = node.get("topics");
+        if (configNode == null) {
+            throw MismatchedInputException.from(parser, Consumer.class, "Consumer object missing configs field");
+        }
+        if (topicsNode == null) {
+            throw MismatchedInputException.from(parser, Consumer.class, "Consumer object missing topics field");
+        }
+
         final ObjectMapper mapper = ObjectMapperFactory.getInstance();
         final TypeReference<Map<String, String>> configsType = new TypeReference<Map<String, String>>() {};
-        final Map<String, Object> configs = mapper.convertValue(node.get("configs"), configsType);
         final TypeReference<List<String>> topicsType = new TypeReference<List<String>>() {};
-        final List<String> topics = mapper.convertValue(node.get("topics"), topicsType);
+
+        final Map<String, Object> configs = mapper.convertValue(configNode, configsType);
+        final List<String> topics = mapper.convertValue(topicsNode, topicsType);
+
+        if (configs == null) {
+            throw MismatchedInputException.from(parser, Consumer.class, "Consumer configs field cannot be null");
+        }
+        if (topics == null) {
+            throw MismatchedInputException.from(parser, Consumer.class, "Consumer topics field cannot be null");
+        }
 
         // Create consumer
         final KafkaConsumer<K, V> consumer = new KafkaConsumer<>(configs);
