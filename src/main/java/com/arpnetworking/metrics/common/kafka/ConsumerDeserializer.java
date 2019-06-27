@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
@@ -44,7 +46,8 @@ public class ConsumerDeserializer<K, V> extends JsonDeserializer<Consumer<K, V>>
     public Consumer<K, V> deserialize(final JsonParser parser, final DeserializationContext context)
             throws IOException, JsonProcessingException {
         // Parse input json into JsonNode Tree
-        final JsonNode node = parser.getCodec().readTree(parser);
+        final JsonDeserializer<? extends JsonNode> deserializer = JsonNodeDeserializer.getDeserializer(ObjectNode.class);
+        final JsonNode node = deserializer.deserialize(parser, context);
 
         // Pull out configs and topics fields and convert deserialize with standard mapper
         final ObjectMapper mapper = ObjectMapperFactory.getInstance();

@@ -63,7 +63,7 @@ public class ConsumerDeserializerTest {
             + "\"auto.offset.reset\":\"earliest\""
             + "},\"topics\":[\"" + TOPIC + "\"]}";
 
-    private static final String CONSUMER_JSON_MALFORMED = "\"configs\": {"  // Missing opening brace
+    private static final String CONSUMER_JSON_MALFORMED = "{\"configs\": "  // Missing opening brace
             + "\"bootstrap.servers\":\"localhost:9092\","
             + "\"group.id\":\"test\",\"client.id\":\"consumer0\","
             + "\"key.deserializer\":\"org.apache.kafka.common.serialization.StringDeserializer\","
