@@ -31,6 +31,7 @@ import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -104,32 +105,35 @@ public class KafkaSourceTest {
     @Test
     public void testDeserializeKafkaSourceFromJson() throws IOException {
         final String jsonString =
-                  "{\n"
-                + "\t\"type\":\"com.arpnetworking.metrics.common.sources.KafkaSource\",\n"
-                + "\t\"name\":\"kafka_source\",\n"
-                + "\t\"pollTimeMillis\":1000,\n"
-                + "\t\"consumer\":{\n"
-                + "\t\t\"type\":\"com.arpnetworking.metrics.common.kafka.KafkaConsumerWrapper\",\n"
-                + "\t\t\"topics\":[\"test\"],\n"
-                + "\t\t\"configs\":{\n"
-                + "\t\t\t\"bootstrap.servers\":\"localhost:9092\",\n"
-                + "\t\t\t\"group.id\":\"test\",\n"
-                + "\t\t\t\"client.id\":\"consumer0\",\n"
-                + "\t\t\t\"key.deserializer\":\"org.apache.kafka.common.serialization.StringDeserializer\",\n"
-                + "\t\t\t\"value.deserializer\":\"org.apache.kafka.common.serialization.StringDeserializer\",\n"
-                + "\t\t\t\"auto.offset.reset\":\"earliest\"\n"
-                + "\t\t}\n"
-                + "\t}\n"
-                + "}\n";
+                    "{"
+                + "\n    \"type\":\"com.arpnetworking.metrics.common.sources.KafkaSource\","
+                + "\n    \"name\":\"kafka_source\","
+                + "\n    \"pollTimeMillis\":1000,"
+                + "\n    \"consumer\":{"
+                + "\n        \"type\":\"org.apache.kafka.clients.consumer.Consumer\","
+                + "\n        \"topics\":[\"test\"],"
+                + "\n        \"configs\":{"
+                + "\n            \"bootstrap.servers\":\"localhost:9092\","
+                + "\n            \"group.id\":\"test\","
+                + "\n            \"client.id\":\"consumer0\","
+                + "\n            \"key.deserializer\":\"org.apache.kafka.common.serialization.StringDeserializer\","
+                + "\n            \"value.deserializer\":\"org.apache.kafka.common.serialization.StringDeserializer\","
+                + "\n            \"auto.offset.reset\":\"earliest\""
+                + "\n        }"
+                + "\n    }"
+                + "\n}";
 
         final ObjectMapper mapper = ObjectMapperFactory.createInstance();
 
         final SimpleModule module = new SimpleModule("KafkaConsumer");
         module.addDeserializer(Consumer.class, new ConsumerDeserializer<>());
         mapper.registerModule(module);
-        final KafkaSource<String> source = mapper.readValue(jsonString, new TypeReference<KafkaSource<String>>() {});
+        final KafkaSource<String> source = mapper.readValue(jsonString, new KafkaSourceStringType());
 
-        System.out.println(source.toString());
+        Assert.assertTrue("Expected KafkaSource class label in log value: " + source.toString(),
+                source.toString().contains("class=com.arpnetworking.metrics.common.sources.KafkaSource"));
+        Assert.assertTrue("Expected KafkaConsumer consumer label in log value: " + source.toString(),
+                source.toString().contains("consumer=org.apache.kafka.clients.consumer.KafkaConsumer"));
     }
 
     private void createHealthySource() {
@@ -171,4 +175,11 @@ public class KafkaSourceTest {
      * Interface needed to mock generic interface.
      */
     private interface ConsumerSS extends Consumer<String, String> {}
+
+    /**
+     * Class needed for generic object mapping with <code>ObjectMapper</code>.
+     *
+     * @author Joey Jackson (jjackson at dropbox dot com)
+     */
+    private static class KafkaSourceStringType extends TypeReference<KafkaSource<String>> {}
 }

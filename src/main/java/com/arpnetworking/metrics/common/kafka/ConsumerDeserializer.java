@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.vertx.java.core.json.impl.Json;
 
 import java.io.IOException;
 import java.util.List;
