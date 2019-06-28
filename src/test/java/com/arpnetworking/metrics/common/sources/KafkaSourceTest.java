@@ -102,40 +102,6 @@ public class KafkaSourceTest {
         _source.stop();
     }
 
-    @Test
-    public void testDeserializeKafkaSourceFromJson() throws IOException {
-        final String jsonString =
-                    "{"
-                + "\n  \"type\":\"com.arpnetworking.metrics.common.sources.KafkaSource\","
-                + "\n  \"name\":\"kafka_source\","
-                + "\n  \"pollTimeMillis\":1000,"
-                + "\n  \"consumer\":{"
-                + "\n    \"type\":\"org.apache.kafka.clients.consumer.Consumer\","
-                + "\n    \"topics\":[\"test\"],"
-                + "\n    \"configs\":{"
-                + "\n      \"bootstrap.servers\":\"localhost:9092\","
-                + "\n      \"group.id\":\"test\","
-                + "\n      \"client.id\":\"consumer0\","
-                + "\n      \"key.deserializer\":\"org.apache.kafka.common.serialization.StringDeserializer\","
-                + "\n      \"value.deserializer\":\"org.apache.kafka.common.serialization.StringDeserializer\","
-                + "\n      \"auto.offset.reset\":\"earliest\""
-                + "\n    }"
-                + "\n  }"
-                + "\n}";
-
-        final ObjectMapper mapper = ObjectMapperFactory.createInstance();
-
-        final SimpleModule module = new SimpleModule("KafkaConsumer");
-        module.addDeserializer(Consumer.class, new ConsumerDeserializer<>());
-        mapper.registerModule(module);
-        final KafkaSource<String> source = mapper.readValue(jsonString, new KafkaSourceStringType());
-
-        Assert.assertTrue("Expected KafkaSource class label in log value: " + source.toString(),
-                source.toString().contains("class=com.arpnetworking.metrics.common.sources.KafkaSource"));
-        Assert.assertTrue("Expected KafkaConsumer consumer label in log value: " + source.toString(),
-                source.toString().contains("consumer=org.apache.kafka.clients.consumer.KafkaConsumer"));
-    }
-
     private void createHealthySource() {
         final MockConsumer<String, String> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
         consumer.assign(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
@@ -175,11 +141,4 @@ public class KafkaSourceTest {
      * Interface needed to mock generic interface.
      */
     private interface ConsumerSS extends Consumer<String, String> {}
-
-    /**
-     * Class needed for generic object mapping with <code>ObjectMapper</code>.
-     *
-     * @author Joey Jackson (jjackson at dropbox dot com)
-     */
-    private static class KafkaSourceStringType extends TypeReference<KafkaSource<String>> {}
 }

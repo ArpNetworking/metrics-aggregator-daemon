@@ -15,13 +15,19 @@
  */
 package com.arpnetworking.metrics.common.integration;
 
+import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.commons.observer.Observer;
+import com.arpnetworking.metrics.common.kafka.ConsumerDeserializer;
 import com.arpnetworking.metrics.common.sources.KafkaSource;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.Maps;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -32,10 +38,12 @@ import org.apache.kafka.common.errors.AuthorizationException;
 import org.apache.kafka.common.errors.OutOfOrderSequenceException;
 import org.apache.kafka.common.errors.ProducerFencedException;
 import org.apache.kafka.common.errors.TopicExistsException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,110 +58,134 @@ import java.util.concurrent.ExecutionException;
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public class KafkaIT {
-    private static final String HOST = "localhost";
-    private static final String PORT = "9092";
+    private static final String KAFKA_SERVER = "localhost:9092";
     private static final String KEY_SERIALIZER = "org.apache.kafka.common.serialization.IntegerSerializer";
     private static final String VALUE_SERIALIZER = "org.apache.kafka.common.serialization.StringSerializer";
     private static final String KEY_DESERIALIZER = "org.apache.kafka.common.serialization.IntegerDeserializer";
     private static final String VALUE_DESERIALIZER = "org.apache.kafka.common.serialization.StringDeserializer";
-    private Map<String, Object> _consumerProps;
-    private Map<String, Object> _producerProps;
     private static final int POLL_DURATION_MILLIS = 1000;
     private static final int TIMEOUT = 5000;
 
+    private Map<String, Object> _consumerProps;
+    private KafkaConsumer<Integer, String> _consumer;
+    private String _topicName;
+    private KafkaSource<String> _source;
+    private List<ProducerRecord<Integer, String>> _producerRecords;
+
     @Before
     public void setUp() {
-        _producerProps = Maps.newHashMap();
-        _producerProps.put(ProducerConfig.ACKS_CONFIG, "all");
-        _producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, HOST + ":" + PORT);
-        _producerProps.put(ProducerConfig.CLIENT_ID_CONFIG, "producer0");
-        _producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KEY_SERIALIZER);
-        _producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, VALUE_SERIALIZER);
-        _producerProps.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "transactional-id");
+        // Create kafka topic
+        _topicName = createTopicName();
+        createTopic(_topicName);
 
+        // Create and send producer records
+        _producerRecords = createProducerRecords(_topicName, 3);
+        sendRecords(_producerRecords);
+
+        // Create consumer props
         _consumerProps = Maps.newHashMap();
-        _consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, HOST + ":" + PORT);
+        _consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
         _consumerProps.put(ConsumerConfig.CLIENT_ID_CONFIG, "consumer0");
         _consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KEY_DESERIALIZER);
         _consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, VALUE_DESERIALIZER);
         _consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        _consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "group" + _topicName);
+    }
+
+    @After
+    public void tearDown() {
+        if (_source != null) {
+            _source.stop();
+        }
     }
 
     @Test
     public void testKafkaSourceSingleObserver() {
-        // Create kafka topic
-        final String topicName = createTopicName();
-        createTopic(topicName);
-
-        // Create and send producer records
-        final List<ProducerRecord<Integer, String>> producerRecords = createProducerRecords(topicName, 3);
-        sendRecords(producerRecords);
-
-        // Create consumer
-        _consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "group" + topicName);
-        final KafkaConsumer<Integer, String> consumer = new KafkaConsumer<>(_consumerProps);
-        consumer.subscribe(Collections.singletonList(topicName));
-
         // Create Kafka Source
-        final Observer observer = Mockito.mock(Observer.class);
-        final KafkaSource<String> source = new KafkaSource.Builder<String>()
+        _consumer = new KafkaConsumer<>(_consumerProps);
+        _consumer.subscribe(Collections.singletonList(_topicName));
+        _source = new KafkaSource.Builder<String>()
                 .setName("KafkaSource")
-                .setConsumer(consumer)
+                .setConsumer(_consumer)
                 .setPollTimeMillis(POLL_DURATION_MILLIS)
                 .build();
 
         // Observe records
-        source.attach(observer);
-        source.start();
-        for (ProducerRecord<Integer, String> expected : producerRecords) {
-            Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(source, expected.value());
+        final Observer observer = Mockito.mock(Observer.class);
+        _source.attach(observer);
+        _source.start();
+        for (ProducerRecord<Integer, String> expected : _producerRecords) {
+            Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source, expected.value());
         }
-        source.stop();
     }
 
     @Test
     public void testKafkaSourceMultipleObservers() {
-        // Create kafka topic
-        final String topicName = createTopicName();
-        createTopic(topicName);
-
-        // Create and send producer records
-        final List<ProducerRecord<Integer, String>> producerRecords = createProducerRecords(topicName, 3);
-        sendRecords(producerRecords);
-
-        // Create consumer
-        _consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "group" + topicName);
-        final KafkaConsumer<Integer, String> consumer = new KafkaConsumer<>(_consumerProps);
-        consumer.subscribe(Collections.singletonList(topicName));
-
         // Create Kafka Source
-        final Observer observer1 = Mockito.mock(Observer.class);
-        final Observer observer2 = Mockito.mock(Observer.class);
-        final KafkaSource<String> source = new KafkaSource.Builder<String>()
+        _consumer = new KafkaConsumer<>(_consumerProps);
+        _consumer.subscribe(Collections.singletonList(_topicName));
+        _source = new KafkaSource.Builder<String>()
                 .setName("KafkaSource")
-                .setConsumer(consumer)
+                .setConsumer(_consumer)
                 .setPollTimeMillis(POLL_DURATION_MILLIS)
                 .build();
 
         // Observe records
-        source.attach(observer1);
-        source.attach(observer2);
-        source.start();
-        for (ProducerRecord<Integer, String> expected : producerRecords) {
-            Mockito.verify(observer1, Mockito.timeout(TIMEOUT)).notify(source, expected.value());
-            Mockito.verify(observer2, Mockito.timeout(TIMEOUT)).notify(source, expected.value());
+        final Observer observer1 = Mockito.mock(Observer.class);
+        final Observer observer2 = Mockito.mock(Observer.class);
+        _source.attach(observer1);
+        _source.attach(observer2);
+        _source.start();
+        for (ProducerRecord<Integer, String> expected : _producerRecords) {
+            Mockito.verify(observer1, Mockito.timeout(TIMEOUT)).notify(_source, expected.value());
+            Mockito.verify(observer2, Mockito.timeout(TIMEOUT)).notify(_source, expected.value());
         }
-        source.stop();
+    }
+
+    @Test
+    public void testKafkaSourceFromConfig() throws IOException {
+        final String jsonString =
+                    "{"
+                + "\n  \"type\":\"com.arpnetworking.metrics.common.sources.KafkaSource\","
+                + "\n  \"name\":\"kafka_source\","
+                + "\n  \"pollTimeMillis\":" + POLL_DURATION_MILLIS + ","
+                + "\n  \"consumer\":{"
+                + "\n    \"type\":\"org.apache.kafka.clients.consumer.Consumer\","
+                + "\n    \"topics\":[\"" + _topicName + "\"],"
+                + "\n    \"configs\":{"
+                + "\n      \"bootstrap.servers\":\"" + KAFKA_SERVER + "\","
+                + "\n      \"group.id\":\"group" + _topicName + "\","
+                + "\n      \"client.id\":\"consumer0\","
+                + "\n      \"key.deserializer\":\"" + KEY_DESERIALIZER + "\","
+                + "\n      \"value.deserializer\":\"" + VALUE_DESERIALIZER + "\","
+                + "\n      \"auto.offset.reset\":\"earliest\""
+                + "\n    }"
+                + "\n  }"
+                + "\n}";
+
+        final ObjectMapper mapper = ObjectMapperFactory.createInstance();
+        final SimpleModule module = new SimpleModule("KafkaConsumer");
+        module.addDeserializer(Consumer.class, new ConsumerDeserializer<>());
+        mapper.registerModule(module);
+        _source = mapper.readValue(jsonString, new KafkaSourceStringType());
+
+        // Observe records
+        final Observer observer = Mockito.mock(Observer.class);
+        _source.attach(observer);
+        _source.start();
+        for (ProducerRecord<Integer, String> expected : _producerRecords) {
+            Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source, expected.value());
+        }
     }
 
     private String createTopicName() {
         return "topic_" + UUID.randomUUID().toString();
     }
 
-    private void createTopic(final String topicName) {
+    private static void createTopic(final String topicName) {
         try {
             final Properties config = new Properties();
-            config.setProperty(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, HOST + ":" + PORT);
+            config.setProperty(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
             config.setProperty(AdminClientConfig.CLIENT_ID_CONFIG, "adminClient");
             final AdminClient adminClient = AdminClient.create(config);
             final NewTopic newTopic = new NewTopic(topicName, 1, (short) 1);
@@ -171,7 +203,7 @@ public class KafkaIT {
         }
     }
 
-    private List<ProducerRecord<Integer, String>> createProducerRecords(final String topic, final int num) {
+    private static List<ProducerRecord<Integer, String>> createProducerRecords(final String topic, final int num) {
         final List<ProducerRecord<Integer, String>> records = new ArrayList<>();
         for (int i = 0; i < num; i++) {
             records.add(new ProducerRecord<>(topic, i, "value" + i));
@@ -180,7 +212,16 @@ public class KafkaIT {
     }
 
     private void sendRecords(final List<ProducerRecord<Integer, String>> records) {
-        final KafkaProducer<Integer, String> producer = new KafkaProducer<Integer, String>(_producerProps);
+        final Map<String, Object> producerProps;
+        producerProps = Maps.newHashMap();
+        producerProps.put(ProducerConfig.ACKS_CONFIG, "all");
+        producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
+        producerProps.put(ProducerConfig.CLIENT_ID_CONFIG, "producer0");
+        producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KEY_SERIALIZER);
+        producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, VALUE_SERIALIZER);
+        producerProps.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "transactional-id");
+
+        final KafkaProducer<Integer, String> producer = new KafkaProducer<>(producerProps);
         producer.initTransactions();
         try {
             producer.beginTransaction();
@@ -195,4 +236,11 @@ public class KafkaIT {
         }
         producer.close();
     }
+
+    /**
+     * Class needed for generic object mapping with <code>ObjectMapper</code>.
+     *
+     * @author Joey Jackson (jjackson at dropbox dot com)
+     */
+    private static class KafkaSourceStringType extends TypeReference<KafkaSource<String>> {}
 }
