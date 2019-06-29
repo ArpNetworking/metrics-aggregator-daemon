@@ -19,6 +19,7 @@ import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.common.kafka.ConsumerDeserializer;
 import com.arpnetworking.metrics.common.sources.KafkaSource;
+import com.arpnetworking.test.StringParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -69,7 +70,7 @@ public class KafkaIT {
     private Map<String, Object> _consumerProps;
     private KafkaConsumer<Integer, String> _consumer;
     private String _topicName;
-    private KafkaSource<String> _source;
+    private KafkaSource<String, String> _source;
     private List<ProducerRecord<Integer, String>> _producerRecords;
 
     @Before
@@ -104,8 +105,9 @@ public class KafkaIT {
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
-        _source = new KafkaSource.Builder<String>()
+        _source = new KafkaSource.Builder<String, String>()
                 .setName("KafkaSource")
+                .setParser(new StringParser.Builder().build())
                 .setConsumer(_consumer)
                 .setPollTimeMillis(POLL_DURATION_MILLIS)
                 .build();
@@ -124,8 +126,9 @@ public class KafkaIT {
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
-        _source = new KafkaSource.Builder<String>()
+        _source = new KafkaSource.Builder<String, String>()
                 .setName("KafkaSource")
+                .setParser(new StringParser.Builder().build())
                 .setConsumer(_consumer)
                 .setPollTimeMillis(POLL_DURATION_MILLIS)
                 .build();
@@ -160,6 +163,10 @@ public class KafkaIT {
                 + "\n      \"value.deserializer\":\"" + VALUE_DESERIALIZER + "\","
                 + "\n      \"auto.offset.reset\":\"earliest\""
                 + "\n    }"
+                + "\n  },"
+                + "\n  \"parser\":{"
+                + "\n    \"type\":\"com.arpnetworking.test.StringParser\","
+                + "\n    \"name\":\"StringParser\""
                 + "\n  }"
                 + "\n}";
 
@@ -242,5 +249,5 @@ public class KafkaIT {
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
-    private static class KafkaSourceStringType extends TypeReference<KafkaSource<String>> {}
+    private static class KafkaSourceStringType extends TypeReference<KafkaSource<String, String>> {}
 }

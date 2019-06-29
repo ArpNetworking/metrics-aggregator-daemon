@@ -19,6 +19,8 @@ import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.common.kafka.ConsumerListener;
 import com.arpnetworking.metrics.common.kafka.RunnableConsumer;
 import com.arpnetworking.metrics.common.kafka.RunnableConsumerImpl;
+import com.arpnetworking.metrics.common.parsers.Parser;
+import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
@@ -37,18 +39,19 @@ import java.util.concurrent.TimeUnit;
  * from a Kafka topic. The key from the entries gets discarded
  *
  * @param <T> the type of data created by the source
+ * @param <V> the type of data of value in kafka <code>ConsumerRecords</code>
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
-public final class KafkaSource<T> extends BaseSource {
+public final class KafkaSource<T, V> extends BaseSource {
 
-    private final Consumer<?, T> _consumer;
+    private final Consumer<?, V> _consumer;
     private final RunnableConsumer _runnableConsumer;
     private final ExecutorService _consumerExecutor;
+    private final Parser<T, V> _parser;
     private final Logger _logger;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSource.class);
-
 
     @Override
     public void start() {
@@ -89,28 +92,38 @@ public final class KafkaSource<T> extends BaseSource {
     }
 
     @SuppressWarnings("unused")
-    private KafkaSource(final Builder<T> builder) {
+    private KafkaSource(final Builder<T, V> builder) {
         this(builder, LOGGER);
     }
 
-    /* package private */ KafkaSource(final Builder<T> builder, final Logger logger) {
+    /* package private */ KafkaSource(final Builder<T, V> builder, final Logger logger) {
         super(builder);
         _logger = logger;
         _consumer = builder._consumer;
-        _runnableConsumer = new RunnableConsumerImpl.Builder<T>()
+        _parser = builder._parser;
+        _runnableConsumer = new RunnableConsumerImpl.Builder<V>()
                 .setConsumer(builder._consumer)
-                .setListener(new LogConsumerListener<>())
+                .setListener(new LogConsumerListener())
                 .setPollTime(builder._pollTime)
                 .build();
         _consumerExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "KafkaConsumer"));
     }
 
-    private class LogConsumerListener<V> implements ConsumerListener<V> {
+    private class LogConsumerListener implements ConsumerListener<V> {
 
         @Override
-        public void handle(final ConsumerRecord<?, V> record) {
-            final V value = record.value();
-            KafkaSource.this.notify(value);
+        public void handle(final ConsumerRecord<?, V> consumerRecord) {
+            final T record;
+            try {
+                record = _parser.parse(consumerRecord.value());
+            } catch (final ParsingException e) {
+                _logger.error()
+                        .setMessage("Failed to parse data")
+                        .setThrowable(e)
+                        .log();
+                return;
+            }
+            KafkaSource.this.notify(record);
         }
 
         @Override
@@ -148,10 +161,11 @@ public final class KafkaSource<T> extends BaseSource {
      * Builder pattern class for <code>KafkaSource</code>.
      *
      * @param <T> the type of data created by the source
+     * @param <V> the type of data of value in kafka <code>ConsumerRecords</code>
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
-    public static class Builder<T> extends BaseSource.Builder<Builder<T>, KafkaSource<T>> {
+    public static class Builder<T, V> extends BaseSource.Builder<Builder<T, V>, KafkaSource<T, V>> {
 
         /**
          * Public constructor.
@@ -166,7 +180,7 @@ public final class KafkaSource<T> extends BaseSource {
          * @param consumer The <code>Consumer</code>.
          * @return This instance of <code>Builder</code>.
          */
-        public final Builder<T> setConsumer(final Consumer<?, T> consumer) {
+        public final Builder<T, V> setConsumer(final Consumer<?, V> consumer) {
             _consumer = consumer;
             return this;
         }
@@ -175,21 +189,34 @@ public final class KafkaSource<T> extends BaseSource {
          * Sets the duration the consumer will poll kafka for each consume. Cannot be null.
          *
          * @param millis The number of milliseconds to poll for.
-         * @return This instance of {@link RunnableConsumerImpl.Builder}
+         * @return This instance of <code>Builder</code>.
          */
-        public final Builder<T> setPollTimeMillis(final int millis) {
+        public final Builder<T, V> setPollTimeMillis(final int millis) {
             _pollTime = Duration.ofMillis(millis);
             return this;
         }
 
+        /**
+         * Sets <code>Parser</code>. Cannot be null.
+         *
+         * @param value The <code>Parser</code>.
+         * @return This instance of <code>Builder</code>.
+         */
+        public final Builder<T, V> setParser(final Parser<T, V> value) {
+            _parser = value;
+            return this;
+        }
+
         @Override
-        protected Builder<T> self() {
+        protected Builder<T, V> self() {
             return this;
         }
 
         @NotNull
-        private Consumer<?, T> _consumer;
+        private Consumer<?, V> _consumer;
         @NotNull
         private Duration _pollTime;
+        @NotNull
+        private Parser<T, V> _parser;
     }
 }

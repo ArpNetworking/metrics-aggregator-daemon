@@ -1,0 +1,57 @@
+/*
+ * Copyright 2019 Dropbox.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.arpnetworking.test;
+
+import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.metrics.common.parsers.Parser;
+import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+
+/**
+ * Trivial <code>Parser</code> that converts Strings to Strings.
+ *
+ * @author Joey Jackson (jjackson at dropbox dot com)
+ */
+public class StringParser implements Parser<String, String> {
+
+    /**
+     * Public constructor.
+     *
+     * @param builder the builder for this class
+     */
+    StringParser(final StringParser.Builder builder) {
+
+    }
+
+    @Override
+    public String parse(final String data) throws ParsingException {
+        return data;
+    }
+
+    /**
+     * Builder pattern class for <code>StringParser</code>.
+     *
+     * @author Joey Jackson (jjackson at dropbox dot com)
+     */
+    public static class Builder extends OvalBuilder<StringParser> {
+
+        /**
+         * Public constructor.
+         */
+        public Builder() {
+            super(StringParser::new);
+        }
+    }
+}

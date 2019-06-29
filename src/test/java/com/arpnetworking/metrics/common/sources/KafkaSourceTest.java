@@ -16,8 +16,12 @@
 package com.arpnetworking.metrics.common.sources;
 
 import com.arpnetworking.commons.observer.Observer;
+import com.arpnetworking.metrics.common.parsers.Parser;
+import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
+import com.arpnetworking.test.StringParser;
+import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -42,7 +46,7 @@ import java.util.Map;
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public class KafkaSourceTest {
-    private KafkaSource<String> _source;
+    private KafkaSource<String, String> _source;
     private static final List<String> EXPECTED = Arrays.asList("value0", "value1", "value2");
     private static final String TOPIC = "test_topic";
     private static final int PARTITION = 0;
@@ -95,6 +99,14 @@ public class KafkaSourceTest {
         _source.stop();
     }
 
+    @Test
+    public void testSourceParsingException() throws ParsingException {
+        createBadParsingSource();
+        _source.start();
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Failed to parse data");
+        _source.stop();
+    }
+
     private void createHealthySource() {
         final MockConsumer<String, String> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
         consumer.assign(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
@@ -107,9 +119,10 @@ public class KafkaSourceTest {
             consumer.addRecord(new ConsumerRecord<>(TOPIC, PARTITION, offset++, "" + offset, value));
         }
 
-        _source = new KafkaSource.Builder<String>()
+        _source = new KafkaSource.Builder<String, String>()
                 .setName("KafkaSource")
                 .setConsumer(consumer)
+                .setParser(new StringParser.Builder().build())
                 .setPollTimeMillis(POLL_TIME_MILLIS)
                 .build();
     }
@@ -123,9 +136,32 @@ public class KafkaSourceTest {
         Mockito.when(consumer.poll(Mockito.any()))
                 .thenReturn(new ConsumerRecords<>(records))
                 .thenThrow(exception);
-        _source = new KafkaSource<>(new KafkaSource.Builder<String>()
+        _source = new KafkaSource<>(new KafkaSource.Builder<String, String>()
                 .setName("KafkaSource")
                 .setConsumer(consumer)
+                .setParser(new StringParser.Builder().build())
+                .setPollTimeMillis(POLL_TIME_MILLIS),
+                _logger);
+    }
+
+    private void createBadParsingSource() throws ParsingException {
+        final MockConsumer<String, String> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
+        consumer.assign(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
+        long offset = 0L;
+        final Map<TopicPartition, Long> beginningOffsets = Maps.newHashMap();
+        beginningOffsets.put(new TopicPartition(TOPIC, PARTITION), offset);
+        consumer.updateBeginningOffsets(beginningOffsets);
+
+        consumer.addRecord(new ConsumerRecord<>(TOPIC, PARTITION, offset++, "" + offset, "bad_data"));
+
+        final Parser<String, String> parser = Mockito.mock(StringParser.class);
+        Mockito.when(parser.parse(Mockito.anyString()))
+                .thenThrow(new ParsingException("Could not parse data", "bad_data".getBytes(Charsets.UTF_8)));
+
+        _source = new KafkaSource<>(new KafkaSource.Builder<String, String>()
+                .setName("KafkaSource")
+                .setConsumer(consumer)
+                .setParser(parser)
                 .setPollTimeMillis(POLL_TIME_MILLIS),
                 _logger);
     }

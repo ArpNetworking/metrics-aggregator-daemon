@@ -21,18 +21,18 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
  * Interface for classes that handle the records polled by a kafka
  * <code>Consumer</code>.
  *
- * @param <T> the type of the value in the consumer records being handled
+ * @param <V> the type of the values in kafka <code>ConsumerRecords</code> being handled
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
-public interface ConsumerListener<T> {
+public interface ConsumerListener<V> {
 
     /**
      * Handles a consumer record from the consumer.
      *
      * @param record the consumer record to be handled
      */
-    void handle(ConsumerRecord<?, T> record);
+    void handle(ConsumerRecord<?, V> record);
 
     /**
      * Handles a throwable from the consumer.

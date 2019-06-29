@@ -29,18 +29,18 @@ import java.time.Duration;
  * A runnable wrapper for a <code>Consumer</code> that will continually poll
  * the consumer.
  *
- * @param <T> the type of the values pulled from kafka records
+ * @param <V> the type of the values in kafka <code>ConsumerRecords</code>
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
-public class RunnableConsumerImpl<T> implements RunnableConsumer {
-    private ConsumerListener<T> _listener;
-    private Consumer<?, T> _consumer;
+public class RunnableConsumerImpl<V> implements RunnableConsumer {
+    private ConsumerListener<V> _listener;
+    private Consumer<?, V> _consumer;
     private Duration _pollTime;
     private volatile boolean _isRunning;
     private static final Logger LOGGER = LoggerFactory.getLogger(RunnableConsumerImpl.class);
 
-    /* package private */ RunnableConsumerImpl(final Builder<T> builder) {
+    /* package private */ RunnableConsumerImpl(final Builder<V> builder) {
         _consumer = builder._consumer;
         _listener = builder._listener;
         _pollTime = builder._pollTime;
@@ -57,9 +57,9 @@ public class RunnableConsumerImpl<T> implements RunnableConsumer {
 
         while (isRunning()) {
             try {
-                final ConsumerRecords<?, T> records = _consumer.poll(_pollTime);
+                final ConsumerRecords<?, V> records = _consumer.poll(_pollTime);
 
-                for (ConsumerRecord<?, T> record : records) {
+                for (ConsumerRecord<?, V> record : records) {
                     _listener.handle(record);
                 }
             // CHECKSTYLE.OFF: IllegalCatch - Allow clients to decide how to handle exceptions
@@ -87,18 +87,18 @@ public class RunnableConsumerImpl<T> implements RunnableConsumer {
     /**
      * Implementation of builder pattern for <code>RunnableConsumerImpl</code>.
      *
-     * @param <T> the type of the values pulled from kafka records
+     * @param <V> the type of the values pulled from kafka records
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
-    public static class Builder<T> extends OvalBuilder<RunnableConsumerImpl<T>> {
+    public static class Builder<V> extends OvalBuilder<RunnableConsumerImpl<V>> {
 
         /**
          * Public constructor.
          */
         public Builder() {
-            super((java.util.function.Function<RunnableConsumerImpl.Builder<T>,
-                    RunnableConsumerImpl<T>>) RunnableConsumerImpl::new);
+            super((java.util.function.Function<RunnableConsumerImpl.Builder<V>,
+                    RunnableConsumerImpl<V>>) RunnableConsumerImpl::new);
         }
 
         /**
@@ -107,7 +107,7 @@ public class RunnableConsumerImpl<T> implements RunnableConsumer {
          * @param listener The <code>ConsumerListener</code> instance.
          * @return This instance of {@link RunnableConsumerImpl.Builder}
          */
-        public RunnableConsumerImpl.Builder<T> setListener(final ConsumerListener<T> listener) {
+        public RunnableConsumerImpl.Builder<V> setListener(final ConsumerListener<V> listener) {
             _listener = listener;
             return this;
         }
@@ -118,7 +118,7 @@ public class RunnableConsumerImpl<T> implements RunnableConsumer {
          * @param consumer The <code>Consumer</code> instance.
          * @return This instance of {@link RunnableConsumerImpl.Builder}
          */
-        public RunnableConsumerImpl.Builder<T> setConsumer(final Consumer<?, T> consumer) {
+        public RunnableConsumerImpl.Builder<V> setConsumer(final Consumer<?, V> consumer) {
             _consumer = consumer;
             return this;
         }
@@ -129,15 +129,15 @@ public class RunnableConsumerImpl<T> implements RunnableConsumer {
          * @param pollTime The <code>Duration</code> instance.
          * @return This instance of {@link RunnableConsumerImpl.Builder}
          */
-        public RunnableConsumerImpl.Builder<T> setPollTime(final Duration pollTime) {
+        public RunnableConsumerImpl.Builder<V> setPollTime(final Duration pollTime) {
             _pollTime = pollTime;
             return this;
         }
 
         @NotNull
-        private Consumer<?, T> _consumer;
+        private Consumer<?, V> _consumer;
         @NotNull
-        private ConsumerListener<T> _listener;
+        private ConsumerListener<V> _listener;
         @NotNull
         private Duration _pollTime;
     }
