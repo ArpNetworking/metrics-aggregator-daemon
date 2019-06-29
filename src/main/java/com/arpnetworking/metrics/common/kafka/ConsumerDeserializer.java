@@ -66,7 +66,6 @@ public class ConsumerDeserializer<K, V> extends JsonDeserializer<Consumer<K, V>>
         }
 
         final ObjectMapper mapper = ObjectMapperFactory.getInstance();
-
         final TypeReference<Map<String, String>> configsType = new TypeReference<Map<String, String>>() {};
         final TypeReference<List<String>> topicsType = new TypeReference<List<String>>() {};
         final Map<String, Object> configs;
