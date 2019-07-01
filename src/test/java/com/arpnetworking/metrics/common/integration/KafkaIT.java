@@ -40,6 +40,7 @@ import org.apache.kafka.common.errors.OutOfOrderSequenceException;
 import org.apache.kafka.common.errors.ProducerFencedException;
 import org.apache.kafka.common.errors.TopicExistsException;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -238,8 +239,11 @@ public class KafkaIT {
             producer.commitTransaction();
         } catch (final ProducerFencedException | OutOfOrderSequenceException | AuthorizationException e) {
             producer.close();
+            Assert.fail("Failed sending records to kafka server");
         } catch (final KafkaException e) {
             producer.abortTransaction();
+            producer.close();
+            Assert.fail("Failed sending records to kafka server");
         }
         producer.close();
     }
