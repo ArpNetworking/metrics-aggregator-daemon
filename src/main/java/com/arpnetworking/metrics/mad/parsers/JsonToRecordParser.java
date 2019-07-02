@@ -22,9 +22,13 @@ import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.MetricType;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.arpnetworking.metrics.mad.model.json.Version2c;
 import com.arpnetworking.metrics.mad.model.json.Version2d;
 import com.arpnetworking.metrics.mad.model.json.Version2e;
@@ -35,9 +39,6 @@ import com.arpnetworking.metrics.mad.model.json.Version2g.CompositeUnit;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.Key;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -538,7 +539,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 final double value = Double.parseDouble(sample);
                 if (Double.isFinite(value)) {
                     return ThreadLocalBuilder.build(
-                            Quantity.Builder.class,
+                            DefaultQuantity.Builder.class,
                             b -> b.setValue(value));
                 } else {
                     // TODO(barp): Create a counter for invalid metrics [AINT-680]
@@ -561,7 +562,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
                 return ThreadLocalBuilder.build(
-                        Quantity.Builder.class,
+                        DefaultQuantity.Builder.class,
                         b -> b.setValue(sample.getValue())
                                 .setUnit(sample.getUnit().orElse(null)));
             } else {
@@ -582,7 +583,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
                 return ThreadLocalBuilder.build(
-                        Quantity.Builder.class,
+                        DefaultQuantity.Builder.class,
                         b -> b.setValue(sample.getValue())
                                 .setUnit(sample.getUnit().orElse(null)));
             } else {
@@ -603,7 +604,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
                 return ThreadLocalBuilder.build(
-                        Quantity.Builder.class,
+                        DefaultQuantity.Builder.class,
                         b -> b.setValue(sample.getValue())
                                 .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null)));
                         // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
@@ -627,7 +628,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
                 return ThreadLocalBuilder.build(
-                        Quantity.Builder.class,
+                        DefaultQuantity.Builder.class,
                         b -> b.setValue(sample.getValue())
                                 .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null)));
                         // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
@@ -655,7 +656,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                         : null;
 
                 return ThreadLocalBuilder.build(
-                        Quantity.Builder.class,
+                        DefaultQuantity.Builder.class,
                         b -> b.setValue(sample.getValue())
                                 .setUnit(getLegacyUnit(sampleUnit)));
                 // TODO(vkoskela): Support compound units in Tsd Aggregator

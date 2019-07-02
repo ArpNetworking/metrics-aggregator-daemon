@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.tsdcore.model;
 
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;

@@ -22,12 +22,12 @@ import com.arpnetworking.commons.uuidfactory.UuidFactory;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.model.json.Telegraf;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -144,7 +144,7 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
                                         b1 -> b1.setType(MetricType.TIMER)
                                                 .setValues(ImmutableList.of(
                                                         ThreadLocalBuilder.build(
-                                                                Quantity.Builder.class,
+                                                                DefaultQuantity.Builder.class,
                                                                 b2 -> b2.setValue(value))))));
                     }
                 }

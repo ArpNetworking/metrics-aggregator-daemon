@@ -16,8 +16,8 @@
 package com.arpnetworking.test;
 
 import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 

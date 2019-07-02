@@ -16,16 +16,17 @@
 package com.arpnetworking.test;
 
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.MetricType;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.Key;
-import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.common.base.Function;
@@ -86,7 +87,7 @@ public final class TestBeanFactory {
     public static DefaultMetric.Builder createMetricBuilder() {
         return new DefaultMetric.Builder()
                 .setType(MetricType.COUNTER)
-                .setValues(ImmutableList.of(new Quantity.Builder()
+                .setValues(ImmutableList.of(new DefaultQuantity.Builder()
                         .setValue(1.23d)
                         .build()));
     }
@@ -154,8 +155,8 @@ public final class TestBeanFactory {
      *
      * @return New builder for reasonable pseudo-random <code>Quantity</code>.
      */
-    public static Quantity.Builder createSampleBuilder() {
-        return new Quantity.Builder().setValue(Math.random()).setUnit(Unit.BIT);
+    public static DefaultQuantity.Builder createSampleBuilder() {
+        return new DefaultQuantity.Builder().setValue(Math.random()).setUnit(Unit.BIT);
     }
 
     /**
@@ -164,7 +165,7 @@ public final class TestBeanFactory {
      * @return New reasonable pseudo-random <code>Quantity</code>.
      */
     public static Quantity createSample() {
-        return new Quantity.Builder().setValue(Math.random()).setUnit(Unit.BIT).build();
+        return new DefaultQuantity.Builder().setValue(Math.random()).setUnit(Unit.BIT).build();
     }
 
     /**
@@ -180,7 +181,7 @@ public final class TestBeanFactory {
     }
 
     private static final Function<Double, Quantity> CREATE_SAMPLE =
-            input -> new Quantity.Builder().setValue(input).setUnit(Unit.MILLISECOND).build();
+            input -> new DefaultQuantity.Builder().setValue(input).setUnit(Unit.MILLISECOND).build();
 
     private TestBeanFactory() {}
 

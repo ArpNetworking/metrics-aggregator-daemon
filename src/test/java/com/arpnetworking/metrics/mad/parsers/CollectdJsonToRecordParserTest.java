@@ -17,12 +17,13 @@ package com.arpnetworking.metrics.mad.parsers;
 
 import akka.util.ByteString;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.MetricType;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.Key;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.io.Resources;
 import org.junit.Assert;
@@ -56,7 +57,7 @@ public class CollectdJsonToRecordParserTest {
                 "cpu/0/cpu/wait",
                 MetricType.COUNTER,
                 Collections.singletonList(
-                        new Quantity.Builder()
+                        new DefaultQuantity.Builder()
                                 .setValue(0.0)
                                 .build()));
         verifyMetric(records,
@@ -64,7 +65,7 @@ public class CollectdJsonToRecordParserTest {
                 "vmem/vmpage_number/file_pages",
                 MetricType.GAUGE,
                 Collections.singletonList(
-                        new Quantity.Builder()
+                        new DefaultQuantity.Builder()
                                 .setValue(944937.0)
                                 .build()));
         verifyMetric(records,
@@ -72,7 +73,7 @@ public class CollectdJsonToRecordParserTest {
                 "vmem/vmpage_number/dirty",
                 MetricType.GAUGE,
                 Collections.singletonList(
-                        new Quantity.Builder()
+                        new DefaultQuantity.Builder()
                                 .setValue(6463.0)
                                 .build()));
         verifyMetric(records,
@@ -80,7 +81,7 @@ public class CollectdJsonToRecordParserTest {
                 "vmem/vmpage_number/writeback",
                 MetricType.GAUGE,
                 Collections.singletonList(
-                        new Quantity.Builder()
+                        new DefaultQuantity.Builder()
                                 .setValue(0.0)
                                 .build()));
     }

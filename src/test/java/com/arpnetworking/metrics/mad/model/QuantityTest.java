@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.tsdcore.model;
+package com.arpnetworking.metrics.mad.model;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,7 +29,7 @@ public class QuantityTest {
     public void testConstructor() {
         final double expectedValue = 1.23f;
         final Unit expectedUnit = Unit.BYTE;
-        final Quantity sample = new Quantity.Builder()
+        final Quantity sample = new DefaultQuantity.Builder()
                 .setValue(expectedValue)
                 .setUnit(expectedUnit)
                 .build();
@@ -40,19 +40,19 @@ public class QuantityTest {
 
     @Test
     public void testCompare() {
-        final Quantity sample1 = new Quantity.Builder()
+        final DefaultQuantity sample1 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABYTE)
                 .build();
-        final Quantity sample2 = new Quantity.Builder()
+        final DefaultQuantity sample2 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABYTE)
                 .build();
-        final Quantity sample3 = new Quantity.Builder()
+        final DefaultQuantity sample3 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABIT)
                 .build();
-        final Quantity sample4 = new Quantity.Builder()
+        final DefaultQuantity sample4 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.TERABYTE)
                 .build();
@@ -62,13 +62,13 @@ public class QuantityTest {
         Assert.assertEquals(1, sample1.compareTo(sample3));
         Assert.assertEquals(-1, sample1.compareTo(sample4));
 
-        final Quantity sample5 = new Quantity.Builder()
+        final DefaultQuantity sample5 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .build();
-        final Quantity sample6 = new Quantity.Builder()
+        final DefaultQuantity sample6 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .build();
-        final Quantity sample7 = new Quantity.Builder()
+        final DefaultQuantity sample7 = new DefaultQuantity.Builder()
                 .setValue(2.46d)
                 .build();
 
@@ -79,11 +79,11 @@ public class QuantityTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCompareFailureAbsent() {
-        final Quantity sample1 = new Quantity.Builder()
+        final DefaultQuantity sample1 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABYTE)
                 .build();
-        final Quantity sample2 = new Quantity.Builder()
+        final DefaultQuantity sample2 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .build();
         sample1.compareTo(sample2);
@@ -91,11 +91,11 @@ public class QuantityTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCompareFailureAbsentReverse() {
-        final Quantity sample1 = new Quantity.Builder()
+        final DefaultQuantity sample1 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABYTE)
                 .build();
-        final Quantity sample2 = new Quantity.Builder()
+        final DefaultQuantity sample2 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .build();
         sample2.compareTo(sample1);
@@ -103,11 +103,11 @@ public class QuantityTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCompareFailureDifferentDomains() {
-        final Quantity sample1 = new Quantity.Builder()
+        final DefaultQuantity sample1 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABYTE)
                 .build();
-        final Quantity sample2 = new Quantity.Builder()
+        final DefaultQuantity sample2 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.SECOND)
                 .build();
@@ -116,11 +116,11 @@ public class QuantityTest {
 
     @Test
     public void testHash() {
-        final Quantity sample1 = new Quantity.Builder()
+        final Quantity sample1 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABYTE)
                 .build();
-        final Quantity sample2 = new Quantity.Builder()
+        final Quantity sample2 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABYTE)
                 .build();
@@ -130,23 +130,23 @@ public class QuantityTest {
 
     @Test
     public void testEquality() {
-        final Quantity sample1 = new Quantity.Builder()
+        final Quantity sample1 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABYTE)
                 .build();
-        final Quantity sample2 = new Quantity.Builder()
+        final Quantity sample2 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABYTE)
                 .build();
-        final Quantity sample3 = new Quantity.Builder()
+        final Quantity sample3 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABIT)
                 .build();
-        final Quantity sample4 = new Quantity.Builder()
+        final Quantity sample4 = new DefaultQuantity.Builder()
                 .setValue(2.46d)
                 .setUnit(Unit.GIGABYTE)
                 .build();
-        final Quantity sample5 = new Quantity.Builder()
+        final Quantity sample5 = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .build();
 
@@ -162,7 +162,7 @@ public class QuantityTest {
 
     @Test
     public void testToString() {
-        final Quantity sample = new Quantity.Builder()
+        final Quantity sample = new DefaultQuantity.Builder()
                 .setValue(1.23d)
                 .setUnit(Unit.GIGABYTE)
                 .build();
@@ -172,10 +172,10 @@ public class QuantityTest {
 
     @Test
     public void testAddQuantities() {
-        final Quantity quantity1 = new Quantity.Builder()
+        final Quantity quantity1 = new DefaultQuantity.Builder()
                 .setValue(5.0)
                 .build();
-        final Quantity quantity2 = new Quantity.Builder()
+        final DefaultQuantity quantity2 = new DefaultQuantity.Builder()
                 .setValue(10.0)
                 .build();
         final Quantity result = quantity1.add(quantity2);
@@ -184,11 +184,11 @@ public class QuantityTest {
 
     @Test
     public void testAddQuantitiesUnits() {
-        final Quantity quantity1 = new Quantity.Builder()
+        final Quantity quantity1 = new DefaultQuantity.Builder()
                 .setValue(5.0)
                 .setUnit(Unit.SECOND)
                 .build();
-        final Quantity quantity2 = new Quantity.Builder()
+        final DefaultQuantity quantity2 = new DefaultQuantity.Builder()
                 .setValue(10.0)
                 .setUnit(Unit.MILLISECOND)
                 .build();
@@ -199,11 +199,11 @@ public class QuantityTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testAddQuantitiesUnitsMismatch() {
-        final Quantity quantity1 = new Quantity.Builder()
+        final Quantity quantity1 = new DefaultQuantity.Builder()
                 .setValue(5.0)
                 .setUnit(Unit.SECOND)
                 .build();
-        final Quantity quantity2 = new Quantity.Builder()
+        final DefaultQuantity quantity2 = new DefaultQuantity.Builder()
                 .setValue(10.0)
                 .setUnit(Unit.BYTE)
                 .build();
@@ -212,11 +212,11 @@ public class QuantityTest {
 
     @Test(expected = IllegalStateException.class)
     public void testAddQuantitiesUnitsMismatchExist() {
-        final Quantity quantity1 = new Quantity.Builder()
+        final Quantity quantity1 = new DefaultQuantity.Builder()
                 .setValue(5.0)
                 .setUnit(Unit.SECOND)
                 .build();
-        final Quantity quantity2 = new Quantity.Builder()
+        final DefaultQuantity quantity2 = new DefaultQuantity.Builder()
                 .setValue(10.0)
                 .build();
         quantity1.add(quantity2);
@@ -224,10 +224,10 @@ public class QuantityTest {
 
     @Test
     public void testSubQuantities() {
-        final Quantity quantity1 = new Quantity.Builder()
+        final Quantity quantity1 = new DefaultQuantity.Builder()
                 .setValue(10.0)
                 .build();
-        final Quantity quantity2 = new Quantity.Builder()
+        final DefaultQuantity quantity2 = new DefaultQuantity.Builder()
                 .setValue(5.0)
                 .build();
         final Quantity result = quantity1.subtract(quantity2);
@@ -236,11 +236,11 @@ public class QuantityTest {
 
     @Test
     public void testSubQuantitiesUnits() {
-        final Quantity quantity1 = new Quantity.Builder()
+        final Quantity quantity1 = new DefaultQuantity.Builder()
                 .setValue(5.0)
                 .setUnit(Unit.SECOND)
                 .build();
-        final Quantity quantity2 = new Quantity.Builder()
+        final DefaultQuantity quantity2 = new DefaultQuantity.Builder()
                 .setValue(10.0)
                 .setUnit(Unit.MILLISECOND)
                 .build();
@@ -251,11 +251,11 @@ public class QuantityTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testSubQuantitiesUnitsMismatch() {
-        final Quantity quantity1 = new Quantity.Builder()
+        final Quantity quantity1 = new DefaultQuantity.Builder()
                 .setValue(5.0)
                 .setUnit(Unit.SECOND)
                 .build();
-        final Quantity quantity2 = new Quantity.Builder()
+        final DefaultQuantity quantity2 = new DefaultQuantity.Builder()
                 .setValue(10.0)
                 .setUnit(Unit.BYTE)
                 .build();
@@ -264,11 +264,11 @@ public class QuantityTest {
 
     @Test(expected = IllegalStateException.class)
     public void testSubQuantitiesUnitsMismatchExist() {
-        final Quantity quantity1 = new Quantity.Builder()
+        final Quantity quantity1 = new DefaultQuantity.Builder()
                 .setValue(5.0)
                 .setUnit(Unit.SECOND)
                 .build();
-        final Quantity quantity2 = new Quantity.Builder()
+        final DefaultQuantity quantity2 = new DefaultQuantity.Builder()
                 .setValue(10.0)
                 .build();
         quantity1.subtract(quantity2);

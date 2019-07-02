@@ -15,8 +15,9 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.arpnetworking.tsdcore.model.Quantity;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -74,68 +75,68 @@ public class TPStatisticTest {
     public void testTP75Accumulator() {
         final Accumulator<?> accumulator = (Accumulator<?>) HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 1; x <= 10000; ++x) {
-            accumulator.accumulate(new Quantity.Builder().setValue((double) x).build());
+            accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) x).build());
         }
         final CalculatedValue<Void> calculated = TP75_STATISTIC.createCalculator().calculate(
                 Collections.singletonMap(HISTOGRAM_STATISTIC, accumulator));
-        Assert.assertTrue(areClose(new Quantity.Builder().setValue(7500.0).build(), calculated.getValue()));
+        Assert.assertTrue(areClose(new DefaultQuantity.Builder().setValue(7500.0).build(), calculated.getValue()));
     }
 
     @Test
     public void testTP90Accumulator() {
         final Accumulator<?> accumulator = (Accumulator<?>) HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 1; x <= 10000; ++x) {
-            accumulator.accumulate(new Quantity.Builder().setValue((double) x).build());
+            accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) x).build());
         }
         final CalculatedValue<Void> calculated = TP90_STATISTIC.createCalculator().calculate(
                 Collections.singletonMap(HISTOGRAM_STATISTIC, accumulator));
-        Assert.assertTrue(areClose(new Quantity.Builder().setValue(9000.0).build(), calculated.getValue()));
+        Assert.assertTrue(areClose(new DefaultQuantity.Builder().setValue(9000.0).build(), calculated.getValue()));
     }
 
     @Test
     public void testTP95Accumulator() {
         final Accumulator<?> accumulator = (Accumulator<?>) HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 1; x <= 10000; ++x) {
-            accumulator.accumulate(new Quantity.Builder().setValue((double) x).build());
+            accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) x).build());
         }
         final CalculatedValue<?> calculated = TP95_STATISTIC.createCalculator().calculate(
                 Collections.singletonMap(HISTOGRAM_STATISTIC, accumulator));
-        Assert.assertTrue(areClose(new Quantity.Builder().setValue(9500.0).build(), calculated.getValue()));
+        Assert.assertTrue(areClose(new DefaultQuantity.Builder().setValue(9500.0).build(), calculated.getValue()));
     }
 
     @Test
     public void testTP99Accumulator() {
         final Accumulator<?> accumulator = (Accumulator<?>) HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 1; x <= 10000; ++x) {
-            accumulator.accumulate(new Quantity.Builder().setValue((double) x).build());
+            accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) x).build());
         }
         final CalculatedValue<?> calculated = TP99_STATISTIC.createCalculator().calculate(
                 Collections.singletonMap(HISTOGRAM_STATISTIC, accumulator));
-        Assert.assertTrue(areClose(new Quantity.Builder().setValue(9900.0).build(), calculated.getValue()));
+        Assert.assertTrue(areClose(new DefaultQuantity.Builder().setValue(9900.0).build(), calculated.getValue()));
     }
 
     @Test
     public void testTP99p9Accumulator() {
         final Accumulator<?> accumulator = (Accumulator<?>) HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 1; x <= 10000; ++x) {
-            accumulator.accumulate(new Quantity.Builder().setValue((double) x).build());
+            accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) x).build());
         }
         final CalculatedValue<?> calculated = TP99P9_STATISTIC.createCalculator().calculate(
                 Collections.singletonMap(HISTOGRAM_STATISTIC, accumulator));
-        Assert.assertTrue(areClose(new Quantity.Builder().setValue(9990.0).build(), calculated.getValue()));
+        Assert.assertTrue(areClose(new DefaultQuantity.Builder().setValue(9990.0).build(), calculated.getValue()));
     }
     @Test
     public void testTP99p9AccumulatorBiModal() {
         final Accumulator<?> accumulator = (Accumulator<?>) HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 1; x <= 9900; ++x) {
-            accumulator.accumulate(new Quantity.Builder().setValue((double) 10).build());
+            accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) 10).build());
         }
         for (int x = 1; x <= 100; ++x) {
-            accumulator.accumulate(new Quantity.Builder().setValue((double) 100).build());
+            accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) 100).build());
         }
         final CalculatedValue<?> calculated = TP99P9_STATISTIC.createCalculator().calculate(
                 Collections.singletonMap(HISTOGRAM_STATISTIC, accumulator));
-        Assert.assertTrue(areClose(new Quantity.Builder().setValue(100.0).build(), calculated.getValue()));
+        Assert.assertTrue(areClose(new DefaultQuantity.Builder().setValue(100.0).build(), calculated.getValue()));
     }
 
     private boolean areClose(final Quantity expected, final Quantity actual) {

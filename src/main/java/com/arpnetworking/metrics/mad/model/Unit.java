@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.tsdcore.model;
+package com.arpnetworking.metrics.mad.model;
 
 import com.google.common.collect.Maps;
 
@@ -33,35 +33,35 @@ public enum Unit {
     /**
      * Nanoseconds.
      */
-    NANOSECOND(1L, Type.TIME),
+    NANOSECOND(1L, UnitType.TIME),
     /**
      * Microseconds.
      */
-    MICROSECOND(1000L, Type.TIME),
+    MICROSECOND(1000L, UnitType.TIME),
     /**
      * Milliseconds.
      */
-    MILLISECOND(1000L * 1000, Type.TIME),
+    MILLISECOND(1000L * 1000, UnitType.TIME),
     /**
      * Seconds.
      */
-    SECOND(1000L * 1000 * 1000, Type.TIME),
+    SECOND(1000L * 1000 * 1000, UnitType.TIME),
     /**
      * Minutes.
      */
-    MINUTE(1000L * 1000 * 1000 * 60, Type.TIME),
+    MINUTE(1000L * 1000 * 1000 * 60, UnitType.TIME),
     /**
      * Hours.
      */
-    HOUR(1000L * 1000 * 1000 * 60 * 60, Type.TIME),
+    HOUR(1000L * 1000 * 1000 * 60 * 60, UnitType.TIME),
     /**
      * Days.
      */
-    DAY(1000L * 1000 * 1000 * 60 * 60 * 24, Type.TIME),
+    DAY(1000L * 1000 * 1000 * 60 * 60 * 24, UnitType.TIME),
     /**
      * Weeks.
      */
-    WEEK(1000L * 1000 * 1000 * 60 * 60 * 24 * 7, Type.TIME),
+    WEEK(1000L * 1000 * 1000 * 60 * 60 * 24 * 7, UnitType.TIME),
 
     /***************************************************************************
      * Data Size
@@ -69,51 +69,51 @@ public enum Unit {
     /**
      * Bits.
      */
-    BIT(1L, Type.DATA_SIZE),
+    BIT(1L, UnitType.DATA_SIZE),
     /**
      * Bytes.
      */
-    BYTE(8L, Type.DATA_SIZE),
+    BYTE(8L, UnitType.DATA_SIZE),
     /**
      * Kilobits.
      */
-    KILOBIT(1024L, Type.DATA_SIZE),
+    KILOBIT(1024L, UnitType.DATA_SIZE),
     /**
      * Megabits.
      */
-    MEGABIT(1024L * 1024, Type.DATA_SIZE),
+    MEGABIT(1024L * 1024, UnitType.DATA_SIZE),
     /**
      * Gigabits.
      */
-    GIGABIT(1024L * 1024 * 1024, Type.DATA_SIZE),
+    GIGABIT(1024L * 1024 * 1024, UnitType.DATA_SIZE),
     /**
      * Terabits.
      */
-    TERABIT(1024L * 1024 * 1024 * 1024, Type.DATA_SIZE),
+    TERABIT(1024L * 1024 * 1024 * 1024, UnitType.DATA_SIZE),
     /**
      * Petabits.
      */
-    PETABIT(1024L * 1024 * 1024 * 1024 * 1024, Type.DATA_SIZE),
+    PETABIT(1024L * 1024 * 1024 * 1024 * 1024, UnitType.DATA_SIZE),
     /**
      * Kilobytes.
      */
-    KILOBYTE(1000L * 8, Type.DATA_SIZE),
+    KILOBYTE(1000L * 8, UnitType.DATA_SIZE),
     /**
      * Megabytes.
      */
-    MEGABYTE(1000L * 1000 * 8, Type.DATA_SIZE),
+    MEGABYTE(1000L * 1000 * 8, UnitType.DATA_SIZE),
     /**
      * Gigabytes.
      */
-    GIGABYTE(1000L * 1000 * 1000 * 8, Type.DATA_SIZE),
+    GIGABYTE(1000L * 1000 * 1000 * 8, UnitType.DATA_SIZE),
     /**
      * Terabytes.
      */
-    TERABYTE(1000L * 1000 * 1000 * 1000 * 8, Type.DATA_SIZE),
+    TERABYTE(1000L * 1000 * 1000 * 1000 * 8, UnitType.DATA_SIZE),
     /**
      * Petabytes.
      */
-    PETABYTE(1000L * 1000 * 1000 * 1000 * 1000 * 8, Type.DATA_SIZE),
+    PETABYTE(1000L * 1000 * 1000 * 1000 * 1000 * 8, UnitType.DATA_SIZE),
 
     /***************************************************************************
      * Temperature
@@ -121,7 +121,7 @@ public enum Unit {
     /**
      * Kelvin.
      */
-    KELVIN(1L, Type.TEMPERATURE) {
+    KELVIN(1L, UnitType.TEMPERATURE) {
         @Override
         public double convert(final double sourceValue, final Unit sourceUnit) {
             assertSameType(this, sourceUnit);
@@ -138,7 +138,7 @@ public enum Unit {
     /**
      * Celcius.
      */
-    CELCIUS(2L, Type.TEMPERATURE) {
+    CELCIUS(2L, UnitType.TEMPERATURE) {
         @Override
         public double convert(final double sourceValue, final Unit sourceUnit) {
             assertSameType(this, sourceUnit);
@@ -155,7 +155,7 @@ public enum Unit {
     /**
      * Fahrenheit.
      */
-    FAHRENHEIT(3L, Type.TEMPERATURE) {
+    FAHRENHEIT(3L, UnitType.TEMPERATURE) {
         @Override
         public double convert(final double sourceValue, final Unit sourceUnit) {
             assertSameType(this, sourceUnit);
@@ -170,12 +170,12 @@ public enum Unit {
         }
     };
 
-    Unit(final long scale, final Type type) {
+    Unit(final long scale, final UnitType type) {
         _scale = scale;
         _type = type;
     }
 
-    public Type getType() {
+    public UnitType getType() {
         return _type;
     }
 
@@ -260,9 +260,9 @@ public enum Unit {
     }
 
     private final double _scale;
-    private final Type _type;
+    private final UnitType _type;
 
-    private static final Map<Type, Unit> SMALLEST_UNIT_BY_TYPE = Maps.newHashMap();
+    private static final Map<UnitType, Unit> SMALLEST_UNIT_BY_TYPE = Maps.newHashMap();
 
     static {
         for (final Unit unit : Unit.values()) {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.tsdcore.model;
+package com.arpnetworking.metrics.mad.model;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
@@ -21,116 +21,91 @@ import com.google.common.base.MoreObjects;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
 
-import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Represents a sample.
+ * Default sample implementation.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
 @Loggable
-public final class Quantity implements Comparable<Quantity>, Serializable {
+public final class DefaultQuantity implements Quantity {
 
+    @Override
     public double getValue() {
         return _value;
     }
 
+    @Override
     public Optional<Unit> getUnit() {
         return _unit;
     }
 
-    /**
-     * Add this <code>Quantity</code> to the specified one returning the
-     * result. Both <code>Quantity</code> instances must either not have a
-     * <code>Unit</code> or the <code>Unit</code> must be of the same type.
-     *
-     * @param otherQuantity The other <code>Quantity</code>.
-     * @return The resulting sum <code>Quantity</code>.
-     */
+    @Override
     public Quantity add(final Quantity otherQuantity) {
-        if (_unit.isPresent() != otherQuantity._unit.isPresent()) {
+        if (_unit.isPresent() != otherQuantity.getUnit().isPresent()) {
             throw new IllegalStateException(String.format(
                     "Units must both be present or absent; thisQuantity=%s otherQuantity=%s",
                     this,
                     otherQuantity));
         }
-        if (Objects.equals(_unit, otherQuantity._unit)) {
-            return new Quantity(_value + otherQuantity._value, _unit);
+        if (Objects.equals(_unit, otherQuantity.getUnit())) {
+            return new DefaultQuantity(_value + otherQuantity.getValue(), _unit);
         }
         final Unit smallerUnit = _unit.get().getSmallerUnit(otherQuantity.getUnit().get());
-        return new Quantity(
+        return new DefaultQuantity(
                 smallerUnit.convert(_value, _unit.get())
-                        + smallerUnit.convert(otherQuantity._value, otherQuantity._unit.get()),
+                        + smallerUnit.convert(otherQuantity.getValue(), otherQuantity.getUnit().get()),
                 Optional.of(smallerUnit));
     }
 
-    /**
-     * Subtract the specified <code>Quantity</code> from this one returning
-     * the result. Both <code>Quantity</code> instances must either not have
-     * a <code>Unit</code> or the <code>Unit</code> must be of the same type.
-     *
-     * @param otherQuantity The other <code>Quantity</code>.
-     * @return The resulting difference <code>Quantity</code>.
-     */
+    @Override
     public Quantity subtract(final Quantity otherQuantity) {
-        if (_unit.isPresent() != otherQuantity._unit.isPresent()) {
+        if (_unit.isPresent() != otherQuantity.getUnit().isPresent()) {
             throw new IllegalStateException(String.format(
                     "Units must both be present or absent; thisQuantity=%s otherQuantity=%s",
                     this,
                     otherQuantity));
         }
-        if (Objects.equals(_unit, otherQuantity._unit)) {
-            return new Quantity(_value - otherQuantity._value, _unit);
+        if (Objects.equals(_unit, otherQuantity.getUnit())) {
+            return new DefaultQuantity(_value - otherQuantity.getValue(), _unit);
         }
         final Unit smallerUnit = _unit.get().getSmallerUnit(otherQuantity.getUnit().get());
-        return new Quantity(
+        return new DefaultQuantity(
                 smallerUnit.convert(_value, _unit.get())
-                        - smallerUnit.convert(otherQuantity._value, otherQuantity._unit.get()),
+                        - smallerUnit.convert(otherQuantity.getValue(), otherQuantity.getUnit().get()),
                 Optional.of(smallerUnit));
     }
 
-    /**
-     * Multiply this <code>Quantity</code> with the specified one returning
-     * the result.
-     *
-     * @param otherQuantity The other <code>Quantity</code>.
-     * @return The resulting product <code>Quantity</code>.
-     */
+    @Override
     public Quantity multiply(final Quantity otherQuantity) {
-        if (_unit.isPresent() && otherQuantity._unit.isPresent()) {
+        if (_unit.isPresent() && otherQuantity.getUnit().isPresent()) {
             throw new UnsupportedOperationException("Compound units not supported yet");
         }
-        return new Quantity(
-                _value * otherQuantity._value,
-                Optional.ofNullable(_unit.orElse(otherQuantity._unit.orElse(null))));
+        return new DefaultQuantity(
+                _value * otherQuantity.getValue(),
+                Optional.ofNullable(_unit.orElse(otherQuantity.getUnit().orElse(null))));
     }
 
-    /**
-     * Divide this <code>Quantity</code> by the specified one returning
-     * the result.
-     *
-     * @param otherQuantity The other <code>Quantity</code>.
-     * @return The resulting quotient <code>Quantity</code>.
-     */
+    @Override
     public Quantity divide(final Quantity otherQuantity) {
         // TODO(vkoskela): Support division by quantity with unit [2F].
-        if (otherQuantity._unit.isPresent()) {
+        if (otherQuantity.getUnit().isPresent()) {
             throw new UnsupportedOperationException("Compound units not supported yet");
         }
-        if (Objects.equals(_unit, otherQuantity._unit)) {
-            return new Quantity(_value / otherQuantity._value, Optional.empty());
+        if (Objects.equals(_unit, otherQuantity.getUnit())) {
+            return new DefaultQuantity(_value / otherQuantity.getValue(), Optional.empty());
         }
-        return new Quantity(
-                _value / otherQuantity._value,
+        return new DefaultQuantity(
+                _value / otherQuantity.getValue(),
                 _unit);
     }
 
     @Override
     public int compareTo(final Quantity other) {
-        if (other._unit.equals(_unit)) {
-            return Double.compare(_value, other._value);
+        if (other.getUnit().equals(_unit)) {
+            return Double.compare(_value, other.getValue());
         }
         throw new IllegalArgumentException(String.format(
                 "Cannot compare mismatched units; this=%s, other=%s",
@@ -148,14 +123,14 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Quantity)) {
+        if (!(o instanceof DefaultQuantity)) {
             return false;
         }
 
-        final Quantity sample = (Quantity) o;
+        final DefaultQuantity sample = (DefaultQuantity) o;
 
-        return Double.compare(sample._value, _value) == 0
-                && Objects.equals(_unit, sample._unit);
+        return Double.compare(sample.getValue(), _value) == 0
+                && Objects.equals(_unit, sample.getUnit());
     }
 
     @Override
@@ -167,11 +142,11 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
                 .toString();
     }
 
-    private Quantity(final Builder builder) {
+    private DefaultQuantity(final Builder builder) {
         this(builder._value, Optional.ofNullable(builder._unit));
     }
 
-    private Quantity(final double value, final Optional<Unit> unit) {
+    private DefaultQuantity(final double value, final Optional<Unit> unit) {
         _value = value;
         _unit = unit;
     }
@@ -185,13 +160,13 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
     /**
      * <code>Builder</code> implementation for <code>Quantity</code>.
      */
-    public static final class Builder extends ThreadLocalBuilder<Quantity> {
+    public static final class Builder extends ThreadLocalBuilder<DefaultQuantity> {
 
         /**
          * Public constructor.
          */
         public Builder() {
-            super((java.util.function.Function<Builder, Quantity>) Quantity::new);
+            super((java.util.function.Function<Builder, DefaultQuantity>) DefaultQuantity::new);
         }
 
         /**
@@ -199,10 +174,10 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
          *
          * @param quantity the <code>Quantity</code> to initialize from
          */
-        public Builder(final Quantity quantity) {
-            super((java.util.function.Function<Builder, Quantity>) Quantity::new);
-            _value = quantity._value;
-            _unit = quantity._unit.orElse(null);
+        public Builder(final DefaultQuantity quantity) {
+            super((java.util.function.Function<Builder, DefaultQuantity>) DefaultQuantity::new);
+            _value = quantity.getValue();
+            _unit = quantity.getUnit().orElse(null);
         }
 
         /**
@@ -228,9 +203,9 @@ public final class Quantity implements Comparable<Quantity>, Serializable {
         }
 
         @Override
-        public Quantity build() {
+        public DefaultQuantity build() {
             normalize();
-            return new Quantity(this);
+            return new DefaultQuantity(this);
         }
 
         @Override
