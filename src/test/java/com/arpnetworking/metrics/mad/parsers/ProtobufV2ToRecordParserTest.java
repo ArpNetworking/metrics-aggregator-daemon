@@ -18,11 +18,11 @@ package com.arpnetworking.metrics.mad.parsers;
 import akka.util.ByteString;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.io.Resources;
@@ -69,17 +69,17 @@ public final class ProtobufV2ToRecordParserTest {
         final Metric counter = metrics.get("counter1");
         Assert.assertNotNull(counter);
         Assert.assertEquals(1, counter.getValues().size());
-        Assert.assertEquals(new Quantity.Builder().setValue(1d).build(), counter.getValues().get(0));
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1d).build(), counter.getValues().get(0));
 
         final Metric timer = metrics.get("timer1");
         Assert.assertNotNull(timer);
         Assert.assertEquals(1, timer.getValues().size());
-        Assert.assertEquals(new Quantity.Builder().setUnit(Unit.MILLISECOND).setValue(508d).build(), timer.getValues().get(0));
+        Assert.assertEquals(new DefaultQuantity.Builder().setUnit(Unit.MILLISECOND).setValue(508d).build(), timer.getValues().get(0));
 
         final Metric longCounter = metrics.get("longCounter1");
         Assert.assertNotNull(longCounter);
         Assert.assertEquals(1, longCounter.getValues().size());
-        Assert.assertEquals(new Quantity.Builder().setValue(1d).build(), counter.getValues().get(0));
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1d).build(), counter.getValues().get(0));
     }
 
     private static List<Record> parseRecords(final String fileName) throws ParsingException, IOException {

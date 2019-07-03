@@ -18,10 +18,10 @@ package com.arpnetworking.metrics.mad.parsers;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
+import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -67,7 +67,7 @@ public final class StatsdToRecordParserTest {
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
                                         .setValues(ImmutableList.of(
-                                                new Quantity.Builder()
+                                                new DefaultQuantity.Builder()
                                                         .setValue(1.0)
                                                         .build()))
                                         .build()
@@ -90,7 +90,7 @@ public final class StatsdToRecordParserTest {
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.GAUGE)
                                         .setValues(ImmutableList.of(
-                                                new Quantity.Builder()
+                                                new DefaultQuantity.Builder()
                                                         .setValue(0.5)
                                                         .build()))
                                         .build()
@@ -114,7 +114,7 @@ public final class StatsdToRecordParserTest {
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.TIMER)
                                         .setValues(ImmutableList.of(
-                                                new Quantity.Builder()
+                                                new DefaultQuantity.Builder()
                                                         .setValue(240.0)
                                                         .build()))
                                         .build()
@@ -144,7 +144,7 @@ public final class StatsdToRecordParserTest {
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.TIMER)
                                         .setValues(ImmutableList.of(
-                                                new Quantity.Builder()
+                                                new DefaultQuantity.Builder()
                                                         .setValue(240.0)
                                                         .build()))
                                         .build()
@@ -179,7 +179,7 @@ public final class StatsdToRecordParserTest {
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
                                         .setValues(ImmutableList.of(
-                                                new Quantity.Builder()
+                                                new DefaultQuantity.Builder()
                                                         .setValue(1.0)
                                                         .build()))
                                         .build()
@@ -204,7 +204,7 @@ public final class StatsdToRecordParserTest {
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
                                         .setValues(ImmutableList.of(
-                                                new Quantity.Builder()
+                                                new DefaultQuantity.Builder()
                                                         .setValue(1.0)
                                                         .build()))
                                         .build()
@@ -240,7 +240,7 @@ public final class StatsdToRecordParserTest {
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.COUNTER)
                                         .setValues(ImmutableList.of(
-                                                new Quantity.Builder()
+                                                new DefaultQuantity.Builder()
                                                         .setValue(1.0)
                                                         .build()))
                                         .build()

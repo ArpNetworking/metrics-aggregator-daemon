@@ -18,8 +18,6 @@ package com.arpnetworking.metrics.mad.model;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
@@ -68,7 +66,7 @@ public final class DefaultMetric implements Metric {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", Integer.toHexString(System.identityHashCode(this)))
-                .add("Type", _type)
+                .add("UnitType", _type)
                 .add("Values", _values)
                 .toString();
     }

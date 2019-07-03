@@ -18,7 +18,9 @@ package com.arpnetworking.metrics.mad;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
@@ -27,7 +29,6 @@ import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Accumulator;
 import com.arpnetworking.tsdcore.statistics.Calculator;
@@ -274,7 +275,7 @@ import java.util.function.BiFunction;
                                 CalculatedValue.Builder.class,
                                 b -> b.setValue(
                                         ThreadLocalBuilder.build(
-                                                Quantity.Builder.class,
+                                                DefaultQuantity.Builder.class,
                                                 builder -> builder.setValue(-1.0))));
             }
 

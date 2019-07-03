@@ -19,13 +19,14 @@ import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.MetricType;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -91,13 +92,13 @@ public final class ProtobufV2ToRecordParser implements Parser<List<Record>, Http
                 if (quantity.getValueCase().equals(ClientV2.Quantity.ValueCase.DOUBLEVALUE)) {
                     quantities.add(
                             ThreadLocalBuilder.build(
-                                    Quantity.Builder.class,
+                                    DefaultQuantity.Builder.class,
                                     b -> b.setUnit(baseUnit(quantity.getUnit()))
                                             .setValue(quantity.getDoubleValue())));
                 } else if (quantity.getValueCase().equals(ClientV2.Quantity.ValueCase.LONGVALUE)) {
                     quantities.add(
                             ThreadLocalBuilder.build(
-                                    Quantity.Builder.class,
+                                    DefaultQuantity.Builder.class,
                                     b -> b.setUnit(baseUnit(quantity.getUnit()))
                                             .setValue((double) quantity.getLongValue())));
                 }

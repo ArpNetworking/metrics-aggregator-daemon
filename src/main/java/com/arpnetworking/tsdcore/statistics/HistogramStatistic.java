@@ -16,9 +16,10 @@
 package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
+import com.arpnetworking.metrics.mad.model.Quantity;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import it.unimi.dsi.fastutil.doubles.Double2IntAVLTreeMap;
 import it.unimi.dsi.fastutil.doubles.Double2IntMap;
 import it.unimi.dsi.fastutil.doubles.Double2IntSortedMap;
@@ -101,7 +102,7 @@ public final class HistogramStatistic extends BaseStatistic {
                             CalculatedValue.Builder.class,
                             b1 -> b1.setValue(
                                     ThreadLocalBuilder.build(
-                                            Quantity.Builder.class,
+                                            DefaultQuantity.Builder.class,
                                             b2 -> b2.setValue(1.0)))
                                     .setData(
                                             ThreadLocalBuilder.build(
@@ -119,7 +120,7 @@ public final class HistogramStatistic extends BaseStatistic {
         public Quantity calculate(final double percentile) {
             final HistogramSnapshot snapshot = _histogram.getSnapshot();
             return ThreadLocalBuilder.build(
-                    Quantity.Builder.class,
+                    DefaultQuantity.Builder.class,
                     b -> b.setValue(snapshot.getValueAtPercentile(percentile))
                             .setUnit(_unit.orElse(null)));
         }

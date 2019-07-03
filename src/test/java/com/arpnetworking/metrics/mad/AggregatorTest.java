@@ -18,14 +18,15 @@ package com.arpnetworking.metrics.mad;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
+import com.arpnetworking.metrics.mad.model.MetricType;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.Key;
-import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
@@ -90,7 +91,7 @@ public class AggregatorTest {
                                 new DefaultMetric.Builder()
                                         .setType(MetricType.GAUGE)
                                         .setValues(ImmutableList.of(
-                                                new Quantity.Builder().setValue(1d).build()))
+                                                new DefaultQuantity.Builder().setValue(1d).build()))
                                         .build()))
                         .setTime(dataTimeInThePast)
                         .setId(UUID.randomUUID().toString())
@@ -114,7 +115,7 @@ public class AggregatorTest {
         final AggregatedData.Builder builder = new AggregatedData.Builder()
                 .setIsSpecified(false)
                 .setPopulationSize(1L)
-                .setValue(new Quantity.Builder().setValue(1d).build());
+                .setValue(new DefaultQuantity.Builder().setValue(1d).build());
         Assert.assertEquals(2, data.size());
         Assert.assertThat(
                 data.get("MyMetric"),
@@ -186,7 +187,7 @@ public class AggregatorTest {
         final AggregatedData.Builder builder = new AggregatedData.Builder()
                 .setIsSpecified(false)
                 .setPopulationSize(1L)
-                .setValue(new Quantity.Builder().setValue(1d).build());
+                .setValue(new DefaultQuantity.Builder().setValue(1d).build());
         Assert.assertThat(
                 unifiedData,
                 Matchers.containsInAnyOrder(
@@ -267,7 +268,7 @@ public class AggregatorTest {
         final AggregatedData.Builder builder = new AggregatedData.Builder()
                 .setIsSpecified(false)
                 .setPopulationSize(1L)
-                .setValue(new Quantity.Builder().setValue(1d).build());
+                .setValue(new DefaultQuantity.Builder().setValue(1d).build());
         Assert.assertThat(
                 unifiedData,
                 Matchers.containsInAnyOrder(
@@ -347,7 +348,7 @@ public class AggregatorTest {
         final AggregatedData.Builder builder = new AggregatedData.Builder()
                 .setIsSpecified(false)
                 .setPopulationSize(1L)
-                .setValue(new Quantity.Builder().setValue(1d).build());
+                .setValue(new DefaultQuantity.Builder().setValue(1d).build());
         Assert.assertThat(
                 unifiedData,
                 Matchers.containsInAnyOrder(
@@ -401,8 +402,8 @@ public class AggregatorTest {
     private static final Statistic MAX_STATISTIC = STATISTIC_FACTORY.getStatistic("max");
     private static final Statistic COUNT_STATISTIC = STATISTIC_FACTORY.getStatistic("count");
 
-    private static final Quantity ONE = new Quantity.Builder().setValue(1.0).build();
-    private static final Quantity TWO = new Quantity.Builder().setValue(2.0).build();
+    private static final Quantity ONE = new DefaultQuantity.Builder().setValue(1.0).build();
+    private static final Quantity TWO = new DefaultQuantity.Builder().setValue(2.0).build();
     private static final Observable OBSERVABLE = new Observable() {
         @Override
         public void attach(final Observer observer) { }

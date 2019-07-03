@@ -20,10 +20,10 @@ import akka.actor.ActorSystem;
 import akka.testkit.javadsl.TestKit;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
+import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.timgroup.statsd.NonBlockingStatsDClient;
@@ -109,7 +109,7 @@ public final class StatsdSourceTest {
                                     new DefaultMetric.Builder()
                                             .setType(MetricType.COUNTER)
                                             .setValues(ImmutableList.of(
-                                                    new Quantity.Builder()
+                                                    new DefaultQuantity.Builder()
                                                             .setValue(3d)
                                                             .build()))
                                             .build()))

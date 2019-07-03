@@ -16,14 +16,15 @@
 package com.arpnetworking.metrics.mad;
 
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
+import com.arpnetworking.metrics.mad.model.MetricType;
+import com.arpnetworking.metrics.mad.model.Quantity;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.Key;
-import com.arpnetworking.tsdcore.model.MetricType;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.arpnetworking.tsdcore.statistics.StatisticFactory;
@@ -198,7 +199,7 @@ public class BucketTest {
                                 .setIsSpecified(true)
                                 .setPopulationSize(3L)
                                 .setStatistic(MAX_STATISTIC)
-                                .setValue(new Quantity.Builder()
+                                .setValue(new DefaultQuantity.Builder()
                                         .setValue(3.0)
                                         .setUnit(Unit.SECOND)
                                         .build())
@@ -262,14 +263,14 @@ public class BucketTest {
 
     private static final ZonedDateTime START = ZonedDateTime.parse("2015-02-05T00:00:00Z");
 
-    private static final Quantity ONE = new Quantity.Builder().setValue(1.0).build();
-    private static final Quantity TWO = new Quantity.Builder().setValue(2.0).build();
-    private static final Quantity THREE = new Quantity.Builder().setValue(3.0).build();
-    private static final Quantity SIX = new Quantity.Builder().setValue(6.0).build();
+    private static final Quantity ONE = new DefaultQuantity.Builder().setValue(1.0).build();
+    private static final Quantity TWO = new DefaultQuantity.Builder().setValue(2.0).build();
+    private static final Quantity THREE = new DefaultQuantity.Builder().setValue(3.0).build();
+    private static final Quantity SIX = new DefaultQuantity.Builder().setValue(6.0).build();
 
-    private static final Quantity ONE_SECOND = new Quantity.Builder().setValue(1.0).setUnit(Unit.SECOND).build();
-    private static final Quantity TWO_SECONDS = new Quantity.Builder().setValue(2000.0).setUnit(Unit.MILLISECOND).build();
-    private static final Quantity THREE_SECONDS = new Quantity.Builder().setValue(3.0).setUnit(Unit.SECOND).build();
+    private static final Quantity ONE_SECOND = new DefaultQuantity.Builder().setValue(1.0).setUnit(Unit.SECOND).build();
+    private static final Quantity TWO_SECONDS = new DefaultQuantity.Builder().setValue(2000.0).setUnit(Unit.MILLISECOND).build();
+    private static final Quantity THREE_SECONDS = new DefaultQuantity.Builder().setValue(3.0).setUnit(Unit.SECOND).build();
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic MIN_STATISTIC = STATISTIC_FACTORY.getStatistic("min");

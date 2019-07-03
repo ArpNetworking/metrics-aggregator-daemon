@@ -17,8 +17,9 @@ package com.arpnetworking.tsdcore.statistics;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.arpnetworking.tsdcore.model.Quantity;
 
 import java.util.Collections;
 import java.util.Map;
@@ -85,7 +86,7 @@ public final class CountStatistic extends BaseStatistic {
                     CalculatedValue.Builder.class,
                     b1 -> b1.setValue(
                             ThreadLocalBuilder.build(
-                                    Quantity.Builder.class,
+                                    DefaultQuantity.Builder.class,
                                     b2 -> b2.setValue((double) _count))));
         }
 

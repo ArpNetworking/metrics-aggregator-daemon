@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
-import com.arpnetworking.tsdcore.model.Unit;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;

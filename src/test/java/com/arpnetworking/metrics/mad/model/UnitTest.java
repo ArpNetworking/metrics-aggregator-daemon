@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.tsdcore.model;
+package com.arpnetworking.metrics.mad.model;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -81,9 +81,9 @@ public class UnitTest {
 
     @Test
     public void testUnitTypeValues() {
-        for (final Type type : Type.values()) {
+        for (final UnitType type : UnitType.values()) {
             final String typeAsString = type.name();
-            final Type actualType = Type.valueOf(typeAsString);
+            final UnitType actualType = UnitType.valueOf(typeAsString);
             Assert.assertSame(type, actualType);
         }
     }

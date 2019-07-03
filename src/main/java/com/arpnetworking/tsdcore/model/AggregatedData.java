@@ -17,6 +17,7 @@ package com.arpnetworking.tsdcore.model;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.tsdcore.statistics.Statistic;
 import com.google.common.base.Objects;

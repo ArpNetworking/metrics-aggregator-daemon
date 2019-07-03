@@ -17,7 +17,7 @@
 package com.arpnetworking.metrics.proxy.models.messages;
 
 import com.arpnetworking.logback.annotations.Loggable;
-import com.arpnetworking.tsdcore.model.Unit;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 

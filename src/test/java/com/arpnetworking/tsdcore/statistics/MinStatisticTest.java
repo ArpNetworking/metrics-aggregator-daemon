@@ -15,8 +15,8 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.arpnetworking.tsdcore.model.Quantity;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -49,11 +49,11 @@ public class MinStatisticTest {
     @Test
     public void testAccumulator() {
         final Accumulator<Void> accumulator = (Accumulator<Void>) MIN_STATISTIC.createCalculator();
-        accumulator.accumulate(new Quantity.Builder().setValue(12d).build());
-        accumulator.accumulate(new Quantity.Builder().setValue(18d).build());
-        accumulator.accumulate(new Quantity.Builder().setValue(5d).build());
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue(12d).build());
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue(18d).build());
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue(5d).build());
         final CalculatedValue<Void> calculated = accumulator.calculate(Collections.emptyMap());
-        Assert.assertEquals(calculated.getValue(), new Quantity.Builder().setValue(5.0).build());
+        Assert.assertEquals(calculated.getValue(), new DefaultQuantity.Builder().setValue(5.0).build());
     }
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();

@@ -15,8 +15,8 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.arpnetworking.tsdcore.model.Quantity;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -51,11 +51,11 @@ public class SumStatisticTest {
     @Test
     public void testAccumulator() {
         final Accumulator<Void> accumulator = (Accumulator<Void>) SUM_STATISTIC.createCalculator();
-        accumulator.accumulate(new Quantity.Builder().setValue(12d).build());
-        accumulator.accumulate(new Quantity.Builder().setValue(18d).build());
-        accumulator.accumulate(new Quantity.Builder().setValue(5d).build());
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue(12d).build());
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue(18d).build());
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue(5d).build());
         final CalculatedValue<?> calculated = accumulator.calculate(Collections.emptyMap());
-        Assert.assertEquals(calculated.getValue(), new Quantity.Builder().setValue(35.0).build());
+        Assert.assertEquals(calculated.getValue(), new DefaultQuantity.Builder().setValue(35.0).build());
     }
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();

@@ -15,8 +15,9 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.arpnetworking.tsdcore.model.Quantity;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -58,11 +59,11 @@ public class MedianStatisticTest {
     public void testCalculator() {
         final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator = HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 0; x < 100; ++x) {
-            accumulator.accumulate(new Quantity.Builder().setValue((double) x).build());
+            accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) x).build());
         }
         final CalculatedValue<?> calculated = MEDIAN_STATISTIC.createCalculator().calculate(
                 Collections.singletonMap(HISTOGRAM_STATISTIC, accumulator));
-        Assert.assertTrue(areClose(new Quantity.Builder().setValue(50.0).build(), calculated.getValue()));
+        Assert.assertTrue(areClose(new DefaultQuantity.Builder().setValue(50.0).build(), calculated.getValue()));
     }
 
 

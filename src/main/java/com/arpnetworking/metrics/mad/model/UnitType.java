@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.arpnetworking.tsdcore.model;
+package com.arpnetworking.metrics.mad.model;
 
 /**
  * The unit type classification.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
  */
-/* package private */ enum Type {
+/* package private */ enum UnitType {
     TIME {
         @Override
         public Unit getDefaultUnit() {

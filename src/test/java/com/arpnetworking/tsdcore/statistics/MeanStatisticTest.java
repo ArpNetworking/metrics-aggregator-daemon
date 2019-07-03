@@ -15,8 +15,8 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -61,12 +61,12 @@ public class MeanStatisticTest {
     public void testCalculator() {
         Mockito.doReturn(
                 new CalculatedValue.Builder<Void>()
-                    .setValue(new Quantity.Builder().setValue(45.0).build())
+                    .setValue(new DefaultQuantity.Builder().setValue(45.0).build())
                     .build())
                 .when(_sumCalculator).calculate(Mockito.any());
         Mockito.doReturn(
                 new CalculatedValue.Builder<Void>()
-                        .setValue(new Quantity.Builder().setValue(3.0).build())
+                        .setValue(new DefaultQuantity.Builder().setValue(3.0).build())
                         .build())
                 .when(_countCalculator).calculate(Mockito.any());
 
@@ -74,7 +74,7 @@ public class MeanStatisticTest {
         final CalculatedValue<Void> calculated = calculator.calculate(ImmutableMap.of(
                 COUNT_STATISTIC, _countCalculator,
                 SUM_STATISTIC, _sumCalculator));
-        Assert.assertEquals(calculated.getValue(), new Quantity.Builder().setValue(15.0).build());
+        Assert.assertEquals(calculated.getValue(), new DefaultQuantity.Builder().setValue(15.0).build());
     }
 
     @Mock(name = "SumCalculator")
