@@ -15,9 +15,6 @@
  */
 package com.arpnetworking.metrics.mad.model;
 
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
-
 import java.util.List;
 
 /**

@@ -19,13 +19,14 @@ import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.MetricType;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -97,7 +98,7 @@ public final class ProtobufV1ToRecordParser implements Parser<List<Record>, Http
             for (final com.inscopemetrics.client.protocol.ClientV1.DoubleQuantity quantity : metricEntry.getSamplesList()) {
                 quantities.add(
                         ThreadLocalBuilder.build(
-                                Quantity.Builder.class,
+                                DefaultQuantity.Builder.class,
                                 b -> b.setUnit(baseUnit(quantity.getUnit()))
                                         .setValue(quantity.getValue())));
             }

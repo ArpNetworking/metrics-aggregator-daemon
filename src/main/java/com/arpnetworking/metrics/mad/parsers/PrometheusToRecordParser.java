@@ -19,16 +19,17 @@ import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.MetricType;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.arpnetworking.metrics.prometheus.Remote;
 import com.arpnetworking.metrics.prometheus.Types;
 import com.arpnetworking.metrics.prometheus.Types.TimeSeries;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -172,7 +173,7 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
 
     private Quantity createQuantity(final Types.Sample sample, final Optional<Unit> unit) {
         return ThreadLocalBuilder.build(
-                Quantity.Builder.class,
+                DefaultQuantity.Builder.class,
                 p -> p
                         .setValue(sample.getValue())
                         .setUnit(unit.orElse(null))

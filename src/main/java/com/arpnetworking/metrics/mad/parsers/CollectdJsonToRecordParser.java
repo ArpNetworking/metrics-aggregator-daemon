@@ -21,13 +21,14 @@ import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.MetricType;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.Key;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -105,7 +106,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                             b1 -> b1.setType(metricType)
                                     .setValues(ImmutableList.of(
                                             ThreadLocalBuilder.build(
-                                                    Quantity.Builder.class,
+                                                    DefaultQuantity.Builder.class,
                                                     b2 -> b2.setValue(sample.getValue())))));
                     metrics.put(metricName, metric);
                 }

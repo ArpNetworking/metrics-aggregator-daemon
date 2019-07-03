@@ -16,7 +16,7 @@
 package com.arpnetworking.metrics.mad.model.json;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
-import com.arpnetworking.tsdcore.model.Unit;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.collect.ImmutableList;

@@ -19,10 +19,10 @@ import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
+import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -197,7 +197,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
                                 b2 -> b2.setValues(
                                         ImmutableList.of(
                                                 ThreadLocalBuilder.build(
-                                                        Quantity.Builder.class,
+                                                        DefaultQuantity.Builder.class,
                                                         b3 -> b3.setValue(value.doubleValue()))))
                                 .setType(MetricType.GAUGE))))
                 .setTime(timestamp));

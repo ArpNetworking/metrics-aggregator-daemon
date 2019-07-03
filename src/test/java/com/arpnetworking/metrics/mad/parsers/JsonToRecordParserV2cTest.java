@@ -18,10 +18,10 @@ package com.arpnetworking.metrics.mad.parsers;
 
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.MetricType;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.Key;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
 import com.google.common.base.Strings;
 import com.google.common.io.Resources;
 import org.hamcrest.Matchers;

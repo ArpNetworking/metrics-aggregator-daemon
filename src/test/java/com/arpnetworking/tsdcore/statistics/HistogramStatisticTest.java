@@ -15,9 +15,9 @@
  */
 package com.arpnetworking.tsdcore.statistics;
 
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -34,7 +34,7 @@ public class HistogramStatisticTest {
     public void histogramAccumulateQuantities() {
         final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator = HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 1; x <= 100; ++x) {
-            accumulator.accumulate(new Quantity.Builder().setValue((double) x).build());
+            accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) x).build());
         }
 
         final CalculatedValue<HistogramStatistic.HistogramSupportingData> value = accumulator.calculate(Collections.emptyMap());
@@ -51,7 +51,7 @@ public class HistogramStatisticTest {
 
         final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator = HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 1; x <= 100; ++x) {
-            accumulator.accumulate(new Quantity.Builder().setValue((double) x).build());
+            accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) x).build());
         }
 
         merged.accumulate(accumulator.calculate(Collections.emptyMap()));
@@ -70,17 +70,17 @@ public class HistogramStatisticTest {
 
         final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator1 = HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 1; x <= 100; ++x) {
-            accumulator1.accumulate(new Quantity.Builder().setValue((double) x).build());
+            accumulator1.accumulate(new DefaultQuantity.Builder().setValue((double) x).build());
         }
 
         final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator2 = HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 1; x <= 100; ++x) {
-            accumulator2.accumulate(new Quantity.Builder().setValue((double) 10 * x + 1000).build());
+            accumulator2.accumulate(new DefaultQuantity.Builder().setValue((double) 10 * x + 1000).build());
         }
 
         final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator3 = HISTOGRAM_STATISTIC.createCalculator();
         for (int x = 50; x <= 100; ++x) {
-            accumulator3.accumulate(new Quantity.Builder().setValue((double) x).build());
+            accumulator3.accumulate(new DefaultQuantity.Builder().setValue((double) x).build());
         }
 
         merged.accumulate(accumulator1.calculate(Collections.emptyMap()));
@@ -107,8 +107,8 @@ public class HistogramStatisticTest {
     @Test(expected = IllegalStateException.class)
     public void histogramQuantityInvalidConversion() {
         final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator = HISTOGRAM_STATISTIC.createCalculator();
-        accumulator.accumulate(new Quantity.Builder().setValue((double) 1).setUnit(null).build());
-        accumulator.accumulate(new Quantity.Builder().setValue((double) 1000).setUnit(Unit.MILLISECOND).build());
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) 1).setUnit(null).build());
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) 1000).setUnit(Unit.MILLISECOND).build());
 
         final CalculatedValue<HistogramStatistic.HistogramSupportingData> value = accumulator.calculate(Collections.emptyMap());
         final HistogramStatistic.HistogramSupportingData supportingData = value.getData();
@@ -120,8 +120,8 @@ public class HistogramStatisticTest {
     @Test
     public void histogramEnds() {
         final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator = HISTOGRAM_STATISTIC.createCalculator();
-        accumulator.accumulate(new Quantity.Builder().setValue((double) 10).setUnit(Unit.SECOND).build());
-        accumulator.accumulate(new Quantity.Builder().setValue((double) 50).setUnit(Unit.SECOND).build());
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) 10).setUnit(Unit.SECOND).build());
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue((double) 50).setUnit(Unit.SECOND).build());
 
         final CalculatedValue<HistogramStatistic.HistogramSupportingData> value = accumulator.calculate(Collections.emptyMap());
         final HistogramStatistic.HistogramSupportingData supportingData = value.getData();

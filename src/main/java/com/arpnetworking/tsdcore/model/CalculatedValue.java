@@ -16,6 +16,7 @@
 package com.arpnetworking.tsdcore.model;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
+import com.arpnetworking.metrics.mad.model.Quantity;
 import net.sf.oval.constraint.NotNull;
 
 /**

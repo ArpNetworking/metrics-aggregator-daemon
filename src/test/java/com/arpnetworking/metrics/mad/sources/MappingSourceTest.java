@@ -18,13 +18,13 @@ package com.arpnetworking.metrics.mad.sources;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.common.sources.Source;
+import com.arpnetworking.metrics.mad.model.DefaultQuantity;
+import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Record;
+import com.arpnetworking.metrics.mad.model.Unit;
 import com.arpnetworking.metrics.mad.sources.MappingSource.MergingMetric;
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.test.UnorderedRecordEquality;
-import com.arpnetworking.tsdcore.model.MetricType;
-import com.arpnetworking.tsdcore.model.Quantity;
-import com.arpnetworking.tsdcore.model.Unit;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Assert;
@@ -136,7 +136,7 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(1.23d)
                                                 .setUnit(Unit.BYTE)
                                                 .build()))
@@ -145,7 +145,7 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(2.46d)
                                                 .build()))
                                 .build()))
@@ -167,11 +167,11 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(1.23d)
                                                 .setUnit(Unit.BYTE)
                                                 .build(),
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(2.46d)
                                                 .build()))
                                 .build()))
@@ -189,13 +189,13 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder().setValue(1.23d).build()))
+                                        new DefaultQuantity.Builder().setValue(1.23d).build()))
                                 .build(),
                         "foo/2/bar",
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.TIMER)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder().setValue(2.46d).build()))
+                                        new DefaultQuantity.Builder().setValue(2.46d).build()))
                                 .build()))
                 .build();
 
@@ -215,7 +215,7 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder().setValue(1.23d).build()))
+                                        new DefaultQuantity.Builder().setValue(1.23d).build()))
                                 .build()))
                 .build();
         final Record expectedRecord2 = TestBeanFactory.createRecordBuilder()
@@ -226,7 +226,7 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.TIMER)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder().setValue(2.46d).build()))
+                                        new DefaultQuantity.Builder().setValue(2.46d).build()))
                                 .build()))
                 .build();
 
@@ -244,7 +244,7 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(1.23d)
                                                 .setUnit(Unit.BYTE)
                                                 .build()))
@@ -267,7 +267,7 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(1.23d)
                                                 .setUnit(Unit.BYTE)
                                                 .build()))
@@ -286,7 +286,7 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(1.23d)
                                                 .setUnit(Unit.BYTE)
                                                 .build()))
@@ -295,7 +295,7 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(2.46d)
                                                 .build()))
                                 .build()))
@@ -317,11 +317,11 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(1.23d)
                                                 .setUnit(Unit.BYTE)
                                                 .build(),
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(2.46d)
                                                 .build()))
                                 .build(),
@@ -329,7 +329,7 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(2.46d)
                                                 .build()))
                                 .build(),
@@ -337,7 +337,7 @@ public class MappingSourceTest {
                         TestBeanFactory.createMetricBuilder()
                                 .setType(MetricType.GAUGE)
                                 .setValues(ImmutableList.of(
-                                        new Quantity.Builder()
+                                        new DefaultQuantity.Builder()
                                                 .setValue(1.23d)
                                                 .setUnit(Unit.BYTE)
                                                 .build()))
