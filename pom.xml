@@ -28,7 +28,7 @@
   <packaging>jar</packaging>
   <name>Metrics Aggregator Daemon</name>
   <description>Aggregates samples published by metrics client libraries and writes to destinations.</description>
-  <version>1.12.1-SNAPSHOT</version>
+  <version>1.12.2-SNAPSHOT</version>
 
   <licenses>
     <license>
