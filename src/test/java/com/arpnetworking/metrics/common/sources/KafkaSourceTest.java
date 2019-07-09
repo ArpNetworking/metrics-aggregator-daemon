@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -41,17 +42,19 @@ import java.util.Map;
 
 
 /**
- * Unit tests for the <code>KafkaSource</code> class.
+ * Unit tests for the {@code KafkaSource} class.
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public class KafkaSourceTest {
-    private KafkaSource<String, String> _source;
+
     private static final List<String> EXPECTED = Arrays.asList("value0", "value1", "value2");
     private static final String TOPIC = "test_topic";
     private static final int PARTITION = 0;
-    private static final int POLL_TIME_MILLIS = 1;
+    private static final Duration POLL_DURATION = Duration.ofSeconds(1);
     private static final int TIMEOUT = 1000;
+
+    private KafkaSource<String, String> _source;
     private Logger _logger;
     private LogBuilder _logBuilder;
 
@@ -122,8 +125,8 @@ public class KafkaSourceTest {
         _source = new KafkaSource.Builder<String, String>()
                 .setName("KafkaSource")
                 .setConsumer(consumer)
-                .setParser(new StringParser.Builder().build())
-                .setPollTimeMillis(POLL_TIME_MILLIS)
+                .setParser(new StringParser())
+                .setPollTime(POLL_DURATION)
                 .build();
     }
 
@@ -139,8 +142,8 @@ public class KafkaSourceTest {
         _source = new KafkaSource<>(new KafkaSource.Builder<String, String>()
                 .setName("KafkaSource")
                 .setConsumer(consumer)
-                .setParser(new StringParser.Builder().build())
-                .setPollTimeMillis(POLL_TIME_MILLIS),
+                .setParser(new StringParser())
+                .setPollTime(POLL_DURATION),
                 _logger);
     }
 
@@ -162,7 +165,7 @@ public class KafkaSourceTest {
                 .setName("KafkaSource")
                 .setConsumer(consumer)
                 .setParser(parser)
-                .setPollTimeMillis(POLL_TIME_MILLIS),
+                .setPollTime(POLL_DURATION),
                 _logger);
     }
 

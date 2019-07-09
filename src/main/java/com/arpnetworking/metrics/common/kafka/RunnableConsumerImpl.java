@@ -18,6 +18,8 @@ package com.arpnetworking.metrics.common.kafka;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import net.sf.oval.constraint.CheckWith;
+import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.NotNull;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -26,19 +28,21 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import java.time.Duration;
 
 /**
- * A runnable wrapper for a <code>Consumer</code> that will continually poll
+ * A runnable wrapper for a {@code Consumer} that will continually poll
  * the consumer.
  *
- * @param <V> the type of the values in kafka <code>ConsumerRecords</code>
+ * @param <V> the type of the values in kafka {@code ConsumerRecords}
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public class RunnableConsumerImpl<V> implements RunnableConsumer {
-    private ConsumerListener<V> _listener;
-    private Consumer<?, V> _consumer;
-    private Duration _pollTime;
-    private volatile boolean _isRunning;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RunnableConsumerImpl.class);
+
+    private final ConsumerListener<V> _listener;
+    private final Consumer<?, V> _consumer;
+    private final Duration _pollTime;
+    private volatile boolean _isRunning;
 
     /* package private */ RunnableConsumerImpl(final Builder<V> builder) {
         _consumer = builder._consumer;
@@ -59,7 +63,7 @@ public class RunnableConsumerImpl<V> implements RunnableConsumer {
             try {
                 final ConsumerRecords<?, V> records = _consumer.poll(_pollTime);
 
-                for (ConsumerRecord<?, V> record : records) {
+                for (final ConsumerRecord<?, V> record : records) {
                     _listener.handle(record);
                 }
             // CHECKSTYLE.OFF: IllegalCatch - Allow clients to decide how to handle exceptions
@@ -85,13 +89,13 @@ public class RunnableConsumerImpl<V> implements RunnableConsumer {
     }
 
     /**
-     * Implementation of builder pattern for <code>RunnableConsumerImpl</code>.
+     * Implementation of builder pattern for {@link RunnableConsumerImpl}.
      *
      * @param <V> the type of the values pulled from kafka records
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
-    public static class Builder<V> extends OvalBuilder<RunnableConsumerImpl<V>> {
+    public static final class Builder<V> extends OvalBuilder<RunnableConsumerImpl<V>> {
 
         /**
          * Public constructor.
@@ -102,9 +106,9 @@ public class RunnableConsumerImpl<V> implements RunnableConsumer {
         }
 
         /**
-         * Sets the <code>ConsumerListener</code> instance. Cannot be null.
+         * Sets the {@link ConsumerListener} instance. Cannot be null.
          *
-         * @param listener The <code>ConsumerListener</code> instance.
+         * @param listener The {@link ConsumerListener} instance.
          * @return This instance of {@link RunnableConsumerImpl.Builder}
          */
         public RunnableConsumerImpl.Builder<V> setListener(final ConsumerListener<V> listener) {
@@ -113,9 +117,9 @@ public class RunnableConsumerImpl<V> implements RunnableConsumer {
         }
 
         /**
-         * Sets the <code>Consumer</code> instance. Cannot be null.
+         * Sets the {@code Consumer} instance. Cannot be null.
          *
-         * @param consumer The <code>Consumer</code> instance.
+         * @param consumer The {@code Consumer} instance.
          * @return This instance of {@link RunnableConsumerImpl.Builder}
          */
         public RunnableConsumerImpl.Builder<V> setConsumer(final Consumer<?, V> consumer) {
@@ -126,7 +130,7 @@ public class RunnableConsumerImpl<V> implements RunnableConsumer {
         /**
          * Sets the duration the consumer will poll kafka for each consume. Cannot be null.
          *
-         * @param pollTime The <code>Duration</code> instance.
+         * @param pollTime The {@code Duration} instance.
          * @return This instance of {@link RunnableConsumerImpl.Builder}
          */
         public RunnableConsumerImpl.Builder<V> setPollTime(final Duration pollTime) {
@@ -139,6 +143,16 @@ public class RunnableConsumerImpl<V> implements RunnableConsumer {
         @NotNull
         private ConsumerListener<V> _listener;
         @NotNull
+        @CheckWith(value = PositiveDuration.class, message = "Poll duration must be positive")
         private Duration _pollTime;
+
+        private static class PositiveDuration implements CheckWithCheck.SimpleCheck {
+            @Override
+            public boolean isSatisfied(final Object validatedObject, final Object value) {
+                return (value instanceof Duration) && !((Duration) value).isNegative();
+            }
+
+            private static final long serialVersionUID = 1L;
+        }
     }
 }

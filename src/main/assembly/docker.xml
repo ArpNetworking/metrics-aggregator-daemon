@@ -24,7 +24,7 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${project.basedir}/src/main/docker</directory>
+      <directory>${project.basedir}/src/main/docker/mad</directory>
       <outputDirectory/>
       <filtered>false</filtered>
       <fileMode>0644</fileMode>

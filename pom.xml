@@ -360,13 +360,16 @@
             <goals>
               <goal>push</goal>
             </goals>
+            <configuration>
+              <filter>arpnetworking/mad:${project.version}</filter>
+            </configuration>
           </execution>
         </executions>
         <configuration>
           <showLogs>true</showLogs>
           <images>
             <image>
-              <name>joeyjackson/kafka:${project.version}</name>
+              <name>arpnetworking/mad/kafka:${project.version}</name>
               <build>
                 <dockerFile>${project.basedir}/src/main/docker/kafka/Dockerfile</dockerFile>
                 <tags>

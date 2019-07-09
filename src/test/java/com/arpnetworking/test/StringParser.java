@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.test;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 
@@ -26,32 +25,8 @@ import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
  */
 public class StringParser implements Parser<String, String> {
 
-    /**
-     * Public constructor.
-     *
-     * @param builder the builder for this class
-     */
-    StringParser(final StringParser.Builder builder) {
-
-    }
-
     @Override
     public String parse(final String data) throws ParsingException {
         return data;
-    }
-
-    /**
-     * Builder pattern class for <code>StringParser</code>.
-     *
-     * @author Joey Jackson (jjackson at dropbox dot com)
-     */
-    public static class Builder extends OvalBuilder<StringParser> {
-
-        /**
-         * Public constructor.
-         */
-        public Builder() {
-            super(StringParser::new);
-        }
     }
 }

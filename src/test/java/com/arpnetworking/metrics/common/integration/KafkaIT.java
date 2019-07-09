@@ -46,6 +46,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,6 +54,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Tests to check integration with a kafka topic.
@@ -65,7 +68,7 @@ public class KafkaIT {
     private static final String VALUE_SERIALIZER = "org.apache.kafka.common.serialization.StringSerializer";
     private static final String KEY_DESERIALIZER = "org.apache.kafka.common.serialization.IntegerDeserializer";
     private static final String VALUE_DESERIALIZER = "org.apache.kafka.common.serialization.StringDeserializer";
-    private static final int POLL_DURATION_MILLIS = 1000;
+    private static final Duration POLL_DURATION = Duration.ofSeconds(1);
     private static final int TIMEOUT = 5000;
 
     private Map<String, Object> _consumerProps;
@@ -75,7 +78,7 @@ public class KafkaIT {
     private List<ProducerRecord<Integer, String>> _producerRecords;
 
     @Before
-    public void setUp() {
+    public void setUp() throws TimeoutException {
         // Create kafka topic
         _topicName = createTopicName();
         createTopic(_topicName);
@@ -108,9 +111,9 @@ public class KafkaIT {
         _consumer.subscribe(Collections.singletonList(_topicName));
         _source = new KafkaSource.Builder<String, String>()
                 .setName("KafkaSource")
-                .setParser(new StringParser.Builder().build())
+                .setParser(new StringParser())
                 .setConsumer(_consumer)
-                .setPollTimeMillis(POLL_DURATION_MILLIS)
+                .setPollTime(POLL_DURATION)
                 .build();
 
         // Observe records
@@ -129,9 +132,9 @@ public class KafkaIT {
         _consumer.subscribe(Collections.singletonList(_topicName));
         _source = new KafkaSource.Builder<String, String>()
                 .setName("KafkaSource")
-                .setParser(new StringParser.Builder().build())
+                .setParser(new StringParser())
                 .setConsumer(_consumer)
-                .setPollTimeMillis(POLL_DURATION_MILLIS)
+                .setPollTime(POLL_DURATION)
                 .build();
 
         // Observe records
@@ -152,7 +155,7 @@ public class KafkaIT {
                     "{"
                 + "\n  \"type\":\"com.arpnetworking.metrics.common.sources.KafkaSource\","
                 + "\n  \"name\":\"kafka_source\","
-                + "\n  \"pollTimeMillis\":" + POLL_DURATION_MILLIS + ","
+                + "\n  \"pollTime\":\"PT1S\","
                 + "\n  \"consumer\":{"
                 + "\n    \"type\":\"org.apache.kafka.clients.consumer.Consumer\","
                 + "\n    \"topics\":[\"" + _topicName + "\"],"
@@ -166,9 +169,9 @@ public class KafkaIT {
                 + "\n    }"
                 + "\n  },"
                 + "\n  \"parser\":{"
-                + "\n    \"type\":\"com.arpnetworking.test.StringParser\","
-                + "\n    \"name\":\"StringParser\""
-                + "\n  }"
+                + "\n    \"type\":\"com.arpnetworking.test.StringParser\""
+                + "\n  },"
+                + "\n  \"shutdownAwaitTime\":\"PT10S\""
                 + "\n}";
 
         final ObjectMapper mapper = ObjectMapperFactory.createInstance();
@@ -190,7 +193,7 @@ public class KafkaIT {
         return "topic_" + UUID.randomUUID().toString();
     }
 
-    private static void createTopic(final String topicName) {
+    private static void createTopic(final String topicName) throws TimeoutException {
         try {
             final Properties config = new Properties();
             config.setProperty(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
@@ -202,7 +205,8 @@ public class KafkaIT {
             final CreateTopicsResult createTopicsResult = adminClient.createTopics(Collections.singleton(newTopic));
 
             // Wait for it to complete
-            createTopicsResult.values().get(topicName).get();
+            createTopicsResult.values().get(topicName).get(20, TimeUnit.SECONDS);
+            adminClient.close();
         } catch (final InterruptedException | ExecutionException e) {
             if (!(e.getCause() instanceof TopicExistsException)) {
                 throw new RuntimeException(e.getMessage(), e);
@@ -249,7 +253,7 @@ public class KafkaIT {
     }
 
     /**
-     * Class needed for generic object mapping with <code>ObjectMapper</code>.
+     * Class needed for generic object mapping with {@code ObjectMapper}.
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */

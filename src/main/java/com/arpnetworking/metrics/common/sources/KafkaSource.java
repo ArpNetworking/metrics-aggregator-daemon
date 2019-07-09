@@ -24,6 +24,8 @@ import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import net.sf.oval.constraint.CheckWith;
+import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.NotNull;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -35,23 +37,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Produce instances of <code>Record</code> from the values of entries
+ * Produce instances of {@code Record} from the values of entries
  * from a Kafka topic. The key from the entries gets discarded
  *
  * @param <T> the type of data created by the source
- * @param <V> the type of data of value in kafka <code>ConsumerRecords</code>
+ * @param <V> the type of data of value in kafka {@code ConsumerRecords}
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public final class KafkaSource<T, V> extends BaseSource {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSource.class);
 
     private final Consumer<?, V> _consumer;
     private final RunnableConsumer _runnableConsumer;
     private final ExecutorService _consumerExecutor;
     private final Parser<T, V> _parser;
     private final Logger _logger;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSource.class);
+    private final Duration _shutdownAwaitTime;
 
     @Override
     public void start() {
@@ -64,7 +67,7 @@ public final class KafkaSource<T, V> extends BaseSource {
 
         _consumerExecutor.shutdown();
         try {
-            _consumerExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            _consumerExecutor.awaitTermination(_shutdownAwaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             LOGGER.warn()
                     .setMessage("Unable to shutdown kafka consumer executor")
@@ -107,6 +110,7 @@ public final class KafkaSource<T, V> extends BaseSource {
                 .setPollTime(builder._pollTime)
                 .build();
         _consumerExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "KafkaConsumer"));
+        _shutdownAwaitTime = builder._shutdownAwaitTime;
     }
 
     private class LogConsumerListener implements ConsumerListener<V> {
@@ -158,14 +162,14 @@ public final class KafkaSource<T, V> extends BaseSource {
     }
 
     /**
-     * Builder pattern class for <code>KafkaSource</code>.
+     * Builder pattern class for {@code KafkaSource}.
      *
      * @param <T> the type of data created by the source
-     * @param <V> the type of data of value in kafka <code>ConsumerRecords</code>
+     * @param <V> the type of data of value in kafka {@code ConsumerRecords}
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
-    public static class Builder<T, V> extends BaseSource.Builder<Builder<T, V>, KafkaSource<T, V>> {
+    public static final class Builder<T, V> extends BaseSource.Builder<Builder<T, V>, KafkaSource<T, V>> {
 
         /**
          * Public constructor.
@@ -175,35 +179,48 @@ public final class KafkaSource<T, V> extends BaseSource {
         }
 
         /**
-         * Sets <code>Consumer</code>. Cannot be null.
+         * Sets {@code Consumer}. Cannot be null.
          *
-         * @param consumer The <code>Consumer</code>.
-         * @return This instance of <code>Builder</code>.
+         * @param consumer The {@code Consumer}.
+         * @return This instance of {@link KafkaSource.Builder}.
          */
-        public final Builder<T, V> setConsumer(final Consumer<?, V> consumer) {
+        public Builder<T, V> setConsumer(final Consumer<?, V> consumer) {
             _consumer = consumer;
             return this;
         }
 
         /**
-         * Sets the duration the consumer will poll kafka for each consume. Cannot be null.
+         * Sets {@link Parser}. Cannot be null.
          *
-         * @param millis The number of milliseconds to poll for.
-         * @return This instance of <code>Builder</code>.
+         * @param value The {@link Parser}.
+         * @return This instance of {@link KafkaSource.Builder}.
          */
-        public final Builder<T, V> setPollTimeMillis(final int millis) {
-            _pollTime = Duration.ofMillis(millis);
+        public Builder<T, V> setParser(final Parser<T, V> value) {
+            _parser = value;
             return this;
         }
 
         /**
-         * Sets <code>Parser</code>. Cannot be null.
+         * Sets the duration the consumer will poll kafka for each consume. Cannot be null or negative.
          *
-         * @param value The <code>Parser</code>.
-         * @return This instance of <code>Builder</code>.
+         * @param pollTime The {@code Duration} of each poll call made by the {@code KafkaConsumer}.
+         * @return This instance of {@link KafkaSource.Builder}.
          */
-        public final Builder<T, V> setParser(final Parser<T, V> value) {
-            _parser = value;
+        public Builder<T, V> setPollTime(final Duration pollTime) {
+            _pollTime = pollTime;
+            return this;
+        }
+
+        /**
+         * Sets the amount of time the {@link KafkaSource} will wait to shutdown the {@code RunnableConsumer} thread.
+         * Default is 10 seconds. Cannot be null or negative.
+         *
+         * @param shutdownAwaitTime The {@code Duration} the {@link KafkaSource} will wait to shutdown
+         *                          the {@code RunnableConsumer} thread.
+         * @return This instance of {@link KafkaSource.Builder}.
+         */
+        public Builder<T, V> setShutdownAwaitTime(final Duration shutdownAwaitTime) {
+            _shutdownAwaitTime = shutdownAwaitTime;
             return this;
         }
 
@@ -215,8 +232,21 @@ public final class KafkaSource<T, V> extends BaseSource {
         @NotNull
         private Consumer<?, V> _consumer;
         @NotNull
+        private Parser<T, V> _parser;
+        @NotNull
+        @CheckWith(value = PositiveDuration.class, message = "Poll duration must be positive")
         private Duration _pollTime;
         @NotNull
-        private Parser<T, V> _parser;
+        @CheckWith(value = PositiveDuration.class, message = "Shutdown await time must be positive")
+        private Duration _shutdownAwaitTime = Duration.ofSeconds(10);
+
+        private static class PositiveDuration implements CheckWithCheck.SimpleCheck {
+            @Override
+            public boolean isSatisfied(final Object validatedObject, final Object value) {
+                return (value instanceof Duration) && !((Duration) value).isNegative();
+            }
+
+            private static final long serialVersionUID = 1L;
+        }
     }
 }

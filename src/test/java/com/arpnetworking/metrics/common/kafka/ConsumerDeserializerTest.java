@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 /**
- * Unit Tests for <code>ConsumerDeserializer</code>.
+ * Unit Tests for {@link ConsumerDeserializer}.
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
