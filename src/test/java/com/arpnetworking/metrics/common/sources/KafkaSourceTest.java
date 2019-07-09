@@ -90,7 +90,8 @@ public class KafkaSourceTest {
     public void testSourceKafkaException() {
         createExceptionSource(KafkaException.class);
         _source.start();
-        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Consumer received Kafka Exception");
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT).atLeastOnce())
+                .setMessage("Consumer received Kafka Exception");
         _source.stop();
     }
 
@@ -98,7 +99,7 @@ public class KafkaSourceTest {
     public void testSourceRuntimeException() {
         createExceptionSource(RuntimeException.class);
         _source.start();
-        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Consumer thread error");
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT).atLeastOnce()).setMessage("Consumer thread error");
         _source.stop();
     }
 
@@ -106,7 +107,7 @@ public class KafkaSourceTest {
     public void testSourceParsingException() throws ParsingException {
         createBadParsingSource();
         _source.start();
-        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Failed to parse data");
+        Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT).atLeastOnce()).setMessage("Failed to parse data");
         _source.stop();
     }
 

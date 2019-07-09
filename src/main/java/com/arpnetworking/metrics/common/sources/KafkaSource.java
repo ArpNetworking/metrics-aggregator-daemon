@@ -145,17 +145,34 @@ public final class KafkaSource<T, V> extends BaseSource {
                 _logger.error()
                         .setMessage("Consumer received Kafka Exception")
                         .addData("source", KafkaSource.this)
-                        .addData("action", "stopping")
+                        .addData("action", "sleeping")
                         .setThrowable(throwable)
                         .log();
-                _runnableConsumer.stop();
+                backoff(throwable);
             } else {
                 _logger.error()
                         .setMessage("Consumer thread error")
                         .addData("source", KafkaSource.this)
+                        .addData("action", "sleeping")
+                        .setThrowable(throwable)
+                        .log();
+                backoff(throwable);
+            }
+        }
+
+        private void backoff(final Throwable throwable) {
+            try {
+                Thread.sleep(1000);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+
+                _logger.info()
+                        .setMessage("Sleep interrupted")
+                        .addData("source", KafkaSource.this)
                         .addData("action", "stopping")
                         .setThrowable(throwable)
                         .log();
+
                 _runnableConsumer.stop();
             }
         }

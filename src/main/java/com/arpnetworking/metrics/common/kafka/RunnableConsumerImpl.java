@@ -66,6 +66,7 @@ public class RunnableConsumerImpl<V> implements RunnableConsumer {
                 for (final ConsumerRecord<?, V> record : records) {
                     _listener.handle(record);
                 }
+                _consumer.commitSync();
             // CHECKSTYLE.OFF: IllegalCatch - Allow clients to decide how to handle exceptions
             } catch (final Exception e) {
             // CHECKSTYLE.ON: IllegalCatch

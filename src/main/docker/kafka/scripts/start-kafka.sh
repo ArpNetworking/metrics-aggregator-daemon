@@ -1,5 +1,22 @@
 #!/bin/sh
 
+# Copyright 2016 Spotify
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Original: https://github.com/spotify/docker-kafka
+
+
 # Optional ENV variables:
 # * ADVERTISED_HOST: the external ip for the container, e.g. `docker-machine ip \`docker-machine active\``
 # * ADVERTISED_PORT: the external port for Kafka, e.g. 9092
@@ -8,7 +25,6 @@
 # * LOG_RETENTION_BYTES: configure the size at which segments are pruned from the log, (default is 1073741824, for 1GB)
 # * NUM_PARTITIONS: configure the default number of log partitions per topic
 # * AUTO_CREATE_TOPICS: whether to autocreate topics
-# * LISTENERS: configure the listener list e.g. "PLAINTEXT://:9092"
 
 # Configure advertised host/port if we run in helios
 if [ ! -z "$HELIOS_PORT_kafka" ]; then
@@ -65,16 +81,6 @@ fi
 if [ ! -z "$NUM_PARTITIONS" ]; then
     echo "default number of partition: $NUM_PARTITIONS"
     sed -r -i "s/(num.partitions)=(.*)/\1=$NUM_PARTITIONS/g" $KAFKA_HOME/config/server.properties
-fi
-
-# Set the listener list
-if [ ! -z "$LISTENERS" ]; then
-    echo "listeners : $LISTENERS"
-    if grep -q "^listeners" $KAFKA_HOME/config/server.properties; then
-        sed -r -i "s/#(listeners)=(.*)/\1=$(echo $LISTENERS | sed -e 's/[\/&]/\\&/g')/g" $KAFKA_HOME/config/server.properties
-    else
-        echo "\nlisteners=$LISTENERS" >> $KAFKA_HOME/config/server.properties
-    fi
 fi
 
 # Enable/disable auto creation of topics
