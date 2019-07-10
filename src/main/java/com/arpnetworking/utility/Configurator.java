@@ -31,7 +31,7 @@ import java.util.Optional;
  * @param <T> The <code>Launchable</code> type to configure.
  * @param <S> The type representing the validated configuration.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class Configurator<T extends Launchable, S> implements Listener, Launchable {
 

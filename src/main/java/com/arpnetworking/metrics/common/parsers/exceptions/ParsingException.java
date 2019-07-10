@@ -21,7 +21,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 /**
  * Exception thrown when a <code>Parser</code> fails to parse the data.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 @Loggable

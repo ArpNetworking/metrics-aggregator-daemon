@@ -25,7 +25,7 @@ import java.time.ZonedDateTime;
 /**
  * Tests for the <code>PeriodWorker</code> class.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class PeriodWorkerTest {
 

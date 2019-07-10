@@ -30,7 +30,7 @@ import java.nio.file.attribute.PosixFilePermission;
 /**
  * Tests for the <code>HoconFileSource</code> class.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class HoconFileSourceTest {
 

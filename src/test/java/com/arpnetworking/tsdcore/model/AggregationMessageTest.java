@@ -29,7 +29,7 @@ import java.nio.ByteOrder;
 /**
  * Tests for the AggregationMessage class.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class AggregationMessageTest {
 

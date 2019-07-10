@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * Tests for the 2c version of the query log format.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class JsonToRecordParserV2cTest {
 

@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * Tests for the Graphite plaintext parser.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class GraphitePlaintextToRecordParserTest {
 

@@ -29,8 +29,8 @@ import java.io.Serializable;
  * Serves as a data class for storing data for aggregated values after
  * computation.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class AggregatedData implements Serializable {
 
@@ -126,7 +126,7 @@ public final class AggregatedData implements Serializable {
     /**
      * Implementation of builder pattern for <code>AggregatedData</code>.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends ThreadLocalBuilder<AggregatedData> {
 

@@ -34,7 +34,7 @@ import java.util.Optional;
 /**
  * Tests for the 2f version of the query log format.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class JsonToRecordParserV2fTest {
 

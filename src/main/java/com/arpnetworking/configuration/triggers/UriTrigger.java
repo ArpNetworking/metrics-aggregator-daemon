@@ -47,7 +47,7 @@ import java.util.Optional;
  * the uri is unavailable it is not considered changed to prevent flickering
  * caused by connectivity or server issues.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class UriTrigger implements Trigger {
 

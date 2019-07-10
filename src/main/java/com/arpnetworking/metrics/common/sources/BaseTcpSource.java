@@ -34,7 +34,7 @@ import java.util.function.Function;
  * Base source that listens on a tcp port. Subclasses should set appropriate
  * defaults on the abstract builder.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public abstract class BaseTcpSource extends ActorSource {
 
@@ -159,7 +159,7 @@ public abstract class BaseTcpSource extends ActorSource {
      * @param <B> the builder type
      * @param <S> the source type
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public abstract static class Builder<B extends Builder<B, S>, S extends BaseTcpSource>
             extends ActorSource.Builder<B, S> {

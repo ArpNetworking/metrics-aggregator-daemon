@@ -36,7 +36,7 @@ import java.util.Objects;
 /**
  * Publisher to send data to an upstream aggregation server.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public final class AggregationServerSink extends VertxSink {
 
@@ -170,7 +170,7 @@ public final class AggregationServerSink extends VertxSink {
     /**
      * Implementation of builder pattern for ${code AggreationServerSink}.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends VertxSink.Builder<Builder, AggregationServerSink> {
 

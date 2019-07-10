@@ -47,7 +47,7 @@ import java.util.regex.Pattern;
  * together if the name matches a regular expression with a new name generated
  * through replacement of all matches in the original name.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class MappingSource extends BaseSource {
 
@@ -220,7 +220,7 @@ public final class MappingSource extends BaseSource {
     /**
      * Implementation of builder pattern for <code>FileSource</code>.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends BaseSource.Builder<Builder, MappingSource> {
 

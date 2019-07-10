@@ -24,7 +24,7 @@ import java.util.Objects;
 /**
  * Default implementation of the <code>Key</code> interface.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @Loggable
 public final class DefaultKey implements Key {

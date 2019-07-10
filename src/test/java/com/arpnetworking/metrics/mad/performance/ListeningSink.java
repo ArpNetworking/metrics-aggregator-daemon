@@ -22,7 +22,7 @@ import com.google.common.base.Function;
 /**
  * Test helper to provide a callback for a sink.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class ListeningSink implements Sink {
     /**

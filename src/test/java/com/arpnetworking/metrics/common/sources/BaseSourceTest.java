@@ -24,7 +24,7 @@ import org.mockito.Mockito;
 /**
  * Tests for the BaseSource class.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class BaseSourceTest {
 

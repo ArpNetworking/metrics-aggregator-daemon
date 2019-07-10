@@ -33,7 +33,7 @@ import java.util.Optional;
  * Json based configuration sourced by merging zero or more <code>JsonSource</code>
  * instances together.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class JsonNodeMergingSource implements JsonNodeSource {
 

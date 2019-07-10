@@ -19,7 +19,7 @@ package com.arpnetworking.utility;
 /**
  * Resolves the host name by returning it without modification.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class DefaultHostNameResolver implements HostNameResolver {
 

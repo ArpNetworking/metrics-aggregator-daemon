@@ -28,7 +28,7 @@ import java.util.Set;
 /**
  * Min statistic (e.g. top 0th percentile). Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @Loggable
 public final class MinStatistic extends BaseStatistic {
@@ -62,7 +62,7 @@ public final class MinStatistic extends BaseStatistic {
     /**
      * Accumulator computing the minimum of values.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class MinAccumulator extends BaseCalculator<Void> implements Accumulator<Void> {
 

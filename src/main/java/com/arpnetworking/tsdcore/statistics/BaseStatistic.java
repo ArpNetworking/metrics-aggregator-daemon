@@ -28,7 +28,7 @@ import java.util.Set;
 /**
  * A statistic base class.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public abstract class BaseStatistic implements Statistic {
 

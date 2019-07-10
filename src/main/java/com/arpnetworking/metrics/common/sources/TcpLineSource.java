@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * Source that uses line delimited data over tcp.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class TcpLineSource extends BaseTcpSource {
 
@@ -215,7 +215,7 @@ public final class TcpLineSource extends BaseTcpSource {
     /**
      * TcpLineSource {@link BaseSource.Builder} implementation.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends BaseTcpSource.Builder<Builder, TcpLineSource> {
 

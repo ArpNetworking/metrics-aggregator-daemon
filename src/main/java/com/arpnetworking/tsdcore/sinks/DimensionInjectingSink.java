@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * Sink adds any specified dimensions.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class DimensionInjectingSink extends BaseSink {
 
@@ -65,7 +65,7 @@ public final class DimensionInjectingSink extends BaseSink {
     /**
      * Implementation of builder pattern for {@link DimensionInjectingSink}.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends BaseSink.Builder<Builder, DimensionInjectingSink> {
 

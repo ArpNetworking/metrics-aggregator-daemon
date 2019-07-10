@@ -26,7 +26,7 @@ import java.util.Collections;
 /**
  * Tests for the SumStatistic class.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class SumStatisticTest {
 

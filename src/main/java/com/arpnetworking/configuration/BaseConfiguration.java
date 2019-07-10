@@ -27,7 +27,7 @@ import java.util.Optional;
  * implements the shared convenience methods which rely core methods. The
  * core methods are left for implementation by each concrete subclass.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public abstract class BaseConfiguration implements Configuration {
 

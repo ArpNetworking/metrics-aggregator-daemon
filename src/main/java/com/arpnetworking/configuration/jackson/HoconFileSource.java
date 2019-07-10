@@ -33,7 +33,7 @@ import java.util.Optional;
 /**
  * Typesafe config based configuration sourced from a file and mapped to a <code>JsonNode</code>.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class HoconFileSource extends BaseJsonNodeSource {
 

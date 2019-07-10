@@ -24,7 +24,7 @@ import com.arpnetworking.tsdcore.model.CalculatedValue;
  * streams.
  *
  * @param <T> The type of supporting data.
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public interface Accumulator<T> extends Calculator<T> {
 

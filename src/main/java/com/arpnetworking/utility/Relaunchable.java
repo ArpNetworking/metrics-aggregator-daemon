@@ -20,7 +20,7 @@ package com.arpnetworking.utility;
  *
  * @param <T> The type representing the validated configuration.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public interface Relaunchable<T> {
 

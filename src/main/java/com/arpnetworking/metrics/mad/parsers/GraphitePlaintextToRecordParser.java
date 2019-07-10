@@ -81,7 +81,7 @@ import javax.annotation.Nullable;
  * - https://graphite.readthedocs.io/en/latest/feeding-carbon.html#the-pickle-protocol
  * - https://github.com/irmen/Pyrolite
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class GraphitePlaintextToRecordParser implements Parser<List<Record>, ByteBuffer> {
 

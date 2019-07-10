@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * This class provides searchable access to runtime annotations.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public interface AnnotationDatabase {
 

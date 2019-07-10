@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * A processor factory that creates a V2 protocol processor list.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class ProcessorsV2Factory implements MessageProcessorsFactory {
 

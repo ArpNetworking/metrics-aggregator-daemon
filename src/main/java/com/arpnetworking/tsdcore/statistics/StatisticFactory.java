@@ -31,8 +31,8 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Creates statistics.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class StatisticFactory {
 
