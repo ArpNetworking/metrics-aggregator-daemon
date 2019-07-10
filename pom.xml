@@ -79,7 +79,7 @@
     <aspectjrt.version>1.9.2</aspectjrt.version>
     <asynchttpclient.version>2.6.0</asynchttpclient.version>
     <cglib.version>3.2.10</cglib.version>
-    <client.protocol.version>0.10.1</client.protocol.version>
+    <client.protocol.version>0.10.2-SNAPSHOT</client.protocol.version>
     <fastutil.version>8.2.2</fastutil.version>
     <spotbugs.annotations.version>3.1.12</spotbugs.annotations.version>
     <guava.version>25.1-jre</guava.version>
