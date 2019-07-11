@@ -144,7 +144,7 @@ public class RunnableConsumerImpl<V> implements RunnableConsumer {
         @NotNull
         private ConsumerListener<V> _listener;
         @NotNull
-        @CheckWith(value = PositiveDuration.class, message = "Poll duration must be positive")
+        @CheckWith(value = PositiveDuration.class, message = "Poll duration must be positive.")
         private Duration _pollTime;
 
         private static class PositiveDuration implements CheckWithCheck.SimpleCheck {

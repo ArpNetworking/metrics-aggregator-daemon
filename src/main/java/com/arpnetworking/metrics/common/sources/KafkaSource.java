@@ -55,6 +55,7 @@ public final class KafkaSource<T, V> extends BaseSource {
     private final Parser<T, V> _parser;
     private final Logger _logger;
     private final Duration _shutdownAwaitTime;
+    private final Duration _backoffTime;
 
     @Override
     public void start() {
@@ -111,6 +112,7 @@ public final class KafkaSource<T, V> extends BaseSource {
                 .build();
         _consumerExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "KafkaConsumer"));
         _shutdownAwaitTime = builder._shutdownAwaitTime;
+        _backoffTime = builder._backoffTime;
     }
 
     private class LogConsumerListener implements ConsumerListener<V> {
@@ -162,7 +164,7 @@ public final class KafkaSource<T, V> extends BaseSource {
 
         private void backoff(final Throwable throwable) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(_backoffTime.toMillis());
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
 
@@ -241,6 +243,19 @@ public final class KafkaSource<T, V> extends BaseSource {
             return this;
         }
 
+        /**
+         * Sets the amount of time the {@link KafkaSource} will wait to retry an operation after
+         * receiving an exception. Default is 1 second. Cannot be null or negative.
+         *
+         * @param backoffTime The {@code Duration} the {@link KafkaSource} will wait to retry
+         *                          an operation on exception.
+         * @return This instance of {@link KafkaSource.Builder}.
+         */
+        public Builder<T, V> setBackoffTime(final Duration backoffTime) {
+            _backoffTime = backoffTime;
+            return this;
+        }
+
         @Override
         protected Builder<T, V> self() {
             return this;
@@ -251,11 +266,14 @@ public final class KafkaSource<T, V> extends BaseSource {
         @NotNull
         private Parser<T, V> _parser;
         @NotNull
-        @CheckWith(value = PositiveDuration.class, message = "Poll duration must be positive")
+        @CheckWith(value = PositiveDuration.class, message = "Poll duration must be positive.")
         private Duration _pollTime;
         @NotNull
-        @CheckWith(value = PositiveDuration.class, message = "Shutdown await time must be positive")
+        @CheckWith(value = PositiveDuration.class, message = "Shutdown await time must be positive.")
         private Duration _shutdownAwaitTime = Duration.ofSeconds(10);
+        @NotNull
+        @CheckWith(value = PositiveDuration.class, message = "Backoff time must be positive.")
+        private Duration _backoffTime = Duration.ofSeconds(1);
 
         private static class PositiveDuration implements CheckWithCheck.SimpleCheck {
             @Override
