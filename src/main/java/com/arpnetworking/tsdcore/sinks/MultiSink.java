@@ -31,7 +31,7 @@ import java.util.Collection;
  *
  * TODO(vkoskela): Support concurrent execution [MAI-98]
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public final class MultiSink extends BaseSink {
 
@@ -80,7 +80,7 @@ public final class MultiSink extends BaseSink {
     /**
      * Implementation of builder pattern for <code>MultiSink</code>.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends BaseSink.Builder<Builder, MultiSink> {
 

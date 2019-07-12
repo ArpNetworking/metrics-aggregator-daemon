@@ -31,7 +31,7 @@ import java.util.Optional;
  * @param <T> The <code>Relaunchable</code> type to configure.
  * @param <S> The type representing the validated configuration.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class Reconfigurator<T extends Relaunchable<? super S>, S> implements Listener {
 

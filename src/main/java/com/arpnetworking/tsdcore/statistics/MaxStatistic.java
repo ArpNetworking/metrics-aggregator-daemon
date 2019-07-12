@@ -28,8 +28,8 @@ import java.util.Set;
 /**
  * Max statistic (e.g. top 100th percentile). Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @Loggable
 public final class MaxStatistic extends BaseStatistic {
@@ -64,7 +64,7 @@ public final class MaxStatistic extends BaseStatistic {
     /**
      * Accumulator computing the maximum of values.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class MaxAccumulator extends BaseCalculator<Void> implements Accumulator<Void> {
 

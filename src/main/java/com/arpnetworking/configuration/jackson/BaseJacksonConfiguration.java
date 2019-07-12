@@ -35,7 +35,7 @@ import java.util.function.Function;
  * Common base class for <code>Configuration</code> implementations based on
  * Jackson's <code>ObjectMapper</code>.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public abstract class BaseJacksonConfiguration extends com.arpnetworking.configuration.BaseConfiguration {
 

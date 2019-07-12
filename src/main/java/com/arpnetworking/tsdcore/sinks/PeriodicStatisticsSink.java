@@ -65,7 +65,7 @@ import javax.annotation.Nullable;
  * This can be replaced with a separate lock or a thread-safe accumulator
  * implementation.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class PeriodicStatisticsSink extends BaseSink {
 
@@ -263,7 +263,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
     /**
      * Implementation of builder pattern for <code>PeriodicStatisticsSink</code>.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends BaseSink.Builder<Builder, PeriodicStatisticsSink> {
 

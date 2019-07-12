@@ -57,7 +57,7 @@ import java.util.function.Function;
 /**
  * Source that uses HTTP POSTs as input.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class HttpSource extends ActorSource {
 

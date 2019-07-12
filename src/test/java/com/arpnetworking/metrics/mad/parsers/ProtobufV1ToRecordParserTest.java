@@ -39,7 +39,7 @@ import java.util.UUID;
 /**
  * Tests for the V1 protobuf parser.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public final class ProtobufV1ToRecordParserTest {
 

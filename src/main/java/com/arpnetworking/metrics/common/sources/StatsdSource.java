@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * Source that uses Statsd as input.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class StatsdSource extends ActorSource {
 
@@ -166,7 +166,7 @@ public final class StatsdSource extends ActorSource {
     /**
      * StatsdSource {@link BaseSource.Builder} implementation.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends ActorSource.Builder<Builder, StatsdSource> {
 

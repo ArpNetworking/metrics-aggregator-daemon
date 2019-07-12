@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Actor responsible for discovering files that are created or removed.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class LogScanner extends AbstractActor {
 

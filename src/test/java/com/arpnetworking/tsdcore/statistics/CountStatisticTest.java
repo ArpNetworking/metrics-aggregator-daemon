@@ -27,7 +27,7 @@ import java.util.Collections;
 /**
  * Tests for the CountStatistic class.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class CountStatisticTest {
 

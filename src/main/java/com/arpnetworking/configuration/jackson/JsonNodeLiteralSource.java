@@ -26,7 +26,7 @@ import java.util.Optional;
 /**
  * <code>JsonNode</code> based configuration sourced from a literal string.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class JsonNodeLiteralSource extends BaseJsonNodeSource {
 

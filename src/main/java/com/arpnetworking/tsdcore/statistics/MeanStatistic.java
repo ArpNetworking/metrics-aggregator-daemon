@@ -28,8 +28,8 @@ import java.util.Set;
 /**
  * Takes the mean of the entries. Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @Loggable
 public final class MeanStatistic extends BaseStatistic {
@@ -63,7 +63,7 @@ public final class MeanStatistic extends BaseStatistic {
     /**
      * Calculator computing the average.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class MeanCalculator extends BaseCalculator<Void> {
 

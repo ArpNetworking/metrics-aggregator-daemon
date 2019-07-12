@@ -34,7 +34,7 @@ import java.util.Set;
  * and forwards included metrics to the wrapped sink. This  class is thread
  * safe.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class PeriodFilteringSink extends BaseSink {
 
@@ -104,7 +104,7 @@ public final class PeriodFilteringSink extends BaseSink {
     /**
      * Base <code>Builder</code> implementation.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends BaseSink.Builder<Builder, PeriodFilteringSink> {
 

@@ -19,7 +19,7 @@ package com.arpnetworking.metrics.proxy.models.protocol;
 /**
  * Defines simple interface for a message processor.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public interface MessagesProcessor {
     /**

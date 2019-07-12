@@ -45,7 +45,7 @@ import java.util.UUID;
 /**
  * Tests for the statsd parser.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class StatsdToRecordParserTest {
 

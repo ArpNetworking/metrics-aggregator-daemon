@@ -27,7 +27,7 @@ import java.nio.ByteOrder;
 /**
  * Class for building on-the-wire bytes for messages.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public final class AggregationMessage {
 

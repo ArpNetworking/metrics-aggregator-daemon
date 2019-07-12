@@ -18,7 +18,7 @@ package com.arpnetworking.metrics.mad.model;
 /**
  * The type of data.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public enum MetricType {
 

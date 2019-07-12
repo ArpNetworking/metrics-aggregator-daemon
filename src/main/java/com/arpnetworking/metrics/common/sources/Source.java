@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * Interface for sources of <code>Record</code> data entries. All
  * implementations must be thread safe.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.CLASS,

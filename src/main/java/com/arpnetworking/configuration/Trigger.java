@@ -18,7 +18,7 @@ package com.arpnetworking.configuration;
 /**
  * Interface for classes which evaluate when to reload configuration.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public interface Trigger {
 

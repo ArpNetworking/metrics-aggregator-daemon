@@ -27,7 +27,7 @@ import java.util.Optional;
 /**
  * Message class to hold data about a metric that should be sent to clients.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @Loggable
 public final class MetricReport {

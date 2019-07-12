@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
  * and removed this implementation needs to be modified to purge file trigger
  * instances when a file is removed!
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class DirectoryTrigger implements Trigger {
 
