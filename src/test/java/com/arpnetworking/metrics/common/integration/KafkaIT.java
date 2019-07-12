@@ -171,7 +171,6 @@ public class KafkaIT {
                 + "\n  \"parser\":{"
                 + "\n    \"type\":\"com.arpnetworking.test.StringParser\""
                 + "\n  },"
-                + "\n  \"shutdownAwaitTime\":\"PT10S\","
                 + "\n  \"backoffTime\":\"PT1S\""
                 + "\n}";
 
