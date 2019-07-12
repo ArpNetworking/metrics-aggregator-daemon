@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Parses the Inscope Metrics protobuf binary protocol in the body of an http request into records.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public final class ProtobufV2ToRecordParser implements Parser<List<Record>, HttpRequest> {
 

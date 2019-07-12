@@ -49,7 +49,7 @@ import java.util.Set;
  * Representation of TsdAggregator pipeline configuration. Each pipeline can
  * define one or more sources and one or more sinks.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @Loggable
 public final class PipelineConfiguration {
@@ -151,7 +151,7 @@ public final class PipelineConfiguration {
     /**
      * Implementation of builder pattern for <code>PipelineConfiguration</code>.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static class Builder extends OvalBuilder<PipelineConfiguration> {
 

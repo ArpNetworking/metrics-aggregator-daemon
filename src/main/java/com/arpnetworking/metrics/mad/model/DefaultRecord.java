@@ -28,8 +28,8 @@ import java.time.ZonedDateTime;
 /**
  * Default implementation of the <code>Record</code> interface.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  * @author Ryan Ascheman (rascheman at groupon dot com)
  */
 @Loggable
@@ -113,7 +113,7 @@ public final class DefaultRecord implements Record {
     /**
      * Implementation of builder pattern for <code>DefaultRecord</code>.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends ThreadLocalBuilder<Record> {
 

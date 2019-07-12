@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 /**
  * Parses the Inscope Metrics protobuf binary protocol into records.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @SuppressWarnings("deprecation")
 public final class ProtobufV1ToRecordParser implements Parser<List<Record>, HttpRequest> {

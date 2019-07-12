@@ -29,7 +29,7 @@ import java.util.function.Function;
 /**
  * Abstract base class for <code>JsonSource</code> implementations.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public abstract class BaseJsonNodeSource implements JsonNodeSource {
 

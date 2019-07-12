@@ -23,7 +23,7 @@ import net.sf.oval.constraint.NotNull;
  * Represents a value that is reaggregatable.
  *
  * @param <T> The type of supporting data.
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class CalculatedValue<T> {
 

@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * A variable and data to describe the input to a statistic calculator.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public final class DefaultMetric implements Metric {
 
@@ -100,7 +100,7 @@ public final class DefaultMetric implements Metric {
     /**
      * Implementation of builder pattern for <code>DefaultMetric</code>.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends ThreadLocalBuilder<Metric> {
 

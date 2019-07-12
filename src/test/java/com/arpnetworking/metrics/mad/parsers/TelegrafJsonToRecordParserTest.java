@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * Tests for Telegraf JSON format.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class TelegrafJsonToRecordParserTest {
 

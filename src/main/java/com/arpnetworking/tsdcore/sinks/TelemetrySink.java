@@ -28,7 +28,7 @@ import net.sf.oval.constraint.NotNull;
 /**
  * A publisher that sends a message to the <code>Telemetry</code> actor.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class TelemetrySink extends BaseSink {
 
@@ -61,7 +61,7 @@ public final class TelemetrySink extends BaseSink {
     /**
      * Base <code>Builder</code> implementation.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class Builder extends BaseSink.Builder<Builder, TelemetrySink> {
 

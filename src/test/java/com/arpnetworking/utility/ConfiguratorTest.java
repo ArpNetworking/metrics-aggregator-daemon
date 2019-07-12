@@ -25,7 +25,7 @@ import java.util.Optional;
 /**
  * Tests for the <code>Configurator</code> class.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class ConfiguratorTest {
 

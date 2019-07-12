@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
 /**
  * Processes log-based messages.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class LogMessagesProcessor implements MessagesProcessor {
     /**

@@ -98,7 +98,7 @@ import javax.annotation.Nullable;
  * report_active = false
  * </pre>
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class TelegrafJsonToRecordParser implements Parser<List<Record>, ByteBuffer> {
 

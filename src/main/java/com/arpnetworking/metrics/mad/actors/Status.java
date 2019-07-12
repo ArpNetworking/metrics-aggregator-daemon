@@ -20,7 +20,7 @@ import akka.actor.AbstractActor;
 /**
  * Actor to determine the status of the system.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class Status extends AbstractActor {
 

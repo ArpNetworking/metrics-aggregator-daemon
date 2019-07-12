@@ -32,7 +32,7 @@ import java.util.Optional;
 /**
  * <code>JsonNode</code> based configuration sourced from a paginated <code>URI</code>.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class JsonNodePaginatedUriSource extends BaseJsonNodeSource {
 

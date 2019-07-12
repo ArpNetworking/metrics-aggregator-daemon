@@ -28,7 +28,7 @@ import java.util.Set;
 /**
  * Counts the entries. Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @Loggable
 public final class CountStatistic extends BaseStatistic {
@@ -55,7 +55,7 @@ public final class CountStatistic extends BaseStatistic {
     /**
      * Accumulator computing the count of values.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     private static final class CountAccumulator extends BaseCalculator<Void> implements Accumulator<Void> {
 

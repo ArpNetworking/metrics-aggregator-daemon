@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * to inject a service discovery or load balancing strategy that is not
  * supported transparently through DNS lookup.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.CLASS,

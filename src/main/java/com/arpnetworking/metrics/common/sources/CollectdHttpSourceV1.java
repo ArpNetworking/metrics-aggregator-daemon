@@ -20,7 +20,7 @@ import com.arpnetworking.metrics.mad.parsers.CollectdJsonToRecordParser;
 /**
  * Processes HTTP requests from Collectd, extracts data and emits metrics.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public final class CollectdHttpSourceV1 extends HttpSource {
 
@@ -41,7 +41,7 @@ public final class CollectdHttpSourceV1 extends HttpSource {
     /**
      * CollectdHttpSourceV1 {@link BaseSource.Builder} implementation.
      *
-     * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+     * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
      */
     public static final class Builder extends HttpSource.Builder<Builder, CollectdHttpSourceV1> {
         /**

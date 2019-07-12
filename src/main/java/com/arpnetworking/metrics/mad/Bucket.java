@@ -58,7 +58,7 @@ import java.util.function.BiFunction;
 /**
 * Contains samples for a particular aggregation period in time.
 *
-* @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+* @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
 */
 /* package private */ final class Bucket {
 

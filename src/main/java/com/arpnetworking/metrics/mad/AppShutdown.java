@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 /**
  * Assists Guice-instantiated classes in shutting down.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class AppShutdown implements LifecycleRegistration {
     /**

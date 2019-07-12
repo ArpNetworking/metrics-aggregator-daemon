@@ -27,7 +27,7 @@ import java.util.function.Function;
  * Abstract base class for common functionality for publishing
  * <code>AggregatedData</code>. This class is thread safe.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public abstract class BaseSink implements Sink {
 
@@ -73,7 +73,7 @@ public abstract class BaseSink implements Sink {
      * @param <B> type of the builder
      * @param <S> type of the object to be built
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     protected abstract static class Builder<B extends Builder<B, S>, S extends Sink> extends OvalBuilder<S> {
 

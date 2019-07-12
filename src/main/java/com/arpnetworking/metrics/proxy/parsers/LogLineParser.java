@@ -28,7 +28,7 @@ import java.nio.file.Path;
 /**
  * Represents raw log lines read from a file.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class LogLineParser implements Parser<LogLine, byte[]> {
 

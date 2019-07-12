@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Factory for creating all the processors needed to process a v1 message.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class ProcessorsV1Factory implements MessageProcessorsFactory {
     @Override

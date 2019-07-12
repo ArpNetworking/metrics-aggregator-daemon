@@ -23,7 +23,7 @@ import java.time.Duration;
 /**
  * A {@link Trigger} that waits a set amount of time then fires.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class TimerTrigger implements Trigger {
 

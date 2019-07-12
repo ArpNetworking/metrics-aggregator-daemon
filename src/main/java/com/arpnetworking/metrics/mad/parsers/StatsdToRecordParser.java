@@ -69,7 +69,7 @@ import javax.annotation.Nullable;
  * https://docs.datadoghq.com/guides/dogstatsd/
  * https://github.com/influxdata/telegraf/tree/master/plugins/inputs/statsd#influx-statsd
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuffer> {
 

@@ -27,7 +27,7 @@ import java.util.concurrent.Semaphore;
  *
  * NOTE: this class is only intended to coordinate interaction between one waiter and one trigger thread for testing.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class ManualSingleThreadedTrigger implements Trigger {
     @Override

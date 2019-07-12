@@ -22,7 +22,7 @@ import org.junit.Test;
 /**
  * Tests for the <code>StaticConfiguration</code> class.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class StaticConfigurationTest {
 

@@ -24,7 +24,7 @@ import java.nio.channels.SeekableByteChannel;
 /**
  * Represents the initial position for a tailer.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public enum InitialPosition {
     /**

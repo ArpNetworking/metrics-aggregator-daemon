@@ -73,7 +73,7 @@ import java.util.stream.StreamSupport;
 /**
  * Http server routes.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
 public final class Routes implements Function<HttpRequest, CompletionStage<HttpResponse>> {

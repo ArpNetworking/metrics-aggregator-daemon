@@ -25,7 +25,7 @@ import java.util.concurrent.CompletionStage;
 /**
  * Supplemental http server routes.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public interface SupplementalRoutes extends Function<HttpRequest, Optional<CompletionStage<HttpResponse>>> {
 

@@ -45,7 +45,7 @@ import java.util.function.Function;
 /**
  * Publishes to an HTTP endpoint. This class is thread safe.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public abstract class HttpPostSink extends BaseSink {
 
@@ -179,7 +179,7 @@ public abstract class HttpPostSink extends BaseSink {
      *
      * @param <B> type of the builder
      * @param <S> type of the object to be built
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public abstract static class Builder<B extends BaseSink.Builder<B, S>, S extends HttpPostSink> extends BaseSink.Builder<B, S> {
 
