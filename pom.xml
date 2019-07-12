@@ -43,9 +43,9 @@
     <developer>
       <id>barp</id>
       <name>Brandon Arp</name>
-      <email>brandon.arp@inscopemetrics.com</email>
+      <email>brandon.arp@inscopemetrics.io</email>
       <organization>Inscope Metrics</organization>
-      <organizationUrl>http://www.inscopemetrics.com</organizationUrl>
+      <organizationUrl>http://www.inscopemetrics.io</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>
@@ -53,9 +53,9 @@
     <developer>
       <id>vkoskela</id>
       <name>Ville Koskela</name>
-      <email>ville.koskela@inscopemetrics.com</email>
+      <email>ville.koskela@inscopemetrics.io</email>
       <organization>Inscope Metrics</organization>
-      <organizationUrl>http://www.inscopemetrics.com</organizationUrl>
+      <organizationUrl>http://www.inscopemetrics.io</organizationUrl>
       <roles>
         <role>developer</role>
       </roles>

@@ -55,7 +55,7 @@ import java.util.UUID;
 /**
  * Tests for the <code>Aggregator</code> class.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class AggregatorTest {
 

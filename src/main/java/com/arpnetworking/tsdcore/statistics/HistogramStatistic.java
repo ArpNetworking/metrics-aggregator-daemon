@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
  * a value itself. It is used by percentile statistics as a common dependency.
  * Use <code>StatisticFactory</code> for construction.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class HistogramStatistic extends BaseStatistic {
 
@@ -57,7 +57,7 @@ public final class HistogramStatistic extends BaseStatistic {
      * Accumulator computing the histogram of values. There is a dependency on the
      * histogram accumulator from each percentile statistic's calculator.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     /* package private */ static final class HistogramAccumulator
             extends BaseCalculator<HistogramSupportingData>
@@ -132,7 +132,7 @@ public final class HistogramStatistic extends BaseStatistic {
     /**
      * Supporting data based on a histogram.
      *
-     * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+     * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
      */
     public static final class HistogramSupportingData {
         /**
@@ -181,7 +181,7 @@ public final class HistogramStatistic extends BaseStatistic {
         /**
          * Implementation of the builder pattern for a {@link HistogramSupportingData}.
          *
-         * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+         * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
          */
         public static class Builder extends ThreadLocalBuilder<HistogramSupportingData> {
             /**
@@ -278,7 +278,7 @@ public final class HistogramStatistic extends BaseStatistic {
     /**
      * Represents a snapshot of immutable histogram data.
      *
-     * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+     * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
      */
     public static final class HistogramSnapshot {
         private HistogramSnapshot(final Double2IntSortedMap data, final int entriesCount) {

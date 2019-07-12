@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 /**
  * Provides a way to register for lifecycle events, ensuring that Guice-instantiated classes can be notified.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public interface LifecycleRegistration {
     /**

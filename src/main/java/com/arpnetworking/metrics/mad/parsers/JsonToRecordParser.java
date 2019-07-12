@@ -74,8 +74,8 @@ import javax.annotation.Nullable;
  * line. Specifications for each version of the query log can be found in the
  * <code>metrics-client-doc</code> repository.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  * @author Ryan Ascheman (rascheman at groupon dot com)
  */
 public final class JsonToRecordParser implements Parser<Record, byte[]> {

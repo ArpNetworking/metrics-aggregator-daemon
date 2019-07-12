@@ -26,8 +26,8 @@ import java.util.Optional;
 /**
  * Takes the sum of the entries. Use <code>StatisticFactory</code> for construction.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @Loggable
 public final class SumStatistic extends BaseStatistic {
@@ -49,7 +49,7 @@ public final class SumStatistic extends BaseStatistic {
     /**
      * Accumulator computing the sum of values.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class SumAccumulator extends BaseCalculator<Void> implements Accumulator<Void> {
 

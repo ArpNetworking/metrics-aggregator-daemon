@@ -31,7 +31,7 @@ import java.util.Set;
 /**
  * Base class for percentile based statistics.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public abstract class TPStatistic extends BaseStatistic implements OrderedStatistic {
 
@@ -94,7 +94,7 @@ public abstract class TPStatistic extends BaseStatistic implements OrderedStatis
     /**
      * Calculator computing the percentile of values.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static final class PercentileCalculator extends BaseCalculator<Void> {
 

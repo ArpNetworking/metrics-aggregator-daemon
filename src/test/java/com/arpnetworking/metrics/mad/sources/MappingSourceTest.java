@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 /**
  * Tests for the <code>MergingSource</code> class.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class MappingSourceTest {
 

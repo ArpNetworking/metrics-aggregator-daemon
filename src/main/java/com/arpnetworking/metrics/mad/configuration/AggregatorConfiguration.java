@@ -32,7 +32,7 @@ import java.util.Optional;
 /**
  * Representation of TsdAggregator configuration.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @Loggable
 public final class AggregatorConfiguration {
@@ -143,7 +143,7 @@ public final class AggregatorConfiguration {
     /**
      * Implementation of builder pattern for <code>TsdAggregatorConfiguration</code>.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static class Builder extends OvalBuilder<AggregatorConfiguration> {
 

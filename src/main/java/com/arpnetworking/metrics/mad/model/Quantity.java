@@ -21,7 +21,7 @@ import java.util.Optional;
 /**
  * Represents a sample.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public interface Quantity extends Comparable<Quantity>, Serializable {
 

@@ -28,7 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * Tests for the <code>PeriodicStatisticsSink</code> class.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class PeriodicStatisticsSinkTest {
 

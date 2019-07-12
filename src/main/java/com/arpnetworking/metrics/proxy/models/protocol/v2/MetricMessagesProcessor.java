@@ -38,7 +38,7 @@ import java.util.Set;
 /**
  * Processes metric-based messages.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class MetricMessagesProcessor implements MessagesProcessor {
     /**

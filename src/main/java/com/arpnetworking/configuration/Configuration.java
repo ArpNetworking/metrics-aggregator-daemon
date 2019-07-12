@@ -22,7 +22,7 @@ import java.util.Optional;
 /**
  * Interface for classes which provide configuration.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public interface Configuration {
 

@@ -21,7 +21,7 @@ import java.util.Optional;
 /**
  * A <code>PositionStore</code> that always returns absent.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class NoPositionStore implements PositionStore {
     @Override

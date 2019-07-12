@@ -28,7 +28,7 @@ import java.time.ZonedDateTime;
 /**
  * Contains the data for a specific period in time.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @Loggable
 public final class PeriodicData {

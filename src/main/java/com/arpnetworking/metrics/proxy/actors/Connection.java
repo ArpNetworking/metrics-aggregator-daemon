@@ -49,7 +49,7 @@ import java.util.Set;
 /**
  * Actor class to hold the state for a single connection.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class Connection extends AbstractActor {
     /**

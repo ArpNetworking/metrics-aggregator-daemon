@@ -30,7 +30,7 @@ import java.util.Set;
  * NOTE: This is not marked as @Loggable since it only has one attribute which we
  * do not wish to log with it since it contains a lot of data.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @Loggable
 public final class MetricsList {

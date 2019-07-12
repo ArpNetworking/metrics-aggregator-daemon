@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableMap;
 /**
  * Interface for aggregation context (e.g. slice of hyper-cube).
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public interface Key {
 

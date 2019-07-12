@@ -48,7 +48,7 @@ import java.util.List;
 /**
  * Tests for the FileSource class.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class FileSourceTest {
     @SuppressWarnings("unchecked")

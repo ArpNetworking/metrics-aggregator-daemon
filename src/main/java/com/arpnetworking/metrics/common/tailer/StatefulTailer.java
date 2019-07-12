@@ -49,8 +49,8 @@ import javax.xml.bind.DatatypeConverter;
  * new feature is the <code>PositionStore</code> which is used to checkpoint
  * the offset in the tailed file as identified by a hash of the file prefix.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class StatefulTailer implements Tailer {
 
@@ -586,7 +586,7 @@ public final class StatefulTailer implements Tailer {
     /**
      * Implementation of builder pattern for <code>StatefulTailer</code>.
      *
-     * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+     * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
      */
     public static class Builder extends OvalBuilder<StatefulTailer> {
 

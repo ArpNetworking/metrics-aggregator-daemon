@@ -45,7 +45,7 @@ import java.util.concurrent.ConcurrentMap;
  * position in a file on local disk. This class is thread-safe per file
  * identifier.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class FilePositionStore implements PositionStore {
 
@@ -239,7 +239,7 @@ public final class FilePositionStore implements PositionStore {
     /**
      * Implementation of builder pattern for <code>FilePositionStore</code>.
      *
-     * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+     * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
     public static class Builder extends OvalBuilder<FilePositionStore> {
 

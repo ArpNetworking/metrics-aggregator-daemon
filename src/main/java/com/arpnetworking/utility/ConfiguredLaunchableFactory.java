@@ -21,7 +21,7 @@ package com.arpnetworking.utility;
  * @param <T> The type of the {@link com.arpnetworking.utility.Launchable}.
  * @param <S> The type of config.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public interface ConfiguredLaunchableFactory<T, S> {
     /**

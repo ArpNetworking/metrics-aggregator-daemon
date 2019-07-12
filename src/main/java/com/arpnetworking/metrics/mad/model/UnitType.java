@@ -19,7 +19,7 @@ package com.arpnetworking.metrics.mad.model;
 /**
  * The unit type classification.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 /* package private */ enum UnitType {
     TIME {

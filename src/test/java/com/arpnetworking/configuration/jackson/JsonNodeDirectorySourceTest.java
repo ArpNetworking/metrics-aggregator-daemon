@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 /**
  * Tests for the {@link JsonNodeDirectorySource} class.
  *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class JsonNodeDirectorySourceTest {
 

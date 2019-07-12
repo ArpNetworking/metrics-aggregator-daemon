@@ -19,7 +19,7 @@ package com.arpnetworking.tsdcore.statistics;
  * Marker interface for statistics which require values to be ordered from
  * smallest to largest.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public interface OrderedStatistic extends Statistic {
 
