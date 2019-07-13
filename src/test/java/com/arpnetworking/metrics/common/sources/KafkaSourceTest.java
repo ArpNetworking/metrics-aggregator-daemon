@@ -35,11 +35,10 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Unit tests for the {@code KafkaSource} class.
@@ -48,11 +47,11 @@ import java.util.Map;
  */
 public class KafkaSourceTest {
 
-    private static final List<String> EXPECTED = Arrays.asList("value0", "value1", "value2");
+    private static final List<String> EXPECTED = createValues("value", 100);
     private static final String TOPIC = "test_topic";
     private static final int PARTITION = 0;
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
-    private static final int TIMEOUT = 1000;
+    private static final int TIMEOUT = 5000;
 
     private KafkaSource<String, String> _source;
     private Logger _logger;
@@ -75,7 +74,7 @@ public class KafkaSourceTest {
     }
 
     @Test
-    public void testSourceSuccess() {
+    public void testSourceSingleWorkerSuccess() {
         createHealthySource();
         final Observer observer = Mockito.mock(Observer.class);
         _source.attach(observer);
@@ -168,6 +167,14 @@ public class KafkaSourceTest {
                 .setParser(parser)
                 .setPollTime(POLL_DURATION),
                 _logger);
+    }
+
+    private static List<String> createValues(final String prefix, final int num) {
+        final List<String> values = new ArrayList<>(num);
+        for (int i = 0; i < num; i++) {
+            values.add(prefix + i);
+        }
+        return values;
     }
 
     /**

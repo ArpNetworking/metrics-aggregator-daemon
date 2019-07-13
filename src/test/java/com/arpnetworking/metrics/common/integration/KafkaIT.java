@@ -16,6 +16,7 @@
 package com.arpnetworking.metrics.common.integration;
 
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
+import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.common.kafka.ConsumerDeserializer;
 import com.arpnetworking.metrics.common.sources.KafkaSource;
@@ -56,6 +57,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 /**
  * Tests to check integration with a kafka topic.
@@ -69,7 +71,7 @@ public class KafkaIT {
     private static final String KEY_DESERIALIZER = "org.apache.kafka.common.serialization.IntegerDeserializer";
     private static final String VALUE_DESERIALIZER = "org.apache.kafka.common.serialization.StringDeserializer";
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
-    private static final int TIMEOUT = 5000;
+    private static final int TIMEOUT = 10000;
 
     private Map<String, Object> _consumerProps;
     private KafkaConsumer<Integer, String> _consumer;
@@ -82,19 +84,6 @@ public class KafkaIT {
         // Create kafka topic
         _topicName = createTopicName();
         createTopic(_topicName);
-
-        // Create and send producer records
-        _producerRecords = createProducerRecords(_topicName, 3);
-        sendRecords(_producerRecords);
-
-        // Create consumer props
-        _consumerProps = Maps.newHashMap();
-        _consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
-        _consumerProps.put(ConsumerConfig.CLIENT_ID_CONFIG, "consumer0");
-        _consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KEY_DESERIALIZER);
-        _consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, VALUE_DESERIALIZER);
-        _consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        _consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "group" + _topicName);
     }
 
     @After
@@ -106,6 +95,7 @@ public class KafkaIT {
 
     @Test
     public void testKafkaSourceSingleObserver() {
+        setupKafka(500);
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
@@ -127,6 +117,7 @@ public class KafkaIT {
 
     @Test
     public void testKafkaSourceMultipleObservers() {
+        setupKafka(500);
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
@@ -151,6 +142,7 @@ public class KafkaIT {
 
     @Test
     public void testKafkaSourceFromConfig() throws IOException {
+        setupKafka(500);
         final String jsonString =
                     "{"
                 + "\n  \"type\":\"com.arpnetworking.metrics.common.sources.KafkaSource\","
@@ -187,6 +179,66 @@ public class KafkaIT {
         for (ProducerRecord<Integer, String> expected : _producerRecords) {
             Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source, expected.value());
         }
+    }
+
+    @Test
+    public void testKafkaSourceMultipleWorkerThreads() throws InterruptedException {
+        setupKafka(500);
+        // Create Kafka Source
+        _consumer = new KafkaConsumer<>(_consumerProps);
+        _consumer.subscribe(Collections.singletonList(_topicName));
+        _source = new KafkaSource.Builder<String, String>()
+                .setName("KafkaSource")
+                .setParser(new StringParser())
+                .setConsumer(_consumer)
+                .setPollTime(POLL_DURATION)
+                .setNumWorkerThreads(4)
+                .build();
+
+        // Observe records
+        final CollectObserver observer = new CollectObserver();
+        _source.attach(observer);
+        _source.start();
+
+        Thread.sleep(TIMEOUT);
+
+        final List<String> collected = observer.getCollection();
+        final List<String> expected = _producerRecords.stream()
+                .map(ProducerRecord::value)
+                .collect(Collectors.toList());
+        Collections.sort(expected);
+        Collections.sort(collected);
+        Assert.assertEquals(expected, collected);
+    }
+
+    @Test
+    public void testKafkaSourceFillQueue() throws InterruptedException {
+        setupKafka(4000);
+        // Create Kafka Source
+        _consumer = new KafkaConsumer<>(_consumerProps);
+        _consumer.subscribe(Collections.singletonList(_topicName));
+        _source = new KafkaSource.Builder<String, String>()
+                .setName("KafkaSource")
+                .setParser(new StringParser())
+                .setConsumer(_consumer)
+                .setPollTime(POLL_DURATION)
+                .setNumWorkerThreads(2)
+                .build();
+
+        // Observe records
+        final CollectObserver observer = new CollectObserver();
+        _source.attach(observer);
+        _source.start();
+
+        Thread.sleep(TIMEOUT);
+
+        final List<String> collected = observer.getCollection();
+        final List<String> expected = _producerRecords.stream()
+                .map(ProducerRecord::value)
+                .collect(Collectors.toList());
+        Collections.sort(expected);
+        Collections.sort(collected);
+        Assert.assertEquals(expected, collected);
     }
 
     private String createTopicName() {
@@ -252,10 +304,40 @@ public class KafkaIT {
         producer.close();
     }
 
+    private void setupKafka(final int numRecords) {
+        // Create and send producer records
+        _producerRecords = createProducerRecords(_topicName, numRecords);
+        sendRecords(_producerRecords);
+
+        // Create consumer props
+        _consumerProps = Maps.newHashMap();
+        _consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
+        _consumerProps.put(ConsumerConfig.CLIENT_ID_CONFIG, "consumer0");
+        _consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KEY_DESERIALIZER);
+        _consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, VALUE_DESERIALIZER);
+        _consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        _consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "group" + _topicName);
+    }
+
     /**
      * Class needed for generic object mapping with {@code ObjectMapper}.
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
     private static class KafkaSourceStringType extends TypeReference<KafkaSource<String, String>> {}
+
+    private static final class CollectObserver implements Observer {
+        private List<String> _collection = Collections.synchronizedList(new ArrayList<>());
+
+        @Override
+        public void notify(final Observable observable, final Object object) {
+            if (object instanceof String) {
+                _collection.add((String) object);
+            }
+        }
+
+        List<String> getCollection() {
+            return _collection;
+        }
+    }
 }
