@@ -13,18 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.metrics.common.kafka;
+package com.arpnetworking.test;
+
+import com.arpnetworking.metrics.common.parsers.Parser;
+import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 
 /**
- * Interface for classes which use a kafka {@code Consumer} to
- * continually poll a kafka topic.
+ * Trivial <code>Parser</code> that converts Strings to Strings.
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
-public interface RunnableConsumer extends Runnable {
+public class StringParser implements Parser<String, String> {
 
-    /**
-     * Stop the {@link RunnableConsumer} instance.
-     */
-    void stop();
+    @Override
+    public String parse(final String data) throws ParsingException {
+        return data;
+    }
 }

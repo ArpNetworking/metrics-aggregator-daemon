@@ -19,7 +19,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 /**
  * Interface for classes that handle the records polled by a kafka
- * <code>Consumer</code>.
+ * {@code Consumer}.
  *
  * @param <T> the type of the value in the consumer records being handled
  *

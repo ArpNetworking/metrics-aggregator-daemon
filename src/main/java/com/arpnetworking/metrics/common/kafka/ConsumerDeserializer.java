@@ -37,10 +37,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Jackson <code>JsonDeserializer</code> implementation for <code>Consumer</code>.
+ * Jackson {@code JsonDeserializer} implementation for {@code Consumer}.
  *
- * @param <K> the type of key field in <code>Consumer</code>
- * @param <V> the type of value field in <code>Consumer</code>
+ * @param <K> the type of key field in {@code Consumer}
+ * @param <V> the type of value field in {@code Consumer}
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
