@@ -21,9 +21,11 @@ import com.arpnetworking.metrics.common.kafka.RunnableConsumer;
 import com.arpnetworking.metrics.common.kafka.RunnableConsumerImpl;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.fasterxml.jackson.annotation.JacksonInject;
 import net.sf.oval.constraint.CheckWith;
 import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.NotNull;
@@ -56,6 +58,7 @@ public final class KafkaSource<T, V> extends BaseSource {
     private final Logger _logger;
     private final Duration _shutdownAwaitTime;
     private final Duration _backoffTime;
+    private final PeriodicMetrics _periodicMetrics;
 
     @Override
     public void start() {
@@ -113,6 +116,7 @@ public final class KafkaSource<T, V> extends BaseSource {
         _consumerExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "KafkaConsumer"));
         _shutdownAwaitTime = builder._shutdownAwaitTime;
         _backoffTime = builder._backoffTime;
+        _periodicMetrics = builder._periodicMetrics;
     }
 
     private class LogConsumerListener implements ConsumerListener<V> {
@@ -130,6 +134,7 @@ public final class KafkaSource<T, V> extends BaseSource {
                 return;
             }
             KafkaSource.this.notify(record);
+            _periodicMetrics.recordCounter("num_records", 1);
         }
 
         @Override
@@ -181,7 +186,7 @@ public final class KafkaSource<T, V> extends BaseSource {
     }
 
     /**
-     * Builder pattern class for {@code KafkaSource}.
+     * Builder pattern class for {@link KafkaSource}.
      *
      * @param <T> the type of data created by the source
      * @param <V> the type of data of value in kafka {@code ConsumerRecords}
@@ -256,6 +261,18 @@ public final class KafkaSource<T, V> extends BaseSource {
             return this;
         }
 
+        /**
+         * Sets {@code PeriodicMetrics} for self instrumentation of {@link KafkaSource}.
+         *
+         * @param periodicMetrics The {@code PeriodicMetrics} for the {@link KafkaSource}.
+         * @return This instance of {@link KafkaSource.Builder}.
+         */
+        public Builder<T, V> setPeriodicMetrics(final PeriodicMetrics periodicMetrics) {
+            _periodicMetrics = periodicMetrics;
+            return this;
+        }
+
+
         @Override
         protected Builder<T, V> self() {
             return this;
@@ -274,6 +291,9 @@ public final class KafkaSource<T, V> extends BaseSource {
         @NotNull
         @CheckWith(value = PositiveDuration.class, message = "Backoff time must be positive.")
         private Duration _backoffTime = Duration.ofSeconds(1);
+        @JacksonInject
+        @NotNull
+        private PeriodicMetrics _periodicMetrics;
 
         private static class PositiveDuration implements CheckWithCheck.SimpleCheck {
             @Override

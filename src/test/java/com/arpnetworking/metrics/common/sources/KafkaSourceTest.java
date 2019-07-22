@@ -16,8 +16,10 @@
 package com.arpnetworking.metrics.common.sources;
 
 import com.arpnetworking.commons.observer.Observer;
+import com.arpnetworking.metrics.Unit;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.test.StringParser;
@@ -30,6 +32,7 @@ import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -39,10 +42,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 /**
- * Unit tests for the {@code KafkaSource} class.
+ * Unit tests for the {@link KafkaSource} class.
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
@@ -58,6 +65,9 @@ public class KafkaSourceTest {
     private Logger _logger;
     private LogBuilder _logBuilder;
 
+    private LoggingPeriodicMetrics _periodicMetrics;
+    private ScheduledExecutorService _executor;
+
     @Before
     public void setUp() {
         _logger = Mockito.mock(Logger.class);
@@ -72,6 +82,17 @@ public class KafkaSourceTest {
         Mockito.when(_logBuilder.addContext(Mockito.anyString(), Mockito.any())).thenReturn(_logBuilder);
         Mockito.when(_logBuilder.setEvent(Mockito.anyString())).thenReturn(_logBuilder);
         Mockito.when(_logBuilder.setThrowable(Mockito.any(Throwable.class))).thenReturn(_logBuilder);
+
+
+        _periodicMetrics = new LoggingPeriodicMetrics();
+        _executor = Executors.newSingleThreadScheduledExecutor(
+                r -> new Thread(r, "PeriodicMetricsCloser"));
+        _executor.scheduleAtFixedRate(_periodicMetrics, 5, 5, TimeUnit.MILLISECONDS);
+    }
+
+    @After
+    public void tearDown() {
+        _executor.shutdown();
     }
 
     @Test
@@ -128,6 +149,7 @@ public class KafkaSourceTest {
                 .setConsumer(consumer)
                 .setParser(new StringParser())
                 .setPollTime(POLL_DURATION)
+                .setPeriodicMetrics(_periodicMetrics)
                 .build();
     }
 
@@ -144,7 +166,8 @@ public class KafkaSourceTest {
                 .setName("KafkaSource")
                 .setConsumer(consumer)
                 .setParser(new StringParser())
-                .setPollTime(POLL_DURATION),
+                .setPollTime(POLL_DURATION)
+                .setPeriodicMetrics(_periodicMetrics),
                 _logger);
     }
 
@@ -166,7 +189,8 @@ public class KafkaSourceTest {
                 .setName("KafkaSource")
                 .setConsumer(consumer)
                 .setParser(parser)
-                .setPollTime(POLL_DURATION),
+                .setPollTime(POLL_DURATION)
+                .setPeriodicMetrics(_periodicMetrics),
                 _logger);
     }
 
@@ -174,4 +198,50 @@ public class KafkaSourceTest {
      * Interface needed to mock generic interface.
      */
     private interface ConsumerSS extends Consumer<String, String> {}
+
+    private static class LoggingPeriodicMetrics implements PeriodicMetrics, Runnable {
+
+        private long _count = 0L;
+
+        @Override
+        public void run() {
+            System.out.println(_count);
+            _count = 0L;
+        }
+
+        @Override
+        public void registerPolledMetric(final java.util.function.Consumer<PeriodicMetrics> consumer) {
+
+        }
+
+        @Override
+        public void recordCounter(final String name, final long value) {
+            _count += value;
+        }
+
+        @Override
+        public void recordTimer(final String name, final long duration, final Optional<Unit> unit) {
+
+        }
+
+        @Override
+        public void recordGauge(final String name, final double value) {
+
+        }
+
+        @Override
+        public void recordGauge(final String name, final double value, final Optional<Unit> unit) {
+
+        }
+
+        @Override
+        public void recordGauge(final String name, final long value) {
+
+        }
+
+        @Override
+        public void recordGauge(final String name, final long value, final Optional<Unit> unit) {
+
+        }
+    }
 }
