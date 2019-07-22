@@ -90,7 +90,7 @@ public class KafkaSourceTest {
     @Test
     public void testSourceMultiWorkerSuccess() throws InterruptedException {
         final List<String> expected = createValues("values", 4000);
-        createMultiWorkerSource(expected);
+        createMultiWorkerSource(expected, 4);
 
         // Observe records
         final CollectObserver observer = new CollectObserver();
@@ -150,7 +150,7 @@ public class KafkaSourceTest {
                 .build();
     }
 
-    private void createMultiWorkerSource(final List<String> expected) {
+    private void createMultiWorkerSource(final List<String> expected, final int numWorkers) {
         final MockConsumer<String, String> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
         consumer.assign(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
         long offset = 0L;
@@ -167,7 +167,7 @@ public class KafkaSourceTest {
                 .setConsumer(consumer)
                 .setParser(new StringParser())
                 .setPollTime(POLL_DURATION)
-                .setNumWorkerThreads(4)
+                .setNumWorkerThreads(numWorkers)
                 .build();
     }
 

@@ -62,7 +62,7 @@ public final class KafkaSource<T, V> extends BaseSource {
     private final Duration _shutdownAwaitTime;
     private final Duration _backoffTime;
     private final Integer _numWorkerThreads;
-    private final BlockingQueue<ConsumerRecord<?, V>> _queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
+    private final BlockingQueue<V> _queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ParsingWorker _parsingWorker = new ParsingWorker();
 
     @Override
@@ -145,12 +145,12 @@ public final class KafkaSource<T, V> extends BaseSource {
 
         @Override
         public void run() {
-            while (_isRunning || !_queue.isEmpty()) {
-                final ConsumerRecord<?, V> consumerRecord = _queue.poll();
-                if (consumerRecord != null) {
+            while (_isRunning || !_queue.isEmpty()) { // Empty the queue before stopping the workers
+                final V value = _queue.poll();
+                if (value != null) {
                     final T record;
                     try {
-                        record = _parser.parse(consumerRecord.value());
+                        record = _parser.parse(value);
                     } catch (final ParsingException e) {
                         _logger.error()
                                 .setMessage("Failed to parse data")
@@ -160,6 +160,7 @@ public final class KafkaSource<T, V> extends BaseSource {
                     }
                     KafkaSource.this.notify(record);
                 } else {
+                    // Queue is empty
                     try {
                         Thread.sleep(_backoffTime.toMillis());
                     } catch (final InterruptedException e) {
@@ -180,7 +181,7 @@ public final class KafkaSource<T, V> extends BaseSource {
         @Override
         public void handle(final ConsumerRecord<?, V> consumerRecord) {
             try {
-                _queue.put(consumerRecord);
+                _queue.put(consumerRecord.value());
             } catch (final InterruptedException e) {
                 _logger.info()
                         .setMessage("Consumer thread interrupted")
