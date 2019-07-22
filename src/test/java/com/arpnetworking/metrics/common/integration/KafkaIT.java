@@ -16,10 +16,10 @@
 package com.arpnetworking.metrics.common.integration;
 
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
-import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.common.kafka.ConsumerDeserializer;
 import com.arpnetworking.metrics.common.sources.KafkaSource;
+import com.arpnetworking.test.CollectObserver;
 import com.arpnetworking.test.StringParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -325,19 +325,4 @@ public class KafkaIT {
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
     private static class KafkaSourceStringType extends TypeReference<KafkaSource<String, String>> {}
-
-    private static final class CollectObserver implements Observer {
-        private List<String> _collection = Collections.synchronizedList(new ArrayList<>());
-
-        @Override
-        public void notify(final Observable observable, final Object object) {
-            if (object instanceof String) {
-                _collection.add((String) object);
-            }
-        }
-
-        List<String> getCollection() {
-            return _collection;
-        }
-    }
 }

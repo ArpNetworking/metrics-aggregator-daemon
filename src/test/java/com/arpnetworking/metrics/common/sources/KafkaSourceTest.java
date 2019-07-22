@@ -20,6 +20,7 @@ import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
+import com.arpnetworking.test.CollectObserver;
 import com.arpnetworking.test.StringParser;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
@@ -30,6 +31,7 @@ import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -86,6 +88,24 @@ public class KafkaSourceTest {
     }
 
     @Test
+    public void testSourceMultiWorkerSuccess() throws InterruptedException {
+        final List<String> expected = createValues("values", 4000);
+        createMultiWorkerSource(expected);
+
+        // Observe records
+        final CollectObserver observer = new CollectObserver();
+        _source.attach(observer);
+        _source.start();
+
+        Thread.sleep(TIMEOUT);
+
+        final List<String> collected = observer.getCollection();
+        Collections.sort(expected);
+        Collections.sort(collected);
+        Assert.assertEquals(expected, collected);
+    }
+
+    @Test
     public void testSourceKafkaException() {
         createExceptionSource(KafkaException.class);
         _source.start();
@@ -118,7 +138,7 @@ public class KafkaSourceTest {
         beginningOffsets.put(new TopicPartition(TOPIC, PARTITION), offset);
         consumer.updateBeginningOffsets(beginningOffsets);
 
-        for (String value : EXPECTED) {
+        for (final String value : EXPECTED) {
             consumer.addRecord(new ConsumerRecord<>(TOPIC, PARTITION, offset++, "" + offset, value));
         }
 
@@ -130,6 +150,26 @@ public class KafkaSourceTest {
                 .build();
     }
 
+    private void createMultiWorkerSource(final List<String> expected) {
+        final MockConsumer<String, String> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
+        consumer.assign(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
+        long offset = 0L;
+        final Map<TopicPartition, Long> beginningOffsets = Maps.newHashMap();
+        beginningOffsets.put(new TopicPartition(TOPIC, PARTITION), offset);
+        consumer.updateBeginningOffsets(beginningOffsets);
+
+        for (final String value : expected) {
+            consumer.addRecord(new ConsumerRecord<>(TOPIC, PARTITION, offset++, "" + offset, value));
+        }
+
+        _source = new KafkaSource.Builder<String, String>()
+                .setName("KafkaSource")
+                .setConsumer(consumer)
+                .setParser(new StringParser())
+                .setPollTime(POLL_DURATION)
+                .setNumWorkerThreads(4)
+                .build();
+    }
 
     private void createExceptionSource(final Class<? extends Exception> exception) {
         final Consumer<String, String> consumer = Mockito.mock(ConsumerSS.class);
