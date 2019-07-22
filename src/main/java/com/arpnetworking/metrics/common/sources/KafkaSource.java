@@ -77,9 +77,6 @@ public final class KafkaSource<T, V> extends BaseSource {
     public void stop() {
         _runnableConsumer.stop();
         _consumerExecutor.shutdown();
-
-        _parsingWorker.stop();
-        _parserExecutor.shutdown();
         try {
             _consumerExecutor.awaitTermination(_shutdownAwaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
@@ -90,6 +87,9 @@ public final class KafkaSource<T, V> extends BaseSource {
         } finally {
             _consumer.close();
         }
+
+        _parsingWorker.stop();
+        _parserExecutor.shutdown();
         try {
             _parserExecutor.awaitTermination(_shutdownAwaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
