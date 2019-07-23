@@ -20,7 +20,6 @@ import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.common.kafka.ConsumerDeserializer;
 import com.arpnetworking.metrics.common.sources.KafkaSource;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
-import com.arpnetworking.test.NopPeriodicMetrics;
 import com.arpnetworking.test.StringParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -93,7 +92,7 @@ public class KafkaIT {
         _topicName = createTopicName();
         createTopic(_topicName);
         setupKafka();
-        _periodicMetrics = new NopPeriodicMetrics();
+        _periodicMetrics = Mockito.mock(PeriodicMetrics.class);
     }
 
     @After
@@ -175,18 +174,19 @@ public class KafkaIT {
                 + "\n  \"backoffTime\":\"PT1S\""
                 + "\n}";
 
+        final ObjectMapper mapper = ObjectMapperFactory.createInstance();
+
+        final SimpleModule module = new SimpleModule("KafkaConsumer");
+        module.addDeserializer(Consumer.class, new ConsumerDeserializer<>());
+        mapper.registerModule(module);
+
         final Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 super.configure();
-                bind(PeriodicMetrics.class).toInstance(new NopPeriodicMetrics());
+                bind(PeriodicMetrics.class).toInstance(_periodicMetrics);
             }
         });
-
-        final ObjectMapper mapper = ObjectMapperFactory.createInstance();
-        final SimpleModule module = new SimpleModule("KafkaConsumer");
-        module.addDeserializer(Consumer.class, new ConsumerDeserializer<>());
-        mapper.registerModule(module);
         mapper.setInjectableValues(new GuiceInjectableValues(injector));
 
         _source = mapper.readValue(jsonString, new KafkaSourceStringType());
@@ -311,17 +311,4 @@ public class KafkaIT {
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
     private static class KafkaSourceStringType extends TypeReference<KafkaSource<String, String>> {}
-
-    /**
-     * Class for configuring testing {@code PeriodicMetrics} to inject with the {@code ObjectMapper}.
-     *
-     * @author Joey Jackson (jjackson at dropbox dot com)
-     */
-    private static class PeriodicTestingModule extends AbstractModule {
-        @Override
-        protected void configure() {
-            super.configure();
-            bind(PeriodicMetrics.class).toInstance(new NopPeriodicMetrics());
-        }
-    }
 }

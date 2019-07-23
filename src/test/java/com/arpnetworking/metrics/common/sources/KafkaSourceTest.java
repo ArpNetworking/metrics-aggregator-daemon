@@ -16,11 +16,12 @@
 package com.arpnetworking.metrics.common.sources;
 
 import com.arpnetworking.commons.observer.Observer;
+import com.arpnetworking.metrics.Unit;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
-import com.arpnetworking.test.NopPeriodicMetrics;
 import com.arpnetworking.test.StringParser;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -269,7 +271,7 @@ public class KafkaSourceTest {
         }
     }
 
-    private static class LoggingPeriodicMetrics extends NopPeriodicMetrics {
+    private static class LoggingPeriodicMetrics implements PeriodicMetrics, Runnable {
         private long _count = 0L;
 
         @Override
@@ -281,6 +283,36 @@ public class KafkaSourceTest {
         @Override
         public void recordCounter(final String name, final long value) {
             _count += value;
+        }
+
+        @Override
+        public void registerPolledMetric(final java.util.function.Consumer<PeriodicMetrics> consumer) {
+
+        }
+
+        @Override
+        public void recordTimer(final String name, final long duration, final Optional<Unit> unit) {
+
+        }
+
+        @Override
+        public void recordGauge(final String name, final double value) {
+
+        }
+
+        @Override
+        public void recordGauge(final String name, final double value, final Optional<Unit> unit) {
+
+        }
+
+        @Override
+        public void recordGauge(final String name, final long value) {
+
+        }
+
+        @Override
+        public void recordGauge(final String name, final long value, final Optional<Unit> unit) {
+
         }
     }
 }
