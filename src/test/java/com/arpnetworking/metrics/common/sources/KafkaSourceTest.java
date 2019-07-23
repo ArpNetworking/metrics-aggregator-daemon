@@ -30,29 +30,33 @@ import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
- * Unit tests for the {@code KafkaSource} class.
+ * Unit tests for the {@link KafkaSource} class.
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public class KafkaSourceTest {
 
-    private static final List<String> EXPECTED = Arrays.asList("value0", "value1", "value2");
+    private static final List<String> EXPECTED = createValues("value", 300);
     private static final String TOPIC = "test_topic";
     private static final int PARTITION = 0;
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
-    private static final int TIMEOUT = 1000;
+    private static final int TIMEOUT = 10000;
 
     private KafkaSource<String, String> _source;
     private Logger _logger;
@@ -75,15 +79,46 @@ public class KafkaSourceTest {
     }
 
     @Test
-    public void testSourceSuccess() {
-        createHealthySource();
+    public void testSourceSingleWorkerSuccess() {
+        createHealthySource(1);
         final Observer observer = Mockito.mock(Observer.class);
         _source.attach(observer);
         _source.start();
+
         for (String expected : EXPECTED) {
             Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source, expected);
         }
         _source.stop();
+    }
+
+    @Test
+    public void testSourceMultiWorkerSuccess() {
+        createHealthySource(4);
+        final Observer observer = Mockito.mock(Observer.class);
+        _source.attach(observer);
+        _source.start();
+
+        final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(EXPECTED.size())).notify(Mockito.any(), captor.capture());
+        Assert.assertEquals(
+                EXPECTED.stream().sorted().collect(Collectors.toList()),
+                captor.getAllValues().stream().sorted().collect(Collectors.toList())
+        );
+    }
+
+    @Test
+    public void testSourceMultiWorkerFillQueue() {
+        createFillingQueueSource();
+        final Observer observer = Mockito.mock(Observer.class);
+        _source.attach(observer);
+        _source.start();
+
+        final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(EXPECTED.size())).notify(Mockito.any(), captor.capture());
+        Assert.assertEquals(
+                EXPECTED.stream().sorted().collect(Collectors.toList()),
+                captor.getAllValues().stream().sorted().collect(Collectors.toList())
+        );
     }
 
     @Test
@@ -111,26 +146,25 @@ public class KafkaSourceTest {
         _source.stop();
     }
 
-    private void createHealthySource() {
-        final MockConsumer<String, String> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
-        consumer.assign(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
-        long offset = 0L;
-        final Map<TopicPartition, Long> beginningOffsets = Maps.newHashMap();
-        beginningOffsets.put(new TopicPartition(TOPIC, PARTITION), offset);
-        consumer.updateBeginningOffsets(beginningOffsets);
-
-        for (String value : EXPECTED) {
-            consumer.addRecord(new ConsumerRecord<>(TOPIC, PARTITION, offset++, "" + offset, value));
-        }
-
-        _source = new KafkaSource.Builder<String, String>()
+    private void createFillingQueueSource() {
+        _source = new KafkaSource<>(new KafkaSource.Builder<String, String>()
                 .setName("KafkaSource")
-                .setConsumer(consumer)
+                .setConsumer(createMockConsumer())
                 .setParser(new StringParser())
                 .setPollTime(POLL_DURATION)
-                .build();
+                .setNumWorkerThreads(1),
+                new FillingBlockingQueue(100));
     }
 
+    private void createHealthySource(final int numWorkers) {
+        _source = new KafkaSource.Builder<String, String>()
+                .setName("KafkaSource")
+                .setConsumer(createMockConsumer())
+                .setParser(new StringParser())
+                .setPollTime(POLL_DURATION)
+                .setNumWorkerThreads(numWorkers)
+                .build();
+    }
 
     private void createExceptionSource(final Class<? extends Exception> exception) {
         final Consumer<String, String> consumer = Mockito.mock(ConsumerSS.class);
@@ -149,6 +183,27 @@ public class KafkaSourceTest {
     }
 
     private void createBadParsingSource() throws ParsingException {
+        final Parser<String, String> parser = Mockito.mock(StringParser.class);
+        Mockito.when(parser.parse(Mockito.anyString()))
+                .thenThrow(new ParsingException("Could not parse data", "bad_data".getBytes(Charsets.UTF_8)));
+
+        _source = new KafkaSource<>(new KafkaSource.Builder<String, String>()
+                .setName("KafkaSource")
+                .setConsumer(createMockConsumer())
+                .setParser(parser)
+                .setPollTime(POLL_DURATION),
+                _logger);
+    }
+
+    private static List<String> createValues(final String prefix, final int num) {
+        final List<String> values = new ArrayList<>(num);
+        for (int i = 0; i < num; i++) {
+            values.add(prefix + i);
+        }
+        return values;
+    }
+
+    private static MockConsumer<String, String> createMockConsumer() {
         final MockConsumer<String, String> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
         consumer.assign(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
         long offset = 0L;
@@ -156,22 +211,37 @@ public class KafkaSourceTest {
         beginningOffsets.put(new TopicPartition(TOPIC, PARTITION), offset);
         consumer.updateBeginningOffsets(beginningOffsets);
 
-        consumer.addRecord(new ConsumerRecord<>(TOPIC, PARTITION, offset++, "" + offset, "bad_data"));
+        for (final String value : EXPECTED) {
+            consumer.addRecord(new ConsumerRecord<>(TOPIC, PARTITION, offset++, "" + offset, value));
+        }
 
-        final Parser<String, String> parser = Mockito.mock(StringParser.class);
-        Mockito.when(parser.parse(Mockito.anyString()))
-                .thenThrow(new ParsingException("Could not parse data", "bad_data".getBytes(Charsets.UTF_8)));
-
-        _source = new KafkaSource<>(new KafkaSource.Builder<String, String>()
-                .setName("KafkaSource")
-                .setConsumer(consumer)
-                .setParser(parser)
-                .setPollTime(POLL_DURATION),
-                _logger);
+        return consumer;
     }
 
     /**
      * Interface needed to mock generic interface.
      */
     private interface ConsumerSS extends Consumer<String, String> {}
+
+    private static class FillingBlockingQueue extends ArrayBlockingQueue<String> {
+        private AtomicBoolean _enabled = new AtomicBoolean(false);
+        private static final long serialVersionUID = 1L;
+
+        FillingBlockingQueue(final int capacity) {
+            super(capacity);
+        }
+
+        @Override
+        public String poll() {
+            return _enabled.get() ? super.poll() : null;
+        }
+
+        @Override
+        public void put(final String element) throws InterruptedException {
+            if (remainingCapacity() == 0) {
+                _enabled.set(true);
+            }
+            super.put(element);
+        }
+    }
 }
