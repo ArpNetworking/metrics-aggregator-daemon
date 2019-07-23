@@ -50,7 +50,6 @@ import java.util.concurrent.TimeUnit;
  */
 public final class KafkaSource<T, V> extends BaseSource {
 
-    private static final int QUEUE_SIZE = 1000;
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSource.class);
 
     private final Consumer<?, V> _consumer;
@@ -62,8 +61,9 @@ public final class KafkaSource<T, V> extends BaseSource {
     private final Duration _shutdownAwaitTime;
     private final Duration _backoffTime;
     private final Integer _numWorkerThreads;
-    private final BlockingQueue<V> _queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
+    private final BlockingQueue<V> _buffer;
     private final ParsingWorker _parsingWorker = new ParsingWorker();
+    private final Integer _bufferSize;
 
     @Override
     public void start() {
@@ -138,6 +138,8 @@ public final class KafkaSource<T, V> extends BaseSource {
         _parserExecutor = Executors.newFixedThreadPool(_numWorkerThreads);
         _shutdownAwaitTime = builder._shutdownAwaitTime;
         _backoffTime = builder._backoffTime;
+        _bufferSize = builder._bufferSize;
+        _buffer = new ArrayBlockingQueue<>(_bufferSize);
     }
 
     private class ParsingWorker implements Runnable {
@@ -145,8 +147,8 @@ public final class KafkaSource<T, V> extends BaseSource {
 
         @Override
         public void run() {
-            while (_isRunning || !_queue.isEmpty()) { // Empty the queue before stopping the workers
-                final V value = _queue.poll();
+            while (_isRunning || !_buffer.isEmpty()) { // Empty the queue before stopping the workers
+                final V value = _buffer.poll();
                 if (value != null) {
                     final T record;
                     try {
@@ -181,7 +183,7 @@ public final class KafkaSource<T, V> extends BaseSource {
         @Override
         public void handle(final ConsumerRecord<?, V> consumerRecord) {
             try {
-                _queue.put(consumerRecord.value());
+                _buffer.put(consumerRecord.value());
             } catch (final InterruptedException e) {
                 _logger.info()
                         .setMessage("Consumer thread interrupted")
@@ -329,6 +331,18 @@ public final class KafkaSource<T, V> extends BaseSource {
             return this;
         }
 
+        /**
+         * Sets the size of the buffer to hold {@code ConsumerRecord}s from the {@code Consumer} before they are parsed.
+         * Default is 1000. Must be greater than or equal to 1.
+         *
+         * @param bufferSize The size of the buffer.
+         * @return This instance of {@link KafkaSource.Builder}.
+         */
+        public Builder<T, V> setBufferSize(final Integer bufferSize) {
+            _bufferSize = bufferSize;
+            return this;
+        }
+
         @Override
         protected Builder<T, V> self() {
             return this;
@@ -350,6 +364,9 @@ public final class KafkaSource<T, V> extends BaseSource {
         @NotNull
         @Min(1)
         private Integer _numWorkerThreads = 1;
+        @NotNull
+        @Min(1)
+        private Integer _bufferSize = 1000;
 
         private static class PositiveDuration implements CheckWithCheck.SimpleCheck {
             @Override
