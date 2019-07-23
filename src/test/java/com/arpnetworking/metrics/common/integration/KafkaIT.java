@@ -85,7 +85,7 @@ public class KafkaIT {
         // Create kafka topic
         _topicName = createTopicName();
         createTopic(_topicName);
-        setupKafka(NUM_RECORDS);
+        setupKafka();
     }
 
     @After
@@ -269,9 +269,9 @@ public class KafkaIT {
         producer.close();
     }
 
-    private void setupKafka(final int numRecords) {
+    private void setupKafka() {
         // Create and send producer records
-        _producerRecords = createProducerRecords(_topicName, numRecords);
+        _producerRecords = createProducerRecords(_topicName, NUM_RECORDS);
         sendRecords(_producerRecords);
 
         // Create consumer props

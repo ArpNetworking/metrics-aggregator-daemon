@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Unit tests for the {@code KafkaSource} class.
+ * Unit tests for the {@link KafkaSource} class.
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
@@ -150,7 +150,7 @@ public class KafkaSourceTest {
     }
 
     private void createMultiWorkerSource(final int numWorkers) {
-        createHealthySource(4, 1000);
+        createHealthySource(numWorkers, 1000);
     }
 
     private void createSmallQueueSource() {

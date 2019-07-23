@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Produce instances of {@code Record} from the values of entries
+ * Produce instances of {@link com.arpnetworking.metrics.mad.model.Record} from the values of entries
  * from a Kafka topic. The key from the entries gets discarded
  *
  * @param <T> the type of data created by the source
@@ -244,7 +244,7 @@ public final class KafkaSource<T, V> extends BaseSource {
     }
 
     /**
-     * Builder pattern class for {@code KafkaSource}.
+     * Builder pattern class for {@link KafkaSource}.
      *
      * @param <T> the type of data created by the source
      * @param <V> the type of data of value in kafka {@code ConsumerRecords}
@@ -294,11 +294,11 @@ public final class KafkaSource<T, V> extends BaseSource {
         }
 
         /**
-         * Sets the amount of time the {@link KafkaSource} will wait to shutdown the {@code RunnableConsumer} thread.
+         * Sets the amount of time the {@link KafkaSource} will wait to shutdown the {@link RunnableConsumer} thread.
          * Default is 10 seconds. Cannot be null or negative.
          *
          * @param shutdownAwaitTime The {@code Duration} the {@link KafkaSource} will wait to shutdown
-         *                          the {@code RunnableConsumer} thread.
+         *                          the {@link RunnableConsumer} thread.
          * @return This instance of {@link KafkaSource.Builder}.
          */
         public Builder<T, V> setShutdownAwaitTime(final Duration shutdownAwaitTime) {
