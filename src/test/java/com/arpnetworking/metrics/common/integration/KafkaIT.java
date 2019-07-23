@@ -23,7 +23,9 @@ import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.test.StringParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.module.guice.GuiceAnnotationIntrospector;
 import com.fasterxml.jackson.module.guice.GuiceInjectableValues;
 import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
@@ -180,6 +182,7 @@ public class KafkaIT {
         module.addDeserializer(Consumer.class, new ConsumerDeserializer<>());
         mapper.registerModule(module);
 
+        final GuiceAnnotationIntrospector guiceIntrospector = new GuiceAnnotationIntrospector();
         final Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -188,6 +191,11 @@ public class KafkaIT {
             }
         });
         mapper.setInjectableValues(new GuiceInjectableValues(injector));
+        mapper.setAnnotationIntrospectors(
+                new AnnotationIntrospectorPair(
+                        guiceIntrospector, mapper.getSerializationConfig().getAnnotationIntrospector()),
+                new AnnotationIntrospectorPair(
+                        guiceIntrospector, mapper.getDeserializationConfig().getAnnotationIntrospector()));
 
         _source = mapper.readValue(jsonString, new KafkaSourceStringType());
 
