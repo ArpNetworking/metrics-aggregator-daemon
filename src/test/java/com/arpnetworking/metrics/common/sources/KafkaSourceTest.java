@@ -54,7 +54,7 @@ public class KafkaSourceTest {
     private static final String TOPIC = "test_topic";
     private static final int PARTITION = 0;
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
-    private static final int TIMEOUT = 5000;
+    private static final int TIMEOUT = 10000;
 
     private KafkaSource<String, String> _source;
     private Logger _logger;
@@ -78,7 +78,7 @@ public class KafkaSourceTest {
 
     @Test
     public void testSourceSingleWorkerSuccess() {
-        createHealthySource();
+        createNormalSource();
         final Observer observer = Mockito.mock(Observer.class);
         _source.attach(observer);
         _source.start();
@@ -90,18 +90,34 @@ public class KafkaSourceTest {
 
     @Test
     public void testSourceMultiWorkerSuccess() {
-        final int numValues = 4000;
-        final List<String> expected = createValues("values", numValues);
-        createMultiWorkerSource(expected, 4);
+        createMultiWorkerSource(4);
 
         final Observer observer = Mockito.mock(Observer.class);
         _source.attach(observer);
         _source.start();
 
         final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
-        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(numValues)).notify(Mockito.any(), captor.capture());
-        Collections.sort(expected);
-        Assert.assertEquals(expected, captor.getAllValues().stream().sorted().collect(Collectors.toList()));
+        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(EXPECTED.size())).notify(Mockito.any(), captor.capture());
+        Assert.assertEquals(
+                EXPECTED.stream().sorted().collect(Collectors.toList()),
+                captor.getAllValues().stream().sorted().collect(Collectors.toList())
+        );
+    }
+
+    @Test
+    public void testSourceMultiWorkerFillQueue() {
+        createSmallQueueSource();
+
+        final Observer observer = Mockito.mock(Observer.class);
+        _source.attach(observer);
+        _source.start();
+
+        final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(EXPECTED.size())).notify(Mockito.any(), captor.capture());
+        Assert.assertEquals(
+                EXPECTED.stream().sorted().collect(Collectors.toList()),
+                captor.getAllValues().stream().sorted().collect(Collectors.toList())
+        );
     }
 
     @Test
@@ -129,7 +145,19 @@ public class KafkaSourceTest {
         _source.stop();
     }
 
-    private void createHealthySource() {
+    private void createNormalSource() {
+        createHealthySource(1, 1000);
+    }
+
+    private void createMultiWorkerSource(final int numWorkers) {
+        createHealthySource(4, 1000);
+    }
+
+    private void createSmallQueueSource() {
+        createHealthySource(1, 5);
+    }
+
+    private void createHealthySource(final int numWorkers, final int bufferSize) {
         final MockConsumer<String, String> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
         consumer.assign(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
         long offset = 0L;
@@ -146,29 +174,12 @@ public class KafkaSourceTest {
                 .setConsumer(consumer)
                 .setParser(new StringParser())
                 .setPollTime(POLL_DURATION)
-                .build();
-    }
-
-    private void createMultiWorkerSource(final List<String> expected, final int numWorkers) {
-        final MockConsumer<String, String> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
-        consumer.assign(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
-        long offset = 0L;
-        final Map<TopicPartition, Long> beginningOffsets = Maps.newHashMap();
-        beginningOffsets.put(new TopicPartition(TOPIC, PARTITION), offset);
-        consumer.updateBeginningOffsets(beginningOffsets);
-
-        for (final String value : expected) {
-            consumer.addRecord(new ConsumerRecord<>(TOPIC, PARTITION, offset++, "" + offset, value));
-        }
-
-        _source = new KafkaSource.Builder<String, String>()
-                .setName("KafkaSource")
-                .setConsumer(consumer)
-                .setParser(new StringParser())
-                .setPollTime(POLL_DURATION)
                 .setNumWorkerThreads(numWorkers)
+                .setBufferSize(bufferSize)
                 .build();
     }
+
+
 
     private void createExceptionSource(final Class<? extends Exception> exception) {
         final Consumer<String, String> consumer = Mockito.mock(ConsumerSS.class);

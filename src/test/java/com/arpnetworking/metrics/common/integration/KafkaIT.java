@@ -72,6 +72,7 @@ public class KafkaIT {
     private static final String VALUE_DESERIALIZER = "org.apache.kafka.common.serialization.StringDeserializer";
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
     private static final int TIMEOUT = 10000;
+    private static final int NUM_RECORDS = 500;
 
     private Map<String, Object> _consumerProps;
     private KafkaConsumer<Integer, String> _consumer;
@@ -84,6 +85,7 @@ public class KafkaIT {
         // Create kafka topic
         _topicName = createTopicName();
         createTopic(_topicName);
+        setupKafka(NUM_RECORDS);
     }
 
     @After
@@ -95,7 +97,6 @@ public class KafkaIT {
 
     @Test
     public void testKafkaSourceSingleObserver() {
-        setupKafka(500);
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
@@ -117,7 +118,6 @@ public class KafkaIT {
 
     @Test
     public void testKafkaSourceMultipleObservers() {
-        setupKafka(500);
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
@@ -142,7 +142,6 @@ public class KafkaIT {
 
     @Test
     public void testKafkaSourceFromConfig() throws IOException {
-        setupKafka(500);
         final String jsonString =
                     "{"
                 + "\n  \"type\":\"com.arpnetworking.metrics.common.sources.KafkaSource\","
@@ -183,8 +182,6 @@ public class KafkaIT {
 
     @Test
     public void testKafkaSourceMultipleWorkerThreads() {
-        final int numRecords = 500;
-        setupKafka(numRecords);
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
@@ -202,35 +199,7 @@ public class KafkaIT {
         _source.start();
 
         final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
-        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(numRecords)).notify(Mockito.any(), captor.capture());
-        Assert.assertEquals(
-                _producerRecords.stream().map(ProducerRecord::value).sorted().collect(Collectors.toList()),
-                captor.getAllValues().stream().sorted().collect(Collectors.toList())
-        );
-    }
-
-    @Test
-    public void testKafkaSourceFillQueue() {
-        final int numRecords = 4000;
-        setupKafka(numRecords);
-        // Create Kafka Source
-        _consumer = new KafkaConsumer<>(_consumerProps);
-        _consumer.subscribe(Collections.singletonList(_topicName));
-        _source = new KafkaSource.Builder<String, String>()
-                .setName("KafkaSource")
-                .setParser(new StringParser())
-                .setConsumer(_consumer)
-                .setPollTime(POLL_DURATION)
-                .setNumWorkerThreads(2)
-                .build();
-
-        // Observe records
-        final Observer observer = Mockito.mock(Observer.class);
-        _source.attach(observer);
-        _source.start();
-
-        final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
-        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(numRecords)).notify(Mockito.any(), captor.capture());
+        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(NUM_RECORDS)).notify(Mockito.any(), captor.capture());
         Assert.assertEquals(
                 _producerRecords.stream().map(ProducerRecord::value).sorted().collect(Collectors.toList()),
                 captor.getAllValues().stream().sorted().collect(Collectors.toList())
