@@ -73,7 +73,6 @@ public class RunnableConsumerImpl<V> implements RunnableConsumer {
                 _listener.handle(e);
             }
         }
-        _consumer.close();
     }
 
     @Override

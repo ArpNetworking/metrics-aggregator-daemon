@@ -26,18 +26,21 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import net.sf.oval.constraint.CheckWith;
 import net.sf.oval.constraint.CheckWithCheck;
+import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.KafkaException;
 
 import java.time.Duration;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Produce instances of {@code Record} from the values of entries
+ * Produce instances of {@link com.arpnetworking.metrics.mad.model.Record} from the values of entries
  * from a Kafka topic. The key from the entries gets discarded
  *
  * @param <T> the type of data created by the source
@@ -52,26 +55,45 @@ public final class KafkaSource<T, V> extends BaseSource {
     private final Consumer<?, V> _consumer;
     private final RunnableConsumer _runnableConsumer;
     private final ExecutorService _consumerExecutor;
+    private final ExecutorService _parserExecutor;
     private final Parser<T, V> _parser;
     private final Logger _logger;
     private final Duration _shutdownAwaitTime;
     private final Duration _backoffTime;
+    private final Integer _numWorkerThreads;
+    private final BlockingQueue<V> _buffer;
+    private final ParsingWorker _parsingWorker = new ParsingWorker();
 
     @Override
     public void start() {
         _consumerExecutor.execute(_runnableConsumer);
+        for (int i = 0; i < _numWorkerThreads; i++) {
+            _parserExecutor.execute(_parsingWorker);
+        }
     }
 
     @Override
     public void stop() {
         _runnableConsumer.stop();
-
         _consumerExecutor.shutdown();
         try {
             _consumerExecutor.awaitTermination(_shutdownAwaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
-            LOGGER.warn()
+            _logger.warn()
                     .setMessage("Unable to shutdown kafka consumer executor")
+                    .setThrowable(e)
+                    .log();
+        } finally {
+            _consumer.close();
+        }
+
+        _parsingWorker.stop();
+        _parserExecutor.shutdown();
+        try {
+            _parserExecutor.awaitTermination(_shutdownAwaitTime.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (final InterruptedException e) {
+            _logger.warn()
+                    .setMessage("Unable to shutdown parsing worker executor")
                     .setThrowable(e)
                     .log();
         }
@@ -97,12 +119,21 @@ public final class KafkaSource<T, V> extends BaseSource {
 
     @SuppressWarnings("unused")
     private KafkaSource(final Builder<T, V> builder) {
-        this(builder, LOGGER);
+        this(builder, LOGGER, new ArrayBlockingQueue<>(builder._bufferSize));
     }
 
+    // NOTE: Package private for testing
     /* package private */ KafkaSource(final Builder<T, V> builder, final Logger logger) {
+        this(builder, logger, new ArrayBlockingQueue<>(builder._bufferSize));
+    }
+
+    // NOTE: Package private for testing
+    /* package private */ KafkaSource(final Builder<T, V> builder, final BlockingQueue<V> buffer) {
+        this(builder, LOGGER, buffer);
+    }
+
+    private KafkaSource(final Builder<T, V> builder, final Logger logger, final BlockingQueue<V> buffer) {
         super(builder);
-        _logger = logger;
         _consumer = builder._consumer;
         _parser = builder._parser;
         _runnableConsumer = new RunnableConsumerImpl.Builder<V>()
@@ -110,26 +141,66 @@ public final class KafkaSource<T, V> extends BaseSource {
                 .setListener(new LogConsumerListener())
                 .setPollTime(builder._pollTime)
                 .build();
+        _numWorkerThreads = builder._numWorkerThreads;
         _consumerExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "KafkaConsumer"));
+        _parserExecutor = Executors.newFixedThreadPool(_numWorkerThreads);
         _shutdownAwaitTime = builder._shutdownAwaitTime;
         _backoffTime = builder._backoffTime;
+        _logger = logger;
+        _buffer = buffer;
+    }
+
+    private class ParsingWorker implements Runnable {
+        private volatile boolean _isRunning = true;
+
+        @Override
+        public void run() {
+            while (_isRunning || !_buffer.isEmpty()) { // Empty the queue before stopping the workers
+                final V value = _buffer.poll();
+                if (value != null) {
+                    final T record;
+                    try {
+                        record = _parser.parse(value);
+                    } catch (final ParsingException e) {
+                        _logger.error()
+                                .setMessage("Failed to parse data")
+                                .setThrowable(e)
+                                .log();
+                        return;
+                    }
+                    KafkaSource.this.notify(record);
+                } else {
+                    // Queue is empty
+                    try {
+                        Thread.sleep(_backoffTime.toMillis());
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        stop();
+                    }
+                }
+            }
+        }
+
+        public void stop() {
+            _isRunning = false;
+        }
     }
 
     private class LogConsumerListener implements ConsumerListener<V> {
 
         @Override
         public void handle(final ConsumerRecord<?, V> consumerRecord) {
-            final T record;
             try {
-                record = _parser.parse(consumerRecord.value());
-            } catch (final ParsingException e) {
-                _logger.error()
-                        .setMessage("Failed to parse data")
+                _buffer.put(consumerRecord.value());
+            } catch (final InterruptedException e) {
+                _logger.info()
+                        .setMessage("Consumer thread interrupted")
+                        .addData("source", KafkaSource.this)
+                        .addData("action", "stopping")
                         .setThrowable(e)
                         .log();
-                return;
+                _runnableConsumer.stop();
             }
-            KafkaSource.this.notify(record);
         }
 
         @Override
@@ -181,7 +252,7 @@ public final class KafkaSource<T, V> extends BaseSource {
     }
 
     /**
-     * Builder pattern class for {@code KafkaSource}.
+     * Builder pattern class for {@link KafkaSource}.
      *
      * @param <T> the type of data created by the source
      * @param <V> the type of data of value in kafka {@code ConsumerRecords}
@@ -231,11 +302,11 @@ public final class KafkaSource<T, V> extends BaseSource {
         }
 
         /**
-         * Sets the amount of time the {@link KafkaSource} will wait to shutdown the {@code RunnableConsumer} thread.
+         * Sets the amount of time the {@link KafkaSource} will wait to shutdown the {@link RunnableConsumer} thread.
          * Default is 10 seconds. Cannot be null or negative.
          *
          * @param shutdownAwaitTime The {@code Duration} the {@link KafkaSource} will wait to shutdown
-         *                          the {@code RunnableConsumer} thread.
+         *                          the {@link RunnableConsumer} thread.
          * @return This instance of {@link KafkaSource.Builder}.
          */
         public Builder<T, V> setShutdownAwaitTime(final Duration shutdownAwaitTime) {
@@ -253,6 +324,30 @@ public final class KafkaSource<T, V> extends BaseSource {
          */
         public Builder<T, V> setBackoffTime(final Duration backoffTime) {
             _backoffTime = backoffTime;
+            return this;
+        }
+
+        /**
+         * Sets the number of threads that will parse {@code ConsumerRecord}s from the {@code Consumer}.
+         * Default is 1. Must be greater than or equal to 1.
+         *
+         * @param numWorkerThreads The number of parsing worker threads.
+         * @return This instance of {@link KafkaSource.Builder}.
+         */
+        public Builder<T, V> setNumWorkerThreads(final Integer numWorkerThreads) {
+            _numWorkerThreads = numWorkerThreads;
+            return this;
+        }
+
+        /**
+         * Sets the size of the buffer to hold {@code ConsumerRecord}s from the {@code Consumer} before they are parsed.
+         * Default is 1000. Must be greater than or equal to 1.
+         *
+         * @param bufferSize The size of the buffer.
+         * @return This instance of {@link KafkaSource.Builder}.
+         */
+        public Builder<T, V> setBufferSize(final Integer bufferSize) {
+            _bufferSize = bufferSize;
             return this;
         }
 
@@ -274,6 +369,12 @@ public final class KafkaSource<T, V> extends BaseSource {
         @NotNull
         @CheckWith(value = PositiveDuration.class, message = "Backoff time must be positive.")
         private Duration _backoffTime = Duration.ofSeconds(1);
+        @NotNull
+        @Min(1)
+        private Integer _numWorkerThreads = 1;
+        @NotNull
+        @Min(1)
+        private Integer _bufferSize = 1000;
 
         private static class PositiveDuration implements CheckWithCheck.SimpleCheck {
             @Override

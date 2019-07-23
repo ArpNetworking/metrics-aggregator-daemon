@@ -43,6 +43,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -56,6 +57,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 /**
  * Tests to check integration with a kafka topic.
@@ -69,7 +71,8 @@ public class KafkaIT {
     private static final String KEY_DESERIALIZER = "org.apache.kafka.common.serialization.IntegerDeserializer";
     private static final String VALUE_DESERIALIZER = "org.apache.kafka.common.serialization.StringDeserializer";
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
-    private static final int TIMEOUT = 5000;
+    private static final int TIMEOUT = 10000;
+    private static final int NUM_RECORDS = 500;
 
     private Map<String, Object> _consumerProps;
     private KafkaConsumer<Integer, String> _consumer;
@@ -82,19 +85,7 @@ public class KafkaIT {
         // Create kafka topic
         _topicName = createTopicName();
         createTopic(_topicName);
-
-        // Create and send producer records
-        _producerRecords = createProducerRecords(_topicName, 3);
-        sendRecords(_producerRecords);
-
-        // Create consumer props
-        _consumerProps = Maps.newHashMap();
-        _consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
-        _consumerProps.put(ConsumerConfig.CLIENT_ID_CONFIG, "consumer0");
-        _consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KEY_DESERIALIZER);
-        _consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, VALUE_DESERIALIZER);
-        _consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        _consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "group" + _topicName);
+        setupKafka();
     }
 
     @After
@@ -189,6 +180,32 @@ public class KafkaIT {
         }
     }
 
+    @Test
+    public void testKafkaSourceMultipleWorkerThreads() {
+        // Create Kafka Source
+        _consumer = new KafkaConsumer<>(_consumerProps);
+        _consumer.subscribe(Collections.singletonList(_topicName));
+        _source = new KafkaSource.Builder<String, String>()
+                .setName("KafkaSource")
+                .setParser(new StringParser())
+                .setConsumer(_consumer)
+                .setPollTime(POLL_DURATION)
+                .setNumWorkerThreads(4)
+                .build();
+
+        // Observe records
+        final Observer observer = Mockito.mock(Observer.class);
+        _source.attach(observer);
+        _source.start();
+
+        final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(NUM_RECORDS)).notify(Mockito.any(), captor.capture());
+        Assert.assertEquals(
+                _producerRecords.stream().map(ProducerRecord::value).sorted().collect(Collectors.toList()),
+                captor.getAllValues().stream().sorted().collect(Collectors.toList())
+        );
+    }
+
     private String createTopicName() {
         return "topic_" + UUID.randomUUID().toString();
     }
@@ -250,6 +267,21 @@ public class KafkaIT {
             Assert.fail("Failed sending records to kafka server");
         }
         producer.close();
+    }
+
+    private void setupKafka() {
+        // Create and send producer records
+        _producerRecords = createProducerRecords(_topicName, NUM_RECORDS);
+        sendRecords(_producerRecords);
+
+        // Create consumer props
+        _consumerProps = Maps.newHashMap();
+        _consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
+        _consumerProps.put(ConsumerConfig.CLIENT_ID_CONFIG, "consumer0");
+        _consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KEY_DESERIALIZER);
+        _consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, VALUE_DESERIALIZER);
+        _consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        _consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "group" + _topicName);
     }
 
     /**
