@@ -20,7 +20,6 @@ import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
-import com.arpnetworking.test.CollectObserver;
 import com.arpnetworking.test.StringParser;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
@@ -34,6 +33,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.time.Duration;
@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Unit tests for the {@code KafkaSource} class.
@@ -88,21 +89,19 @@ public class KafkaSourceTest {
     }
 
     @Test
-    public void testSourceMultiWorkerSuccess() throws InterruptedException {
-        final List<String> expected = createValues("values", 4000);
+    public void testSourceMultiWorkerSuccess() {
+        final int numValues = 4000;
+        final List<String> expected = createValues("values", numValues);
         createMultiWorkerSource(expected, 4);
 
-        // Observe records
-        final CollectObserver observer = new CollectObserver();
+        final Observer observer = Mockito.mock(Observer.class);
         _source.attach(observer);
         _source.start();
 
-        Thread.sleep(TIMEOUT);
-
-        final List<String> collected = observer.getCollection();
+        final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(numValues)).notify(Mockito.any(), captor.capture());
         Collections.sort(expected);
-        Collections.sort(collected);
-        Assert.assertEquals(expected, collected);
+        Assert.assertEquals(expected, captor.getAllValues().stream().sorted().collect(Collectors.toList()));
     }
 
     @Test

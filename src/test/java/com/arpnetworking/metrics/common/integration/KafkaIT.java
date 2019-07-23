@@ -19,7 +19,6 @@ import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.common.kafka.ConsumerDeserializer;
 import com.arpnetworking.metrics.common.sources.KafkaSource;
-import com.arpnetworking.test.CollectObserver;
 import com.arpnetworking.test.StringParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +43,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -182,8 +182,9 @@ public class KafkaIT {
     }
 
     @Test
-    public void testKafkaSourceMultipleWorkerThreads() throws InterruptedException {
-        setupKafka(500);
+    public void testKafkaSourceMultipleWorkerThreads() {
+        final int numRecords = 500;
+        setupKafka(numRecords);
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
@@ -196,24 +197,22 @@ public class KafkaIT {
                 .build();
 
         // Observe records
-        final CollectObserver observer = new CollectObserver();
+        final Observer observer = Mockito.mock(Observer.class);
         _source.attach(observer);
         _source.start();
 
-        Thread.sleep(TIMEOUT);
-
-        final List<String> collected = observer.getCollection();
-        final List<String> expected = _producerRecords.stream()
-                .map(ProducerRecord::value)
-                .collect(Collectors.toList());
-        Collections.sort(expected);
-        Collections.sort(collected);
-        Assert.assertEquals(expected, collected);
+        final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(numRecords)).notify(Mockito.any(), captor.capture());
+        Assert.assertEquals(
+                _producerRecords.stream().map(ProducerRecord::value).sorted().collect(Collectors.toList()),
+                captor.getAllValues().stream().sorted().collect(Collectors.toList())
+        );
     }
 
     @Test
-    public void testKafkaSourceFillQueue() throws InterruptedException {
-        setupKafka(4000);
+    public void testKafkaSourceFillQueue() {
+        final int numRecords = 4000;
+        setupKafka(numRecords);
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
@@ -226,19 +225,16 @@ public class KafkaIT {
                 .build();
 
         // Observe records
-        final CollectObserver observer = new CollectObserver();
+        final Observer observer = Mockito.mock(Observer.class);
         _source.attach(observer);
         _source.start();
 
-        Thread.sleep(TIMEOUT);
-
-        final List<String> collected = observer.getCollection();
-        final List<String> expected = _producerRecords.stream()
-                .map(ProducerRecord::value)
-                .collect(Collectors.toList());
-        Collections.sort(expected);
-        Collections.sort(collected);
-        Assert.assertEquals(expected, collected);
+        final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(numRecords)).notify(Mockito.any(), captor.capture());
+        Assert.assertEquals(
+                _producerRecords.stream().map(ProducerRecord::value).sorted().collect(Collectors.toList()),
+                captor.getAllValues().stream().sorted().collect(Collectors.toList())
+        );
     }
 
     private String createTopicName() {
