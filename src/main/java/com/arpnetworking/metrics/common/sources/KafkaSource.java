@@ -66,7 +66,6 @@ public final class KafkaSource<T, V> extends BaseSource {
     private final Integer _numWorkerThreads;
     private final BlockingQueue<V> _buffer;
     private final ParsingWorker _parsingWorker = new ParsingWorker();
-    private final Integer _bufferSize;
     private final PeriodicMetrics _periodicMetrics;
 
     @Override
@@ -84,7 +83,7 @@ public final class KafkaSource<T, V> extends BaseSource {
         try {
             _consumerExecutor.awaitTermination(_shutdownAwaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
-            LOGGER.warn()
+            _logger.warn()
                     .setMessage("Unable to shutdown kafka consumer executor")
                     .setThrowable(e)
                     .log();
@@ -97,7 +96,7 @@ public final class KafkaSource<T, V> extends BaseSource {
         try {
             _parserExecutor.awaitTermination(_shutdownAwaitTime.toMillis(), TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
-            LOGGER.warn()
+            _logger.warn()
                     .setMessage("Unable to shutdown parsing worker executor")
                     .setThrowable(e)
                     .log();
@@ -124,33 +123,21 @@ public final class KafkaSource<T, V> extends BaseSource {
 
     @SuppressWarnings("unused")
     private KafkaSource(final Builder<T, V> builder) {
-        this(builder, LOGGER);
+        this(builder, LOGGER, new ArrayBlockingQueue<>(builder._bufferSize));
     }
 
+    // NOTE: Package private for testing
     /* package private */ KafkaSource(final Builder<T, V> builder, final Logger logger) {
-        super(builder);
-        _logger = logger;
-        _consumer = builder._consumer;
-        _parser = builder._parser;
-        _runnableConsumer = new RunnableConsumerImpl.Builder<V>()
-                .setConsumer(builder._consumer)
-                .setListener(new LogConsumerListener())
-                .setPollTime(builder._pollTime)
-                .build();
-        _numWorkerThreads = builder._numWorkerThreads;
-        _consumerExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "KafkaConsumer"));
-        _parserExecutor = Executors.newFixedThreadPool(_numWorkerThreads);
-        _shutdownAwaitTime = builder._shutdownAwaitTime;
-        _backoffTime = builder._backoffTime;
-        _bufferSize = builder._bufferSize;
-        _buffer = new ArrayBlockingQueue<>(_bufferSize);
-        _periodicMetrics = builder._periodicMetrics;
+        this(builder, logger, new ArrayBlockingQueue<>(builder._bufferSize));
     }
 
     // NOTE: Package private for testing
     /* package private */ KafkaSource(final Builder<T, V> builder, final BlockingQueue<V> buffer) {
+        this(builder, LOGGER, buffer);
+    }
+
+    private KafkaSource(final Builder<T, V> builder, final Logger logger, final BlockingQueue<V> buffer) {
         super(builder);
-        _logger = LOGGER;
         _consumer = builder._consumer;
         _parser = builder._parser;
         _runnableConsumer = new RunnableConsumerImpl.Builder<V>()
@@ -163,8 +150,8 @@ public final class KafkaSource<T, V> extends BaseSource {
         _parserExecutor = Executors.newFixedThreadPool(_numWorkerThreads);
         _shutdownAwaitTime = builder._shutdownAwaitTime;
         _backoffTime = builder._backoffTime;
-        _bufferSize = builder._bufferSize;
         _periodicMetrics = builder._periodicMetrics;
+        _logger = logger;
         _buffer = buffer;
     }
 

@@ -19,11 +19,17 @@ import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.common.kafka.ConsumerDeserializer;
 import com.arpnetworking.metrics.common.sources.KafkaSource;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
+import com.arpnetworking.test.NopPeriodicMetrics;
 import com.arpnetworking.test.StringParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.module.guice.GuiceInjectableValues;
 import com.google.common.collect.Maps;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
@@ -79,6 +85,7 @@ public class KafkaIT {
     private String _topicName;
     private KafkaSource<String, String> _source;
     private List<ProducerRecord<Integer, String>> _producerRecords;
+    private PeriodicMetrics _periodicMetrics;
 
     @Before
     public void setUp() throws TimeoutException {
@@ -86,6 +93,7 @@ public class KafkaIT {
         _topicName = createTopicName();
         createTopic(_topicName);
         setupKafka();
+        _periodicMetrics = new NopPeriodicMetrics();
     }
 
     @After
@@ -105,6 +113,7 @@ public class KafkaIT {
                 .setParser(new StringParser())
                 .setConsumer(_consumer)
                 .setPollTime(POLL_DURATION)
+                .setPeriodicMetrics(_periodicMetrics)
                 .build();
 
         // Observe records
@@ -126,6 +135,7 @@ public class KafkaIT {
                 .setParser(new StringParser())
                 .setConsumer(_consumer)
                 .setPollTime(POLL_DURATION)
+                .setPeriodicMetrics(_periodicMetrics)
                 .build();
 
         // Observe records
@@ -165,10 +175,20 @@ public class KafkaIT {
                 + "\n  \"backoffTime\":\"PT1S\""
                 + "\n}";
 
+        final Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                super.configure();
+                bind(PeriodicMetrics.class).toInstance(new NopPeriodicMetrics());
+            }
+        });
+
         final ObjectMapper mapper = ObjectMapperFactory.createInstance();
         final SimpleModule module = new SimpleModule("KafkaConsumer");
         module.addDeserializer(Consumer.class, new ConsumerDeserializer<>());
         mapper.registerModule(module);
+        mapper.setInjectableValues(new GuiceInjectableValues(injector));
+
         _source = mapper.readValue(jsonString, new KafkaSourceStringType());
 
         // Observe records
@@ -191,6 +211,7 @@ public class KafkaIT {
                 .setConsumer(_consumer)
                 .setPollTime(POLL_DURATION)
                 .setNumWorkerThreads(4)
+                .setPeriodicMetrics(_periodicMetrics)
                 .build();
 
         // Observe records
@@ -290,4 +311,17 @@ public class KafkaIT {
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
     private static class KafkaSourceStringType extends TypeReference<KafkaSource<String, String>> {}
+
+    /**
+     * Class for configuring testing {@code PeriodicMetrics} to inject with the {@code ObjectMapper}.
+     *
+     * @author Joey Jackson (jjackson at dropbox dot com)
+     */
+    private static class PeriodicTestingModule extends AbstractModule {
+        @Override
+        protected void configure() {
+            super.configure();
+            bind(PeriodicMetrics.class).toInstance(new NopPeriodicMetrics());
+        }
+    }
 }
