@@ -48,6 +48,7 @@ import java.util.concurrent.TimeUnit;
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public final class KafkaSource<T, V> extends BaseSource {
+    //TODO(jjackson): add gauge metric for queue size - put and poll
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSource.class);
 
@@ -271,7 +272,6 @@ public final class KafkaSource<T, V> extends BaseSource {
             _periodicMetrics = periodicMetrics;
             return this;
         }
-
 
         @Override
         protected Builder<T, V> self() {
