@@ -142,6 +142,26 @@ public final class KafkaSource<T, V> extends BaseSource {
         _buffer = new ArrayBlockingQueue<>(_bufferSize);
     }
 
+    // NOTE: Package private for testing
+    /* package private */ KafkaSource(final Builder<T, V> builder, final BlockingQueue<V> buffer) {
+        super(builder);
+        _logger = LOGGER;
+        _consumer = builder._consumer;
+        _parser = builder._parser;
+        _runnableConsumer = new RunnableConsumerImpl.Builder<V>()
+                .setConsumer(builder._consumer)
+                .setListener(new LogConsumerListener())
+                .setPollTime(builder._pollTime)
+                .build();
+        _numWorkerThreads = builder._numWorkerThreads;
+        _consumerExecutor = Executors.newSingleThreadExecutor(runnable -> new Thread(runnable, "KafkaConsumer"));
+        _parserExecutor = Executors.newFixedThreadPool(_numWorkerThreads);
+        _shutdownAwaitTime = builder._shutdownAwaitTime;
+        _backoffTime = builder._backoffTime;
+        _bufferSize = builder._bufferSize;
+        _buffer = buffer;
+    }
+
     private class ParsingWorker implements Runnable {
         private volatile boolean _isRunning = true;
 
