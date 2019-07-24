@@ -40,6 +40,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Produce instances of {@link com.arpnetworking.metrics.mad.model.Record} from the values of entries
@@ -51,8 +52,6 @@ import java.util.concurrent.TimeUnit;
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public final class KafkaSource<T, V> extends BaseSource {
-    //TODO(jjackson): add gauge metric for queue size - put and poll
-
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSource.class);
 
     private final Consumer<?, V> _consumer;
@@ -67,6 +66,7 @@ public final class KafkaSource<T, V> extends BaseSource {
     private final BlockingQueue<V> _buffer;
     private final ParsingWorker _parsingWorker = new ParsingWorker();
     private final PeriodicMetrics _periodicMetrics;
+    private final AtomicLong _recordProcessed = new AtomicLong(0);
 
     @Override
     public void start() {
@@ -151,6 +151,8 @@ public final class KafkaSource<T, V> extends BaseSource {
         _shutdownAwaitTime = builder._shutdownAwaitTime;
         _backoffTime = builder._backoffTime;
         _periodicMetrics = builder._periodicMetrics;
+        _periodicMetrics.registerPolledMetric(periodicMetrics ->
+                periodicMetrics.recordCounter("num_records", _recordProcessed.getAndSet(0)));
         _logger = logger;
         _buffer = buffer;
     }
@@ -162,6 +164,7 @@ public final class KafkaSource<T, V> extends BaseSource {
         public void run() {
             while (_isRunning || !_buffer.isEmpty()) { // Empty the queue before stopping the workers
                 final V value = _buffer.poll();
+                _periodicMetrics.recordGauge("queue_size", _buffer.size());
                 if (value != null) {
                     final T record;
                     try {
@@ -174,7 +177,7 @@ public final class KafkaSource<T, V> extends BaseSource {
                         return;
                     }
                     KafkaSource.this.notify(record);
-                    _periodicMetrics.recordCounter("num_records", 1);
+                    _recordProcessed.getAndIncrement();
                 } else {
                     // Queue is empty
                     try {
@@ -198,6 +201,7 @@ public final class KafkaSource<T, V> extends BaseSource {
         public void handle(final ConsumerRecord<?, V> consumerRecord) {
             try {
                 _buffer.put(consumerRecord.value());
+                _periodicMetrics.recordGauge("queue_size", _buffer.size());
             } catch (final InterruptedException e) {
                 _logger.info()
                         .setMessage("Consumer thread interrupted")
