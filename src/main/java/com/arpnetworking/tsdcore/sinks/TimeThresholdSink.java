@@ -17,10 +17,10 @@ package com.arpnetworking.tsdcore.sinks;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Sets;

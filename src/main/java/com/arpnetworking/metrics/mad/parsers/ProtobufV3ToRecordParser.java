@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Inscope Metrics
+ * Copyright 2019 Dropbox
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.arpnetworking.metrics.mad.parsers;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
@@ -26,44 +27,50 @@ import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.arpnetworking.metrics.mad.model.Unit;
+import com.arpnetworking.metrics.mad.model.statistics.HistogramStatistic;
+import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.inscopemetrics.client.protocol.ClientV2;
+import io.inscopemetrics.client.protocol.ClientV3;
 import net.sf.oval.exception.ConstraintsViolatedException;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
 
 /**
  * Parses the Inscope Metrics protobuf binary protocol into records.
  *
- * @author Ville Koskela (vkoskela dot arp at inscopemetrics dot io)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class ProtobufV3ToRecordParser implements Parser<List<Record>, HttpRequest> {
+
+    private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
+
     @Override
     public List<Record> parse(final HttpRequest data) throws ParsingException {
         try {
-            final ClientV2.RecordSet request = ClientV2.RecordSet.parseFrom(data.getBody().asByteBuffer());
+            final ClientV3.Request request = ClientV3.Request.parseFrom(data.getBody().asByteBuffer());
             final List<Record> records = Lists.newArrayList();
-            for (final ClientV2.Record record : request.getRecordsList()) {
+            for (final ClientV3.Record record : request.getRecordsList()) {
                 final ByteBuffer byteBuffer = ByteBuffer.wrap(record.getId().toByteArray());
-                final Long high = byteBuffer.getLong();
-                final Long low = byteBuffer.getLong();
-                records.add(ThreadLocalBuilder.build(DefaultRecord.Builder.class, builder -> {
-                        builder.setId(new UUID(high, low).toString())
-                            .setTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getEndMillisSinceEpoch()), ZoneOffset.UTC))
-                            .setAnnotations(buildAnnotations(record))
-                            .setDimensions(buildDimensions(record))
-                            .setMetrics(buildMetrics(record));
-                }));
+                final long high = byteBuffer.getLong();
+                final long low = byteBuffer.getLong();
+                records.add(ThreadLocalBuilder.build(
+                        DefaultRecord.Builder.class,
+                        builder -> builder.setId(new UUID(high, low).toString())
+                                .setTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getEndMillisSinceEpoch()), ZoneOffset.UTC))
+                                .setDimensions(buildDimensions(record))
+                                .setMetrics(buildMetrics(record))));
             }
             return records;
         } catch (final InvalidProtocolBufferException e) {
@@ -73,80 +80,211 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
         }
     }
 
-    private ImmutableMap<String, ? extends Metric> buildMetrics(final ClientV2.Record record) {
-        final ImmutableMap.Builder<String, Metric> metrics = ImmutableMap.builder();
-        processEntries(metrics, record.getCountersList(), MetricType.COUNTER);
-        processEntries(metrics, record.getTimersList(), MetricType.TIMER);
-        processEntries(metrics, record.getGaugesList(), MetricType.GAUGE);
-        return metrics.build();
+    private ImmutableMap<String, ? extends Metric> buildMetrics(final ClientV3.Record record) {
+        // Merge samples and statistics by metric
+        final Map<String, MetricData> metricData = Maps.newHashMap();
+        for (final ClientV3.MetricDataEntry metricDataEntry : record.getDataList()) {
+            final String metricName = decodeRequiredIdentifier(metricDataEntry.getName());
+
+            parseSamples(metricName, metricData, metricDataEntry.getSamples());
+            parseStatistics(metricName, metricData, metricDataEntry.getStatistic());
+        }
+
+        // Create DefaultMetric instances
+        final ImmutableMap.Builder<String, Metric> metricsBuilder = ImmutableMap.builder();
+        for (final Map.Entry<String, MetricData> metricDataEntry : metricData.entrySet()) {
+            final String metricName = metricDataEntry.getKey();
+            final MetricData metricDatum = metricDataEntry.getValue();
+            metricsBuilder.put(
+                    metricName,
+                    createNewMetricBuilder()
+                            .setValues(metricDatum.getSamples())
+                            .setStatistics(metricDatum.getStatistics())
+                            .build());
+        }
+
+        // Build the list of the DefaultMetric instances
+        return metricsBuilder.build();
     }
 
-    private void processEntries(
-            final ImmutableMap.Builder<String, Metric> metrics,
-            final List<ClientV2.MetricEntry> entries,
-            final MetricType metricType) {
-        for (final ClientV2.MetricEntry metricEntry : entries) {
-            final ImmutableList.Builder<Quantity> quantities =
-                    ImmutableList.builderWithExpectedSize(metricEntry.getSamplesCount());
-            for (final ClientV2.Quantity quantity : metricEntry.getSamplesList()) {
-                if (quantity.getValueCase().equals(ClientV2.Quantity.ValueCase.DOUBLEVALUE)) {
-                    quantities.add(
-                            ThreadLocalBuilder.build(
-                                    DefaultQuantity.Builder.class,
-                                    b -> b.setUnit(baseUnit(quantity.getUnit()))
-                                            .setValue(quantity.getDoubleValue())));
-                } else if (quantity.getValueCase().equals(ClientV2.Quantity.ValueCase.LONGVALUE)) {
-                    quantities.add(
-                            ThreadLocalBuilder.build(
-                                    DefaultQuantity.Builder.class,
-                                    b -> b.setUnit(baseUnit(quantity.getUnit()))
-                                            .setValue((double) quantity.getLongValue())));
-                }
-            }
-
-            final Metric defaultMetric = ThreadLocalBuilder.build(
-                    DefaultMetric.Builder.class,
-                    b -> b.setType(metricType)
-                            .setValues(quantities.build()));
-            metrics.put(metricEntry.getName(), defaultMetric);
+    private void parseSamples(
+            final String metricName,
+            final Map<String, MetricData> metricData,
+            final ClientV3.Samples samples) {
+        MetricData metricDatum = metricData.get(metricName);
+        if (metricDatum == null) {
+            metricDatum = new MetricData();
+            metricData.put(metricName, metricDatum);
         }
+        metricDatum.addSamples(decodeSamples(samples));
+    }
+
+    private void parseStatistics(
+            final String metricName,
+            final Map<String, MetricData> metricData,
+            final ClientV3.Statistic statistic) {
+        MetricData metricDatum = metricData.get(metricName);
+        if (metricDatum == null) {
+            metricDatum = new MetricData();
+            metricData.put(metricName, metricDatum);
+        }
+        metricDatum.addStatistics(decodeStatistics(statistic));
+    }
+
+    private DefaultMetric.Builder createNewMetricBuilder() {
+        return new DefaultMetric.Builder()
+                .setType(MetricType.GAUGE);
+    }
+
+    private ImmutableList<Quantity> decodeSamples(final ClientV3.Samples samples) {
+        switch (samples.getValueCase()) {
+            case DOUBLESAMPLES:
+                final ClientV3.DoubleSamples doubleSamples = samples.getDoubleSamples();
+                final ImmutableList.Builder<Quantity> quantities =
+                        ImmutableList.builderWithExpectedSize(doubleSamples.getSamplesCount());
+                for (final double sample : doubleSamples.getSamplesList()) {
+                    quantities.add(
+                            ThreadLocalBuilder.build(
+                                    DefaultQuantity.Builder.class,
+                                    b -> b.setValue(sample)));
+                }
+                return quantities.build();
+            case VALUE_NOT_SET:
+                return ImmutableList.of();
+            default:
+                throw new IllegalArgumentException("Unsupported samples type");
+        }
+    }
+
+    private ImmutableList<AggregatedData> decodeStatistics(final ClientV3.Statistic statistic) {
+        switch (statistic.getValueCase()) {
+            case AUGMENTEDHISTOGRAM:
+                final ClientV3.AugmentedHistogram augmentedHistogram = statistic.getAugmentedHistogram();
+                final long populationSize = augmentedHistogram.getEntriesList().stream()
+                        .map(e -> (long) e.getCount())
+                        .reduce(Long::sum)
+                        .orElse(0L);
+                final ImmutableList.Builder<AggregatedData> statistics = ImmutableList.builder();
+
+                statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
+                        bldr.setStatistic(STATISTIC_FACTORY.getStatistic("min"))
+                                .setIsSpecified(false)
+                                .setValue(ThreadLocalBuilder.build(
+                                        DefaultQuantity.Builder.class,
+                                        b -> b.setValue(augmentedHistogram.getMin())))
+                                .setPopulationSize(populationSize)));
+
+                statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
+                        bldr.setStatistic(STATISTIC_FACTORY.getStatistic("max"))
+                                .setIsSpecified(false)
+                                .setValue(ThreadLocalBuilder.build(
+                                        DefaultQuantity.Builder.class,
+                                        b -> b.setValue(augmentedHistogram.getMax())))
+                                .setPopulationSize(populationSize)));
+
+                statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
+                        bldr.setStatistic(STATISTIC_FACTORY.getStatistic("count"))
+                                .setIsSpecified(false)
+                                .setValue(ThreadLocalBuilder.build(
+                                        DefaultQuantity.Builder.class,
+                                        b -> b.setValue((double) populationSize)))
+                                .setPopulationSize(populationSize)));
+
+                statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
+                        bldr.setStatistic(STATISTIC_FACTORY.getStatistic("sum"))
+                                .setIsSpecified(false)
+                                .setValue(ThreadLocalBuilder.build(
+                                        DefaultQuantity.Builder.class,
+                                        b -> b.setValue(augmentedHistogram.getSum())))
+                                .setPopulationSize(populationSize)));
+
+                if (populationSize != 0) {
+                    statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
+                            bldr.setStatistic(STATISTIC_FACTORY.getStatistic("mean"))
+                                    .setIsSpecified(false)
+                                    .setValue(ThreadLocalBuilder.build(
+                                            DefaultQuantity.Builder.class,
+                                            b -> b.setValue(augmentedHistogram.getSum() / populationSize)))
+                                    .setPopulationSize(populationSize)));
+                }
+
+                statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
+                        bldr.setStatistic(STATISTIC_FACTORY.getStatistic("histogram"))
+                                .setIsSpecified(false)
+                                .setValue(ThreadLocalBuilder.build(
+                                        DefaultQuantity.Builder.class,
+                                        b -> b.setValue(1.0)))
+                                .setPopulationSize(populationSize)
+                                .setSupportingData(ThreadLocalBuilder.build(
+                                        HistogramStatistic.HistogramSupportingData.Builder.class,
+                                        b -> {
+                                            final HistogramStatistic.Histogram histogram = new HistogramStatistic.Histogram();
+                                            augmentedHistogram.getEntriesList().forEach(
+                                                e -> histogram.recordPacked(
+                                                        e.getBucket(),
+                                                        e.getCount()));
+                                            b.setHistogramSnapshot(histogram.getSnapshot());
+                                        }))));
+
+                return statistics.build();
+            case VALUE_NOT_SET:
+                return ImmutableList.of();
+            default:
+                throw new IllegalArgumentException("Unsupported statistic type");
+        }
+    }
+
+    private ImmutableMap<String, String> buildDimensions(final ClientV3.Record record) {
+        final ImmutableMap.Builder<String, String> dimensions = ImmutableMap.builder();
+        for (final ClientV3.DimensionEntry dimensionEntry : record.getDimensionsList()) {
+            dimensions.put(
+                    decodeRequiredIdentifier(dimensionEntry.getName()),
+                    decodeRequiredIdentifier(dimensionEntry.getValue()));
+        }
+        return dimensions.build();
+    }
+
+    private String decodeRequiredIdentifier(final ClientV3.Identifier identifier) {
+        @Nullable final String identifierAsString = decodeIdentifier(identifier);
+        if (identifierAsString == null) {
+            throw new IllegalArgumentException("Required identifier is not set");
+        }
+        return identifierAsString;
     }
 
     @Nullable
-    private Unit baseUnit(final ClientV2.CompoundUnit compoundUnit) {
-        if (!compoundUnit.getNumeratorList().isEmpty()) {
-            final ClientV2.Unit selectedUnit = compoundUnit.getNumerator(0);
-            if (ClientV2.Unit.Type.Value.UNRECOGNIZED.equals(selectedUnit.getType())
-                    || ClientV2.Unit.Type.Value.UNKNOWN.equals(selectedUnit.getType())) {
+    private String decodeIdentifier(final ClientV3.Identifier identifier) {
+        switch (identifier.getValueCase()) {
+            case STRINGVALUE:
+                return identifier.getStringValue();
+            case VALUE_NOT_SET:
                 return null;
-            }
-            final String unitName;
-            if (!ClientV2.Unit.Scale.Value.UNIT.equals(selectedUnit.getScale())
-                    && !ClientV2.Unit.Scale.Value.UNRECOGNIZED.equals(selectedUnit.getScale())
-                    && !ClientV2.Unit.Scale.Value.UNKNOWN.equals(selectedUnit.getScale())) {
-                unitName = selectedUnit.getScale().name() + selectedUnit.getType().name();
-            } else {
-                unitName = selectedUnit.getType().name();
-            }
-
-            return Unit.valueOf(unitName);
+            default:
+                throw new IllegalArgumentException("Unsupported identifier type");
         }
-        return null;
     }
 
-    private ImmutableMap<String, String> buildAnnotations(final ClientV2.Record record) {
-        final ImmutableMap.Builder<String, String> annotations = ImmutableMap.builder();
-        for (final ClientV2.AnnotationEntry annotationEntry : record.getAnnotationsList()) {
-            annotations.put(annotationEntry.getName(), annotationEntry.getValue());
-        }
-        return annotations.build();
-    }
+    private static final class MetricData {
 
-    private ImmutableMap<String, String> buildDimensions(final ClientV2.Record record) {
-        final ImmutableMap.Builder<String, String> dimensions = ImmutableMap.builder();
-        for (final ClientV2.DimensionEntry dimensionEntry : record.getDimensionsList()) {
-            dimensions.put(dimensionEntry.getName(), dimensionEntry.getValue());
+        void addSamples(final Collection<Quantity> samples) {
+            _metricSamples.addAll(samples);
         }
-        return dimensions.build();
+
+        void addStatistics(final Collection<AggregatedData> statistics) {
+            _metricStatistics.addAll(statistics);
+        }
+
+        ImmutableList<Quantity> getSamples() {
+            return _metricSamples.build();
+        }
+
+        ImmutableList<AggregatedData> getStatistics() {
+            return _metricStatistics.build();
+        }
+
+        MetricData() {}
+
+        private final ImmutableList.Builder<Quantity> _metricSamples = ImmutableList.builder();
+        private final ImmutableList.Builder<AggregatedData> _metricStatistics = ImmutableList.builder();
     }
 }

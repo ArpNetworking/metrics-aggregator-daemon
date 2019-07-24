@@ -20,6 +20,7 @@ import akka.actor.Props;
 import akka.http.javadsl.model.StatusCodes;
 import akka.pattern.PatternsCS;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
@@ -285,7 +286,7 @@ public class HttpPostSinkActor extends AbstractActor {
     }
 
     /**
-     * Message class to wrap a list of {@link com.arpnetworking.tsdcore.model.AggregatedData}.
+     * Message class to wrap a list of {@link AggregatedData}.
      */
     public static final class EmitAggregation {
 

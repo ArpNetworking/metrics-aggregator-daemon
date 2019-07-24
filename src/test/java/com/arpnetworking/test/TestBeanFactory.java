@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.test;
 
+import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
@@ -23,12 +24,11 @@ import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.model.Unit;
-import com.arpnetworking.tsdcore.model.AggregatedData;
+import com.arpnetworking.metrics.mad.model.statistics.Statistic;
+import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import com.arpnetworking.tsdcore.statistics.Statistic;
-import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;

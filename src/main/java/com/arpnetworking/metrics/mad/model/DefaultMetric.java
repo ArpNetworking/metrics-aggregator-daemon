@@ -26,9 +26,12 @@ import net.sf.oval.constraint.NotNull;
 import java.util.List;
 
 /**
- * A variable and data to describe the input to a statistic calculator.
+ * Representation of aggregated data; also known as a statistic. However, not
+ * to be confused with the identity of a statistic
+ * ({@link com.arpnetworking.metrics.mad.model.statistics.Statistic}).
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class DefaultMetric implements Metric {
 
@@ -43,6 +46,11 @@ public final class DefaultMetric implements Metric {
     }
 
     @Override
+    public List<AggregatedData> getStatistics() {
+        return _statistics;
+    }
+
+    @Override
     public boolean equals(final Object other) {
         if (this == other) {
             return true;
@@ -54,20 +62,22 @@ public final class DefaultMetric implements Metric {
 
         final Metric otherMetric = (Metric) other;
         return Objects.equal(getType(), otherMetric.getType())
-                && Objects.equal(getValues(), otherMetric.getValues());
+                && Objects.equal(getValues(), otherMetric.getValues())
+                && Objects.equal(getStatistics(), otherMetric.getStatistics());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getType(), getValues());
+        return Objects.hashCode(getType(), getValues(), getStatistics());
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", Integer.toHexString(System.identityHashCode(this)))
-                .add("UnitType", _type)
+                .add("Type", _type)
                 .add("Values", _values)
+                .add("Statistics", _statistics)
                 .toString();
     }
 
@@ -86,19 +96,22 @@ public final class DefaultMetric implements Metric {
         return LogValueMapFactory.builder(this)
                 .put("type", _type)
                 .put("valueSize", _values.size())
+                .put("statisticsSize", _statistics.size())
                 .build();
     }
 
     private DefaultMetric(final Builder builder) {
         _type = builder._type;
         _values = builder._values;
+        _statistics = builder._statistics;
     }
 
     private final MetricType _type;
     private final ImmutableList<Quantity> _values;
+    private final ImmutableList<AggregatedData> _statistics;
 
     /**
-     * Implementation of builder pattern for <code>DefaultMetric</code>.
+     * Implementation of builder pattern for {@link DefaultMetric}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
@@ -112,10 +125,21 @@ public final class DefaultMetric implements Metric {
         }
 
         /**
-         * The values <code>List</code>. Cannot be null.
+         * The statistics {@code List}. Cannot be null.
          *
-         * @param value The values <code>List</code>.
-         * @return This instance of <code>Builder</code>.
+         * @param value The values {@code List}.
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setStatistics(final ImmutableList<AggregatedData> value) {
+            _statistics = value;
+            return this;
+        }
+
+        /**
+         * The values {@code List}. Cannot be null.
+         *
+         * @param value The values {@code List}.
+         * @return This instance of {@link Builder}.
          */
         public Builder setValues(final ImmutableList<Quantity> value) {
             _values = value;
@@ -126,7 +150,7 @@ public final class DefaultMetric implements Metric {
          * The metric type. Cannot be null.
          *
          * @param value The metric type.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setType(final MetricType value) {
             _type = value;
@@ -140,7 +164,9 @@ public final class DefaultMetric implements Metric {
         }
 
         @NotNull
-        private ImmutableList<Quantity> _values;
+        private ImmutableList<AggregatedData> _statistics = ImmutableList.of();
+        @NotNull
+        private ImmutableList<Quantity> _values = ImmutableList.of();
         @NotNull
         private MetricType _type;
     }

@@ -21,6 +21,7 @@ import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.common.sources.BaseSource;
 import com.arpnetworking.metrics.common.sources.Source;
+import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Metric;
@@ -181,6 +182,7 @@ public final class MappingSource extends BaseSource {
         /* package private */ MergingMetric(final Metric metric) {
             _type = metric.getType();
             _values.addAll(metric.getValues());
+            _statistics.addAll(metric.getStatistics());
         }
 
         public boolean isMergable(final Metric metric) {
@@ -205,6 +207,11 @@ public final class MappingSource extends BaseSource {
         }
 
         @Override
+        public ImmutableList<AggregatedData> getStatistics() {
+            return _statistics.build();
+        }
+
+        @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
                     .add("id", Integer.toHexString(System.identityHashCode(this)))
@@ -215,6 +222,7 @@ public final class MappingSource extends BaseSource {
 
         private final MetricType _type;
         private final ImmutableList.Builder<Quantity> _values = ImmutableList.builder();
+        private final ImmutableList.Builder<AggregatedData> _statistics = ImmutableList.builder();
     }
 
     /**
