@@ -61,14 +61,14 @@ public class KafkaSourceTest {
     private static final int PARTITION = 0;
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
     private static final int TIMEOUT = 5000;
-    private static final String RECORD_COUNT_METRIC = KafkaSource.RECORD_OUT_COUNT_METRIC_NAME;
-    private static final String QUEUE_SIZE_GAUGE_METRIC = KafkaSource.QUEUE_SIZE_GAUGE_METRIC_NAME;
 
     private KafkaSource<String, String> _source;
     private Logger _logger;
     private LogBuilder _logBuilder;
     private CollectorPeriodicMetrics _periodicMetrics;
     private ScheduledExecutorService _executor;
+    private String _recordCountMetric;
+    private String _queueSizeMetric;
 
     @Before
     public void setUp() {
@@ -110,7 +110,7 @@ public class KafkaSourceTest {
 
         // Check counter metric recorded
         Assert.assertEquals(EXPECTED.size(),
-                _periodicMetrics.getCounters(RECORD_COUNT_METRIC).stream().mapToLong(Long::longValue).sum());
+                _periodicMetrics.getCounters(_recordCountMetric).stream().mapToLong(Long::longValue).sum());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class KafkaSourceTest {
 
         // Check counter metric recorded
         Assert.assertEquals(EXPECTED.size(),
-                _periodicMetrics.getCounters(RECORD_COUNT_METRIC).stream().mapToLong(Long::longValue).sum());
+                _periodicMetrics.getCounters(_recordCountMetric).stream().mapToLong(Long::longValue).sum());
     }
 
     @Test
@@ -143,7 +143,7 @@ public class KafkaSourceTest {
 
         // Check queue size gauge was set when queue is full
         Mockito.verify(_periodicMetrics,
-                Mockito.timeout(TIMEOUT).atLeastOnce()).recordGauge(QUEUE_SIZE_GAUGE_METRIC, (long) bufSize);
+                Mockito.timeout(TIMEOUT).atLeastOnce()).recordGauge(_queueSizeMetric, (long) bufSize);
 
         final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
         Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(EXPECTED.size())).notify(Mockito.any(),
@@ -156,7 +156,7 @@ public class KafkaSourceTest {
 
         // Check counter metric recorded
         Assert.assertEquals(EXPECTED.size(),
-                _periodicMetrics.getCounters(RECORD_COUNT_METRIC).stream().mapToLong(Long::longValue).sum());
+                _periodicMetrics.getCounters(_recordCountMetric).stream().mapToLong(Long::longValue).sum());
     }
 
     @Test
@@ -193,6 +193,7 @@ public class KafkaSourceTest {
                 .setPeriodicMetrics(_periodicMetrics)
                 .setNumWorkerThreads(1),
                 new FillingBlockingQueue(bufferSize));
+        getMetricNames();
     }
 
     private void createHealthySource(final int numWorkers) {
@@ -204,6 +205,7 @@ public class KafkaSourceTest {
                 .setPeriodicMetrics(_periodicMetrics)
                 .setNumWorkerThreads(numWorkers)
                 .build();
+        getMetricNames();
     }
 
     private void createExceptionSource(final Class<? extends Exception> exception) {
@@ -221,6 +223,7 @@ public class KafkaSourceTest {
                 .setPeriodicMetrics(_periodicMetrics)
                 .setPollTime(POLL_DURATION),
                 _logger);
+        getMetricNames();
     }
 
     private void createBadParsingSource() throws ParsingException {
@@ -236,6 +239,12 @@ public class KafkaSourceTest {
                 .setPeriodicMetrics(_periodicMetrics)
                 .setPollTime(POLL_DURATION),
                 _logger);
+        getMetricNames();
+    }
+
+    private void getMetricNames() {
+        _recordCountMetric = _source._recordsOutCountMetricName;
+        _queueSizeMetric = _source._queueSizeGaugeMetricName;
     }
 
     private static List<String> createValues(final String prefix, final int num) {

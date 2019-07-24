@@ -55,14 +55,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public final class KafkaSource<T, V> extends BaseSource {
-    private static final String KAFKA_RECORD_IN_COUNT_METRIC_NAME = "mad_kafkaSource_numInRecords";
-    static final String RECORD_OUT_COUNT_METRIC_NAME = "mad_kafkaSource_numOutRecords";
-    static final String QUEUE_SIZE_GAUGE_METRIC_NAME = "mad_kafkaSource_queueSize";
-    private static final String PARSING_EXCEPTION_COUNT_METRIC_NAME = "mad_kafkaSource_parsingExceptions";
-    private static final String KAFKA_EXCEPTION_COUNT_METRIC_NAME = "mad_kafkaSource_kafkaExceptions";
-    private static final String CONSUMER_EXCEPTION_COUNT_METRIC_NAME = "mad_kafkaSource_consumerExceptions";
-    private static final String PARSING_TIME_METRIC_NAME = "mad_kafkaSource_parseTime";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSource.class);
 
     private final Consumer<?, V> _consumer;
@@ -79,6 +71,15 @@ public final class KafkaSource<T, V> extends BaseSource {
     private final PeriodicMetrics _periodicMetrics;
     private final AtomicLong _currentRecordsProcessedCount = new AtomicLong(0);
     private final AtomicLong _currentRecordsIngestedCount = new AtomicLong(0);
+    // CHECKSTYLE.OFF: VisibilityModifierCheck - Package private for use in testing
+    final String _recordsInCountMetricName = "sources/kafka/" + getMetricSafeName() + "/recordsIn";
+    final String _recordsOutCountMetricName = "sources/kafka/" + getMetricSafeName() + "/recordsOut";
+    final String _parsingExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/parsingExceptions";
+    final String _kafkaExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/kafkaExceptions";
+    final String _consumerExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/consumerExceptions";
+    final String _queueSizeGaugeMetricName = "sources/kafka/" + getMetricSafeName() + "/queueSize";
+    final String _parsingTimeMetricName = "sources/kafka/" + getMetricSafeName() + "/parsingTime";
+    // CHECKSTYLE.ON: VisibilityModifierCheck
 
     @Override
     public void start() {
@@ -164,10 +165,10 @@ public final class KafkaSource<T, V> extends BaseSource {
         _backoffTime = builder._backoffTime;
         _periodicMetrics = builder._periodicMetrics;
         _periodicMetrics.registerPolledMetric(periodicMetrics ->
-                periodicMetrics.recordCounter(RECORD_OUT_COUNT_METRIC_NAME,
+                periodicMetrics.recordCounter(_recordsOutCountMetricName,
                         _currentRecordsProcessedCount.getAndSet(0)));
         _periodicMetrics.registerPolledMetric(periodicMetrics ->
-                periodicMetrics.recordCounter(KAFKA_RECORD_IN_COUNT_METRIC_NAME,
+                periodicMetrics.recordCounter(_recordsInCountMetricName,
                         _currentRecordsIngestedCount.getAndSet(0)));
         _logger = logger;
         _buffer = buffer;
@@ -180,17 +181,17 @@ public final class KafkaSource<T, V> extends BaseSource {
         public void run() {
             while (_isRunning || !_buffer.isEmpty()) { // Empty the queue before stopping the workers
                 final V value = _buffer.poll();
-                _periodicMetrics.recordGauge(QUEUE_SIZE_GAUGE_METRIC_NAME, _buffer.size());
+                _periodicMetrics.recordGauge(_queueSizeGaugeMetricName, _buffer.size());
                 if (value != null) {
                     final T record;
                     try {
                         final Stopwatch parsingTimer = Stopwatch.createStarted();
                         record = _parser.parse(value);
                         parsingTimer.stop();
-                        _periodicMetrics.recordTimer(PARSING_TIME_METRIC_NAME,
+                        _periodicMetrics.recordTimer(_parsingTimeMetricName,
                                 parsingTimer.elapsed(TimeUnit.NANOSECONDS), Optional.of(Units.NANOSECOND));
                     } catch (final ParsingException e) {
-                        _periodicMetrics.recordCounter(PARSING_EXCEPTION_COUNT_METRIC_NAME, 1);
+                        _periodicMetrics.recordCounter(_parsingExceptionCountMetricName, 1);
                         _logger.error()
                                 .setMessage("Failed to parse data")
                                 .setThrowable(e)
@@ -223,7 +224,7 @@ public final class KafkaSource<T, V> extends BaseSource {
             try {
                 _buffer.put(consumerRecord.value());
                 _currentRecordsIngestedCount.getAndIncrement();
-                _periodicMetrics.recordGauge(QUEUE_SIZE_GAUGE_METRIC_NAME, _buffer.size());
+                _periodicMetrics.recordGauge(_queueSizeGaugeMetricName, _buffer.size());
             } catch (final InterruptedException e) {
                 _logger.info()
                         .setMessage("Consumer thread interrupted")
@@ -247,7 +248,7 @@ public final class KafkaSource<T, V> extends BaseSource {
                         .log();
                 _runnableConsumer.stop();
             } else if (throwable instanceof KafkaException) {
-                _periodicMetrics.recordCounter(KAFKA_EXCEPTION_COUNT_METRIC_NAME, 1);
+                _periodicMetrics.recordCounter(_kafkaExceptionCountMetricName, 1);
                 _logger.error()
                         .setMessage("Consumer received Kafka Exception")
                         .addData("source", KafkaSource.this)
@@ -256,7 +257,7 @@ public final class KafkaSource<T, V> extends BaseSource {
                         .log();
                 backoff(throwable);
             } else {
-                _periodicMetrics.recordCounter(CONSUMER_EXCEPTION_COUNT_METRIC_NAME, 1);
+                _periodicMetrics.recordCounter(_consumerExceptionCountMetricName, 1);
                 _logger.error()
                         .setMessage("Consumer thread error")
                         .addData("source", KafkaSource.this)
