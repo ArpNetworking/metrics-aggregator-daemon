@@ -84,10 +84,6 @@ public class CollectorPeriodicMetrics implements PeriodicMetrics, Runnable {
         for (java.util.function.Consumer<PeriodicMetrics> polledMetric : _polledMetricsRegistrations) {
             polledMetric.accept(this);
         }
-
-        System.out.printf("Counts\t%s%n", _counts);
-        System.out.printf("Gauges\t%s%n", _gauges);
-        System.out.printf("Timers\t%s%n", _timers);
     }
 
     /**
