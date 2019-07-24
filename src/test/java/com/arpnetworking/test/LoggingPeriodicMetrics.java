@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
- * Implementation of {@code PeriodicMetrics} that simply prints the values in collects.
+ * Implementation of {@code PeriodicMetrics} that logs the metrics it records each time step.
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
@@ -77,7 +77,7 @@ public final class LoggingPeriodicMetrics implements PeriodicMetrics, Runnable {
         final AtomicLongMap<String> gauges = _gauges.get();
         final AtomicLongMap<String> timers = _timers.getAndSet(AtomicLongMap.create());
 
-        System.out.printf("Counters\t%s%n", counter);
+        System.out.printf("Counts\t%s%n", counter);
         System.out.printf("Gauges\t%s%n", gauges);
         System.out.printf("Timers\t%s%n", timers);
     }

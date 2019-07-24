@@ -20,7 +20,7 @@ import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
-import com.arpnetworking.test.LoggingPeriodicMetrics;
+import com.arpnetworking.test.CollectingPeriodicMetrics;
 import com.arpnetworking.test.StringParser;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
@@ -67,7 +67,7 @@ public class KafkaSourceTest {
     private Logger _logger;
     private LogBuilder _logBuilder;
 
-    private LoggingPeriodicMetrics _periodicMetrics;
+    private CollectingPeriodicMetrics _periodicMetrics;
     private ScheduledExecutorService _executor;
 
     @Before
@@ -86,10 +86,10 @@ public class KafkaSourceTest {
         Mockito.when(_logBuilder.setThrowable(Mockito.any(Throwable.class))).thenReturn(_logBuilder);
 
 
-        _periodicMetrics = new LoggingPeriodicMetrics();
+        _periodicMetrics = new CollectingPeriodicMetrics();
         _executor = Executors.newSingleThreadScheduledExecutor(
                 r -> new Thread(r, "PeriodicMetricsCloser"));
-        _executor.scheduleAtFixedRate(_periodicMetrics, 5, 5, TimeUnit.MILLISECONDS);
+        _executor.scheduleAtFixedRate(_periodicMetrics, 500, 500, TimeUnit.MILLISECONDS);
     }
 
     @After
@@ -108,6 +108,9 @@ public class KafkaSourceTest {
             Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source, expected);
         }
         _source.stop();
+
+        // Check metrics
+        Assert.assertEquals(EXPECTED.size(), _periodicMetrics.getCounters().stream().mapToLong(Long::longValue).sum());
     }
 
     @Test
@@ -123,6 +126,10 @@ public class KafkaSourceTest {
                 EXPECTED.stream().sorted().collect(Collectors.toList()),
                 captor.getAllValues().stream().sorted().collect(Collectors.toList())
         );
+        _source.stop();
+
+        // Check metrics
+        Assert.assertEquals(EXPECTED.size(), _periodicMetrics.getCounters().stream().mapToLong(Long::longValue).sum());
     }
 
     @Test
@@ -139,6 +146,10 @@ public class KafkaSourceTest {
                 EXPECTED.stream().sorted().collect(Collectors.toList()),
                 captor.getAllValues().stream().sorted().collect(Collectors.toList())
         );
+        _source.stop();
+
+        // Check metrics
+        Assert.assertEquals(EXPECTED.size(), _periodicMetrics.getCounters().stream().mapToLong(Long::longValue).sum());
     }
 
     @Test

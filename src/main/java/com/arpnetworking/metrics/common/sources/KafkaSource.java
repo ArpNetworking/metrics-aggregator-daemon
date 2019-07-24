@@ -66,7 +66,7 @@ public final class KafkaSource<T, V> extends BaseSource {
     private final BlockingQueue<V> _buffer;
     private final ParsingWorker _parsingWorker = new ParsingWorker();
     private final PeriodicMetrics _periodicMetrics;
-    private final AtomicLong _recordProcessed = new AtomicLong(0);
+    private final AtomicLong _currentRecordsProcessedCount = new AtomicLong(0);
 
     @Override
     public void start() {
@@ -152,7 +152,8 @@ public final class KafkaSource<T, V> extends BaseSource {
         _backoffTime = builder._backoffTime;
         _periodicMetrics = builder._periodicMetrics;
         _periodicMetrics.registerPolledMetric(periodicMetrics ->
-                periodicMetrics.recordCounter("num_records", _recordProcessed.getAndSet(0)));
+                periodicMetrics.recordCounter("num_records",
+                        _currentRecordsProcessedCount.getAndSet(0)));
         _logger = logger;
         _buffer = buffer;
     }
@@ -177,7 +178,7 @@ public final class KafkaSource<T, V> extends BaseSource {
                         return;
                     }
                     KafkaSource.this.notify(record);
-                    _recordProcessed.getAndIncrement();
+                    _currentRecordsProcessedCount.getAndIncrement();
                 } else {
                     // Queue is empty
                     try {
