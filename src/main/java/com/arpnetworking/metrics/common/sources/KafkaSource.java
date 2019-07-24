@@ -71,14 +71,14 @@ public final class KafkaSource<T, V> extends BaseSource {
     private final PeriodicMetrics _periodicMetrics;
     private final AtomicLong _currentRecordsProcessedCount = new AtomicLong(0);
     private final AtomicLong _currentRecordsIngestedCount = new AtomicLong(0);
+    private final String _parsingTimeMetricName = "sources/kafka/" + getMetricSafeName() + "/parsing_time";
     // CHECKSTYLE.OFF: VisibilityModifierCheck - Package private for use in testing
-    final String _recordsInCountMetricName = "sources/kafka/" + getMetricSafeName() + "/recordsIn";
-    final String _recordsOutCountMetricName = "sources/kafka/" + getMetricSafeName() + "/recordsOut";
-    final String _parsingExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/parsingExceptions";
-    final String _kafkaExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/kafkaExceptions";
-    final String _consumerExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/consumerExceptions";
-    final String _queueSizeGaugeMetricName = "sources/kafka/" + getMetricSafeName() + "/queueSize";
-    final String _parsingTimeMetricName = "sources/kafka/" + getMetricSafeName() + "/parsingTime";
+    final String _recordsInCountMetricName = "sources/kafka/" + getMetricSafeName() + "/records_in";
+    final String _recordsOutCountMetricName = "sources/kafka/" + getMetricSafeName() + "/records_out";
+    final String _parsingExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/parsing_exceptions";
+    final String _kafkaExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/kafka_exceptions";
+    final String _consumerExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/consumer_exceptions";
+    final String _queueSizeGaugeMetricName = "sources/kafka/" + getMetricSafeName() + "/queue_size";
     // CHECKSTYLE.ON: VisibilityModifierCheck
 
     @Override
@@ -196,7 +196,7 @@ public final class KafkaSource<T, V> extends BaseSource {
                                 .setMessage("Failed to parse data")
                                 .setThrowable(e)
                                 .log();
-                        return;
+                        continue;
                     }
                     KafkaSource.this.notify(record);
                     _currentRecordsProcessedCount.getAndIncrement();
