@@ -61,7 +61,7 @@ public class KafkaSourceTest {
     private static final int PARTITION = 0;
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
     private static final int TIMEOUT = 5000;
-    private static final String RECORD_COUNT_METRIC = KafkaSource.RECORD_COUNT_METRIC_NAME;
+    private static final String RECORD_COUNT_METRIC = KafkaSource.RECORD_OUT_COUNT_METRIC_NAME;
     private static final String QUEUE_SIZE_GAUGE_METRIC = KafkaSource.QUEUE_SIZE_GAUGE_METRIC_NAME;
 
     private KafkaSource<String, String> _source;
@@ -224,8 +224,9 @@ public class KafkaSourceTest {
     }
 
     private void createBadParsingSource() throws ParsingException {
-        final Parser<String, String> parser = Mockito.mock(StringParser.class);
+        final Parser<String, String> parser = Mockito.spy(new StringParser());
         Mockito.when(parser.parse(Mockito.anyString()))
+                .thenCallRealMethod()
                 .thenThrow(new ParsingException("Could not parse data", "bad_data".getBytes(Charsets.UTF_8)));
 
         _source = new KafkaSource<>(new KafkaSource.Builder<String, String>()

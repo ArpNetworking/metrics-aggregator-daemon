@@ -43,37 +43,37 @@ public class CollectorPeriodicMetrics implements PeriodicMetrics, Runnable {
 
     @Override
     public void recordCounter(final String name, final long value) {
-        _counts.computeIfAbsent(name, (String key) -> new ArrayList<>());
+        _counts.computeIfAbsent(name, n -> new ArrayList<>());
         _counts.get(name).add(value);
     }
 
     @Override
     public void recordGauge(final String name, final long value) {
-        _gauges.computeIfAbsent(name, (String key) -> new ArrayList<>());
+        _gauges.computeIfAbsent(name, n -> new ArrayList<>());
         _gauges.get(name).add(value);
     }
 
     @Override
     public void recordGauge(final String name, final long value, final Optional<Unit> unit) {
-        _gauges.computeIfAbsent(name, (String key) -> new ArrayList<>());
+        _gauges.computeIfAbsent(name, n -> new ArrayList<>());
         _gauges.get(name).add(value);
     }
 
     @Override
     public void recordGauge(final String name, final double value) {
-        _gauges.computeIfAbsent(name, (String key) -> new ArrayList<>());
+        _gauges.computeIfAbsent(name, n -> new ArrayList<>());
         _gauges.get(name).add(value);
     }
 
     @Override
     public void recordGauge(final String name, final double value, final Optional<Unit> unit) {
-        _gauges.computeIfAbsent(name, (String key) -> new ArrayList<>());
+        _gauges.computeIfAbsent(name, n -> new ArrayList<>());
         _gauges.get(name).add(value);
     }
 
     @Override
     public void recordTimer(final String name, final long duration, final Optional<Unit> unit) {
-        _timers.computeIfAbsent(name, (String key) -> new ArrayList<>());
+        _timers.computeIfAbsent(name, n -> new ArrayList<>());
         _timers.get(name).add(duration);
     }
 
@@ -84,6 +84,10 @@ public class CollectorPeriodicMetrics implements PeriodicMetrics, Runnable {
         for (java.util.function.Consumer<PeriodicMetrics> polledMetric : _polledMetricsRegistrations) {
             polledMetric.accept(this);
         }
+
+        System.out.printf("Counts\t%s%n", _counts);
+        System.out.printf("Gauges\t%s%n", _gauges);
+        System.out.printf("Timers\t%s%n", _timers);
     }
 
     /**
