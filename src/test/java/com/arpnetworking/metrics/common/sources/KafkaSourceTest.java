@@ -20,7 +20,7 @@ import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
-import com.arpnetworking.test.CollectingPeriodicMetrics;
+import com.arpnetworking.test.CollectorPeriodicMetrics;
 import com.arpnetworking.test.StringParser;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
@@ -56,18 +56,18 @@ import java.util.stream.Collectors;
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public class KafkaSourceTest {
-
     private static final List<String> EXPECTED = createValues("value", 300);
     private static final String TOPIC = "test_topic";
     private static final int PARTITION = 0;
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
     private static final int TIMEOUT = 5000;
+    private static final String RECORD_COUNT_METRIC = KafkaSource.RECORD_COUNT_METRIC_NAME;
+    private static final String QUEUE_SIZE_GAUGE_METRIC = KafkaSource.QUEUE_SIZE_GAUGE_METRIC_NAME;
 
     private KafkaSource<String, String> _source;
     private Logger _logger;
     private LogBuilder _logBuilder;
-
-    private CollectingPeriodicMetrics _periodicMetrics;
+    private CollectorPeriodicMetrics _periodicMetrics;
     private ScheduledExecutorService _executor;
 
     @Before
@@ -85,8 +85,7 @@ public class KafkaSourceTest {
         Mockito.when(_logBuilder.setEvent(Mockito.anyString())).thenReturn(_logBuilder);
         Mockito.when(_logBuilder.setThrowable(Mockito.any(Throwable.class))).thenReturn(_logBuilder);
 
-
-        _periodicMetrics = new CollectingPeriodicMetrics();
+        _periodicMetrics = Mockito.spy(new CollectorPeriodicMetrics());
         _executor = Executors.newSingleThreadScheduledExecutor(
                 r -> new Thread(r, "PeriodicMetricsCloser"));
         _executor.scheduleAtFixedRate(_periodicMetrics, 500, 500, TimeUnit.MILLISECONDS);
@@ -109,8 +108,9 @@ public class KafkaSourceTest {
         }
         _source.stop();
 
-        // Check metrics
-        Assert.assertEquals(EXPECTED.size(), _periodicMetrics.getCounters().stream().mapToLong(Long::longValue).sum());
+        // Check counter metric recorded
+        Assert.assertEquals(EXPECTED.size(),
+                _periodicMetrics.getCounters(RECORD_COUNT_METRIC).stream().mapToLong(Long::longValue).sum());
     }
 
     @Test
@@ -128,16 +128,22 @@ public class KafkaSourceTest {
         );
         _source.stop();
 
-        // Check metrics
-        Assert.assertEquals(EXPECTED.size(), _periodicMetrics.getCounters().stream().mapToLong(Long::longValue).sum());
+        // Check counter metric recorded
+        Assert.assertEquals(EXPECTED.size(),
+                _periodicMetrics.getCounters(RECORD_COUNT_METRIC).stream().mapToLong(Long::longValue).sum());
     }
 
     @Test
     public void testSourceMultiWorkerFillQueue() {
-        createFillingQueueSource();
+        final int bufSize = 100;
+        createFillingQueueSource(bufSize);
         final Observer observer = Mockito.mock(Observer.class);
         _source.attach(observer);
         _source.start();
+
+        // Check queue size gauge was set when queue is full
+        Mockito.verify(_periodicMetrics,
+                Mockito.timeout(TIMEOUT).atLeastOnce()).recordGauge(QUEUE_SIZE_GAUGE_METRIC, (long) bufSize);
 
         final ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
         Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(EXPECTED.size())).notify(Mockito.any(),
@@ -148,8 +154,9 @@ public class KafkaSourceTest {
         );
         _source.stop();
 
-        // Check metrics
-        Assert.assertEquals(EXPECTED.size(), _periodicMetrics.getCounters().stream().mapToLong(Long::longValue).sum());
+        // Check counter metric recorded
+        Assert.assertEquals(EXPECTED.size(),
+                _periodicMetrics.getCounters(RECORD_COUNT_METRIC).stream().mapToLong(Long::longValue).sum());
     }
 
     @Test
@@ -177,7 +184,7 @@ public class KafkaSourceTest {
         _source.stop();
     }
 
-    private void createFillingQueueSource() {
+    private void createFillingQueueSource(final int bufferSize) {
         _source = new KafkaSource<>(new KafkaSource.Builder<String, String>()
                 .setName("KafkaSource")
                 .setConsumer(createMockConsumer())
@@ -185,7 +192,7 @@ public class KafkaSourceTest {
                 .setPollTime(POLL_DURATION)
                 .setPeriodicMetrics(_periodicMetrics)
                 .setNumWorkerThreads(1),
-                new FillingBlockingQueue(100));
+                new FillingBlockingQueue(bufferSize));
     }
 
     private void createHealthySource(final int numWorkers) {

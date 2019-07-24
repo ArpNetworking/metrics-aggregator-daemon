@@ -52,6 +52,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public final class KafkaSource<T, V> extends BaseSource {
+    static final String RECORD_COUNT_METRIC_NAME = "number_of_records";
+    static final String QUEUE_SIZE_GAUGE_METRIC_NAME = "current_queue_size";
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSource.class);
 
     private final Consumer<?, V> _consumer;
@@ -152,7 +154,7 @@ public final class KafkaSource<T, V> extends BaseSource {
         _backoffTime = builder._backoffTime;
         _periodicMetrics = builder._periodicMetrics;
         _periodicMetrics.registerPolledMetric(periodicMetrics ->
-                periodicMetrics.recordCounter("num_records",
+                periodicMetrics.recordCounter(RECORD_COUNT_METRIC_NAME,
                         _currentRecordsProcessedCount.getAndSet(0)));
         _logger = logger;
         _buffer = buffer;
@@ -165,7 +167,7 @@ public final class KafkaSource<T, V> extends BaseSource {
         public void run() {
             while (_isRunning || !_buffer.isEmpty()) { // Empty the queue before stopping the workers
                 final V value = _buffer.poll();
-                _periodicMetrics.recordGauge("queue_size", _buffer.size());
+                _periodicMetrics.recordGauge(QUEUE_SIZE_GAUGE_METRIC_NAME, _buffer.size());
                 if (value != null) {
                     final T record;
                     try {
@@ -202,7 +204,7 @@ public final class KafkaSource<T, V> extends BaseSource {
         public void handle(final ConsumerRecord<?, V> consumerRecord) {
             try {
                 _buffer.put(consumerRecord.value());
-                _periodicMetrics.recordGauge("queue_size", _buffer.size());
+                _periodicMetrics.recordGauge(QUEUE_SIZE_GAUGE_METRIC_NAME, _buffer.size());
             } catch (final InterruptedException e) {
                 _logger.info()
                         .setMessage("Consumer thread interrupted")
