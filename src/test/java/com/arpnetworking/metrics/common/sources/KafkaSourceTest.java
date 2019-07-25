@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public class KafkaSourceTest {
-    private static final List<String> EXPECTED = ImmutableList.copyOf(createValues("value", 300));
+    private static final List<String> EXPECTED = createValues("value", 300);
     private static final String TOPIC = "test_topic";
     private static final int PARTITION = 0;
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
@@ -298,40 +298,29 @@ public class KafkaSourceTest {
     private void assertMetricCountsCorrect(final long inRecords, final long outRecords, final long parsingExceptions,
                                            final long kafkaExceptions, final long consumerExceptions) {
         _periodicMetrics.run(); // Flush the metrics
-        final List<Long> expectedInRecords =
-                _periodicMetrics.getCounters(_source._recordsInCountMetricName) == null
-                ? Collections.singletonList(0L)
-                : _periodicMetrics.getCounters(_source._recordsInCountMetricName);
-        final List<Long> expectedOutRecords =
-                _periodicMetrics.getCounters(_source._recordsOutCountMetricName) == null
-                ? Collections.singletonList(0L)
-                : _periodicMetrics.getCounters(_source._recordsOutCountMetricName);
-        final List<Long> expectedParsingExceptions =
-                _periodicMetrics.getCounters(_source._parsingExceptionCountMetricName) == null
-                ? Collections.singletonList(0L)
-                : _periodicMetrics.getCounters(_source._parsingExceptionCountMetricName);
-        final List<Long> expectedKafkaExceptions =
-                _periodicMetrics.getCounters(_source._kafkaExceptionCountMetricName) == null
-                ? Collections.singletonList(0L)
-                : _periodicMetrics.getCounters(_source._kafkaExceptionCountMetricName);
-        final List<Long> expectedConsumerExceptions =
-                _periodicMetrics.getCounters(_source._consumerExceptionCountMetricName) == null
-                ? Collections.singletonList(0L)
-                : _periodicMetrics.getCounters(_source._consumerExceptionCountMetricName);
-
-        Assert.assertEquals(inRecords, expectedInRecords.stream().mapToLong(Long::longValue).sum());
-        Assert.assertEquals(outRecords, expectedOutRecords.stream().mapToLong(Long::longValue).sum());
-        Assert.assertEquals(parsingExceptions, expectedParsingExceptions.stream().mapToLong(Long::longValue).sum());
-        Assert.assertEquals(kafkaExceptions, expectedKafkaExceptions.stream().mapToLong(Long::longValue).sum());
-        Assert.assertEquals(consumerExceptions, expectedConsumerExceptions.stream().mapToLong(Long::longValue).sum());
+        Assert.assertEquals(inRecords,
+                _periodicMetrics.getCounters(_source._recordsInCountMetricName)
+                        .stream().mapToLong(Long::longValue).sum());
+        Assert.assertEquals(outRecords,
+                _periodicMetrics.getCounters(_source._recordsOutCountMetricName)
+                        .stream().mapToLong(Long::longValue).sum());
+        Assert.assertEquals(parsingExceptions,
+                _periodicMetrics.getCounters(_source._parsingExceptionCountMetricName)
+                        .stream().mapToLong(Long::longValue).sum());
+        Assert.assertEquals(kafkaExceptions,
+                _periodicMetrics.getCounters(_source._kafkaExceptionCountMetricName)
+                        .stream().mapToLong(Long::longValue).sum());
+        Assert.assertEquals(consumerExceptions,
+                _periodicMetrics.getCounters(_source._consumerExceptionCountMetricName)
+                        .stream().mapToLong(Long::longValue).sum());
     }
 
     private static List<String> createValues(final String prefix, final int num) {
-        final List<String> values = new ArrayList<>(num);
+        final ImmutableList.Builder<String> valuesBuilder = ImmutableList.builder();
         for (int i = 0; i < num; i++) {
-            values.add(prefix + i);
+            valuesBuilder.add(prefix + i);
         }
-        return values;
+        return valuesBuilder.build();
     }
 
     private static MockConsumer<String, String> createMockConsumer(

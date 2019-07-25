@@ -387,7 +387,7 @@ public final class KafkaSource<T, V> extends BaseSource {
         }
 
         /**
-         * Sets {@code PeriodicMetrics} for self instrumentation of {@link KafkaSource}.
+         * Sets {@code PeriodicMetrics} for instrumentation of {@link KafkaSource}.
          *
          * @param periodicMetrics The {@code PeriodicMetrics} for the {@link KafkaSource}.
          * @return This instance of {@link KafkaSource.Builder}.
