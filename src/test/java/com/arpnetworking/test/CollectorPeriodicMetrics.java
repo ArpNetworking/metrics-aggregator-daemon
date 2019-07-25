@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import javax.annotation.Nonnull;
 
 /**
  * Implementation of {@code PeriodicMetrics} that collects the metrics it records.
@@ -82,12 +83,13 @@ public class CollectorPeriodicMetrics implements PeriodicMetrics, Runnable {
 
     /**
      * Returns the list of collected counters for a specific metric. This method will return an empty
-     * list if the metric name was never recorded so will not return null.
+     * list if the metric name was never recorded.
      * This method is thread safe.
      *
      * @param name the name of the metric
      * @return the list of counters recorded for a metric or an empty list if nothing was recorded for that metric
      */
+    @Nonnull
     public List<Long> getCounters(final String name) {
         return _counts.getOrDefault(name, Collections.emptyList());
     }
