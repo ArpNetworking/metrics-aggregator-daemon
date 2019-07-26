@@ -16,14 +16,18 @@
 package com.arpnetworking.metrics.common.sources;
 
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.Units;
 import com.arpnetworking.metrics.common.kafka.ConsumerListener;
 import com.arpnetworking.metrics.common.kafka.RunnableConsumer;
 import com.arpnetworking.metrics.common.kafka.RunnableConsumerImpl;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.fasterxml.jackson.annotation.JacksonInject;
+import com.google.common.base.Stopwatch;
 import net.sf.oval.constraint.CheckWith;
 import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.Min;
@@ -33,11 +37,13 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.KafkaException;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Produce instances of {@link com.arpnetworking.metrics.mad.model.Record} from the values of entries
@@ -49,7 +55,6 @@ import java.util.concurrent.TimeUnit;
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 public final class KafkaSource<T, V> extends BaseSource {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSource.class);
 
     private final Consumer<?, V> _consumer;
@@ -63,6 +68,18 @@ public final class KafkaSource<T, V> extends BaseSource {
     private final Integer _numWorkerThreads;
     private final BlockingQueue<V> _buffer;
     private final ParsingWorker _parsingWorker = new ParsingWorker();
+    private final PeriodicMetrics _periodicMetrics;
+    private final AtomicLong _currentRecordsProcessedCount = new AtomicLong(0);
+    private final AtomicLong _currentRecordsIngestedCount = new AtomicLong(0);
+    private final String _parsingTimeMetricName = "sources/kafka/" + getMetricSafeName() + "/parsing_time";
+    // CHECKSTYLE.OFF: VisibilityModifierCheck - Package private for use in testing
+    final String _recordsInCountMetricName = "sources/kafka/" + getMetricSafeName() + "/records_in";
+    final String _recordsOutCountMetricName = "sources/kafka/" + getMetricSafeName() + "/records_out";
+    final String _parsingExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/parsing_exceptions";
+    final String _kafkaExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/kafka_exceptions";
+    final String _consumerExceptionCountMetricName = "sources/kafka/" + getMetricSafeName() + "/consumer_exceptions";
+    final String _queueSizeGaugeMetricName = "sources/kafka/" + getMetricSafeName() + "/queue_size";
+    // CHECKSTYLE.ON: VisibilityModifierCheck
 
     @Override
     public void start() {
@@ -146,6 +163,13 @@ public final class KafkaSource<T, V> extends BaseSource {
         _parserExecutor = Executors.newFixedThreadPool(_numWorkerThreads);
         _shutdownAwaitTime = builder._shutdownAwaitTime;
         _backoffTime = builder._backoffTime;
+        _periodicMetrics = builder._periodicMetrics;
+        _periodicMetrics.registerPolledMetric(periodicMetrics ->
+                periodicMetrics.recordCounter(_recordsOutCountMetricName,
+                        _currentRecordsProcessedCount.getAndSet(0)));
+        _periodicMetrics.registerPolledMetric(periodicMetrics ->
+                periodicMetrics.recordCounter(_recordsInCountMetricName,
+                        _currentRecordsIngestedCount.getAndSet(0)));
         _logger = logger;
         _buffer = buffer;
     }
@@ -157,18 +181,25 @@ public final class KafkaSource<T, V> extends BaseSource {
         public void run() {
             while (_isRunning || !_buffer.isEmpty()) { // Empty the queue before stopping the workers
                 final V value = _buffer.poll();
+                _periodicMetrics.recordGauge(_queueSizeGaugeMetricName, _buffer.size());
                 if (value != null) {
                     final T record;
                     try {
+                        final Stopwatch parsingTimer = Stopwatch.createStarted();
                         record = _parser.parse(value);
+                        parsingTimer.stop();
+                        _periodicMetrics.recordTimer(_parsingTimeMetricName,
+                                parsingTimer.elapsed(TimeUnit.NANOSECONDS), Optional.of(Units.NANOSECOND));
                     } catch (final ParsingException e) {
+                        _periodicMetrics.recordCounter(_parsingExceptionCountMetricName, 1);
                         _logger.error()
                                 .setMessage("Failed to parse data")
                                 .setThrowable(e)
                                 .log();
-                        return;
+                        continue;
                     }
                     KafkaSource.this.notify(record);
+                    _currentRecordsProcessedCount.getAndIncrement();
                 } else {
                     // Queue is empty
                     try {
@@ -192,6 +223,8 @@ public final class KafkaSource<T, V> extends BaseSource {
         public void handle(final ConsumerRecord<?, V> consumerRecord) {
             try {
                 _buffer.put(consumerRecord.value());
+                _currentRecordsIngestedCount.getAndIncrement();
+                _periodicMetrics.recordGauge(_queueSizeGaugeMetricName, _buffer.size());
             } catch (final InterruptedException e) {
                 _logger.info()
                         .setMessage("Consumer thread interrupted")
@@ -215,6 +248,7 @@ public final class KafkaSource<T, V> extends BaseSource {
                         .log();
                 _runnableConsumer.stop();
             } else if (throwable instanceof KafkaException) {
+                _periodicMetrics.recordCounter(_kafkaExceptionCountMetricName, 1);
                 _logger.error()
                         .setMessage("Consumer received Kafka Exception")
                         .addData("source", KafkaSource.this)
@@ -223,6 +257,7 @@ public final class KafkaSource<T, V> extends BaseSource {
                         .log();
                 backoff(throwable);
             } else {
+                _periodicMetrics.recordCounter(_consumerExceptionCountMetricName, 1);
                 _logger.error()
                         .setMessage("Consumer thread error")
                         .addData("source", KafkaSource.this)
@@ -351,6 +386,17 @@ public final class KafkaSource<T, V> extends BaseSource {
             return this;
         }
 
+        /**
+         * Sets {@code PeriodicMetrics} for instrumentation of {@link KafkaSource}.
+         *
+         * @param periodicMetrics The {@code PeriodicMetrics} for the {@link KafkaSource}.
+         * @return This instance of {@link KafkaSource.Builder}.
+         */
+        public Builder<T, V> setPeriodicMetrics(final PeriodicMetrics periodicMetrics) {
+            _periodicMetrics = periodicMetrics;
+            return this;
+        }
+
         @Override
         protected Builder<T, V> self() {
             return this;
@@ -375,6 +421,9 @@ public final class KafkaSource<T, V> extends BaseSource {
         @NotNull
         @Min(1)
         private Integer _bufferSize = 1000;
+        @JacksonInject
+        @NotNull
+        private PeriodicMetrics _periodicMetrics;
 
         private static class PositiveDuration implements CheckWithCheck.SimpleCheck {
             @Override
