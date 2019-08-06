@@ -18,10 +18,11 @@ package com.arpnetworking.metrics.common.sources;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.test.CollectorPeriodicMetrics;
-import com.arpnetworking.test.StringParser;
+import com.arpnetworking.test.StringToRecordParser;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -63,7 +64,7 @@ public class KafkaSourceTest {
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
     private static final int TIMEOUT = 5000;
 
-    private KafkaSource<String, String> _source;
+    private KafkaSource<String> _source;
     private Logger _logger;
     private LogBuilder _logBuilder;
     private CollectorPeriodicMetrics _periodicMetrics;
@@ -109,7 +110,7 @@ public class KafkaSourceTest {
         _source.start();
 
         for (String expected : EXPECTED) {
-            Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source, expected);
+            Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source, StringToRecordParser.recordWithID(expected));
         }
 
         _source.stop();
@@ -128,7 +129,7 @@ public class KafkaSourceTest {
                 captor.capture());
         Assert.assertEquals(
                 EXPECTED.stream().sorted().collect(Collectors.toList()),
-                captor.getAllValues().stream().sorted().collect(Collectors.toList())
+                captor.getAllValues().stream().map(StringToRecordParser::recordID).sorted().collect(Collectors.toList())
         );
 
         _source.stop();
@@ -152,7 +153,7 @@ public class KafkaSourceTest {
                 captor.capture());
         Assert.assertEquals(
                 EXPECTED.stream().sorted().collect(Collectors.toList()),
-                captor.getAllValues().stream().sorted().collect(Collectors.toList())
+                captor.getAllValues().stream().map(StringToRecordParser::recordID).sorted().collect(Collectors.toList())
         );
 
         _source.stop();
@@ -236,10 +237,10 @@ public class KafkaSourceTest {
     }
 
     private void createHealthySource(final int numWorkers) {
-        _source = new KafkaSource.Builder<String, String>()
+        _source = new KafkaSource.Builder<String>()
                 .setName("KafkaSource")
                 .setConsumer(createMockConsumer(expectedConsumerRecords()))
-                .setParser(new StringParser())
+                .setParser(new StringToRecordParser())
                 .setPollTime(POLL_DURATION)
                 .setNumWorkerThreads(numWorkers)
                 .setPeriodicMetrics(_periodicMetrics)
@@ -247,10 +248,10 @@ public class KafkaSourceTest {
     }
 
     private void createFillingQueueSource(final int bufferSize) {
-        _source = new KafkaSource<>(new KafkaSource.Builder<String, String>()
+        _source = new KafkaSource<>(new KafkaSource.Builder<String>()
                 .setName("KafkaSource")
                 .setConsumer(createMockConsumer(expectedConsumerRecords()))
-                .setParser(new StringParser())
+                .setParser(new StringToRecordParser())
                 .setPollTime(POLL_DURATION)
                 .setNumWorkerThreads(1)
                 .setPeriodicMetrics(_periodicMetrics),
@@ -270,10 +271,10 @@ public class KafkaSourceTest {
                     .thenThrow(exception);
         }
 
-        _source = new KafkaSource<>(new KafkaSource.Builder<String, String>()
+        _source = new KafkaSource<>(new KafkaSource.Builder<String>()
                 .setName("KafkaSource")
                 .setConsumer(consumer)
-                .setParser(new StringParser())
+                .setParser(new StringToRecordParser())
                 .setPollTime(POLL_DURATION)
                 .setPeriodicMetrics(_periodicMetrics)
                 .setBackoffTime(Duration.ofMillis(10)),
@@ -281,12 +282,12 @@ public class KafkaSourceTest {
     }
 
     private void createBadParsingSource(final ParsingException exception) throws ParsingException {
-        final Parser<String, String> parser = Mockito.spy(new StringParser());
+        final Parser<List<Record>, String> parser = Mockito.spy(new StringToRecordParser());
         Mockito.when(parser.parse(Mockito.anyString()))
                 .thenThrow(exception)
                 .thenCallRealMethod();
 
-        _source = new KafkaSource<>(new KafkaSource.Builder<String, String>()
+        _source = new KafkaSource<>(new KafkaSource.Builder<String>()
                 .setName("KafkaSource")
                 .setConsumer(createMockConsumer(expectedConsumerRecords()))
                 .setParser(parser)
@@ -364,4 +365,5 @@ public class KafkaSourceTest {
             super.put(element);
         }
     }
+
 }

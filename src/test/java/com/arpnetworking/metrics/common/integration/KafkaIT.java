@@ -20,7 +20,7 @@ import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.common.kafka.ConsumerDeserializer;
 import com.arpnetworking.metrics.common.sources.KafkaSource;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
-import com.arpnetworking.test.StringParser;
+import com.arpnetworking.test.StringToRecordParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
@@ -84,7 +84,7 @@ public class KafkaIT {
     private Map<String, Object> _consumerProps;
     private KafkaConsumer<Integer, String> _consumer;
     private String _topicName;
-    private KafkaSource<String, String> _source;
+    private KafkaSource<String> _source;
     private List<ProducerRecord<Integer, String>> _producerRecords;
     private PeriodicMetrics _periodicMetrics;
 
@@ -109,9 +109,9 @@ public class KafkaIT {
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
-        _source = new KafkaSource.Builder<String, String>()
+        _source = new KafkaSource.Builder<String>()
                 .setName("KafkaSource")
-                .setParser(new StringParser())
+                .setParser(new StringToRecordParser())
                 .setConsumer(_consumer)
                 .setPollTime(POLL_DURATION)
                 .setPeriodicMetrics(_periodicMetrics)
@@ -122,7 +122,8 @@ public class KafkaIT {
         _source.attach(observer);
         _source.start();
         for (ProducerRecord<Integer, String> expected : _producerRecords) {
-            Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source, expected.value());
+            Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source,
+                    StringToRecordParser.recordWithID(expected.value()));
         }
     }
 
@@ -131,9 +132,9 @@ public class KafkaIT {
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
-        _source = new KafkaSource.Builder<String, String>()
+        _source = new KafkaSource.Builder<String>()
                 .setName("KafkaSource")
-                .setParser(new StringParser())
+                .setParser(new StringToRecordParser())
                 .setConsumer(_consumer)
                 .setPollTime(POLL_DURATION)
                 .setPeriodicMetrics(_periodicMetrics)
@@ -146,8 +147,10 @@ public class KafkaIT {
         _source.attach(observer2);
         _source.start();
         for (ProducerRecord<Integer, String> expected : _producerRecords) {
-            Mockito.verify(observer1, Mockito.timeout(TIMEOUT)).notify(_source, expected.value());
-            Mockito.verify(observer2, Mockito.timeout(TIMEOUT)).notify(_source, expected.value());
+            Mockito.verify(observer1, Mockito.timeout(TIMEOUT)).notify(_source,
+                    StringToRecordParser.recordWithID(expected.value()));
+            Mockito.verify(observer2, Mockito.timeout(TIMEOUT)).notify(_source,
+                    StringToRecordParser.recordWithID(expected.value()));
         }
     }
 
@@ -171,7 +174,7 @@ public class KafkaIT {
                 + "\n    }"
                 + "\n  },"
                 + "\n  \"parser\":{"
-                + "\n    \"type\":\"com.arpnetworking.test.StringParser\""
+                + "\n    \"type\":\"com.arpnetworking.test.StringToRecordParser\""
                 + "\n  },"
                 + "\n  \"backoffTime\":\"PT1S\""
                 + "\n}";
@@ -204,7 +207,8 @@ public class KafkaIT {
         _source.attach(observer);
         _source.start();
         for (ProducerRecord<Integer, String> expected : _producerRecords) {
-            Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source, expected.value());
+            Mockito.verify(observer, Mockito.timeout(TIMEOUT)).notify(_source,
+                    StringToRecordParser.recordWithID(expected.value()));
         }
     }
 
@@ -213,9 +217,9 @@ public class KafkaIT {
         // Create Kafka Source
         _consumer = new KafkaConsumer<>(_consumerProps);
         _consumer.subscribe(Collections.singletonList(_topicName));
-        _source = new KafkaSource.Builder<String, String>()
+        _source = new KafkaSource.Builder<String>()
                 .setName("KafkaSource")
-                .setParser(new StringParser())
+                .setParser(new StringToRecordParser())
                 .setConsumer(_consumer)
                 .setPollTime(POLL_DURATION)
                 .setNumWorkerThreads(4)
@@ -231,7 +235,7 @@ public class KafkaIT {
         Mockito.verify(observer, Mockito.timeout(TIMEOUT).times(NUM_RECORDS)).notify(Mockito.any(), captor.capture());
         Assert.assertEquals(
                 _producerRecords.stream().map(ProducerRecord::value).sorted().collect(Collectors.toList()),
-                captor.getAllValues().stream().sorted().collect(Collectors.toList())
+                captor.getAllValues().stream().map(StringToRecordParser::recordID).sorted().collect(Collectors.toList())
         );
     }
 
@@ -318,5 +322,5 @@ public class KafkaIT {
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
-    private static class KafkaSourceStringType extends TypeReference<KafkaSource<String, String>> {}
+    private static class KafkaSourceStringType extends TypeReference<KafkaSource<String>> {}
 }

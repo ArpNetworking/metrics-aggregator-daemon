@@ -23,6 +23,7 @@ import com.arpnetworking.metrics.common.kafka.RunnableConsumerImpl;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
+import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
@@ -37,6 +38,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.KafkaException;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -49,19 +51,18 @@ import java.util.concurrent.atomic.AtomicLong;
  * Produce instances of {@link com.arpnetworking.metrics.mad.model.Record} from the values of entries
  * from a Kafka topic. The key from the entries gets discarded
  *
- * @param <T> the type of data created by the source
  * @param <V> the type of data of value in kafka {@code ConsumerRecords}
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
-public final class KafkaSource<T, V> extends BaseSource {
+public final class KafkaSource<V> extends BaseSource {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSource.class);
 
     private final Consumer<?, V> _consumer;
     private final RunnableConsumer _runnableConsumer;
     private final ExecutorService _consumerExecutor;
     private final ExecutorService _parserExecutor;
-    private final Parser<T, V> _parser;
+    private final Parser<List<Record>, V> _parser;
     private final Logger _logger;
     private final Duration _shutdownAwaitTime;
     private final Duration _backoffTime;
@@ -135,21 +136,21 @@ public final class KafkaSource<T, V> extends BaseSource {
     }
 
     @SuppressWarnings("unused")
-    private KafkaSource(final Builder<T, V> builder) {
+    private KafkaSource(final Builder<V> builder) {
         this(builder, LOGGER, new ArrayBlockingQueue<>(builder._bufferSize));
     }
 
     // NOTE: Package private for testing
-    /* package private */ KafkaSource(final Builder<T, V> builder, final Logger logger) {
+    /* package private */ KafkaSource(final Builder<V> builder, final Logger logger) {
         this(builder, logger, new ArrayBlockingQueue<>(builder._bufferSize));
     }
 
     // NOTE: Package private for testing
-    /* package private */ KafkaSource(final Builder<T, V> builder, final BlockingQueue<V> buffer) {
+    /* package private */ KafkaSource(final Builder<V> builder, final BlockingQueue<V> buffer) {
         this(builder, LOGGER, buffer);
     }
 
-    private KafkaSource(final Builder<T, V> builder, final Logger logger, final BlockingQueue<V> buffer) {
+    private KafkaSource(final Builder<V> builder, final Logger logger, final BlockingQueue<V> buffer) {
         super(builder);
         _consumer = builder._consumer;
         _parser = builder._parser;
@@ -183,10 +184,10 @@ public final class KafkaSource<T, V> extends BaseSource {
                 final V value = _buffer.poll();
                 _periodicMetrics.recordGauge(_queueSizeGaugeMetricName, _buffer.size());
                 if (value != null) {
-                    final T record;
+                    final List<Record> records;
                     try {
                         final Stopwatch parsingTimer = Stopwatch.createStarted();
-                        record = _parser.parse(value);
+                        records = _parser.parse(value);
                         parsingTimer.stop();
                         _periodicMetrics.recordTimer(_parsingTimeMetricName,
                                 parsingTimer.elapsed(TimeUnit.NANOSECONDS), Optional.of(Units.NANOSECOND));
@@ -198,8 +199,10 @@ public final class KafkaSource<T, V> extends BaseSource {
                                 .log();
                         continue;
                     }
-                    KafkaSource.this.notify(record);
-                    _currentRecordsProcessedCount.getAndIncrement();
+                    for (final Record record : records) {
+                        KafkaSource.this.notify(record);
+                        _currentRecordsProcessedCount.getAndIncrement();
+                    }
                 } else {
                     // Queue is empty
                     try {
@@ -289,12 +292,11 @@ public final class KafkaSource<T, V> extends BaseSource {
     /**
      * Builder pattern class for {@link KafkaSource}.
      *
-     * @param <T> the type of data created by the source
      * @param <V> the type of data of value in kafka {@code ConsumerRecords}
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
-    public static final class Builder<T, V> extends BaseSource.Builder<Builder<T, V>, KafkaSource<T, V>> {
+    public static final class Builder<V> extends BaseSource.Builder<Builder<V>, KafkaSource<V>> {
 
         /**
          * Public constructor.
@@ -309,7 +311,7 @@ public final class KafkaSource<T, V> extends BaseSource {
          * @param consumer The {@code Consumer}.
          * @return This instance of {@link KafkaSource.Builder}.
          */
-        public Builder<T, V> setConsumer(final Consumer<?, V> consumer) {
+        public Builder<V> setConsumer(final Consumer<?, V> consumer) {
             _consumer = consumer;
             return this;
         }
@@ -320,7 +322,7 @@ public final class KafkaSource<T, V> extends BaseSource {
          * @param value The {@link Parser}.
          * @return This instance of {@link KafkaSource.Builder}.
          */
-        public Builder<T, V> setParser(final Parser<T, V> value) {
+        public Builder<V> setParser(final Parser<List<Record>, V> value) {
             _parser = value;
             return this;
         }
@@ -331,7 +333,7 @@ public final class KafkaSource<T, V> extends BaseSource {
          * @param pollTime The {@code Duration} of each poll call made by the {@code KafkaConsumer}.
          * @return This instance of {@link KafkaSource.Builder}.
          */
-        public Builder<T, V> setPollTime(final Duration pollTime) {
+        public Builder<V> setPollTime(final Duration pollTime) {
             _pollTime = pollTime;
             return this;
         }
@@ -344,7 +346,7 @@ public final class KafkaSource<T, V> extends BaseSource {
          *                          the {@link RunnableConsumer} thread.
          * @return This instance of {@link KafkaSource.Builder}.
          */
-        public Builder<T, V> setShutdownAwaitTime(final Duration shutdownAwaitTime) {
+        public Builder<V> setShutdownAwaitTime(final Duration shutdownAwaitTime) {
             _shutdownAwaitTime = shutdownAwaitTime;
             return this;
         }
@@ -357,7 +359,7 @@ public final class KafkaSource<T, V> extends BaseSource {
          *                          an operation on exception.
          * @return This instance of {@link KafkaSource.Builder}.
          */
-        public Builder<T, V> setBackoffTime(final Duration backoffTime) {
+        public Builder<V> setBackoffTime(final Duration backoffTime) {
             _backoffTime = backoffTime;
             return this;
         }
@@ -369,7 +371,7 @@ public final class KafkaSource<T, V> extends BaseSource {
          * @param numWorkerThreads The number of parsing worker threads.
          * @return This instance of {@link KafkaSource.Builder}.
          */
-        public Builder<T, V> setNumWorkerThreads(final Integer numWorkerThreads) {
+        public Builder<V> setNumWorkerThreads(final Integer numWorkerThreads) {
             _numWorkerThreads = numWorkerThreads;
             return this;
         }
@@ -381,7 +383,7 @@ public final class KafkaSource<T, V> extends BaseSource {
          * @param bufferSize The size of the buffer.
          * @return This instance of {@link KafkaSource.Builder}.
          */
-        public Builder<T, V> setBufferSize(final Integer bufferSize) {
+        public Builder<V> setBufferSize(final Integer bufferSize) {
             _bufferSize = bufferSize;
             return this;
         }
@@ -392,20 +394,20 @@ public final class KafkaSource<T, V> extends BaseSource {
          * @param periodicMetrics The {@code PeriodicMetrics} for the {@link KafkaSource}.
          * @return This instance of {@link KafkaSource.Builder}.
          */
-        public Builder<T, V> setPeriodicMetrics(final PeriodicMetrics periodicMetrics) {
+        public Builder<V> setPeriodicMetrics(final PeriodicMetrics periodicMetrics) {
             _periodicMetrics = periodicMetrics;
             return this;
         }
 
         @Override
-        protected Builder<T, V> self() {
+        protected Builder<V> self() {
             return this;
         }
 
         @NotNull
         private Consumer<?, V> _consumer;
         @NotNull
-        private Parser<T, V> _parser;
+        private Parser<List<Record>, V> _parser;
         @NotNull
         @CheckWith(value = PositiveDuration.class, message = "Poll duration must be positive.")
         private Duration _pollTime;
