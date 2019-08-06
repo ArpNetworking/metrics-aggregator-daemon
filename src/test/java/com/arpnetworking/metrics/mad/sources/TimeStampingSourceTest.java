@@ -77,7 +77,7 @@ public class TimeStampingSourceTest {
     }
 
     @Test
-    public void testRestamp() {
+    public void testStampSuccess() {
         final ZonedDateTime before = ZonedDateTime.now();
 
         final Record record = TestBeanFactory.createRecordBuilder()
@@ -92,7 +92,7 @@ public class TimeStampingSourceTest {
 
         Assert.assertTrue(String.format("Timestamp should have been between %s and %s but was %s", before.toString(),
                 after.toString(), received.getTime().toString()),
-                before.compareTo(received.getTime()) <= 0 && received.getTime().compareTo(after) <= 0);
+                !received.getTime().isBefore(before) && !received.getTime().isAfter(after));
     }
 
     private static void notify(final Observable observable, final Object event) {
