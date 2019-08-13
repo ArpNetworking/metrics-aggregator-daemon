@@ -294,7 +294,7 @@ public final class HistogramStatistic extends BaseStatistic {
         }
 
         double unpack(final long packed) {
-            return Double.longBitsToDouble(packed << (52 - _precision));
+            return Double.longBitsToDouble(packed << (MANTISSA_BITS - _precision));
         }
 
         /**
@@ -316,8 +316,8 @@ public final class HistogramStatistic extends BaseStatistic {
             }
 
             _precision = precision;
-            _truncateMask = 0xfff0000000000000L >> _precision;
-            _packMask = (1 << (_precision + 12)) - 1;
+            _truncateMask = BASE_MASK >> _precision;
+            _packMask = (1 << (_precision + EXPONENT_BITS + 1)) - 1;
         }
 
         private int _entriesCount = 0;
@@ -325,6 +325,10 @@ public final class HistogramStatistic extends BaseStatistic {
         private final int _precision;
         private final long _truncateMask;
         private final int _packMask;
+
+        private static final int MANTISSA_BITS = 52;
+        private static final int EXPONENT_BITS = 11;
+        private static final long BASE_MASK = (1L << (MANTISSA_BITS + EXPONENT_BITS)) >> EXPONENT_BITS;
     }
 
     /**
