@@ -181,36 +181,33 @@ public final class KafkaSource<V> extends BaseSource {
         @Override
         public void run() {
             while (_isRunning || !_buffer.isEmpty()) { // Empty the queue before stopping the workers
-                final V value = _buffer.poll();
-                _periodicMetrics.recordGauge(_queueSizeGaugeMetricName, _buffer.size());
-                if (value != null) {
-                    final List<Record> records;
-                    try {
-                        final Stopwatch parsingTimer = Stopwatch.createStarted();
-                        records = _parser.parse(value);
-                        parsingTimer.stop();
-                        _periodicMetrics.recordTimer(_parsingTimeMetricName,
-                                parsingTimer.elapsed(TimeUnit.NANOSECONDS), Optional.of(Units.NANOSECOND));
-                    } catch (final ParsingException e) {
-                        _periodicMetrics.recordCounter(_parsingExceptionCountMetricName, 1);
-                        _logger.error()
-                                .setMessage("Failed to parse data")
-                                .setThrowable(e)
-                                .log();
-                        continue;
+                try {
+                    final V value = _buffer.poll(_backoffTime.toMillis(), TimeUnit.MILLISECONDS);
+                    _periodicMetrics.recordGauge(_queueSizeGaugeMetricName, _buffer.size());
+                    if (value != null) {
+                        final List<Record> records;
+                        try {
+                            final Stopwatch parsingTimer = Stopwatch.createStarted();
+                            records = _parser.parse(value);
+                            parsingTimer.stop();
+                            _periodicMetrics.recordTimer(_parsingTimeMetricName,
+                                    parsingTimer.elapsed(TimeUnit.NANOSECONDS), Optional.of(Units.NANOSECOND));
+                        } catch (final ParsingException e) {
+                            _periodicMetrics.recordCounter(_parsingExceptionCountMetricName, 1);
+                            _logger.error()
+                                    .setMessage("Failed to parse data")
+                                    .setThrowable(e)
+                                    .log();
+                            continue;
+                        }
+                        for (final Record record : records) {
+                            KafkaSource.this.notify(record);
+                            _currentRecordsProcessedCount.getAndIncrement();
+                        }
                     }
-                    for (final Record record : records) {
-                        KafkaSource.this.notify(record);
-                        _currentRecordsProcessedCount.getAndIncrement();
-                    }
-                } else {
-                    // Queue is empty
-                    try {
-                        Thread.sleep(_backoffTime.toMillis());
-                    } catch (final InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        stop();
-                    }
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    stop();
                 }
             }
         }
