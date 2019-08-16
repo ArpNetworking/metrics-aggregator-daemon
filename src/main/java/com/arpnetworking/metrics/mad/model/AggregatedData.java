@@ -25,8 +25,11 @@ import net.sf.oval.constraint.NotNull;
 import java.io.Serializable;
 
 /**
- * Serves as a data class for storing data for aggregated values after
- * computation.
+ * Representation of aggregated data; also known as a statistic. However, not
+ * to be confused with the identity of a statistic
+ * ({@link com.arpnetworking.metrics.mad.model.statistics.Statistic}). This
+ * class represents output from aggregation, but also input to aggregation
+ * when clients have performed pre-aggregation.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)

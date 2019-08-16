@@ -307,7 +307,7 @@ public final class HistogramStatistic extends BaseStatistic {
         /**
          * Public constructor.
          *
-         * @param precision the precision of the histogram
+         * @param precision the bits of mantissa precision in the bucket key
          */
         public Histogram(final int precision) {
             // TODO(ville): Support variable precision histograms end-to-end.

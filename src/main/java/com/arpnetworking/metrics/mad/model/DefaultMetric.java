@@ -26,9 +26,7 @@ import net.sf.oval.constraint.NotNull;
 import java.util.List;
 
 /**
- * Representation of aggregated data; also known as a statistic. However, not
- * to be confused with the identity of a statistic
- * ({@link com.arpnetworking.metrics.mad.model.statistics.Statistic}).
+ * A variable and data to describe the input to a statistic calculator.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
