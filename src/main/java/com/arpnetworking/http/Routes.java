@@ -42,6 +42,7 @@ import akka.util.Timeout;
 import com.arpnetworking.metrics.Units;
 import com.arpnetworking.metrics.common.sources.ClientHttpSourceV1;
 import com.arpnetworking.metrics.common.sources.ClientHttpSourceV2;
+import com.arpnetworking.metrics.common.sources.ClientHttpSourceV3;
 import com.arpnetworking.metrics.common.sources.CollectdHttpSourceV1;
 import com.arpnetworking.metrics.common.sources.PrometheusHttpSource;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
@@ -217,6 +218,8 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
         } else if (Objects.equals(HttpMethods.POST, request.method())) {
             if (Objects.equals(path, COLLECTD_V1_SOURCE_PREFIX)) {
                 return dispatchHttpRequest(request, ACTOR_COLLECTD_V1);
+            } else if (Objects.equals(path, APP_V3_SOURCE_PREFIX)) {
+                return dispatchHttpRequest(request, ACTOR_APP_V3);
             } else if (Objects.equals(path, APP_V2_SOURCE_PREFIX)) {
                 return dispatchHttpRequest(request, ACTOR_APP_V2);
             } else if (Objects.equals(path, APP_V1_SOURCE_PREFIX)) {
@@ -350,10 +353,12 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     private static final String COLLECTD_V1_SOURCE_PREFIX = "/metrics/v1/collectd";
     private static final String APP_V1_SOURCE_PREFIX = "/metrics/v1/application";
     private static final String APP_V2_SOURCE_PREFIX = "/metrics/v2/application";
+    private static final String APP_V3_SOURCE_PREFIX = "/metrics/v3/application";
     private static final String PROMETHEUS_SOURCE_PREFIX = "/metrics/prometheus";
     private static final String ACTOR_COLLECTD_V1 = "/user/" + CollectdHttpSourceV1.ACTOR_NAME;
     private static final String ACTOR_APP_V1 = "/user/" + ClientHttpSourceV1.ACTOR_NAME;
     private static final String ACTOR_APP_V2 = "/user/" + ClientHttpSourceV2.ACTOR_NAME;
+    private static final String ACTOR_APP_V3 = "/user/" + ClientHttpSourceV3.ACTOR_NAME;
     private static final String ACTOR_PROMETHEUS = "/user/" + PrometheusHttpSource.ACTOR_NAME;
     private static final String REST_SERVICE_METRIC_ROOT = "rest_service/";
     private static final String BODY_SIZE_METRIC = "body_size";
