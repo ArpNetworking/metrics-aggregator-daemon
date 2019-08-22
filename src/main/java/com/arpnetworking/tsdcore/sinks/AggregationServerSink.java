@@ -17,15 +17,15 @@ package com.arpnetworking.tsdcore.sinks;
 
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
+import com.arpnetworking.metrics.mad.model.AggregatedData;
+import com.arpnetworking.metrics.mad.model.statistics.HistogramStatistic;
+import com.arpnetworking.metrics.mad.model.statistics.Statistic;
+import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.AggregationMessage;
 import com.arpnetworking.tsdcore.model.PeriodicData;
-import com.arpnetworking.tsdcore.statistics.HistogramStatistic;
-import com.arpnetworking.tsdcore.statistics.Statistic;
-import com.arpnetworking.tsdcore.statistics.StatisticFactory;
 import com.google.protobuf.ByteString;
 
 import java.time.ZonedDateTime;

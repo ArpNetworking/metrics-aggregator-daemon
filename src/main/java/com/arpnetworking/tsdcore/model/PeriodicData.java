@@ -17,6 +17,7 @@ package com.arpnetworking.tsdcore.model;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
+import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;

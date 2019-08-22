@@ -15,8 +15,8 @@
  */
 package com.arpnetworking.tsdcore.sinks;
 
+import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.test.TestBeanFactory;
-import com.arpnetworking.tsdcore.model.AggregatedData;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;

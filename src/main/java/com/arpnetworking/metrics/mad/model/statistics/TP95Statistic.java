@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Groupon.com
+ * Copyright 2014 Brandon Arp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,35 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.metrics.mad.model;
+package com.arpnetworking.metrics.mad.model.statistics;
 
-import java.util.List;
+import com.arpnetworking.logback.annotations.Loggable;
 
 /**
- * Interface for a type of collected data.
+ * Top percentile 95% statistic. Use <code>StatisticFactory</code> for construction.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
-public interface Metric {
+@Loggable
+public final class TP95Statistic extends TPStatistic {
 
-    /**
-     * Accessor for the type of metric.
-     *
-     * @return The type of metric.
-     */
-    MetricType getType();
+    private TP95Statistic() {
+        super(95d);
+    }
 
-    /**
-     * Accessor for the collected sample data.
-     *
-     * @return The collected sample data.
-     */
-    List<Quantity> getValues();
-
-    /**
-     * Accessor for the collected statistical data.
-     *
-     * @return The collected statistical data.
-     */
-    List<AggregatedData> getStatistics();
+    private static final long serialVersionUID = 1L;
 }
