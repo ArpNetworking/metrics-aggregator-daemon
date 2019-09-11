@@ -35,6 +35,7 @@ import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.tsdcore.sinks.Sink;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -76,16 +77,6 @@ import java.util.function.BiFunction;
                 computeStatistics(_gaugeMetricCalculators, _specifiedGaugeStatistics, data);
                 computeStatistics(_timerMetricCalculators, _specifiedTimerStatistics, data);
                 computeStatistics(_explicitMetricCalculators, _specifiedStatisticsCache, data);
-                // TODO(vkoskela): Perform expression evaluation here. [NEXT]
-                // -> This still requires realizing and indexing the computed aggregated data
-                // in order to feed the expression evaluation. Once the filtering is consolidated
-                // we can probably just build a map here and then do one copy into immutable form
-                // in the PeriodicData. This becomes feasible with consolidated filtering because
-                // fewer copies (e.g. none) are made downstream.
-                // TODO(vkoskela): Perform alert evaluation here. [NEXT]
-                // -> This requires expressions. Otherwise, it's just a matter of changing the
-                // alerts abstraction from a Sink to something more appropriate and hooking it in
-                // here.
                 final PeriodicData periodicData = ThreadLocalBuilder.build(
                         PeriodicData.Builder.class,
                         b -> b.setData(data.build())
@@ -114,10 +105,10 @@ import java.util.function.BiFunction;
             final String name = entry.getKey();
             final Metric metric = entry.getValue();
 
-            if (metric.getValues().isEmpty()) {
+            if (metric.getValues().isEmpty() && metric.getStatistics().isEmpty()) {
                 LOGGER.debug()
                         .setMessage("Discarding metric")
-                        .addData("reason", "no samples")
+                        .addData("reason", "no samples or statistics")
                         .addData("name", name)
                         .addData("metric", metric)
                         .log();
@@ -320,13 +311,17 @@ import java.util.function.BiFunction;
                 return;
             }
 
-            // Add the value to any accumulators
+            // Add the metric data to any accumulators
             for (final Calculator<?> calculator : calculators) {
+                final Statistic statistic = calculator.getStatistic();
                 if (calculator instanceof Accumulator) {
                     final Accumulator<?> accumulator = (Accumulator<?>) calculator;
                     synchronized (accumulator) {
                         for (final Quantity quantity : metric.getValues()) {
                             accumulator.accumulate(quantity);
+                        }
+                        for (final CalculatedValue<?> value : metric.getStatistics().getOrDefault(statistic, ImmutableList.of())) {
+                            accumulator.accumulateAny(value);
                         }
                     }
                 }
@@ -351,6 +346,7 @@ import java.util.function.BiFunction;
                 newCalculators.add(statistic.createCalculator());
             }
             newCalculators.add(COUNT_STATISTIC.createCalculator());
+
             calculators = calculatorsByMetric.putIfAbsent(name, newCalculators);
             if (calculators == null) {
                 calculators = newCalculators;

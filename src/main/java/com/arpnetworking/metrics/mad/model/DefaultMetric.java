@@ -17,10 +17,13 @@ package com.arpnetworking.metrics.mad.model;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.steno.LogValueMapFactory;
+import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.NotNull;
 
 import java.util.List;
@@ -44,7 +47,7 @@ public final class DefaultMetric implements Metric {
     }
 
     @Override
-    public List<AggregatedData> getStatistics() {
+    public ImmutableMap<Statistic, ImmutableList<CalculatedValue<?>>> getStatistics() {
         return _statistics;
     }
 
@@ -106,7 +109,7 @@ public final class DefaultMetric implements Metric {
 
     private final MetricType _type;
     private final ImmutableList<Quantity> _values;
-    private final ImmutableList<AggregatedData> _statistics;
+    private final ImmutableMap<Statistic, ImmutableList<CalculatedValue<?>>> _statistics;
 
     /**
      * Implementation of builder pattern for {@link DefaultMetric}.
@@ -123,12 +126,12 @@ public final class DefaultMetric implements Metric {
         }
 
         /**
-         * The statistics {@code List}. Cannot be null.
+         * The statistics {@code Map}. Cannot be null.
          *
          * @param value The values {@code List}.
          * @return This instance of {@link Builder}.
          */
-        public Builder setStatistics(final ImmutableList<AggregatedData> value) {
+        public Builder setStatistics(final ImmutableMap<Statistic, ImmutableList<CalculatedValue<?>>> value) {
             _statistics = value;
             return this;
         }
@@ -162,7 +165,7 @@ public final class DefaultMetric implements Metric {
         }
 
         @NotNull
-        private ImmutableList<AggregatedData> _statistics = ImmutableList.of();
+        private ImmutableMap<Statistic, ImmutableList<CalculatedValue<?>>> _statistics = ImmutableMap.of();
         @NotNull
         private ImmutableList<Quantity> _values = ImmutableList.of();
         @NotNull

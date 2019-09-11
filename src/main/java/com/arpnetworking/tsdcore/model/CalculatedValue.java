@@ -69,7 +69,7 @@ public final class CalculatedValue<T> {
         }
 
         /**
-         * Set the data. Optional. Cannot be null. Defaults to empty list.
+         * Set the data. Optional. Defaults to null.
          *
          * @param data The data.
          * @return This <code>Builder</code> instance.

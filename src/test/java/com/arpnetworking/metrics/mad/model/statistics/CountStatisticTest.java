@@ -57,13 +57,45 @@ public class CountStatisticTest {
     }
 
     @Test
-    public void testAccumulator() {
+    public void testAccumulatorWithSamples() {
         final Accumulator<Void> accumulator = (Accumulator<Void>) COUNT_STATISTIC.createCalculator();
         accumulator.accumulate(new DefaultQuantity.Builder().setValue(12d).build());
         accumulator.accumulate(new DefaultQuantity.Builder().setValue(18d).build());
         accumulator.accumulate(new DefaultQuantity.Builder().setValue(5d).build());
         final CalculatedValue<?> calculated = accumulator.calculate(Collections.emptyMap());
         Assert.assertEquals(calculated.getValue(), new DefaultQuantity.Builder().setValue(3.0).build());
+    }
+
+    @Test
+    public void testAccumulatorWithCalculatedValues() {
+        final Accumulator<Void> accumulator = (Accumulator<Void>) COUNT_STATISTIC.createCalculator();
+        accumulator.accumulate(
+                new CalculatedValue.Builder<Void>()
+                    .setValue(new DefaultQuantity.Builder().setValue(12d).build())
+                    .build());
+        accumulator.accumulate(
+                new CalculatedValue.Builder<Void>()
+                        .setValue(new DefaultQuantity.Builder().setValue(18d).build())
+                        .build());
+        accumulator.accumulate(
+                new CalculatedValue.Builder<Void>()
+                        .setValue(new DefaultQuantity.Builder().setValue(15d).build())
+                        .build());
+        final CalculatedValue<?> calculated = accumulator.calculate(Collections.emptyMap());
+        Assert.assertEquals(calculated.getValue(), new DefaultQuantity.Builder().setValue(45.0).build());
+    }
+
+    @Test
+    public void testAccumulatorMixed() {
+        final Accumulator<Void> accumulator = (Accumulator<Void>) COUNT_STATISTIC.createCalculator();
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue(12d).build());
+        accumulator.accumulate(
+                new CalculatedValue.Builder<Void>()
+                        .setValue(new DefaultQuantity.Builder().setValue(18d).build())
+                        .build());
+        accumulator.accumulate(new DefaultQuantity.Builder().setValue(5d).build());
+        final CalculatedValue<?> calculated = accumulator.calculate(Collections.emptyMap());
+        Assert.assertEquals(calculated.getValue(), new DefaultQuantity.Builder().setValue(20.0).build());
     }
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();

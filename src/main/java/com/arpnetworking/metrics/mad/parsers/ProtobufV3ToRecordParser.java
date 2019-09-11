@@ -18,7 +18,6 @@ package com.arpnetworking.metrics.mad.parsers;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
-import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
@@ -28,7 +27,9 @@ import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.model.statistics.HistogramStatistic;
+import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
+import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -150,73 +151,72 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
             metricData.put(metricName, metricDatum);
         }
 
+        final Map<Statistic, CalculatedValue<?>> statistics = Maps.newHashMap();
         final long populationSize = augmentedHistogram.getEntriesList().stream()
                 .map(e -> (long) e.getCount())
                 .reduce(Long::sum)
                 .orElse(0L);
-        final ImmutableList.Builder<AggregatedData> statistics = ImmutableList.builder();
 
-        statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
-                bldr.setStatistic(STATISTIC_FACTORY.getStatistic("min"))
-                        .setIsSpecified(false)
-                        .setValue(ThreadLocalBuilder.build(
-                                DefaultQuantity.Builder.class,
-                                b -> b.setValue(augmentedHistogram.getMin())))
-                        .setPopulationSize(populationSize)));
+        statistics.put(
+                STATISTIC_FACTORY.getStatistic("min"),
+                ThreadLocalBuilder.<CalculatedValue<Void>, CalculatedValue.Builder<Void>>buildGeneric(
+                        CalculatedValue.Builder.class,
+                        b1 -> b1.setValue(
+                                ThreadLocalBuilder.build(
+                                        DefaultQuantity.Builder.class,
+                                        b2 -> b2.setValue(augmentedHistogram.getMin())))));
 
-        statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
-                bldr.setStatistic(STATISTIC_FACTORY.getStatistic("max"))
-                        .setIsSpecified(false)
-                        .setValue(ThreadLocalBuilder.build(
-                                DefaultQuantity.Builder.class,
-                                b -> b.setValue(augmentedHistogram.getMax())))
-                        .setPopulationSize(populationSize)));
+        statistics.put(
+                STATISTIC_FACTORY.getStatistic("max"),
+                ThreadLocalBuilder.<CalculatedValue<Void>, CalculatedValue.Builder<Void>>buildGeneric(
+                        CalculatedValue.Builder.class,
+                        b1 -> b1.setValue(
+                                ThreadLocalBuilder.build(
+                                        DefaultQuantity.Builder.class,
+                                        b2 -> b2.setValue(augmentedHistogram.getMax())))));
 
-        statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
-                bldr.setStatistic(STATISTIC_FACTORY.getStatistic("count"))
-                        .setIsSpecified(false)
-                        .setValue(ThreadLocalBuilder.build(
-                                DefaultQuantity.Builder.class,
-                                b -> b.setValue((double) populationSize)))
-                        .setPopulationSize(populationSize)));
+        statistics.put(
+                STATISTIC_FACTORY.getStatistic("count"),
+                ThreadLocalBuilder.<CalculatedValue<Void>, CalculatedValue.Builder<Void>>buildGeneric(
+                        CalculatedValue.Builder.class,
+                        b1 -> b1.setValue(
+                                ThreadLocalBuilder.build(
+                                        DefaultQuantity.Builder.class,
+                                        b2 -> b2.setValue((double) populationSize)))));
 
-        statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
-                bldr.setStatistic(STATISTIC_FACTORY.getStatistic("sum"))
-                        .setIsSpecified(false)
-                        .setValue(ThreadLocalBuilder.build(
-                                DefaultQuantity.Builder.class,
-                                b -> b.setValue(augmentedHistogram.getSum())))
-                        .setPopulationSize(populationSize)));
+        statistics.put(
+                STATISTIC_FACTORY.getStatistic("sum"),
+                ThreadLocalBuilder.<CalculatedValue<Void>, CalculatedValue.Builder<Void>>buildGeneric(
+                        CalculatedValue.Builder.class,
+                        b1 -> b1.setValue(
+                                ThreadLocalBuilder.build(
+                                        DefaultQuantity.Builder.class,
+                                        b2 -> b2.setValue(augmentedHistogram.getSum())))));
 
-        if (populationSize != 0) {
-            statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
-                    bldr.setStatistic(STATISTIC_FACTORY.getStatistic("mean"))
-                            .setIsSpecified(false)
-                            .setValue(ThreadLocalBuilder.build(
-                                    DefaultQuantity.Builder.class,
-                                    b -> b.setValue(augmentedHistogram.getSum() / populationSize)))
-                            .setPopulationSize(populationSize)));
-        }
+        statistics.put(
+                STATISTIC_FACTORY.getStatistic("histogram"),
+                // CHECKSTYLE.OFF: LineLength - Generic specification required for buildGeneric
+                ThreadLocalBuilder.<CalculatedValue<HistogramStatistic.HistogramSupportingData>, CalculatedValue.Builder<HistogramStatistic.HistogramSupportingData>>buildGeneric(
+                // CHECKSTYLE.ON: LineLength
+                        CalculatedValue.Builder.class,
+                        b1 -> b1.setValue(
+                                ThreadLocalBuilder.build(
+                                        DefaultQuantity.Builder.class,
+                                        b2 -> b2.setValue(1.0)))
+                                .setData(
+                                        ThreadLocalBuilder.build(
+                                                HistogramStatistic.HistogramSupportingData.Builder.class,
+                                                b3 -> {
+                                                    final HistogramStatistic.Histogram histogram =
+                                                            new HistogramStatistic.Histogram();
+                                                    augmentedHistogram.getEntriesList().forEach(
+                                                            e -> histogram.recordPacked(
+                                                                    e.getBucket(),
+                                                                    e.getCount()));
+                                                    b3.setHistogramSnapshot(histogram.getSnapshot());
+                                                }))));
 
-        statistics.add(ThreadLocalBuilder.build(AggregatedData.Builder.class, bldr ->
-                bldr.setStatistic(STATISTIC_FACTORY.getStatistic("histogram"))
-                        .setIsSpecified(false)
-                        .setValue(ThreadLocalBuilder.build(
-                                DefaultQuantity.Builder.class,
-                                b -> b.setValue(1.0)))
-                        .setPopulationSize(populationSize)
-                        .setSupportingData(ThreadLocalBuilder.build(
-                                HistogramStatistic.HistogramSupportingData.Builder.class,
-                                b -> {
-                                    final HistogramStatistic.Histogram histogram = new HistogramStatistic.Histogram();
-                                    augmentedHistogram.getEntriesList().forEach(
-                                            e -> histogram.recordPacked(
-                                                    e.getBucket(),
-                                                    e.getCount()));
-                                    b.setHistogramSnapshot(histogram.getSnapshot());
-                                }))));
-
-        metricDatum.addStatistics(statistics.build());
+        metricDatum.addStatistics(statistics);
     }
 
     private ImmutableMap<String, String> buildDimensions(final ClientV3.Record record) {
@@ -255,21 +255,29 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
             _metricSamples.addAll(samples);
         }
 
-        void addStatistics(final Collection<AggregatedData> statistics) {
-            _metricStatistics.addAll(statistics);
+        void addStatistics(final Map<Statistic, CalculatedValue<?>> statistics) {
+            for (final Map.Entry<Statistic, CalculatedValue<?>> entry : statistics.entrySet()) {
+                final Statistic statistic = entry.getKey();
+                final ImmutableList.Builder<CalculatedValue<?>> calculatedValues =
+                        _metricStatistics.computeIfAbsent(statistic, k -> ImmutableList.builder());
+                calculatedValues.add(entry.getValue());
+            }
         }
 
         ImmutableList<Quantity> getSamples() {
             return _metricSamples.build();
         }
 
-        ImmutableList<AggregatedData> getStatistics() {
-            return _metricStatistics.build();
+        ImmutableMap<Statistic, ImmutableList<CalculatedValue<?>>> getStatistics() {
+            return _metricStatistics.entrySet().stream()
+                    .collect(ImmutableMap.toImmutableMap(
+                            Map.Entry::getKey,
+                            entry -> entry.getValue().build()));
         }
 
         MetricData() {}
 
         private final ImmutableList.Builder<Quantity> _metricSamples = ImmutableList.builder();
-        private final ImmutableList.Builder<AggregatedData> _metricStatistics = ImmutableList.builder();
+        private final Map<Statistic, ImmutableList.Builder<CalculatedValue<?>>> _metricStatistics = Maps.newHashMap();
     }
 }

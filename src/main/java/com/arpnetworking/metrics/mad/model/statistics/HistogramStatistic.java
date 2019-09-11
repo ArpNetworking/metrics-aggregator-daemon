@@ -97,6 +97,27 @@ public final class HistogramStatistic extends BaseStatistic {
         }
 
         @Override
+        public Accumulator<HistogramSupportingData> accumulateAny(final CalculatedValue<?> calculatedValue) {
+            if (calculatedValue.getData() == null) {
+                throw new IllegalArgumentException(
+                        String.format(
+                                "Null calculated value data for %s",
+                                this.getClass()));
+            }
+            if (!(calculatedValue.getData() instanceof HistogramSupportingData)) {
+                throw new IllegalArgumentException(
+                        String.format(
+                                "Unsupported calculated value data type %s for %s",
+                                calculatedValue.getData().getClass(),
+                                this.getClass()));
+            }
+            @SuppressWarnings("unchecked")
+            final CalculatedValue<HistogramSupportingData> checkedCalculatedValue =
+                    (CalculatedValue<HistogramSupportingData>) calculatedValue;
+            return accumulate(checkedCalculatedValue);
+        }
+
+        @Override
         public CalculatedValue<HistogramSupportingData> calculate(final Map<Statistic, Calculator<?>> dependencies) {
             return ThreadLocalBuilder.<
                     CalculatedValue<HistogramSupportingData>,

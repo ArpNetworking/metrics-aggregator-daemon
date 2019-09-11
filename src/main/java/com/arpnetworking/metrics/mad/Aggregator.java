@@ -220,11 +220,7 @@ public final class Aggregator implements Observer, Launchable {
                             @Override
                             public Optional<ImmutableSet<Statistic>> load(final String metric) throws Exception {
                                 final Optional<ImmutableSet<Statistic>> statistics = _cachedSpecifiedStatistics.get(metric);
-                                if (statistics.isPresent()) {
-                                   return Optional.of(computeDependentStatistics(statistics.get()));
-                                } else {
-                                   return Optional.empty();
-                                }
+                                return statistics.map(statisticImmutableSet -> computeDependentStatistics(statisticImmutableSet));
                            }
                         });
 }

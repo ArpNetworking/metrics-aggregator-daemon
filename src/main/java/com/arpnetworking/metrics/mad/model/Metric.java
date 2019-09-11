@@ -15,6 +15,11 @@
  */
 package com.arpnetworking.metrics.mad.model;
 
+import com.arpnetworking.metrics.mad.model.statistics.Statistic;
+import com.arpnetworking.tsdcore.model.CalculatedValue;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 import java.util.List;
 
 /**
@@ -43,5 +48,5 @@ public interface Metric {
      *
      * @return The collected statistical data.
      */
-    List<AggregatedData> getStatistics();
+    ImmutableMap<Statistic, ImmutableList<CalculatedValue<?>>> getStatistics();
 }

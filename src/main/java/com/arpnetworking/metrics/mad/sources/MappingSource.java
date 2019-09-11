@@ -21,16 +21,17 @@ import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.common.sources.BaseSource;
 import com.arpnetworking.metrics.common.sources.Source;
-import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
+import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -182,7 +183,9 @@ public final class MappingSource extends BaseSource {
         /* package private */ MergingMetric(final Metric metric) {
             _type = metric.getType();
             _values.addAll(metric.getValues());
-            _statistics.addAll(metric.getStatistics());
+            for (final Map.Entry<Statistic, ImmutableList<CalculatedValue<?>>> entry : metric.getStatistics().entrySet()) {
+                _statistics.computeIfAbsent(entry.getKey(), k-> ImmutableList.builder()).addAll(entry.getValue());
+            }
         }
 
         public boolean isMergable(final Metric metric) {
@@ -194,6 +197,9 @@ public final class MappingSource extends BaseSource {
                 throw new IllegalArgumentException(String.format("Metric cannot be merged; metric=%s", metric));
             }
             _values.addAll(metric.getValues());
+            for (final Map.Entry<Statistic, ImmutableList<CalculatedValue<?>>> entry : metric.getStatistics().entrySet()) {
+                _statistics.computeIfAbsent(entry.getKey(), k-> ImmutableList.builder()).addAll(entry.getValue());
+            }
         }
 
         @Override
@@ -207,8 +213,11 @@ public final class MappingSource extends BaseSource {
         }
 
         @Override
-        public ImmutableList<AggregatedData> getStatistics() {
-            return _statistics.build();
+        public ImmutableMap<Statistic, ImmutableList<CalculatedValue<?>>> getStatistics() {
+            return _statistics.entrySet().stream().collect(
+                    ImmutableMap.toImmutableMap(
+                            Map.Entry::getKey,
+                            entry -> entry.getValue().build()));
         }
 
         @Override
@@ -222,7 +231,7 @@ public final class MappingSource extends BaseSource {
 
         private final MetricType _type;
         private final ImmutableList.Builder<Quantity> _values = ImmutableList.builder();
-        private final ImmutableList.Builder<AggregatedData> _statistics = ImmutableList.builder();
+        private final Map<Statistic, ImmutableList.Builder<CalculatedValue<?>>> _statistics = Maps.newHashMap();
     }
 
     /**
