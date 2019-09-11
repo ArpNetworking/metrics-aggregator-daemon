@@ -89,7 +89,7 @@ public final class TelemetryClient {
                                     "service", service,
                                     "metric", metricName,
                                     "statistic", statistic.getName())));
-            _callbacks.put(String.format("%s/%s/%s", service, metricName, statistic.getName()), callback);
+            _callbacks.put(createKey(service, metricName, statistic), callback);
         } catch (final JsonProcessingException e) {
             LOGGER.warn()
                     .setMessage("Failed to subscribe to metric")
@@ -110,7 +110,7 @@ public final class TelemetryClient {
             final String metricName,
             final Statistic statistic) {
         try {
-            _callbacks.remove(String.format("%s/%s/%s", service, metricName, statistic.getName()));
+            _callbacks.remove(createKey(service, metricName, statistic));
             _webSocket.sendTextFrame(
                     OBJECT_MAPPER.writeValueAsString(
                             ImmutableMap.of(
@@ -135,6 +135,14 @@ public final class TelemetryClient {
         return value == null ? defaultValue : map.apply(value);
     }
 
+    private static String createKey(final String service, final String metric, final Statistic statistic) {
+        return createKey(service, metric, statistic.getName());
+    }
+
+    private static String createKey(final String service, final String metric, final String statisticName) {
+        return String.format("%s/%s/%s", service, metric, statisticName);
+    }
+
     private TelemetryClient(final String host, final int port) throws ExecutionException, InterruptedException {
         final AsyncHttpClient asyncHttpClient = Dsl.asyncHttpClient();
         _webSocket = asyncHttpClient.prepareGet(String.format("ws://%s:%d/telemetry/v2/stream", host, port))
@@ -145,7 +153,7 @@ public final class TelemetryClient {
                 .get();
 
         _keepAliveExecutor = Executors.newScheduledThreadPool(1);
-        _keepAliveExecutor.schedule(
+        _keepAliveExecutor.scheduleAtFixedRate(
                 () -> {
                     try {
                         _webSocket.sendTextFrame(
@@ -158,6 +166,7 @@ public final class TelemetryClient {
                                 .log();
                     }
                 },
+                10,
                 10,
                 TimeUnit.SECONDS);
     }
@@ -246,8 +255,7 @@ public final class TelemetryClient {
             } else if (message.get("command") != null) {
                 if ("reportMetric".equals(message.get("command").asText("unknown"))) {
                     final JsonNode data = message.get("data");
-                    final String key = String.format(
-                            "%s/%s/%s",
+                    final String key = createKey(
                             data.get("service").asText(),
                             data.get("metric").asText(),
                             data.get("statistic").asText());
