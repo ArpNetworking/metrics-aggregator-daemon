@@ -18,7 +18,6 @@ package com.arpnetworking.tsdcore.sinks;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
-import com.arpnetworking.metrics.Units;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
@@ -155,7 +154,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
         metrics.incrementCounter(_uniqueMetricsName, oldUniqueMetrics.size());
         metrics.incrementCounter(_uniqueStatisticsName, oldUniqueStatistics.size());
         metrics.incrementCounter(_metricSamplesName, _metricSamples.getThenReset());
-        metrics.setGauge(_ageName, _age.getThenReset(), Units.MILLISECOND);
+        metrics.setTimer(_ageName, _age.getThenReset(), TimeUnit.MILLISECONDS);
         metrics.close();
     }
 

@@ -289,7 +289,7 @@ public final class HistogramStatistic extends BaseStatistic {
 
         long pack(final double val) {
             final long truncated = truncateToLong(val);
-            final long shifted = truncated >> (52 - _precision);
+            final long shifted = truncated >> (MANTISSA_BITS - _precision);
             return shifted & _packMask;
         }
 

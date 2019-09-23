@@ -16,7 +16,6 @@
 package com.arpnetworking.metrics.common.sources;
 
 import com.arpnetworking.logback.annotations.LogValue;
-import com.arpnetworking.metrics.Units;
 import com.arpnetworking.metrics.common.kafka.ConsumerListener;
 import com.arpnetworking.metrics.common.kafka.RunnableConsumer;
 import com.arpnetworking.metrics.common.kafka.RunnableConsumerImpl;
@@ -191,7 +190,7 @@ public final class KafkaSource<V> extends BaseSource {
                             records = _parser.parse(value);
                             parsingTimer.stop();
                             _periodicMetrics.recordTimer(_parsingTimeMetricName,
-                                    parsingTimer.elapsed(TimeUnit.NANOSECONDS), Optional.of(Units.NANOSECOND));
+                                    parsingTimer.elapsed(TimeUnit.NANOSECONDS), Optional.of(TimeUnit.NANOSECONDS));
                         } catch (final ParsingException e) {
                             _periodicMetrics.recordCounter(_parsingExceptionCountMetricName, 1);
                             _logger.error()

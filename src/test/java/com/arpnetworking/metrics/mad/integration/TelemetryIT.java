@@ -22,6 +22,7 @@ import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.test.TelemetryClient;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -46,21 +47,25 @@ public final class TelemetryIT {
         _statistic = statistic;
         _expectedResult = expectedResult;
         _telemetryClient = TelemetryClient.getInstance();
+    }
+
+    @Before
+    public void setUp() {
         _metricName = UUID.randomUUID().toString();
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> createParameters() {
         return Arrays.asList(
-                new Object[]{STATISTIC_FACTORY.getStatistic("count"), 10.0d},
+                new Object[]{STATISTIC_FACTORY.getStatistic("count"), 55.0d},
                 new Object[]{STATISTIC_FACTORY.getStatistic("sum"), 423.5d},
-                new Object[]{STATISTIC_FACTORY.getStatistic("mean"), 42.35d},
-                new Object[]{STATISTIC_FACTORY.getStatistic("max"), 110d},
+                new Object[]{STATISTIC_FACTORY.getStatistic("mean"), 7.7d},
+                new Object[]{STATISTIC_FACTORY.getStatistic("max"), 11.0d},
                 new Object[]{STATISTIC_FACTORY.getStatistic("min"), 1.1d});
                 // TODO(ville): enable with mad-2.0
-                //new Object[]{STATISTIC_FACTORY.getStatistic("median"), 33.55d},
-                //new Object[]{STATISTIC_FACTORY.getStatistic("p25"), 9.9d},
-                //new Object[]{STATISTIC_FACTORY.getStatistic("p75"), 70.4d});
+                //new Object[]{STATISTIC_FACTORY.getStatistic("median"), 7.7d},
+                //new Object[]{STATISTIC_FACTORY.getStatistic("p25"), 5.5d},
+                //new Object[]{STATISTIC_FACTORY.getStatistic("p75"), 9.9d});
     }
 
     @Test
@@ -76,7 +81,9 @@ public final class TelemetryIT {
 
             try (Metrics metrics = METRICS_FACTORY.create()) {
                 for (int i = 1; i <= 10; ++i) {
-                    metrics.setGauge(_metricName, i * i * 1.1d);
+                    for (int j = 1; j <= i; ++j) {
+                        metrics.setGauge(_metricName, i * 1.1d);
+                    }
                 }
             }
 
@@ -89,10 +96,11 @@ public final class TelemetryIT {
         }
     }
 
+    private String _metricName;
+
     private final Statistic _statistic;
     private final double _expectedResult;
     private final TelemetryClient _telemetryClient;
-    private final String _metricName;
 
     private static final MetricsFactory METRICS_FACTORY = TsdMetricsFactory.newInstance("TelemetryIT", "test");
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();

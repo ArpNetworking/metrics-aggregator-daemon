@@ -255,7 +255,7 @@ public final class Main implements Launchable {
         // Instantiate the metrics factory
         final URI sinkUrl = URI.create(
                 "http://" + _configuration.getMetricsClientHost() + ":"
-                        + _configuration.getMetricsClientPort() + "/metrics/v2/application");
+                        + _configuration.getMetricsClientPort() + "/metrics/v3/application");
         final MetricsFactory metricsFactory = new TsdMetricsFactory.Builder()
                 .setClusterName(_configuration.getMonitoringCluster())
                 .setServiceName(_configuration.getMonitoringService())

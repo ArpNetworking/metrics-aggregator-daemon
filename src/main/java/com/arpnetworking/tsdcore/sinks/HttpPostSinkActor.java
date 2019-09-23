@@ -142,7 +142,7 @@ public class HttpPostSinkActor extends AbstractActor {
 
     private void processFailedRequest(final PostFailure failure) {
         _inflightRequestsCount--;
-        LOGGER.error()
+        POST_ERROR_LOGGER.error()
                 .setMessage("Post error")
                 .addData("sink", _sink)
                 .addContext("actor", self())
@@ -274,6 +274,7 @@ public class HttpPostSinkActor extends AbstractActor {
     private final int _spreadingDelayMillis;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
+    private static final Logger POST_ERROR_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSink.class, Duration.ofSeconds(30));
     private static final Logger EVICTED_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSink.class, Duration.ofSeconds(30));
     private static final Set<Integer> ACCEPTED_STATUS_CODES = Sets.newHashSet();
 

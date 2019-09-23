@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.test;
 
-import com.arpnetworking.metrics.Unit;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 
 import java.util.ArrayList;
@@ -25,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 
@@ -50,28 +50,18 @@ public class CollectorPeriodicMetrics implements PeriodicMetrics, Runnable {
     }
 
     @Override
-    public void recordGauge(final String name, final long value) {
-        _gauges.computeIfAbsent(name, n -> Collections.synchronizedList(new ArrayList<>())).add(value);
+    public void recordTimer(final String name, final long duration, final Optional<TimeUnit> unit) {
+        _timers.computeIfAbsent(name, n -> Collections.synchronizedList(new ArrayList<>())).add(duration);
     }
 
     @Override
-    public void recordGauge(final String name, final long value, final Optional<Unit> unit) {
+    public void recordGauge(final String name, final long value) {
         _gauges.computeIfAbsent(name, n -> Collections.synchronizedList(new ArrayList<>())).add(value);
     }
 
     @Override
     public void recordGauge(final String name, final double value) {
         _gauges.computeIfAbsent(name, n -> Collections.synchronizedList(new ArrayList<>())).add(value);
-    }
-
-    @Override
-    public void recordGauge(final String name, final double value, final Optional<Unit> unit) {
-        _gauges.computeIfAbsent(name, n -> Collections.synchronizedList(new ArrayList<>())).add(value);
-    }
-
-    @Override
-    public void recordTimer(final String name, final long duration, final Optional<Unit> unit) {
-        _timers.computeIfAbsent(name, n -> Collections.synchronizedList(new ArrayList<>())).add(duration);
     }
 
     @Override

@@ -109,10 +109,11 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
             final MetricData metricDatum = metricDataEntry.getValue();
             metricsBuilder.put(
                     metricName,
-                    createNewMetricBuilder()
-                            .setValues(metricDatum.getSamples())
-                            .setStatistics(metricDatum.getStatistics())
-                            .build());
+                    ThreadLocalBuilder.build(
+                            DefaultMetric.Builder.class,
+                            b -> b.setType(MetricType.GAUGE)
+                                .setValues(metricDatum.getSamples())
+                                .setStatistics(metricDatum.getStatistics())));
         }
 
         // Build the list of the DefaultMetric instances
@@ -216,11 +217,6 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
                                 }))));
 
         metricDatum.addStatistics(statistics.build());
-    }
-
-    private DefaultMetric.Builder createNewMetricBuilder() {
-        return new DefaultMetric.Builder()
-                .setType(MetricType.GAUGE);
     }
 
     private ImmutableMap<String, String> buildDimensions(final ClientV3.Record record) {

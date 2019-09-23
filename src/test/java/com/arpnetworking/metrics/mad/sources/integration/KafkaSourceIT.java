@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.metrics.common.integration;
+package com.arpnetworking.metrics.mad.sources.integration;
 
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.commons.observer.Observer;
@@ -71,7 +71,7 @@ import java.util.stream.Collectors;
  *
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
-public class KafkaIT {
+public class KafkaSourceIT {
     private static final String KAFKA_SERVER = "localhost:9092";
     private static final String KEY_SERIALIZER = "org.apache.kafka.common.serialization.IntegerSerializer";
     private static final String VALUE_SERIALIZER = "org.apache.kafka.common.serialization.StringSerializer";
