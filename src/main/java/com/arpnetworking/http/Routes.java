@@ -39,7 +39,6 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import akka.util.Timeout;
-import com.arpnetworking.metrics.Units;
 import com.arpnetworking.metrics.common.sources.ClientHttpSourceV1;
 import com.arpnetworking.metrics.common.sources.ClientHttpSourceV2;
 import com.arpnetworking.metrics.common.sources.ClientHttpSourceV3;
@@ -120,8 +119,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
         final Stopwatch requestTimer = Stopwatch.createStarted();
         _metrics.recordGauge(
                 createMetricName(request, BODY_SIZE_METRIC),
-                request.entity().getContentLengthOption().orElse(0L),
-                Optional.of(Units.BYTE));
+                request.entity().getContentLengthOption().orElse(0L));
         final UUID requestId = UUID.randomUUID();
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace()
@@ -149,7 +147,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                     _metrics.recordTimer(
                             createMetricName(request, REQUEST_METRIC),
                             requestTimer.elapsed(TimeUnit.NANOSECONDS),
-                            Optional.of(Units.NANOSECOND));
+                            Optional.of(TimeUnit.NANOSECONDS));
 
                     final int responseStatus;
                     if (response != null) {

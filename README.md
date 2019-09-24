@@ -329,6 +329,14 @@ To debug the server during integration tests on port 9000:
 
     metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw -Ddebug=true verify
 
+To launch the service and its dependencies in Docker:
+
+    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw initialize docker:start
+
+To launch the service with remote debugging and its dependencies in Docker:
+
+    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw -Ddebug=true initialize docker:start
+
 To execute performance tests:
 
     metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw -PperformanceTest test

@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <relativePath />
   </parent>
 
@@ -92,10 +92,10 @@
     <log4j.over.slf4j.version>1.7.25</log4j.over.slf4j.version>
     <metrics.aggregator.protocol.prometheus.version>1.0.0</metrics.aggregator.protocol.prometheus.version>
     <metrics.aggregator.protocol.version>1.0.6</metrics.aggregator.protocol.version>
-    <metrics.client.version>0.10.1</metrics.client.version>
-    <metrics.client.http.version>0.9.4</metrics.client.http.version>
-    <metrics.client.incubator.version>0.6.3</metrics.client.incubator.version>
-    <metrics.jvm.extra.version>0.10.1</metrics.jvm.extra.version>
+    <metrics.client.version>0.11.0</metrics.client.version>
+    <metrics.client.http.version>0.11.0</metrics.client.http.version>
+    <metrics.client.incubator.version>0.11.0</metrics.client.incubator.version>
+    <metrics.jvm.extra.version>0.11.0</metrics.jvm.extra.version>
     <oval.version>1.90</oval.version>
     <protobuf.version>3.8.0</protobuf.version>
     <scala.version>2.11</scala.version>
@@ -111,7 +111,7 @@
     <hamcrest.version>2.1</hamcrest.version>
     <junit.benchmarks.version>0.7.2</junit.benchmarks.version>
     <junit.version>4.12</junit.version>
-    <metrics.generator.version>1.2.3</metrics.generator.version>
+    <metrics.generator.version>1.3.0</metrics.generator.version>
     <mockito.version>2.23.4</mockito.version>
     <performance.test.version>1.2.1</performance.test.version>
     <statsd.client.timgroup>3.1.0</statsd.client.timgroup>
@@ -120,9 +120,11 @@
     <!-- Additional Plugins -->
     <aspectjtools.maven.plugin>1.9.2</aspectjtools.maven.plugin>
     <aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
-    <docker.maven.plugin.version>0.26.0</docker.maven.plugin.version>
+    <build.helper.plugin.version>3.0.0</build.helper.plugin.version>
+    <docker.maven.plugin.version>0.27.2</docker.maven.plugin.version>
     <javassist.maven.plugin.version>0.2.2</javassist.maven.plugin.version>
     <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
+    <maven.properties.plugin.version>1.0.0</maven.properties.plugin.version>
     <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
 
     <!-- Code Coverage -->
@@ -322,6 +324,23 @@
         </dependencies>
       </plugin>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${build.helper.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>get-local-ip</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>local-ip</goal>
+            </goals>
+            <configuration>
+              <localIpProperty>kafka.advertised.address</localIpProperty>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
         <version>${docker.maven.plugin.version}</version>
@@ -366,10 +385,12 @@
           </execution>
         </executions>
         <configuration>
+          <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
           <showLogs>true</showLogs>
           <images>
             <image>
               <name>arpnetworking/mad/kafka:${project.version}</name>
+              <alias>kafka</alias>
               <build>
                 <dockerFile>${project.basedir}/src/main/docker/kafka/Dockerfile</dockerFile>
                 <tags>
@@ -377,19 +398,25 @@
                 </tags>
               </build>
               <run>
-                <env>
-                  <AUTO_CREATE_TOPICS>true</AUTO_CREATE_TOPICS>
-                  <ADVERTISED_HOST>localhost</ADVERTISED_HOST>
-                  <ADVERTISED_PORT>9092</ADVERTISED_PORT>
-                </env>
+                <network>
+                  <mode>custom</mode>
+                  <name>mad-net</name>
+                  <alias>kafka</alias>
+                </network>
                 <ports>
-                  <port>2181:2181</port>
-                  <port>9092:9092</port>
+                  <port>+kafka.ip:2181:2181</port>
+                  <port>+kafka.ip:9092:9092</port>
                 </ports>
+                <env>
+                  <ADVERTISED_HOST>${kafka.advertised.address}</ADVERTISED_HOST>
+                  <ADVERTISED_PORT>9092</ADVERTISED_PORT>
+                  <AUTO_CREATE_TOPICS>true</AUTO_CREATE_TOPICS>
+                </env>
               </run>
             </image>
             <image>
               <name>arpnetworking/mad:${project.version}</name>
+              <alias>mad</alias>
               <build>
                 <dockerFile>${project.build.directory}/docker-assembly/Dockerfile</dockerFile>
                 <tags>
@@ -397,14 +424,23 @@
                 </tags>
               </build>
               <run>
-                <env>
-                  <ADDITIONAL_JAVA_OPTS>${debugJavaOptions}</ADDITIONAL_JAVA_OPTS>
-                </env>
+                <dependsOn>
+                  <container>kafka</container>
+                </dependsOn>
+                <network>
+                  <mode>custom</mode>
+                  <name>mad-net</name>
+                  <alias>mad</alias>
+                </network>
                 <ports>
-                  <port>${debugJavaPort}:${debugJavaPort}</port>
-                  <port>7090:7090</port>
-                  <port>8125:8125/udp</port>
+                  <port>+mad.ip:${debugJavaPort}:${debugJavaPort}</port>
+                  <port>+mad.ip:7090:7090</port>
+                  <port>+mad.ip:8125:8125/udp</port>
                 </ports>
+                <env>
+                  <JAVA_OPTS>${debugJavaOptions}</JAVA_OPTS>
+                  <KAFKA_SOURCE_BOOTSTRAP_HOST>kafka</KAFKA_SOURCE_BOOTSTRAP_HOST>
+                </env>
                 <volumes>
                   <bind>
                     <volume>${project.basedir}/logs/docker:/opt/mad/logs</volume>
@@ -412,7 +448,7 @@
                 </volumes>
                 <wait>
                   <http>
-                    <url>http://${docker.host.address}:7090/ping</url>
+                    <url>http://${mad.ip}:7090/ping</url>
                     <method>GET</method>
                     <status>200</status>
                   </http>
@@ -425,6 +461,24 @@
           </images>
           <skip>${skipDockerBuild}</skip>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>${maven.properties.plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>write-project-properties</goal>
+            </goals>
+            <configuration>
+              <outputFile>
+                ${project.build.directory}/pre-integration-test.properties
+              </outputFile>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
