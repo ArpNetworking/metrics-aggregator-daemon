@@ -76,6 +76,11 @@ public final class CountStatistic extends BaseStatistic {
 
         @Override
         public Accumulator<Void> accumulate(final CalculatedValue<Void> calculatedValue) {
+            return accumulateAny(calculatedValue);
+        }
+
+        @Override
+        public Accumulator<Void> accumulateAny(final CalculatedValue<?> calculatedValue) {
             _count += calculatedValue.getValue().getValue();
             return this;
         }

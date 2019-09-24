@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.mad;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
@@ -24,6 +25,7 @@ import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Unit;
 import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
+import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.PeriodicData;
@@ -207,6 +209,72 @@ public class BucketTest {
     }
 
     @Test
+    public void testCalculatedValues() {
+        _bucket.add(
+                new DefaultRecord.Builder()
+                        .setTime(START)
+                        .setDimensions(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHost",
+                                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyCluster"))
+                        .setId(UUID.randomUUID().toString())
+                        .setMetrics(ImmutableMap.of(
+                                "testCalculatedValues/MyMetric",
+                                new DefaultMetric.Builder()
+                                        .setType(MetricType.GAUGE)
+                                        .setStatistics(ImmutableMap.of(
+                                                STATISTIC_FACTORY.getStatistic("min"), cvl(1.0, 2.0),
+                                                STATISTIC_FACTORY.getStatistic("max"), cvl(99.0, 100.0),
+                                                STATISTIC_FACTORY.getStatistic("count"), cvl(2.0, 3.0),
+                                                STATISTIC_FACTORY.getStatistic("sum"), cvl(252.0)
+                                        ))
+                                        .build()))
+                        .build());
+        _bucket.close();
+
+        final ArgumentCaptor<PeriodicData> dataCaptor = ArgumentCaptor.forClass(PeriodicData.class);
+        Mockito.verify(_sink).recordAggregateData(dataCaptor.capture());
+
+        final ImmutableMultimap<String, AggregatedData> data = dataCaptor.getValue().getData();
+        Assert.assertEquals(5, data.size());
+
+        Assert.assertThat(
+                data.get("testCalculatedValues/MyMetric"),
+                Matchers.containsInAnyOrder(
+                        new AggregatedData.Builder()
+                                .setIsSpecified(true)
+                                .setPopulationSize(5L)
+                                .setStatistic(COUNT_STATISTIC)
+                                .setValue(q(5))
+                                .build(),
+                        new AggregatedData.Builder()
+                                .setIsSpecified(false)
+                                .setPopulationSize(5L)
+                                .setStatistic(SUM_STATISTIC)
+                                .setValue(q(252))
+                                .build(),
+                        new AggregatedData.Builder()
+                                .setIsSpecified(true)
+                                .setPopulationSize(5L)
+                                .setStatistic(MEAN_STATISTIC)
+                                .setValue(q(50.4))
+                                .build(),
+                        new AggregatedData.Builder()
+                                .setIsSpecified(true)
+                                .setPopulationSize(5L)
+                                .setStatistic(MAX_STATISTIC)
+                                .setValue(q(100))
+                                .build(),
+                        new AggregatedData.Builder()
+                                .setIsSpecified(true)
+                                .setPopulationSize(5L)
+                                .setStatistic(MIN_STATISTIC)
+                                .setValue(q(1))
+                                .build()));
+    }
+
+    @Test
     public void testToString() {
         final String asString = new Bucket.Builder()
                 .setKey(new DefaultKey(ImmutableMap.of(
@@ -250,13 +318,33 @@ public class BucketTest {
                         .build());
     }
 
+    private static ImmutableList<CalculatedValue<?>> cvl(final double... valueArray) {
+        final ImmutableList.Builder<CalculatedValue<?>> calculatedValues = ImmutableList.builder();
+        for (final double value : valueArray) {
+            calculatedValues.add(cv(value));
+        }
+        return calculatedValues.build();
+    }
+
+    private static CalculatedValue<?> cv(final double value) {
+        return ThreadLocalBuilder.<CalculatedValue<Void>, CalculatedValue.Builder<Void>>buildGeneric(
+                CalculatedValue.Builder.class,
+                b1 -> b1.setValue(q(value)));
+    }
+
+    private static Quantity q(final double value) {
+        return ThreadLocalBuilder.build(
+                DefaultQuantity.Builder.class,
+                b2 -> b2.setValue(value));
+    }
+
     private Bucket _bucket;
 
     private LoadingCache<String, Optional<ImmutableSet<Statistic>>> _specifiedStatsCache = CacheBuilder.newBuilder()
-            .build(new AbsentStatisticCacheLoader());
+            .build(new TestSpecifiedCacheLoader());
 
     private LoadingCache<String, Optional<ImmutableSet<Statistic>>> _dependentStatsCache = CacheBuilder.newBuilder()
-            .build(new AbsentStatisticCacheLoader());
+            .build(new TestDependentCacheLoader());
 
     @Mock
     private Sink _sink;
@@ -279,9 +367,31 @@ public class BucketTest {
     private static final Statistic SUM_STATISTIC = STATISTIC_FACTORY.getStatistic("sum");
     private static final Statistic COUNT_STATISTIC = STATISTIC_FACTORY.getStatistic("count");
 
-    private static final class AbsentStatisticCacheLoader extends CacheLoader<String, Optional<ImmutableSet<Statistic>>> {
+    private static final class TestSpecifiedCacheLoader extends CacheLoader<String, Optional<ImmutableSet<Statistic>>> {
         @Override
         public Optional<ImmutableSet<Statistic>> load(@Nullable final String key) {
+            if ("testCalculatedValues/MyMetric".equals(key)) {
+                return Optional.of(
+                        ImmutableSet.of(
+                                STATISTIC_FACTORY.getStatistic("min"),
+                                STATISTIC_FACTORY.getStatistic("max"),
+                                STATISTIC_FACTORY.getStatistic("count"),
+                                STATISTIC_FACTORY.getStatistic("mean")
+                        ));
+            }
+            return Optional.empty();
+        }
+    }
+
+    private static final class TestDependentCacheLoader extends CacheLoader<String, Optional<ImmutableSet<Statistic>>> {
+        @Override
+        public Optional<ImmutableSet<Statistic>> load(@Nullable final String key) {
+            if ("testCalculatedValues/MyMetric".equals(key)) {
+                return Optional.of(
+                        ImmutableSet.of(
+                                STATISTIC_FACTORY.getStatistic("sum")
+                        ));
+            }
             return Optional.empty();
         }
     }

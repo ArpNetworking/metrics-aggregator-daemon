@@ -49,4 +49,19 @@ public interface Accumulator<T> extends Calculator<T> {
      * @return This <code>Accumulator</code>.
      */
     Accumulator<T> accumulate(CalculatedValue<T> calculatedValue);
+
+    /**
+     * Add the specified <code>CalculatedValue</code> to the accumulated value. The
+     * <code>CalculatedValue</code> was produced by this <code>Accumulator</code> in
+     * a different context. For example, for a different time period or a different
+     * host. It is permissible to mix calls to accumulate with <code>Quantity</code>
+     * and <code>CalculatedValue</code>.
+     *
+     * If the <code>CalculatedValue</code>'s supporting data is of an unsupported
+     * type then an <code>IllegaglArgumentException</code> will be thrown.
+     *
+     * @param calculatedValue The <code>CalculatedValue</code> to include in the accumulated value.
+     * @return This <code>Accumulator</code>.
+     */
+    Accumulator<T> accumulateAny(CalculatedValue<?> calculatedValue);
 }

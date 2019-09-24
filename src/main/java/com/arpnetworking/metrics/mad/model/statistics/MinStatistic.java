@@ -92,6 +92,11 @@ public final class MinStatistic extends BaseStatistic {
 
         @Override
         public Accumulator<Void> accumulate(final CalculatedValue<Void> calculatedValue) {
+            return accumulateAny(calculatedValue);
+        }
+
+        @Override
+        public Accumulator<Void> accumulateAny(final CalculatedValue<?> calculatedValue) {
             return accumulate(calculatedValue.getValue());
         }
 

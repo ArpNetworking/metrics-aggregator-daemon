@@ -18,7 +18,6 @@ package com.arpnetworking.metrics.mad.parsers;
 import akka.util.ByteString;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
-import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
 import com.arpnetworking.metrics.mad.model.Metric;
@@ -26,8 +25,10 @@ import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.model.statistics.HistogramStatistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
+import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import org.junit.Assert;
 import org.junit.Test;
@@ -60,7 +61,7 @@ public final class ProtobufV3ToRecordParserTest {
     public void testParseSingleRecord() throws ParsingException, IOException {
         HistogramStatistic.HistogramSupportingData supportingData;
         HistogramStatistic.HistogramSnapshot histogramSnapshot;
-        AggregatedData aggregatedData;
+        CalculatedValue<?> calculatedValue;
 
         final UUID uuid = UUID.fromString("142949d2-c0fc-469e-9958-7d2be2c49fa5");
         final ZonedDateTime time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(1513239602974L), ZoneOffset.UTC);
@@ -94,50 +95,36 @@ public final class ProtobufV3ToRecordParserTest {
         Assert.assertNotNull(histogram);
         Assert.assertEquals(MetricType.GAUGE, histogram.getType());
         Assert.assertEquals(0, histogram.getValues().size());
-        Assert.assertEquals(6, histogram.getStatistics().size());
+        Assert.assertEquals(5, histogram.getStatistics().size());
+        for (final List<CalculatedValue<?>> values : histogram.getStatistics().values()) {
+            Assert.assertEquals(1, values.size());
+        }
         // Min
-        aggregatedData = histogram.getStatistics().get(0);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("min"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(9, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = Iterables.getOnlyElement(
+                histogram.getStatistics().get(STATISTIC_FACTORY.getStatistic("min")));
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Max
-        aggregatedData = histogram.getStatistics().get(1);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("max"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(5.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(9, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = Iterables.getOnlyElement(
+                histogram.getStatistics().get(STATISTIC_FACTORY.getStatistic("max")));
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(5.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Count
-        aggregatedData = histogram.getStatistics().get(2);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("count"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(9.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(9, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = Iterables.getOnlyElement(
+                histogram.getStatistics().get(STATISTIC_FACTORY.getStatistic("count")));
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(9.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Sum
-        aggregatedData = histogram.getStatistics().get(3);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("sum"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(27.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(9, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
-        // Mean
-        aggregatedData = histogram.getStatistics().get(4);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("mean"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(3.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(9, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = Iterables.getOnlyElement(
+                histogram.getStatistics().get(STATISTIC_FACTORY.getStatistic("sum")));
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(27.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Histogram
-        aggregatedData = histogram.getStatistics().get(5);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("histogram"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(9, aggregatedData.getPopulationSize());
-        Assert.assertTrue(aggregatedData.getSupportingData() instanceof HistogramStatistic.HistogramSupportingData);
-        supportingData = (HistogramStatistic.HistogramSupportingData) aggregatedData.getSupportingData();
+        calculatedValue = Iterables.getOnlyElement(
+                histogram.getStatistics().get(STATISTIC_FACTORY.getStatistic("histogram")));
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), calculatedValue.getValue());
+        Assert.assertTrue(calculatedValue.getData() instanceof HistogramStatistic.HistogramSupportingData);
+        supportingData = (HistogramStatistic.HistogramSupportingData) calculatedValue.getData();
         histogramSnapshot = supportingData.getHistogramSnapshot();
         Assert.assertFalse(supportingData.getUnit().isPresent());
         Assert.assertEquals(9, histogramSnapshot.getEntriesCount());
@@ -156,50 +143,31 @@ public final class ProtobufV3ToRecordParserTest {
         Assert.assertEquals(new DefaultQuantity.Builder().setValue(3.0).build(), combined.getValues().get(1));
         Assert.assertEquals(new DefaultQuantity.Builder().setValue(2.0).build(), combined.getValues().get(2));
         Assert.assertEquals(new DefaultQuantity.Builder().setValue(4.0).build(), combined.getValues().get(3));
-        Assert.assertEquals(12, combined.getStatistics().size());
+        Assert.assertEquals(5, combined.getStatistics().size());
+        for (final List<CalculatedValue<?>> values : combined.getStatistics().values()) {
+            Assert.assertEquals(2, values.size());
+        }
         // Min
-        aggregatedData = combined.getStatistics().get(0);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("min"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(2.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(4, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("min")).get(0);
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(2.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Max
-        aggregatedData = combined.getStatistics().get(1);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("max"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(5.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(4, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("max")).get(0);
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(5.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Count
-        aggregatedData = combined.getStatistics().get(2);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("count"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(4.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(4, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("count")).get(0);
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(4.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Sum
-        aggregatedData = combined.getStatistics().get(3);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("sum"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(14.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(4, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
-        // Mean
-        aggregatedData = combined.getStatistics().get(4);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("mean"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(3.5).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(4, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("sum")).get(0);
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(14.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Histogram
-        aggregatedData = combined.getStatistics().get(5);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("histogram"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(4, aggregatedData.getPopulationSize());
-        Assert.assertTrue(aggregatedData.getSupportingData() instanceof HistogramStatistic.HistogramSupportingData);
-        supportingData = (HistogramStatistic.HistogramSupportingData) aggregatedData.getSupportingData();
+        calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("histogram")).get(0);
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), calculatedValue.getValue());
+        Assert.assertTrue(calculatedValue.getData() instanceof HistogramStatistic.HistogramSupportingData);
+        supportingData = (HistogramStatistic.HistogramSupportingData) calculatedValue.getData();
         histogramSnapshot = supportingData.getHistogramSnapshot();
         Assert.assertFalse(supportingData.getUnit().isPresent());
         Assert.assertEquals(4, histogramSnapshot.getEntriesCount());
@@ -209,48 +177,26 @@ public final class ProtobufV3ToRecordParserTest {
         Assert.assertEquals(1, histogramSnapshot.getValue(4.0));
         Assert.assertEquals(1, histogramSnapshot.getValue(5.0));
         // Min
-        aggregatedData = combined.getStatistics().get(6);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("min"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(3.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(1, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("min")).get(1);
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(3.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Max
-        aggregatedData = combined.getStatistics().get(7);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("max"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(3.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(1, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("max")).get(1);
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(3.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Count
-        aggregatedData = combined.getStatistics().get(8);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("count"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(1, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("count")).get(1);
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Sum
-        aggregatedData = combined.getStatistics().get(9);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("sum"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(3.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(1, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
-        // Mean
-        aggregatedData = combined.getStatistics().get(10);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("mean"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(3.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(1, aggregatedData.getPopulationSize());
-        Assert.assertNull(aggregatedData.getSupportingData());
+        calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("sum")).get(1);
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(3.0).build(), calculatedValue.getValue());
+        Assert.assertNull(calculatedValue.getData());
         // Histogram
-        aggregatedData = combined.getStatistics().get(11);
-        Assert.assertEquals(STATISTIC_FACTORY.getStatistic("histogram"), aggregatedData.getStatistic());
-        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), aggregatedData.getValue());
-        Assert.assertFalse(aggregatedData.isSpecified());
-        Assert.assertEquals(1, aggregatedData.getPopulationSize());
-        Assert.assertTrue(aggregatedData.getSupportingData() instanceof HistogramStatistic.HistogramSupportingData);
-        supportingData = (HistogramStatistic.HistogramSupportingData) aggregatedData.getSupportingData();
+        calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("histogram")).get(1);
+        Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), calculatedValue.getValue());
+        Assert.assertTrue(calculatedValue.getData() instanceof HistogramStatistic.HistogramSupportingData);
+        supportingData = (HistogramStatistic.HistogramSupportingData) calculatedValue.getData();
         histogramSnapshot = supportingData.getHistogramSnapshot();
         Assert.assertFalse(supportingData.getUnit().isPresent());
         Assert.assertEquals(1, histogramSnapshot.getEntriesCount());
