@@ -18,6 +18,7 @@ package com.arpnetworking.metrics.mad;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.Terminated;
+import akka.dispatch.Dispatcher;
 import akka.http.javadsl.ConnectHttp;
 import akka.http.javadsl.Http;
 import akka.http.javadsl.IncomingConnection;
@@ -41,6 +42,7 @@ import com.arpnetworking.metrics.impl.ApacheHttpSink;
 import com.arpnetworking.metrics.impl.TsdMetricsFactory;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.incubator.impl.TsdPeriodicMetrics;
+import com.arpnetworking.metrics.jvm.ExecutorServiceMetricsRunnable;
 import com.arpnetworking.metrics.jvm.JvmMetricsRunnable;
 import com.arpnetworking.metrics.mad.actors.Status;
 import com.arpnetworking.metrics.mad.configuration.AggregatorConfiguration;
@@ -48,8 +50,10 @@ import com.arpnetworking.metrics.mad.configuration.PipelineConfiguration;
 import com.arpnetworking.metrics.proxy.actors.Telemetry;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.utility.AkkaForkJoinPoolAdapter;
 import com.arpnetworking.utility.Configurator;
 import com.arpnetworking.utility.Launchable;
+import com.arpnetworking.utility.ScalaForkJoinPoolAdapter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -62,6 +66,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import scala.concurrent.Await;
+import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
@@ -75,6 +80,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
@@ -180,12 +186,26 @@ public final class Main implements Launchable {
 
     private void launchJvmMetricsCollector(final Injector injector) {
         LOGGER.info().setMessage("Launching JVM metrics collector.").log();
-        final Runnable runnable = new JvmMetricsRunnable.Builder()
+
+        final Runnable jvmMetricsRunnable = new JvmMetricsRunnable.Builder()
                 .setMetricsFactory(injector.getInstance(MetricsFactory.class))
                 .build();
+
+        final Runnable jvmExecutorServiceMetricsRunnable = new ExecutorServiceMetricsRunnable.Builder()
+                .setMetricsFactory(injector.getInstance(MetricsFactory.class))
+                .setExecutorServices(createExecutorServiceMap(_actorSystem))
+                .build();
+
         _jvmMetricsCollector = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "JVMMetricsCollector"));
+
         _jvmMetricsCollector.scheduleAtFixedRate(
-                runnable,
+                jvmMetricsRunnable,
+                INITIAL_DELAY_IN_MILLIS,
+                _configuration.getJvmMetricsCollectionInterval().toMillis(),
+                TIME_UNIT);
+
+        _jvmMetricsCollector.scheduleAtFixedRate(
+                jvmExecutorServiceMetricsRunnable,
                 INITIAL_DELAY_IN_MILLIS,
                 _configuration.getJvmMetricsCollectionInterval().toMillis(),
                 TIME_UNIT);
@@ -320,6 +340,59 @@ public final class Main implements Launchable {
         }
     }
 
+    private static Map<String, ExecutorService> createExecutorServiceMap(
+            final ActorSystem actorSystem) {
+        final Map<String, ExecutorService> executorServices = Maps.newHashMap();
+
+        // Add the default dispatcher
+        addExecutorServiceFromExecutionContextExecutor(
+                executorServices,
+                "akka/default_dispatcher",
+                actorSystem.dispatcher());
+
+        // TODO(ville): Support monitoring additional dispatchers via configuration.
+
+        return executorServices;
+    }
+
+    private static void addExecutorServiceFromExecutionContextExecutor(
+            final Map<String, ExecutorService> executorServices,
+            final String name,
+            final ExecutionContextExecutor executionContextExecutor) {
+        if (executionContextExecutor instanceof Dispatcher) {
+            final Dispatcher dispatcher = (Dispatcher) executionContextExecutor;
+            addExecutorService(
+                    executorServices,
+                    name,
+                    dispatcher.executorService().executor());
+            // TODO(ville): Support other ExecutionContextExecutor types as appropriate
+        } else {
+            throw new IllegalArgumentException(
+                    "Unsupported ExecutionContextExecutor type: " + executionContextExecutor.getClass().getName());
+        }
+    }
+
+    private static void addExecutorService(
+            final Map<String, ExecutorService> executorServices,
+            final String name,
+            final ExecutorService executorService) {
+        if (executorService instanceof scala.concurrent.forkjoin.ForkJoinPool) {
+            final scala.concurrent.forkjoin.ForkJoinPool scalaForkJoinPool =
+                    (scala.concurrent.forkjoin.ForkJoinPool) executorService;
+            executorServices.put(name, new ScalaForkJoinPoolAdapter(scalaForkJoinPool));
+        } else if (executorService instanceof akka.dispatch.forkjoin.ForkJoinPool) {
+            final akka.dispatch.forkjoin.ForkJoinPool akkaForkJoinPool =
+                    (akka.dispatch.forkjoin.ForkJoinPool) executorService;
+            executorServices.put(name, new AkkaForkJoinPoolAdapter(akkaForkJoinPool));
+        } else if (executorService instanceof java.util.concurrent.ForkJoinPool
+                || executorService instanceof java.util.concurrent.ThreadPoolExecutor) {
+            executorServices.put(name, executorService);
+        } else {
+            throw new IllegalArgumentException(
+                    "Unsupported ExecutorService type: " + executorService.getClass().getName());
+        }
+    }
+
     private static Builder<? extends JsonNodeSource> getFileSourceBuilder(final File configurationFile) {
         if (configurationFile.getName().toLowerCase(Locale.getDefault()).endsWith(HOCON_FILE_EXTENSION)) {
             return new HoconFileSource.Builder()
@@ -350,7 +423,9 @@ public final class Main implements Launchable {
 
     private static final class PipelinesLaunchable implements Launchable, Runnable {
 
-        private PipelinesLaunchable(final ObjectMapper objectMapper, final File directory) {
+        private PipelinesLaunchable(
+                final ObjectMapper objectMapper,
+                final File directory) {
             _objectMapper = objectMapper;
             _directory = directory;
             _fileToPipelineLaunchables = Maps.newConcurrentMap();

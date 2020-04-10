@@ -66,6 +66,7 @@ public final class Pipeline implements Launchable {
         _sinks.add(rootSink);
 
         final Aggregator aggregator = new Aggregator.Builder()
+                .setActorSystem(_pipelineConfiguration.getActorSystem())
                 .setPeriods(_pipelineConfiguration.getPeriods())
                 .setTimerStatistics(_pipelineConfiguration.getTimerStatistics())
                 .setCounterStatistics(_pipelineConfiguration.getCounterStatistics())

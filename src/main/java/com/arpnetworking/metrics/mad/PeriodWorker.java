@@ -15,15 +15,13 @@
  */
 package com.arpnetworking.metrics.mad;
 
-import com.arpnetworking.commons.builder.OvalBuilder;
+import akka.actor.AbstractActor;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import net.sf.oval.constraint.NotNull;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -32,85 +30,75 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.Optional;
+import java.util.TreeMap;
 
 /**
- * Responsible for managing aggregation buckets for a period.
+ * Actor that aggregates a particular slice of the data set over time and metric.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
-/* package private */ final class PeriodWorker implements Runnable {
+/* package private */ final class PeriodWorker extends AbstractActor {
 
     /**
-     * Shutdown this <code>PeriodWorker</code>. Cannot be restarted.
+     * Public constructor. Since this is an {@code Actor} this method should not be
+     * called directly, but instead you should use {@code Props}.
      */
-    public void shutdown() {
-        _isRunning = false;
-    }
-
-    /**
-     * Process a <code>Record</code>.
-     *
-     * @param record Instance of <code>Record</code> to process.
-     */
-    public void record(final Record record) {
-        _recordQueue.add(record);
+    PeriodWorker(final Duration period, final Bucket.Builder bucketBuilder) {
+        _period = period;
+        _bucketBuilder = bucketBuilder;
+        _hasRotateScheduled = false;
     }
 
     @Override
-    public void run() {
-        Thread.currentThread().setUncaughtExceptionHandler(
-                (thread, throwable) -> LOGGER.error()
-                        .setMessage("Unhandled exception")
-                        .addData("periodWorker", PeriodWorker.this)
-                        .setThrowable(throwable)
-                        .log());
+    public void preStart() {
+        // TODO(ville): Schedule the actor to self-destruct if it doesn't receive any Record
+        // instances for some period of time (e.g. > the largest period). The caveat is
+        // that we need to deregister the actor from the Aggregator as well without
+        // creating a race condition. Note that period worker clean-up did not exist
+        // in the previous implementation either (not that it shouldn't; just one
+        // problem at a time).
+    }
 
-        while (_isRunning) {
-            try {
-                ZonedDateTime now = ZonedDateTime.now();
-                final ZonedDateTime rotateAt = getRotateAt(now);
-                Duration timeToRotate = Duration.between(now, rotateAt);
-                while (_isRunning && timeToRotate.compareTo(Duration.ZERO) > 0) {
-                    // Process records or sleep
-                    Record recordToProcess = _recordQueue.poll();
-                    if (recordToProcess != null) {
-                        while (recordToProcess != null) {
-                            process(recordToProcess);
-                            recordToProcess = _recordQueue.poll();
-                        }
-                    } else {
-                        Thread.sleep(Math.min(timeToRotate.toMillis(), 100));
-                    }
-                    // Recompute time to close
-                    now = ZonedDateTime.now();
-                    timeToRotate = Duration.between(now, rotateAt);
-                }
-                // Drain the record queue before rotating
-                final List<Record> recordsToProcess = Lists.newArrayList();
-                _recordQueue.drainTo(recordsToProcess);
-                for (final Record recordToProcess : recordsToProcess) {
-                    process(recordToProcess);
-                }
-                // Rotate
-                rotate(now);
-            } catch (final InterruptedException e) {
-                Thread.interrupted();
-                LOGGER.warn()
-                        .setMessage("Interrupted waiting to close buckets")
-                        .setThrowable(e)
-                        .log();
-                // CHECKSTYLE.OFF: IllegalCatch - Top level catch to prevent thread death
-            } catch (final Exception e) {
-                // CHECKSTYLE.ON: IllegalCatch
-                LOGGER.error()
-                        .setMessage("Aggregator failure")
-                        .addData("periodWorker", this)
-                        .setThrowable(e)
-                        .log();
+    @Override
+    public AbstractActor.Receive createReceive() {
+        return receiveBuilder()
+                .match(Record.class, this::processRecord)
+                .matchEquals(ROTATE_MESSAGE, m -> rotateAndSchedule())
+                .build();
+    }
+
+    private void rotateAndSchedule() {
+        final ZonedDateTime now = ZonedDateTime.now();
+        _hasRotateScheduled = false;
+        performRotation(now);
+        scheduleRotation(now);
+    }
+
+    private void scheduleRotation(final ZonedDateTime now) {
+        final Optional<ZonedDateTime> rotateAt = getRotateAt();
+
+        if (rotateAt.isPresent()) {
+            // If we we don't need to wait then just set the scheduled delay to 0.
+            // If we need to wait a really small amount of time, set the delay to a minimum to avoid sleep thrashing.
+            // Otherwise schedule the next rotation at the predicted time.
+            // Finally, if we wake-up and there's nothing to rotate we'll just re-apply these rules.
+
+            Duration timeToRotate = Duration.between(now, rotateAt.get());
+            if (timeToRotate.isNegative()) {
+                timeToRotate = Duration.ZERO;
+            } else if (timeToRotate.compareTo(MINIMUM_ROTATION_CHECK_INTERVAL) < 0) {
+                timeToRotate = MINIMUM_ROTATION_CHECK_INTERVAL;
             }
+
+            context().system().scheduler().scheduleOnce(
+                    timeToRotate,
+                    self(),
+                    ROTATE_MESSAGE,
+                    context().dispatcher(),
+                    self());
+
+            _hasRotateScheduled = true;
         }
     }
 
@@ -132,7 +120,7 @@ import java.util.concurrent.LinkedBlockingDeque;
         return toLogValue().toString();
     }
 
-    /* package private */ void process(final Record record) {
+    private void processRecord(final Record record) {
         // Find an existing bucket for the record
         final Duration timeout = getPeriodTimeout(_period);
         final ZonedDateTime start = getStartTime(record.getTime(), _period);
@@ -140,47 +128,55 @@ import java.util.concurrent.LinkedBlockingDeque;
 
         // Create a new bucket if one does not exist
         if (bucket == null) {
-            // Pre-emptively add the record to the _new_ bucket. This avoids
-            // the race condition after indexing by expiration between adding
-            // the record and closing the bucket.
             final Bucket newBucket = _bucketBuilder
                     .setStart(start)
                     .build();
-            newBucket.add(record);
 
-            // Resolve bucket creation race condition; either:
-            // 1) We won and can proceed to index the new bucket
-            // 2) We lost and can proceed to add data to the existing bucket
-            bucket = _bucketsByStart.putIfAbsent(start, newBucket);
-            if (bucket == null) {
-                final ZonedDateTime expiration = max(ZonedDateTime.now().plus(timeout), start.plus(_period).plus(timeout));
+            _bucketsByStart.put(
+                    start,
+                    newBucket);
 
-                LOGGER.debug()
-                        .setMessage("Created new bucket")
-                        .addData("bucket", newBucket)
-                        .addData("expiration", expiration)
-                        .addData("trigger", record.getId())
-                        .log();
+            bucket = newBucket;
 
-                // Index the bucket by its expiration date; the expiration date is always in the future
-                _bucketsByExpiration.compute(expiration, (dateTime, buckets) -> {
-                    if (buckets == null) {
-                        buckets = Lists.newArrayList();
-                    }
-                    buckets.add(newBucket);
-                    return buckets;
-                });
+            final ZonedDateTime expiration = max(ZonedDateTime.now().plus(timeout), start.plus(_period).plus(timeout));
 
-                // New bucket created and indexed with record
-                return;
+            LOGGER.debug()
+                    .setMessage("Created new bucket")
+                    .addData("bucket", newBucket)
+                    .addData("expiration", expiration)
+                    .addData("trigger", record.getId())
+                    .log();
+
+            // Index the bucket by its expiration date; the expiration date is always in the future
+            _bucketsByExpiration.compute(expiration, (dateTime, buckets) -> {
+                if (buckets == null) {
+                    buckets = Lists.newArrayList();
+                }
+                buckets.add(newBucket);
+                return buckets;
+            });
+
+            // Ensure rotation is scheduled (now that we have data)
+            if (!_hasRotateScheduled) {
+                scheduleRotation(ZonedDateTime.now());
             }
+        } else if (!_hasRotateScheduled) {
+            // This is a serious bug!
+            LOGGER.error()
+                    .setMessage("Rotation not already scheduled while adding to existing bucket")
+                    .addData("bucket", bucket)
+                    .addData("record", record)
+                    .log();
+
+            // But we can cover up the issue by scheduling a rotation
+            scheduleRotation(ZonedDateTime.now());
         }
 
         // Add the record to the _existing_ bucket
         bucket.add(record);
     }
 
-    /* package private */ void rotate(final ZonedDateTime now) {
+    /* package private */ void performRotation(final ZonedDateTime now) {
         final Map<ZonedDateTime, List<Bucket>> expiredBucketMap = _bucketsByExpiration.headMap(now);
         final List<Bucket> expiredBuckets = Lists.newArrayList();
         int closedBucketCount = 0;
@@ -194,8 +190,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 
         // Phase 2: Close the expired buckets
         for (final Bucket bucket : expiredBuckets) {
-            // Close the bucket
-            // NOTE: The race condition between process and close is resolved in Bucket
             bucket.close();
             _bucketsByStart.remove(bucket.getStart());
             ++closedBucketCount;
@@ -211,13 +205,9 @@ import java.util.concurrent.LinkedBlockingDeque;
         LOGGER.debug().setMessage("Rotated").addData("count", closedBucketCount).log();
     }
 
-    /* package private */ ZonedDateTime getRotateAt(final ZonedDateTime now) {
-        final Map.Entry<ZonedDateTime, List<Bucket>> firstEntry = _bucketsByExpiration.firstEntry();
-        final ZonedDateTime periodFirstExpiration = firstEntry == null ? null : firstEntry.getKey();
-        if (periodFirstExpiration != null && periodFirstExpiration.isAfter(now)) {
-            return periodFirstExpiration;
-        }
-        return now.plus(_rotationCheck);
+    /* package private */ Optional<ZonedDateTime> getRotateAt() {
+        return Optional.ofNullable(_bucketsByExpiration.firstEntry())
+                .map(Map.Entry::getKey);
     }
 
     /* package private */ static Duration getPeriodTimeout(final Duration period) {
@@ -248,62 +238,16 @@ import java.util.concurrent.LinkedBlockingDeque;
         return dateTime2;
     }
 
-    private PeriodWorker(final Builder builder) {
-        _period = builder._period;
-        _bucketBuilder = builder._bucketBuilder;
-    }
-
-    private volatile boolean _isRunning = true;
+    private boolean _hasRotateScheduled;
 
     private final Duration _period;
     private final Bucket.Builder _bucketBuilder;
-    private final Duration _rotationCheck = Duration.ofMillis(100);
-    private final BlockingQueue<Record> _recordQueue = new LinkedBlockingDeque<>();
-    private final ConcurrentSkipListMap<ZonedDateTime, Bucket> _bucketsByStart = new ConcurrentSkipListMap<>();
-    private final NavigableMap<ZonedDateTime, List<Bucket>> _bucketsByExpiration =
-            Maps.synchronizedNavigableMap(new ConcurrentSkipListMap<>());
+    private final NavigableMap<ZonedDateTime, Bucket> _bucketsByStart = new TreeMap<>();
+    private final NavigableMap<ZonedDateTime, List<Bucket>> _bucketsByExpiration = new TreeMap<>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PeriodWorker.class);
+    private static final Duration MINIMUM_ROTATION_CHECK_INTERVAL = Duration.ofMillis(100);
     private static final Duration MINIMUM_PERIOD_TIMEOUT = Duration.ofSeconds(1);
     private static final Duration MAXIMUM_PERIOD_TIMEOUT = Duration.ofMinutes(10);
-
-    /**
-     * <code>Builder</code> implementation for <code>PeriodWorker</code>.
-     */
-    public static final class Builder extends OvalBuilder<PeriodWorker> {
-
-        /**
-         * Public constructor.
-         */
-        Builder() {
-            super(PeriodWorker::new);
-        }
-
-        /**
-         * Set the period. Cannot be null or empty.
-         *
-         * @param value The periods.
-         * @return This <code>Builder</code> instance.
-         */
-        public Builder setPeriod(final Duration value) {
-            _period = value;
-            return this;
-        }
-
-        /**
-         * Set the <code>Bucket</code> <code>Builder</code>. Cannot be null.
-         *
-         * @param value The bucket builder.
-         * @return This <code>Builder</code> instance.
-         */
-        public Builder setBucketBuilder(final Bucket.Builder value) {
-            _bucketBuilder = value;
-            return this;
-        }
-
-        @NotNull
-        private Duration _period;
-        @NotNull
-        private Bucket.Builder _bucketBuilder;
-    }
+    private static final String ROTATE_MESSAGE = "ROTATE_NOW";
 }
