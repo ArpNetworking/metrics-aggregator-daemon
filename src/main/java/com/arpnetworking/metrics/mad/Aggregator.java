@@ -15,6 +15,10 @@
  */
 package com.arpnetworking.metrics.mad;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.PoisonPill;
+import akka.actor.Props;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
@@ -35,7 +39,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
 
 import java.time.Duration;
@@ -44,9 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -56,9 +56,6 @@ import java.util.regex.Pattern;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  * @author Ryan Ascheman (rascheman at groupon dot com)
  */
-// NOTE: The _periodWorkerExecutor is accessed both in synchronized lifecycle methods like launch() and shutdown() but
-// also non-synchronized methods like notify(). Access to _periodWorkerExecutor does not need to be synchronized.
-@SuppressFBWarnings("IS2_INCONSISTENT_SYNC")
 public final class Aggregator implements Observer, Launchable {
 
     @Override
@@ -67,11 +64,6 @@ public final class Aggregator implements Observer, Launchable {
                 .setMessage("Launching aggregator")
                 .addData("aggregator", this)
                 .log();
-
-        _periodWorkers.clear();
-        if (!_periods.isEmpty()) {
-            _periodWorkerExecutor = Executors.newCachedThreadPool(r -> new Thread(r, "PeriodWorker"));
-        }
     }
 
     @Override
@@ -81,18 +73,10 @@ public final class Aggregator implements Observer, Launchable {
                 .addData("aggregator", this)
                 .log();
 
-        for (final List<PeriodWorker> periodCloserList : _periodWorkers.values()) {
-            periodCloserList.forEach(com.arpnetworking.metrics.mad.PeriodWorker::shutdown);
-        }
-        _periodWorkers.clear();
-        if (_periodWorkerExecutor != null) {
-            _periodWorkerExecutor.shutdown();
-            try {
-                _periodWorkerExecutor.awaitTermination(10, TimeUnit.SECONDS);
-            } catch (final InterruptedException e) {
-                LOGGER.warn("Unable to shutdown period worker executor", e);
+        for (final List<ActorRef> actorRefList : _periodWorkerActors.values()) {
+            for (final ActorRef actorRef : actorRefList) {
+                actorRef.tell(PoisonPill.getInstance(), ActorRef.noSender());
             }
-            _periodWorkerExecutor = null;
         }
     }
 
@@ -109,12 +93,13 @@ public final class Aggregator implements Observer, Launchable {
         final Record record = (Record) event;
         final Key key = new DefaultKey(record.getDimensions());
         LOGGER.trace()
-                .setMessage("Processing record")
+                .setMessage("Sending record to aggregation actor")
                 .addData("record", record)
                 .addData("key", key)
                 .log();
-        for (final PeriodWorker periodWorker : _periodWorkers.computeIfAbsent(key, this::createPeriodWorkers)) {
-            periodWorker.record(record);
+
+        for (final ActorRef periodWorkerActor : _periodWorkerActors.computeIfAbsent(key, this::createActors)) {
+            periodWorkerActor.tell(record, ActorRef.noSender());
         }
     }
 
@@ -130,7 +115,6 @@ public final class Aggregator implements Observer, Launchable {
                 .put("timerStatistics", _specifiedTimerStatistics)
                 .put("counterStatistics", _specifiedCounterStatistics)
                 .put("gaugeStatistics", _specifiedGaugeStatistics)
-                .put("periodWorkers", _periodWorkers)
                 .build();
     }
 
@@ -139,30 +123,25 @@ public final class Aggregator implements Observer, Launchable {
         return toLogValue().toString();
     }
 
-    private List<PeriodWorker> createPeriodWorkers(final Key key) {
-        final List<PeriodWorker> periodWorkerList = Lists.newArrayListWithExpectedSize(_periods.size());
+    private List<ActorRef> createActors(final Key key) {
+        final List<ActorRef> periodWorkerList = Lists.newArrayListWithExpectedSize(_periods.size());
         for (final Duration period : _periods) {
-            final PeriodWorker periodWorker = new PeriodWorker.Builder()
+            final Bucket.Builder bucketBuilder = new Bucket.Builder()
+                    .setKey(key)
+                    .setSpecifiedCounterStatistics(_specifiedCounterStatistics)
+                    .setSpecifiedGaugeStatistics(_specifiedGaugeStatistics)
+                    .setSpecifiedTimerStatistics(_specifiedTimerStatistics)
+                    .setDependentCounterStatistics(_dependentCounterStatistics)
+                    .setDependentGaugeStatistics(_dependentGaugeStatistics)
+                    .setDependentTimerStatistics(_dependentTimerStatistics)
+                    .setSpecifiedStatistics(_cachedSpecifiedStatistics)
+                    .setDependentStatistics(_cachedDependentStatistics)
                     .setPeriod(period)
-                    .setBucketBuilder(
-                            new Bucket.Builder()
-                                    .setKey(key)
-                                    .setSpecifiedCounterStatistics(_specifiedCounterStatistics)
-                                    .setSpecifiedGaugeStatistics(_specifiedGaugeStatistics)
-                                    .setSpecifiedTimerStatistics(_specifiedTimerStatistics)
-                                    .setDependentCounterStatistics(_dependentCounterStatistics)
-                                    .setDependentGaugeStatistics(_dependentGaugeStatistics)
-                                    .setDependentTimerStatistics(_dependentTimerStatistics)
-                                    .setSpecifiedStatistics(_cachedSpecifiedStatistics)
-                                    .setDependentStatistics(_cachedDependentStatistics)
-                                    .setPeriod(period)
-                                    .setSink(_sink))
-                    .build();
-            periodWorkerList.add(periodWorker);
-            _periodWorkerExecutor.execute(periodWorker);
+                    .setSink(_sink);
+            periodWorkerList.add(_actorSystem.actorOf(Props.create(PeriodWorker.class, period, bucketBuilder)));
         }
         LOGGER.debug()
-                .setMessage("Created period workers")
+                .setMessage("Created period worker actors")
                 .addData("key", key)
                 .addData("periodWorkersSize", periodWorkerList.size())
                 .log();
@@ -178,6 +157,7 @@ public final class Aggregator implements Observer, Launchable {
     }
 
     private Aggregator(final Builder builder) {
+        _actorSystem = builder._actorSystem;
         _periods = ImmutableSet.copyOf(builder._periods);
         _sink = builder._sink;
         _specifiedCounterStatistics = ImmutableSet.copyOf(builder._counterStatistics);
@@ -223,8 +203,9 @@ public final class Aggregator implements Observer, Launchable {
                                 return statistics.map(statisticImmutableSet -> computeDependentStatistics(statisticImmutableSet));
                            }
                         });
-}
+    }
 
+    private final ActorSystem _actorSystem;
     private final ImmutableSet<Duration> _periods;
     private final Sink _sink;
     private final ImmutableSet<Statistic> _specifiedTimerStatistics;
@@ -236,9 +217,7 @@ public final class Aggregator implements Observer, Launchable {
     private final ImmutableMap<Pattern, ImmutableSet<Statistic>> _statistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedSpecifiedStatistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedDependentStatistics;
-    private final Map<Key, List<PeriodWorker>> _periodWorkers = Maps.newConcurrentMap();
-
-    private ExecutorService _periodWorkerExecutor = null;
+    private final Map<Key, List<ActorRef>> _periodWorkerActors = Maps.newConcurrentMap();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Aggregator.class);
 
@@ -252,6 +231,17 @@ public final class Aggregator implements Observer, Launchable {
          */
         public Builder() {
             super(Aggregator::new);
+        }
+
+        /**
+         * Set the Akka {@link ActorSystem}. Cannot be null.
+         *
+         * @param value The Akka {@link ActorSystem}.
+         * @return This <code>Builder</code> instance.
+         */
+        public Builder setActorSystem(final ActorSystem value) {
+            _actorSystem = value;
+            return this;
         }
 
         /**
@@ -321,6 +311,8 @@ public final class Aggregator implements Observer, Launchable {
             return this;
         }
 
+        @NotNull
+        private ActorSystem _actorSystem;
         @NotNull
         private Sink _sink;
         @NotNull

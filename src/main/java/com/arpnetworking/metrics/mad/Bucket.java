@@ -49,11 +49,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 
 /**
@@ -68,25 +64,20 @@ import java.util.function.BiFunction;
      */
     public void close() {
         // Set the close flag before acquiring the write lock to allow "readers" to fail fast
-        if (_isOpen.getAndSet(false)) {
-            try {
-                // Acquire the write lock and flush the calculated statistics
-                _addCloseLock.writeLock().lock();
-                final ImmutableMultimap.Builder<String, AggregatedData> data = ImmutableMultimap.builder();
-                computeStatistics(_counterMetricCalculators, _specifiedCounterStatistics, data);
-                computeStatistics(_gaugeMetricCalculators, _specifiedGaugeStatistics, data);
-                computeStatistics(_timerMetricCalculators, _specifiedTimerStatistics, data);
-                computeStatistics(_explicitMetricCalculators, _specifiedStatisticsCache, data);
-                final PeriodicData periodicData = ThreadLocalBuilder.build(
-                        PeriodicData.Builder.class,
-                        b -> b.setData(data.build())
-                                .setDimensions(_key)
-                                .setPeriod(_period)
-                                .setStart(_start));
-                _sink.recordAggregateData(periodicData);
-            } finally {
-                _addCloseLock.writeLock().unlock();
-            }
+        if (_isOpen) {
+            _isOpen = false;
+            final ImmutableMultimap.Builder<String, AggregatedData> data = ImmutableMultimap.builder();
+            computeStatistics(_counterMetricCalculators, _specifiedCounterStatistics, data);
+            computeStatistics(_gaugeMetricCalculators, _specifiedGaugeStatistics, data);
+            computeStatistics(_timerMetricCalculators, _specifiedTimerStatistics, data);
+            computeStatistics(_explicitMetricCalculators, _specifiedStatisticsCache, data);
+            final PeriodicData periodicData = ThreadLocalBuilder.build(
+                    PeriodicData.Builder.class,
+                    b -> b.setData(data.build())
+                            .setDimensions(_key)
+                            .setPeriod(_period)
+                            .setStart(_start));
+            _sink.recordAggregateData(periodicData);
         } else {
             LOGGER.warn()
                     .setMessage("Bucket closed multiple times")
@@ -101,6 +92,21 @@ import java.util.function.BiFunction;
      * @param record The data to add to this <code>Bucket</code>.
      */
     public void add(final Record record) {
+        if (!_isOpen) {
+            // TODO(vkoskela): Re-aggregation starts here.
+            // 1) Send the record back to Aggregator.
+            // 2) This causes a new bucket to be created for this start+period.
+            // 3) Enhance aggregation at edges to support re-aggregation (or prevent overwrite).
+            BUCKET_CLOSED_LOGGER
+                    .warn()
+                    .setMessage("Discarding metric")
+                    .addData("reason", "added after close")
+                    .addData("record", record)
+                    .log();
+            return;
+        }
+
+
         for (final Map.Entry<String, ? extends Metric> entry : record.getMetrics().entrySet()) {
             final String name = entry.getKey();
             final Metric metric = entry.getValue();
@@ -170,11 +176,7 @@ import java.util.function.BiFunction;
                                 .log();
                 }
             }
-            addMetric(
-                    name,
-                    metric,
-                    record.getTime(),
-                    calculators);
+            addMetric(metric, calculators);
         }
     }
 
@@ -183,7 +185,7 @@ import java.util.function.BiFunction;
     }
 
     public boolean isOpen() {
-        return _isOpen.get();
+        return _isOpen;
     }
 
     /**
@@ -214,7 +216,7 @@ import java.util.function.BiFunction;
     }
 
     private void computeStatistics(
-            final ConcurrentMap<String, Collection<Calculator<?>>> calculatorsByMetric,
+            final Map<String, Collection<Calculator<?>>> calculatorsByMetric,
             final LoadingCache<String, Optional<ImmutableSet<Statistic>>> specifiedStatistics,
             final ImmutableMultimap.Builder<String, AggregatedData> data) {
         computeStatistics(calculatorsByMetric, (metric, statistic) -> {
@@ -229,13 +231,13 @@ import java.util.function.BiFunction;
     }
 
     private void computeStatistics(
-            final ConcurrentMap<String, Collection<Calculator<?>>> calculatorsByMetric,
+            final Map<String, Collection<Calculator<?>>> calculatorsByMetric,
             final ImmutableSet<Statistic> specifiedStatistics,
             final ImmutableMultimap.Builder<String, AggregatedData> data) {
         computeStatistics(calculatorsByMetric, (metric, statistic) -> specifiedStatistics.contains(statistic), data);
     }
     private void computeStatistics(
-            final ConcurrentMap<String, Collection<Calculator<?>>> calculatorsByMetric,
+            final Map<String, Collection<Calculator<?>>> calculatorsByMetric,
             final BiFunction<String, Statistic, Boolean> specified,
             final ImmutableMultimap.Builder<String, AggregatedData> data) {
 
@@ -287,47 +289,23 @@ import java.util.function.BiFunction;
     }
 
     private void addMetric(
-            final String name,
             final Metric metric,
-            final ZonedDateTime time,
             final Collection<Calculator<?>> calculators) {
 
-        try {
-            // Acquire a read lock and validate the bucket is still open
-            _addCloseLock.readLock().lock();
-            if (!_isOpen.get()) {
-                // TODO(vkoskela): Re-aggregation starts here.
-                // 1) Send the record back to Aggregator.
-                // 2) This causes a new bucket to be created for this start+period.
-                // 3) Enhance aggregation at edges to support re-aggregation (or prevent overwrite).
-                BUCKET_CLOSED_LOGGER
-                        .warn()
-                        .setMessage("Discarding metric")
-                        .addData("reason", "added after close")
-                        .addData("name", name)
-                        .addData("metric", metric)
-                        .addData("time", time)
-                        .log();
-                return;
-            }
-
-            // Add the metric data to any accumulators
-            for (final Calculator<?> calculator : calculators) {
-                final Statistic statistic = calculator.getStatistic();
-                if (calculator instanceof Accumulator) {
-                    final Accumulator<?> accumulator = (Accumulator<?>) calculator;
-                    synchronized (accumulator) {
-                        for (final Quantity quantity : metric.getValues()) {
-                            accumulator.accumulate(quantity);
-                        }
-                        for (final CalculatedValue<?> value : metric.getStatistics().getOrDefault(statistic, ImmutableList.of())) {
-                            accumulator.accumulateAny(value);
-                        }
+        // Add the metric data to any accumulators
+        for (final Calculator<?> calculator : calculators) {
+            final Statistic statistic = calculator.getStatistic();
+            if (calculator instanceof Accumulator) {
+                final Accumulator<?> accumulator = (Accumulator<?>) calculator;
+                synchronized (accumulator) {
+                    for (final Quantity quantity : metric.getValues()) {
+                        accumulator.accumulate(quantity);
+                    }
+                    for (final CalculatedValue<?> value : metric.getStatistics().getOrDefault(statistic, ImmutableList.of())) {
+                        accumulator.accumulateAny(value);
                     }
                 }
             }
-        } finally {
-            _addCloseLock.readLock().unlock();
         }
     }
 
@@ -335,7 +313,7 @@ import java.util.function.BiFunction;
             final String name,
             final Collection<Statistic> specifiedStatistics,
             final Collection<Statistic> dependentStatistics,
-            final ConcurrentMap<String, Collection<Calculator<?>>> calculatorsByMetric) {
+            final Map<String, Collection<Calculator<?>>> calculatorsByMetric) {
         Collection<Calculator<?>> calculators = calculatorsByMetric.get(name);
         if (calculators == null) {
             final Set<Calculator<?>> newCalculators = Sets.newHashSet();
@@ -370,12 +348,12 @@ import java.util.function.BiFunction;
         _dependentStatisticsCache = builder._dependentStatistics;
     }
 
-    private final AtomicBoolean _isOpen = new AtomicBoolean(true);
-    private final ReadWriteLock _addCloseLock = new ReentrantReadWriteLock();
-    private final ConcurrentMap<String, Collection<Calculator<?>>> _counterMetricCalculators = Maps.newConcurrentMap();
-    private final ConcurrentMap<String, Collection<Calculator<?>>> _gaugeMetricCalculators = Maps.newConcurrentMap();
-    private final ConcurrentMap<String, Collection<Calculator<?>>> _timerMetricCalculators = Maps.newConcurrentMap();
-    private final ConcurrentMap<String, Collection<Calculator<?>>> _explicitMetricCalculators = Maps.newConcurrentMap();
+    private boolean _isOpen = true;
+
+    private final Map<String, Collection<Calculator<?>>> _counterMetricCalculators = Maps.newHashMap();
+    private final Map<String, Collection<Calculator<?>>> _gaugeMetricCalculators = Maps.newHashMap();
+    private final Map<String, Collection<Calculator<?>>> _timerMetricCalculators = Maps.newHashMap();
+    private final Map<String, Collection<Calculator<?>>> _explicitMetricCalculators = Maps.newHashMap();
     private final Sink _sink;
     private final Key _key;
     private final ZonedDateTime _start;

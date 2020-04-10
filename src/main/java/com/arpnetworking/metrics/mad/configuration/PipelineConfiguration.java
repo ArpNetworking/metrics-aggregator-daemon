@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.configuration;
 
+import akka.actor.ActorSystem;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.Loggable;
@@ -24,6 +25,7 @@ import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticDeserializer;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.tsdcore.sinks.Sink;
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -80,6 +82,10 @@ public final class PipelineConfiguration {
         return objectMapper;
     }
 
+    public ActorSystem getActorSystem() {
+        return _actorSystem;
+    }
+
     public String getName() {
         return _name;
     }
@@ -116,6 +122,7 @@ public final class PipelineConfiguration {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", Integer.toHexString(System.identityHashCode(this)))
+                .add("ActorSystem", _actorSystem)
                 .add("Name", _name)
                 .add("Sources", _sources)
                 .add("Sinks", _sinks)
@@ -127,6 +134,7 @@ public final class PipelineConfiguration {
     }
 
     private PipelineConfiguration(final Builder builder) {
+        _actorSystem = builder._actorSystem;
         _name = builder._name;
         _sources = ImmutableList.copyOf(builder._sources);
         _sinks = ImmutableList.copyOf(builder._sinks);
@@ -137,6 +145,7 @@ public final class PipelineConfiguration {
         _statistics = ImmutableMap.copyOf(builder._statistics);
     }
 
+    private final ActorSystem _actorSystem;
     private final String _name;
     private final ImmutableList<Source> _sources;
     private final ImmutableList<Sink> _sinks;
@@ -160,6 +169,17 @@ public final class PipelineConfiguration {
          */
         public Builder() {
             super(PipelineConfiguration::new);
+        }
+
+        /**
+         * The Akka {@link ActorSystem}. Cannot be null.
+         *
+         * @param value The Akka {@link ActorSystem}.
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setActorSystem(final ActorSystem value) {
+            _actorSystem = value;
+            return this;
         }
 
         /**
@@ -255,6 +275,9 @@ public final class PipelineConfiguration {
             return this;
         }
 
+        @NotNull
+        @JacksonInject
+        private ActorSystem _actorSystem;
         @NotNull
         @NotEmpty
         private String _name;

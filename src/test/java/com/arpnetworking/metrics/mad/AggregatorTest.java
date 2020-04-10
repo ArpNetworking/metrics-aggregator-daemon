@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.mad;
 
+import akka.actor.ActorSystem;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
@@ -44,6 +45,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import scala.concurrent.Await;
 
 import java.time.Duration;
 import java.time.ZoneOffset;
@@ -51,6 +53,7 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for the <code>Aggregator</code> class.
@@ -62,7 +65,9 @@ public class AggregatorTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        _actorSystem = ActorSystem.create();
        _aggregator = new Aggregator.Builder()
+                .setActorSystem(_actorSystem)
                 .setSink(_sink)
                 .setCounterStatistics(Collections.singleton(MAX_STATISTIC))
                 .setTimerStatistics(Collections.singleton(MAX_STATISTIC))
@@ -73,8 +78,9 @@ public class AggregatorTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         _aggregator.shutdown();
+        Await.result(_actorSystem.terminate(), scala.concurrent.duration.Duration.create(10, TimeUnit.SECONDS));
     }
 
     @Test
@@ -392,6 +398,7 @@ public class AggregatorTest {
         return unifiedData;
     }
 
+    private ActorSystem _actorSystem;
     private Aggregator _aggregator;
     @Captor
     private ArgumentCaptor<PeriodicData> _periodicDataCaptor;
