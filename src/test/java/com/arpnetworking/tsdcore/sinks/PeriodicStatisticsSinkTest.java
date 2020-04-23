@@ -50,8 +50,9 @@ public class PeriodicStatisticsSinkTest {
         Mockito.verify(_mockMetrics).resetCounter(COUNTER_NAME);
 
         statisticsSink.close();
-        Mockito.verifyNoMoreInteractions(_mockMetricsFactory);
-        Mockito.verify(_mockMetrics).close();
+
+        Mockito.verify(_mockMetricsFactory, Mockito.times(2)).create();
+        Mockito.verify(_mockMetrics, Mockito.times(2)).resetCounter(COUNTER_NAME);
     }
 
     @Test
