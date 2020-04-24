@@ -245,6 +245,8 @@ public final class PeriodicStatisticsSink extends BaseSink {
         public void record(final PeriodicData periodicData, final long now) {
             _aggregatedData.addAndGet(periodicData.getData().size());
 
+            // TODO(ville): Remove the period and statistic from the unique statistics identifier.
+            // TODO(ville): Convert the serialized identity to use a Set<Key> instead.
             final String fqsnPrefix = new StringBuilder()
                     .append(periodicData.getDimensions().getParameters().entrySet().stream()
                             .map(entry -> entry.getKey() + "=" + entry.getValue())
@@ -298,15 +300,13 @@ public final class PeriodicStatisticsSink extends BaseSink {
             metrics.incrementCounter(_aggregatedDataName, _aggregatedData.getAndSet(0));
             metrics.incrementCounter(_uniqueMetricsName, oldUniqueMetrics.size());
             metrics.incrementCounter(_uniqueStatisticsName, oldUniqueStatistics.size());
-            metrics.incrementCounter(_metricSamplesName, _metricSamples.get());
-
-            // Use age as a proxy for whether data was added. See note in the sink's
-            // flushMetrics method about how the race condition is resolved.
-            final long age = _age.getThenReset();
-            metrics.setTimer(_ageName, age, TimeUnit.MILLISECONDS);
+            metrics.incrementCounter(_metricSamplesName, _metricSamples.getThenReset());
+            metrics.setTimer(_ageName, _age.getThenReset(), TimeUnit.MILLISECONDS);
             metrics.close();
 
-            return age > 0;
+            // Use unique metrics as a proxy for whether data was added. See note in the sink's
+            // flushMetrics method about how the race condition is resolved.
+            return oldUniqueMetrics.size() > 0;
         }
 
         @LogValue

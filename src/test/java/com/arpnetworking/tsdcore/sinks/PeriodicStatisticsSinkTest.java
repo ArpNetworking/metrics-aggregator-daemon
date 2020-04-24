@@ -18,10 +18,13 @@ package com.arpnetworking.tsdcore.sinks;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.test.TestBeanFactory;
+import com.google.common.collect.ImmutableSet;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.hamcrest.MockitoHamcrest;
 
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -106,6 +109,60 @@ public class PeriodicStatisticsSinkTest {
         statisticsSink.close();
         Mockito.verify(_mockMetrics).incrementCounter(COUNTER_NAME, 1);
         Mockito.verify(_mockMetrics, Mockito.atLeastOnce()).close();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testRecordDimensions() {
+        final ScheduledExecutorService executor = Mockito.mock(ScheduledExecutorService.class);
+        final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        _statisticsSinkBuilder.setDimensions(
+                ImmutableSet.of("host"));
+        final Sink statisticsSink = new PeriodicStatisticsSink(_statisticsSinkBuilder, executor);
+        Mockito.verify(executor).scheduleAtFixedRate(
+                runnableCaptor.capture(),
+                Mockito.anyLong(),
+                Mockito.anyLong(),
+                Mockito.any());
+
+        Mockito.verify(_mockMetricsFactory).create();
+        Mockito.verify(_mockMetrics).resetCounter(COUNTER_NAME);
+
+        final Metrics metricsA = Mockito.mock(Metrics.class);
+        final Metrics metricsB = Mockito.mock(Metrics.class);
+        final Metrics metricsUnused = Mockito.mock(Metrics.class);
+        Mockito.reset(_mockMetricsFactory);
+        Mockito.reset(_mockMetrics);
+        Mockito.when(_mockMetricsFactory.create())
+                .thenReturn(metricsA, metricsB, metricsUnused);
+
+        statisticsSink.recordAggregateData(TestBeanFactory.createPeriodicData());
+        statisticsSink.recordAggregateData(TestBeanFactory.createPeriodicData());
+        statisticsSink.close();
+
+        // The first key had a host annotation
+        Mockito.verify(metricsA).incrementCounter(COUNTER_NAME, 1);
+        Mockito.verify(metricsA).addAnnotations(
+                MockitoHamcrest.argThat(
+                    Matchers.allOf(
+                            Matchers.hasKey("host"),
+                            Matchers.aMapWithSize(1))));
+        Mockito.verify(metricsA).close();
+
+        // The second key also had a host annotation
+        Mockito.verify(metricsB).incrementCounter(COUNTER_NAME, 1);
+        Mockito.verify(metricsB).addAnnotations(
+                MockitoHamcrest.argThat(
+                        Matchers.allOf(
+                                Matchers.hasKey("host"),
+                                Matchers.aMapWithSize(1))));
+        Mockito.verify(metricsB).close();
+
+        // Global key had no metrics recorded against it, but it was closed
+        Mockito.verify(_mockMetrics).close();
+
+        // The metrics instances that replaced A, B and Global on flush (via close) were never used
+        Mockito.verify(metricsUnused, Mockito.never()).close();
     }
 
     private PeriodicStatisticsSink.Builder _statisticsSinkBuilder;
