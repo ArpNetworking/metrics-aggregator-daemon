@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.tsdcore.sinks;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.google.common.collect.ImmutableMap;
@@ -38,7 +39,7 @@ public final class DimensionInjectingSink extends BaseSink {
         final Map<String, String> mergedDimensions = Maps.newHashMap(_defaultDimensions);
         mergedDimensions.putAll(data.getDimensions().getParameters());
         mergedDimensions.putAll(_overrideDimensions);
-        final PeriodicData.Builder dataBuilder = PeriodicData.Builder.clone(data);
+        final PeriodicData.Builder dataBuilder = ThreadLocalBuilder.clone(data);
         dataBuilder.setDimensions(new DefaultKey(ImmutableMap.copyOf(mergedDimensions)));
         _sink.recordAggregateData(dataBuilder.build());
     }
