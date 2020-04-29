@@ -18,7 +18,12 @@ package com.arpnetworking.tsdcore.sinks;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.test.TestBeanFactory;
+import com.arpnetworking.tsdcore.model.DefaultKey;
+import com.arpnetworking.tsdcore.model.Key;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import net.sf.oval.exception.ConstraintsViolatedException;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +32,8 @@ import org.mockito.Mockito;
 import org.mockito.hamcrest.MockitoHamcrest;
 
 import java.util.concurrent.ScheduledExecutorService;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for the <code>PeriodicStatisticsSink</code> class.
@@ -44,6 +51,95 @@ public class PeriodicStatisticsSinkTest {
                 .setName("periodic_statistics_sink_test")
                 .setMetricsFactory(_mockMetricsFactory)
                 .setIntervalInMilliseconds(60L);
+    }
+
+    @Test(expected = ConstraintsViolatedException.class)
+    public void testValidationDuplicateMappedTarget() {
+        new PeriodicStatisticsSink.Builder()
+                .setMetricsFactory(_mockMetricsFactory)
+                .setName("testValidationDuplicateMappedTarget")
+                .setMappedDimensions(
+                        ImmutableMap.of(
+                                "foo", "abc",
+                                "bar", "abc"))
+                .build();
+    }
+
+    @Test(expected = ConstraintsViolatedException.class)
+    public void testValidationDimensionCollision() {
+        new PeriodicStatisticsSink.Builder()
+                .setMetricsFactory(_mockMetricsFactory)
+                .setName("testValidationDimensionCollision")
+                .setDimensions(
+                        ImmutableSet.of(
+                                "abc"))
+                .setMappedDimensions(
+                        ImmutableMap.of(
+                                "foo", "abc",
+                                "bar", "def"))
+                .build();
+    }
+
+    @Test
+    public void testValidationDimension() {
+        new PeriodicStatisticsSink.Builder()
+                .setMetricsFactory(_mockMetricsFactory)
+                .setName("testValidationDimension")
+                .setDimensions(
+                        ImmutableSet.of(
+                                "ghi",
+                                "foo"))
+                .setMappedDimensions(
+                        ImmutableMap.of(
+                                "foo", "abc",
+                                "bar", "def"))
+                .build();
+    }
+
+    @Test
+    public void testCreateKey() {
+        final Key k = new DefaultKey(
+                ImmutableMap.of(
+                        "foo", "abc",
+                        "bar", "def"));
+
+        assertEquals(
+                new DefaultKey(ImmutableMap.of()),
+                PeriodicStatisticsSink.computeKey(
+                        k,
+                        ImmutableMultimap.of()));
+
+        assertEquals(
+                new DefaultKey(ImmutableMap.of(
+                        "foo", "abc"
+                )),
+                PeriodicStatisticsSink.computeKey(
+                        k,
+                        ImmutableMultimap.of(
+                                "foo", "foo"
+                        )));
+
+        assertEquals(
+                new DefaultKey(ImmutableMap.of(
+                        "bar", "abc"
+                )),
+                PeriodicStatisticsSink.computeKey(
+                        k,
+                        ImmutableMultimap.of(
+                                "foo", "bar"
+                        )));
+
+        assertEquals(
+                new DefaultKey(ImmutableMap.of(
+                        "bar", "abc",
+                        "foo", "def"
+                )),
+                PeriodicStatisticsSink.computeKey(
+                        k,
+                        ImmutableMultimap.of(
+                                "foo", "bar",
+                                "bar", "foo"
+                        )));
     }
 
     @Test
