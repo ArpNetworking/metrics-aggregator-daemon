@@ -16,6 +16,7 @@
 package com.arpnetworking.tsdcore.model;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Interface for aggregation context (e.g. slice of hyper-cube).
@@ -51,6 +52,15 @@ public interface Key {
      * @return Host parameter value.
      */
     String getHost();
+
+    /**
+     * Create a {@link Key} from this key that contains a subset of the
+     * parameters by parameter key.
+     *
+     * @param keys the parameter keys to retain in the returned {@link Key}
+     * @return instance of {@link Key} with only specified parameter keys and values
+     */
+    Key filter(ImmutableSet<String> keys);
 
     /**
      * The dimension key for the cluster attribute.
