@@ -18,7 +18,9 @@ package com.arpnetworking.tsdcore.model;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -47,6 +49,17 @@ public final class DefaultKey implements Key {
     @Override
     public String getHost() {
         return _dimensions.get(HOST_DIMENSION_KEY);
+    }
+
+    @Override
+    public Key filter(final ImmutableSet<String> keys) {
+        return new DefaultKey(
+                _dimensions.entrySet()
+                        .stream()
+                        .filter(e -> keys.contains(e.getKey()))
+                        .collect(ImmutableMap.toImmutableMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue)));
     }
 
     @Override
