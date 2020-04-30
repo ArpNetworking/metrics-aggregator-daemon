@@ -182,11 +182,10 @@ import java.util.TreeMap;
         int closedBucketCount = 0;
 
         // Phase 1: Collect expired buckets
-        for (final ZonedDateTime key : expiredBucketMap.keySet()) {
-            for (final Bucket bucket : _bucketsByExpiration.remove(key)) {
-                expiredBuckets.add(bucket);
-            }
+        for (final Map.Entry<ZonedDateTime, List<Bucket>> entry : expiredBucketMap.entrySet()) {
+            expiredBuckets.addAll(entry.getValue());
         }
+        expiredBucketMap.clear();
 
         // Phase 2: Close the expired buckets
         for (final Bucket bucket : expiredBuckets) {
