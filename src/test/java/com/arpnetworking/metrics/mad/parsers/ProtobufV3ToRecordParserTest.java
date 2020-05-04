@@ -127,13 +127,13 @@ public final class ProtobufV3ToRecordParserTest {
         supportingData = (HistogramStatistic.HistogramSupportingData) calculatedValue.getData();
         histogramSnapshot = supportingData.getHistogramSnapshot();
         Assert.assertFalse(supportingData.getUnit().isPresent());
-        Assert.assertEquals(9, histogramSnapshot.getEntriesCount());
+        Assert.assertEquals(9L, histogramSnapshot.getEntriesCount());
         Assert.assertEquals(7, histogramSnapshot.getPrecision());
-        Assert.assertEquals(1, histogramSnapshot.getValue(1.0));
-        Assert.assertEquals(2, histogramSnapshot.getValue(2.0));
-        Assert.assertEquals(3, histogramSnapshot.getValue(3.0));
-        Assert.assertEquals(2, histogramSnapshot.getValue(4.0));
-        Assert.assertEquals(1, histogramSnapshot.getValue(5.0));
+        Assert.assertEquals(1L, histogramSnapshot.getValue(1.0));
+        Assert.assertEquals(2L, histogramSnapshot.getValue(2.0));
+        Assert.assertEquals(3L, histogramSnapshot.getValue(3.0));
+        Assert.assertEquals(2L, histogramSnapshot.getValue(4.0));
+        Assert.assertEquals(1L, histogramSnapshot.getValue(5.0));
 
         final Metric combined = metrics.get("combined1");
         Assert.assertNotNull(combined);
@@ -170,12 +170,12 @@ public final class ProtobufV3ToRecordParserTest {
         supportingData = (HistogramStatistic.HistogramSupportingData) calculatedValue.getData();
         histogramSnapshot = supportingData.getHistogramSnapshot();
         Assert.assertFalse(supportingData.getUnit().isPresent());
-        Assert.assertEquals(4, histogramSnapshot.getEntriesCount());
+        Assert.assertEquals(4L, histogramSnapshot.getEntriesCount());
         Assert.assertEquals(7, histogramSnapshot.getPrecision());
-        Assert.assertEquals(1, histogramSnapshot.getValue(2.0));
-        Assert.assertEquals(1, histogramSnapshot.getValue(3.0));
-        Assert.assertEquals(1, histogramSnapshot.getValue(4.0));
-        Assert.assertEquals(1, histogramSnapshot.getValue(5.0));
+        Assert.assertEquals(1L, histogramSnapshot.getValue(2.0));
+        Assert.assertEquals(1L, histogramSnapshot.getValue(3.0));
+        Assert.assertEquals(1L, histogramSnapshot.getValue(4.0));
+        Assert.assertEquals(1L, histogramSnapshot.getValue(5.0));
         // Min
         calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("min")).get(1);
         Assert.assertEquals(new DefaultQuantity.Builder().setValue(3.0).build(), calculatedValue.getValue());
@@ -199,9 +199,9 @@ public final class ProtobufV3ToRecordParserTest {
         supportingData = (HistogramStatistic.HistogramSupportingData) calculatedValue.getData();
         histogramSnapshot = supportingData.getHistogramSnapshot();
         Assert.assertFalse(supportingData.getUnit().isPresent());
-        Assert.assertEquals(1, histogramSnapshot.getEntriesCount());
+        Assert.assertEquals(1L, histogramSnapshot.getEntriesCount());
         Assert.assertEquals(7, histogramSnapshot.getPrecision());
-        Assert.assertEquals(1, histogramSnapshot.getValue(3.0));
+        Assert.assertEquals(1L, histogramSnapshot.getValue(3.0));
     }
     // CHECKSTYLE.ON: MethodLength
 
