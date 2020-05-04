@@ -390,9 +390,9 @@ public final class PeriodicStatisticsSink extends BaseSink {
         private final LongAccumulator _metricSamples = new LongAccumulator(Long::sum, 0);
         private final AtomicLong _aggregatedData = new AtomicLong(0);
         private final AtomicReference<Set<String>> _uniqueMetrics = new AtomicReference<>(
-                Collections.newSetFromMap(Maps.newConcurrentMap()));
+                ConcurrentHashMap.newKeySet());
         private final AtomicReference<Set<MetricKey>> _uniqueStatistics = new AtomicReference<>(
-                Collections.newSetFromMap(Maps.newConcurrentMap()));
+                ConcurrentHashMap.newKeySet());
     }
 
     /**
