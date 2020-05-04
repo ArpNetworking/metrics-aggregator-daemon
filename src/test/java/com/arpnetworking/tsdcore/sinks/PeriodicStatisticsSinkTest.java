@@ -80,9 +80,24 @@ public class PeriodicStatisticsSinkTest {
                 .build();
     }
 
+    @Test(expected = ConstraintsViolatedException.class)
+    public void testValidationDimensionCollisionAlthoughLogicallyEquivalent() {
+        new PeriodicStatisticsSink.Builder()
+                .setMetricsFactory(_mockMetricsFactory)
+                .setName("testValidationDimensionCollisionAlthoughLogicallyEquivalent")
+                .setDimensions(
+                        ImmutableSet.of(
+                                "abc"))
+                .setMappedDimensions(
+                        ImmutableMap.of(
+                                "abc", "abc",
+                                "bar", "def"))
+                .build();
+    }
+
     @Test
     public void testValidationDimension() {
-        new PeriodicStatisticsSink.Builder()
+        final PeriodicStatisticsSink sink = new PeriodicStatisticsSink.Builder()
                 .setMetricsFactory(_mockMetricsFactory)
                 .setName("testValidationDimension")
                 .setDimensions(
@@ -94,6 +109,14 @@ public class PeriodicStatisticsSinkTest {
                                 "foo", "abc",
                                 "bar", "def"))
                 .build();
+        assertEquals(
+                ImmutableMultimap.<String, String>builder()
+                        .put("ghi", "ghi") // from dimensions
+                        .put("foo", "foo") // from dimensions
+                        .put("foo", "abc") // from mapped dimensions
+                        .put("bar", "def") // from mapped dimensions
+                        .build(),
+                sink.getMappedDimensions());
     }
 
     @Test

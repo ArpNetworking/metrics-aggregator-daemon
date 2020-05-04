@@ -31,6 +31,8 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import net.sf.oval.constraint.CheckWith;
+import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.ValidateWithMethod;
@@ -49,7 +51,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAccumulator;
-import java.util.stream.Collectors;
 
 /**
  * Aggregates and periodically logs metrics about the aggregated data being
@@ -120,6 +121,10 @@ public final class PeriodicStatisticsSink extends BaseSink {
         // and then create a new parameter set from the target (values) of the
         // dimension keys and the corresponding value from parameters for the
         // dimension.
+        //
+        // There are no key collisions possible because the inputs that created
+        // mappedDimensions were validated as only declaring each target key
+        // name once (regardless of how it was populated).
         final Map<String, String> parameters = key.getParameters();
         return new DefaultKey(
                 mappedDimensions.entries()
@@ -178,19 +183,21 @@ public final class PeriodicStatisticsSink extends BaseSink {
         return Collections.newSetFromMap(new ConcurrentHashMap<>(initialCapacity));
     }
 
+    ImmutableMultimap<String, String> getMappedDimensions() {
+        return _mappedDimensions;
+    }
+
     // NOTE: Package private for testing
     /* package private */ PeriodicStatisticsSink(final Builder builder, final ScheduledExecutorService executor) {
         super(builder);
 
         // Merge the mapped and unmapped dimensions
+        //
+        // The validation in the Builder ensures that all target key names
+        // occur only once across dimensions and mappedDimensions regardless
+        // of what the source key name is (or whether it was unammped or mapped).
         final ImmutableMultimap.Builder<String, String> dimensionsBuilder = ImmutableMultimap.builder();
-        dimensionsBuilder.putAll(
-                builder._dimensions.stream()
-                        .collect(
-                                Collectors.toMap(
-                                        e -> e,
-                                        e -> e))
-                        .entrySet());
+        builder._dimensions.forEach(e -> dimensionsBuilder.put(e, e));
         dimensionsBuilder.putAll(builder._mappedDimensions.entrySet());
 
         // Initialize the metrics factory and metrics instance
@@ -366,6 +373,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
+    @CheckWith(value = Builder.CheckUniqueDimensionTargets.class)
     public static final class Builder extends BaseSink.Builder<Builder, PeriodicStatisticsSink> {
 
         /**
@@ -391,8 +399,12 @@ public final class PeriodicStatisticsSink extends BaseSink {
          * Dimension names to partition the periodic statistics on. Cannot be
          * null. Default is empty set (no dimension partitions).
          *
-         * Note that if the same dimension is specified here and in mapped
-         * dimensions the output key from mapped dimensions takes precedence.
+         * These dimensions create a target dimension on the periodic data of
+         * the same name. These output dimension names are not allowed to
+         * overlap between those specified (implicitly) via
+         * {@link Builder#setDimensions(ImmutableSet<String>)} and (explicitly)
+         * via {@link Builder#setMappedDimensions(ImmutableMap<String, String>)}.
+         * Doing so will cause a validation failure.
          *
          * @param value The set of dimension names to partition on.
          * @return This instance of <code>Builder</code>.
@@ -407,8 +419,12 @@ public final class PeriodicStatisticsSink extends BaseSink {
          * mapped to an outbound dimension name. Cannot be null. Default is
          * empty map (no dimension partitions).
          *
-         * Note that if the same dimension is specified here and in
-         * dimensions the output key from mapped dimensions takes precedence.
+         * These dimensions create a target dimension on the periodic data of
+         * the specified name. These output dimension names are not allowed to
+         * overlap between those specified (implicitly) via
+         * {@link Builder#setDimensions(ImmutableSet<String>)} and (explicitly)
+         * via {@link Builder#setMappedDimensions(ImmutableMap<String, String>)}.
+         * Doing so will cause a validation failure.
          *
          * @param value The set of dimension names to partition on.
          * @return This instance of <code>Builder</code>.
@@ -435,20 +451,42 @@ public final class PeriodicStatisticsSink extends BaseSink {
             return this;
         }
 
-        private boolean validate(final ImmutableMap<String, String> ignored) {
-            final Set<String> mappedTargetDimensions = Sets.newHashSet(_mappedDimensions.values());
+        private static final class CheckUniqueDimensionTargets implements CheckWithCheck.SimpleCheck {
 
-            // Assert that no two mapped dimensions target the same value
-            if (mappedTargetDimensions.size() != _mappedDimensions.size()) {
-                return false;
+            private static final long serialVersionUID = -1484528750004342337L;
+
+            @Override
+            public boolean isSatisfied(final Object validatedObject, final Object value) {
+                if (!(value instanceof PeriodicStatisticsSink.Builder)) {
+                    return false;
+                }
+                final PeriodicStatisticsSink.Builder builder = (PeriodicStatisticsSink.Builder) value;
+
+                final Set<String> mappedTargetDimensions = Sets.newHashSet(builder._mappedDimensions.values());
+
+                // Assert that no two mapped dimensions target the same value
+                if (mappedTargetDimensions.size() != builder._mappedDimensions.size()) {
+                    return false;
+                }
+
+                // Assert that no mapped dimension target is also a dimension
+                if (!Sets.intersection(mappedTargetDimensions, builder._dimensions).isEmpty()) {
+                    return false;
+                }
+
+                // NOTE: This does mean that a logically equivalent overlap would be
+                // disallowed. For example:
+                //
+                // dimensions = {"a", "b"}
+                // mappedDimensions = {"b": "b"}
+                //
+                // This is logically valid because the dimension rule for "b" and the
+                // mapped dimension rule for "b" are equivalent! However, the current
+                // check disallows this.
+
+
+                return true;
             }
-
-            // Assert that no mapped dimension target is also a dimension
-            if (!Sets.intersection(mappedTargetDimensions, _dimensions).isEmpty()) {
-                return false;
-            }
-
-            return true;
         }
 
         @NotNull
@@ -457,7 +495,6 @@ public final class PeriodicStatisticsSink extends BaseSink {
         @NotNull
         private ImmutableSet<String> _dimensions = ImmutableSet.of();
         @NotNull
-        @ValidateWithMethod(methodName = "validate", parameterType = ImmutableMap.class)
         private ImmutableMap<String, String> _mappedDimensions = ImmutableMap.of();
         @JacksonInject
         @NotNull
