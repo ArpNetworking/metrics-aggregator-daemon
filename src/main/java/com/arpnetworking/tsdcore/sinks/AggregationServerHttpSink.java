@@ -125,7 +125,7 @@ public final class AggregationServerHttpSink extends HttpPostSink {
             }
             builder.setUnit(unit);
 
-            for (final Map.Entry<Double, Integer> entry : histogram.getValues()) {
+            for (final Map.Entry<Double, Long> entry : histogram.getValues()) {
                 builder.addEntriesBuilder()
                         .setBucket(entry.getKey())
                         .setCount(entry.getValue())
