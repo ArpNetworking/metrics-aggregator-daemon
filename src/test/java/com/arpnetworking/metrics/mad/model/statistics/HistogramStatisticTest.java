@@ -40,8 +40,8 @@ public class HistogramStatisticTest {
         final CalculatedValue<HistogramStatistic.HistogramSupportingData> value = accumulator.calculate(Collections.emptyMap());
         final HistogramStatistic.HistogramSupportingData supportingData = value.getData();
         final HistogramStatistic.HistogramSnapshot histogram = supportingData.getHistogramSnapshot();
-        for (final Map.Entry<Double, Integer> entry : histogram.getValues()) {
-            Assert.assertEquals(entry.getValue(), (Integer) 1);
+        for (final Map.Entry<Double, Long> entry : histogram.getValues()) {
+            Assert.assertEquals(entry.getValue(), (Long) 1L);
         }
     }
 
@@ -59,8 +59,8 @@ public class HistogramStatisticTest {
         final CalculatedValue<HistogramStatistic.HistogramSupportingData> value = merged.calculate(Collections.emptyMap());
         final HistogramStatistic.HistogramSupportingData supportingData = value.getData();
         final HistogramStatistic.HistogramSnapshot histogram = supportingData.getHistogramSnapshot();
-        for (final Map.Entry<Double, Integer> entry : histogram.getValues()) {
-            Assert.assertEquals(entry.getValue(), (Integer) 1);
+        for (final Map.Entry<Double, Long> entry : histogram.getValues()) {
+            Assert.assertEquals(entry.getValue(), (Long) 1L);
         }
     }
 
@@ -90,14 +90,14 @@ public class HistogramStatisticTest {
         final CalculatedValue<HistogramStatistic.HistogramSupportingData> value = merged.calculate(Collections.emptyMap());
         final HistogramStatistic.HistogramSupportingData supportingData = value.getData();
         final HistogramStatistic.HistogramSnapshot histogram = supportingData.getHistogramSnapshot();
-        for (final Map.Entry<Double, Integer> entry : histogram.getValues()) {
+        for (final Map.Entry<Double, Long> entry : histogram.getValues()) {
             final int val = entry.getKey().intValue();
             if (val < 50) {
-                Assert.assertEquals("incorrect value for key " + val, (Integer) 1, entry.getValue());
+                Assert.assertEquals("incorrect value for key " + val, (Long) 1L, entry.getValue());
             } else if (val <= 100) {
-                Assert.assertEquals("incorrect value for key " + val, (Integer) 2, entry.getValue());
+                Assert.assertEquals("incorrect value for key " + val, (Long) 2L, entry.getValue());
             } else { // val > 100
-                Assert.assertEquals("incorrect value for key " + val, (Integer) 1, entry.getValue());
+                Assert.assertEquals("incorrect value for key " + val, (Long) 1L, entry.getValue());
             }
         }
 
@@ -113,7 +113,7 @@ public class HistogramStatisticTest {
         final CalculatedValue<HistogramStatistic.HistogramSupportingData> value = accumulator.calculate(Collections.emptyMap());
         final HistogramStatistic.HistogramSupportingData supportingData = value.getData();
         final HistogramStatistic.HistogramSnapshot histogram = supportingData.getHistogramSnapshot();
-        Assert.assertEquals(2, histogram.getEntriesCount());
+        Assert.assertEquals(2L, histogram.getEntriesCount());
         Assert.assertEquals(1, histogram.getValues().size());
     }
 

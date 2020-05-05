@@ -87,7 +87,7 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
         for (final ClientV3.MetricDataEntry metricDataEntry : record.getDataList()) {
             final String metricName = decodeRequiredIdentifier(metricDataEntry.getName());
             switch (metricDataEntry.getDataCase()) {
-                case NUMERICALDATA:
+                case NUMERICAL_DATA:
                     final ClientV3.NumericalData numericalData = metricDataEntry.getNumericalData();
                     if (!numericalData.getSamplesList().isEmpty()) {
                         parseNumericalSamples(metricName, metricData, numericalData.getSamplesList());
@@ -153,7 +153,7 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
 
         final Map<Statistic, CalculatedValue<?>> statistics = Maps.newHashMap();
         final long populationSize = augmentedHistogram.getEntriesList().stream()
-                .map(e -> (long) e.getCount())
+                .map(ClientV3.SparseHistogramEntry::getCount)
                 .reduce(Long::sum)
                 .orElse(0L);
 
@@ -240,7 +240,7 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
     @Nullable
     private String decodeIdentifier(final ClientV3.Identifier identifier) {
         switch (identifier.getValueCase()) {
-            case STRINGVALUE:
+            case STRING_VALUE:
                 return identifier.getStringValue();
             case VALUE_NOT_SET:
                 return null;
