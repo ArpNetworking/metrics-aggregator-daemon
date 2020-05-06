@@ -122,11 +122,11 @@ public final class TelemetryIT {
                                 .setMaximum(5.5)
                                 .setSum(60.5)
                                 .setHistogram(ImmutableMap.of(
-                                        1.1, 1,
-                                        2.2, 2,
-                                        3.3, 3,
-                                        4.4, 4,
-                                        5.5, 5))
+                                        1.1, 1L,
+                                        2.2, 2L,
+                                        3.3, 3L,
+                                        4.4, 4L,
+                                        5.5, 5L))
                                 .setPrecision(7)
                                 .build());
             }
@@ -139,11 +139,11 @@ public final class TelemetryIT {
                                 .setMaximum(11.0)
                                 .setSum(363.0)
                                 .setHistogram(ImmutableMap.of(
-                                        6.6, 6,
-                                        7.7, 7,
-                                        8.8, 8,
-                                        9.9, 9,
-                                        11.0, 10))
+                                        6.6, 6L,
+                                        7.7, 7L,
+                                        8.8, 8L,
+                                        9.9, 9L,
+                                        11.0, 10L))
                                 .setPrecision(7)
                                 .build());
             }
@@ -186,9 +186,9 @@ public final class TelemetryIT {
                                 .setMaximum(5.5)
                                 .setSum(55.0)
                                 .setHistogram(ImmutableMap.of(
-                                        3.3, 3,
-                                        4.4, 4,
-                                        5.5, 5))
+                                        3.3, 3L,
+                                        4.4, 4L,
+                                        5.5, 5L))
                                 .setPrecision(7)
                                 .build());
             }
@@ -209,8 +209,8 @@ public final class TelemetryIT {
                                 .setMaximum(11.0)
                                 .setSum(199.1)
                                 .setHistogram(ImmutableMap.of(
-                                        9.9, 9,
-                                        11.0, 10))
+                                        9.9, 9L,
+                                        11.0, 10L))
                                 .setPrecision(7)
                                 .build());
             }
