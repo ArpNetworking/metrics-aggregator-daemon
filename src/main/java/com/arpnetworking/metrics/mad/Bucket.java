@@ -107,6 +107,7 @@ import java.util.function.BiFunction;
         }
 
 
+
         for (final Map.Entry<String, ? extends Metric> entry : record.getMetrics().entrySet()) {
             final String name = entry.getKey();
             final Metric metric = entry.getValue();
@@ -177,6 +178,16 @@ import java.util.function.BiFunction;
                 }
             }
             addMetric(metric, calculators);
+        }
+
+        if (_min_request_time == null) {
+            _min_request_time= record.getRequestTime();
+        }
+
+        if (record.getRequestTime() != null) {
+            if (record.getRequestTime().isBefore(_min_request_time)) {
+                _min_request_time = record.getRequestTime();
+            }
         }
     }
 
@@ -349,6 +360,7 @@ import java.util.function.BiFunction;
     }
 
     private boolean _isOpen = true;
+    private ZonedDateTime _min_request_time = null;
 
     private final Map<String, Collection<Calculator<?>>> _counterMetricCalculators = Maps.newHashMap();
     private final Map<String, Collection<Calculator<?>>> _gaugeMetricCalculators = Maps.newHashMap();
