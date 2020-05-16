@@ -46,6 +46,11 @@ public final class DefaultRecord implements Record {
     }
 
     @Override
+    public ZonedDateTime getRequestTime() {
+        return _request_time;
+    }
+
+    @Override
     public ImmutableMap<String, ? extends Metric> getMetrics() {
         return _metrics;
     }
@@ -100,6 +105,7 @@ public final class DefaultRecord implements Record {
         _metrics = builder._metrics;
         _id = builder._id;
         _time = builder._time;
+        _request_time= builder._request_time;
         _annotations = builder._annotations;
         _dimensions = builder._dimensions;
     }
@@ -107,6 +113,7 @@ public final class DefaultRecord implements Record {
     private final ImmutableMap<String, ? extends Metric> _metrics;
     private final String _id;
     private final ZonedDateTime _time;
+    private final ZonedDateTime _request_time;
     private final ImmutableMap<String, String> _annotations;
     private final ImmutableMap<String, String> _dimensions;
 
@@ -158,6 +165,17 @@ public final class DefaultRecord implements Record {
         }
 
         /**
+         * The timestamp at which the record was received. Cannot be null.
+         *
+         * @param value The timestamp.
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setRequestTime(final ZonedDateTime value) {
+            _request_time= value;
+            return this;
+        }
+
+        /**
          * The annotations <code>ImmutableMap</code>. Optional. Default is an empty
          * <code>ImmutableMap</code>. Cannot be null.
          *
@@ -197,6 +215,8 @@ public final class DefaultRecord implements Record {
         private String _id;
         @NotNull
         private ZonedDateTime _time;
+        @NotNull
+        private ZonedDateTime _request_time;
         @NotNull
         private ImmutableMap<String, String> _annotations = ImmutableMap.of();
         @NotNull

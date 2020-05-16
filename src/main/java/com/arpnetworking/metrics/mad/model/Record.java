@@ -44,6 +44,13 @@ public interface Record {
     ZonedDateTime getTime();
 
     /**
+     * Gets the "received at" time stamp of the record.
+     *
+     * @return the time stamp
+     */
+    ZonedDateTime getRequestTime();
+
+    /**
      * Gets metrics.
      *
      * @return the metrics
