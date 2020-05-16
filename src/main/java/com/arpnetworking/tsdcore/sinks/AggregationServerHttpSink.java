@@ -76,6 +76,7 @@ public final class AggregationServerHttpSink extends HttpPostSink {
                 .setMetric(metricName)
                 .setPeriod(periodicData.getPeriod().toString())
                 .setPeriodStart(periodicData.getStart().toString())
+                .setMinRequestTime(periodicData.getMinRequestTime().toString())
                 .putAllDimensions(periodicData.getDimensions().getParameters())
                 .setCluster(periodicData.getDimensions().getCluster())
                 .setService(periodicData.getDimensions().getService());
