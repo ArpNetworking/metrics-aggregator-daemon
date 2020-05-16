@@ -70,6 +70,7 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
                         DefaultRecord.Builder.class,
                         builder -> builder.setId(new UUID(high, low).toString())
                                 .setTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getEndMillisSinceEpoch()), ZoneOffset.UTC))
+                                .setRequestTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getRequestMillisSinceEpoch()), ZoneOffset.UTC))
                                 .setDimensions(buildDimensions(record))
                                 .setMetrics(buildMetrics(record))));
             }
