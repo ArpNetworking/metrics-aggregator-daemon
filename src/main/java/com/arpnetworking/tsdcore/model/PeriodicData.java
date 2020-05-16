@@ -23,6 +23,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import net.sf.oval.constraint.NotNull;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 
@@ -41,6 +42,8 @@ public final class PeriodicData {
     public ZonedDateTime getStart() {
         return _start;
     }
+
+    public ZonedDateTime getMinRequestTime() { return _min_request_time; }
 
     public Key getDimensions() {
         return _dimensions;
@@ -90,12 +93,14 @@ public final class PeriodicData {
     private PeriodicData(final Builder builder) {
         _period = builder._period;
         _start = builder._start;
+        _min_request_time=builder._min_request_time;
         _dimensions = builder._dimensions;
         _data = builder._data;
     }
 
     private final Duration _period;
     private final ZonedDateTime _start;
+    private final ZonedDateTime _min_request_time;
     private final Key _dimensions;
     private final ImmutableMultimap<String, AggregatedData> _data;
 
@@ -134,6 +139,18 @@ public final class PeriodicData {
         }
 
         /**
+         * Set the earliest time at which data in this bucket was recorded. Optional.
+         *
+         * @param value The timestamp
+         * @return This <code>Builder</code> instance.
+         */
+        public Builder setMinRequestTime(final ZonedDateTime value) {
+            _min_request_time=value;
+            return this;
+        }
+
+
+        /**
          * Set the dimensions. Required. Cannot be null.
          *
          * @param value The dimensions.
@@ -167,6 +184,9 @@ public final class PeriodicData {
         private Duration _period;
         @NotNull
         private ZonedDateTime _start;
+        @Nullable
+        private ZonedDateTime _min_request_time;
+
         @NotNull
         private Key _dimensions;
         @NotNull

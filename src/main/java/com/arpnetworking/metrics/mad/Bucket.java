@@ -76,7 +76,8 @@ import java.util.function.BiFunction;
                     b -> b.setData(data.build())
                             .setDimensions(_key)
                             .setPeriod(_period)
-                            .setStart(_start));
+                            .setStart(_start)
+                            .setMinRequestTime(_min_request_time));
             _sink.recordAggregateData(periodicData);
         } else {
             LOGGER.warn()
