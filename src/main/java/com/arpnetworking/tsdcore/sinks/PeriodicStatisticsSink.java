@@ -149,7 +149,8 @@ public final class PeriodicStatisticsSink extends BaseSink {
         // condition between the flush+remove and any new data added.
         //
         // 1) If the bucket flush does nothing then remove it from the buckets map and
-        // add it to a "to be removed" list. This prevents further
+        // add it to a "to be removed" list. This prevents buckets from accumulating
+        // in memory if the tag space changes over time.
         //
         // 2) On the next flush interval re-flush all the buckets to be removed and then
         // actually drop them.
@@ -208,7 +209,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
         //
         // The validation in the Builder ensures that all target key names
         // occur only once across dimensions and mappedDimensions regardless
-        // of what the source key name is (or whether it was unammped or mapped).
+        // of what the source key name is (or whether it was unmapped or mapped).
         final ImmutableMultimap.Builder<String, String> dimensionsBuilder = ImmutableMultimap.builder();
         builder._dimensions.forEach(e -> dimensionsBuilder.put(e, e));
         dimensionsBuilder.putAll(builder._mappedDimensions.entrySet());

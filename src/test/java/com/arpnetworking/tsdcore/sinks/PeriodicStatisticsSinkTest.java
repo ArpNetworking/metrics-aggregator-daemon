@@ -28,7 +28,10 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.hamcrest.MockitoHamcrest;
 
 import java.time.Duration;
@@ -45,8 +48,7 @@ public class PeriodicStatisticsSinkTest {
 
     @Before
     public void before() {
-        _mockMetrics = Mockito.mock(Metrics.class);
-        _mockMetricsFactory = Mockito.mock(MetricsFactory.class);
+        MockitoAnnotations.initMocks(this);
         Mockito.doReturn(_mockMetrics).when(_mockMetricsFactory).create();
         _statisticsSinkBuilder = new PeriodicStatisticsSink.Builder()
                 .setName("periodic_statistics_sink_test")
@@ -289,14 +291,7 @@ public class PeriodicStatisticsSinkTest {
 
     @Test
     public void testFlushOnClose() {
-        final ScheduledExecutorService executor = Mockito.mock(ScheduledExecutorService.class);
-        final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        final Sink statisticsSink = new PeriodicStatisticsSink(_statisticsSinkBuilder, executor);
-        Mockito.verify(executor).scheduleAtFixedRate(
-                runnableCaptor.capture(),
-                Mockito.anyLong(),
-                Mockito.anyLong(),
-                Mockito.any());
+        final Sink statisticsSink = new PeriodicStatisticsSink(_statisticsSinkBuilder, _executor);
 
         statisticsSink.recordAggregateData(TestBeanFactory.createPeriodicData());
         statisticsSink.close();
@@ -312,16 +307,14 @@ public class PeriodicStatisticsSinkTest {
 
     @Test
     public void testPeriodicFlush() {
-        final ScheduledExecutorService executor = Mockito.mock(ScheduledExecutorService.class);
-        final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        final Sink statisticsSink = new PeriodicStatisticsSink(_statisticsSinkBuilder, executor);
-        Mockito.verify(executor).scheduleAtFixedRate(
-                runnableCaptor.capture(),
+        final Sink statisticsSink = new PeriodicStatisticsSink(_statisticsSinkBuilder, _executor);
+        Mockito.verify(_executor).scheduleAtFixedRate(
+                _runnableCaptor.capture(),
                 Mockito.anyLong(),
                 Mockito.anyLong(),
                 Mockito.any());
 
-        final Runnable periodicRunnable = runnableCaptor.getValue();
+        final Runnable periodicRunnable = _runnableCaptor.getValue();
 
         statisticsSink.recordAggregateData(TestBeanFactory.createPeriodicData());
         periodicRunnable.run();
@@ -341,14 +334,7 @@ public class PeriodicStatisticsSinkTest {
 
     @Test
     public void testRecordProcessedAggregateData() {
-        final ScheduledExecutorService executor = Mockito.mock(ScheduledExecutorService.class);
-        final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        final Sink statisticsSink = new PeriodicStatisticsSink(_statisticsSinkBuilder, executor);
-        Mockito.verify(executor).scheduleAtFixedRate(
-                runnableCaptor.capture(),
-                Mockito.anyLong(),
-                Mockito.anyLong(),
-                Mockito.any());
+        final Sink statisticsSink = new PeriodicStatisticsSink(_statisticsSinkBuilder, _executor);
 
         statisticsSink.recordAggregateData(TestBeanFactory.createPeriodicData());
         statisticsSink.close();
@@ -359,13 +345,11 @@ public class PeriodicStatisticsSinkTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testRecordDimensions() {
-        final ScheduledExecutorService executor = Mockito.mock(ScheduledExecutorService.class);
-        final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
         _statisticsSinkBuilder.setDimensions(
                 ImmutableSet.of("host"));
-        final Sink statisticsSink = new PeriodicStatisticsSink(_statisticsSinkBuilder, executor);
-        Mockito.verify(executor).scheduleAtFixedRate(
-                runnableCaptor.capture(),
+        final Sink statisticsSink = new PeriodicStatisticsSink(_statisticsSinkBuilder, _executor);
+        Mockito.verify(_executor).scheduleAtFixedRate(
+                _runnableCaptor.capture(),
                 Mockito.anyLong(),
                 Mockito.anyLong(),
                 Mockito.any());
@@ -404,9 +388,16 @@ public class PeriodicStatisticsSinkTest {
         Mockito.verify(metricsUnused, Mockito.never()).close();
     }
 
-    private PeriodicStatisticsSink.Builder _statisticsSinkBuilder;
+    @Mock
     private Metrics _mockMetrics;
+    @Mock
     private MetricsFactory _mockMetricsFactory;
+    @Mock
+    private ScheduledExecutorService _executor;
+    @Captor
+    private ArgumentCaptor<Runnable> _runnableCaptor;
+
+    private PeriodicStatisticsSink.Builder _statisticsSinkBuilder;
 
     private static final String COUNTER_NAME = "sinks/periodic_statistics/periodic_statistics_sink_test/aggregated_data";
 }
