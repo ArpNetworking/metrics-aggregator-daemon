@@ -315,27 +315,22 @@ To build the service locally you must satisfy these prerequisites:
 
 __Note:__ Requires at least Docker for Mac Beta version _Version 1.12.0-rc4-beta19 (build: 10258)_
 
-Next, fork the repository, clone and build:
+Next, fork the repository, clone and build.
+
+Unit tests and integration tests can be run from IntelliJ. Integrate tests
+require that the service and its dependencies be running (see below).
 
 Building:
 
     metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw verify
 
-To debug the server during run on port 9000:
-
-    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw -Ddebug=true docker:start
-
-To debug the server during integration tests on port 9000:
-
-    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw -Ddebug=true verify
-
 To launch the service and its dependencies in Docker:
 
-    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw initialize docker:start
+    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw docker:start
 
-To launch the service with remote debugging and its dependencies in Docker:
+To launch the service with remote debugging on port 9001 and its dependencies in Docker:
 
-    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw -Ddebug=true initialize docker:start
+    metrics-aggregator-daemon> ./jdk-wrapper.sh ./mvnw -Ddebug=true docker:start
 
 To execute performance tests:
 
