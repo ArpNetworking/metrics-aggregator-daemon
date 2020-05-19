@@ -317,7 +317,7 @@ __Note:__ Requires at least Docker for Mac Beta version _Version 1.12.0-rc4-beta
 
 Next, fork the repository, clone and build.
 
-Unit tests and integration tests can be run from IntelliJ. Integrate tests
+Unit tests and integration tests can be run from IntelliJ. Integration tests
 require that the service and its dependencies be running (see below).
 
 Building:
