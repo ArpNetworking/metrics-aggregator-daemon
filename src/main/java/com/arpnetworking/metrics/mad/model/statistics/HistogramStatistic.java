@@ -182,9 +182,9 @@ public final class HistogramStatistic extends BaseStatistic {
         public HistogramSupportingData toUnit(final Unit newUnit) {
             if (_unit.isPresent()) {
                 final Histogram newHistogram = new Histogram();
-                for (final Map.Entry<Double, Long> entry : _histogramSnapshot.getValues()) {
-                    final Double newBucket = newUnit.convert(entry.getKey(), _unit.get());
-                    newHistogram.recordValue(newBucket, entry.getValue());
+                for (final Double2LongMap.Entry entry : _histogramSnapshot.getValues()) {
+                    final double newBucket = newUnit.convert(entry.getDoubleKey(), _unit.get());
+                    newHistogram.recordValue(newBucket, entry.getLongValue());
                 }
                 return ThreadLocalBuilder.build(
                         HistogramSupportingData.Builder.class,
