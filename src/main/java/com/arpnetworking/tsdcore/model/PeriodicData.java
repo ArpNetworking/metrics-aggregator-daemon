@@ -43,7 +43,9 @@ public final class PeriodicData {
         return _start;
     }
 
-    public ZonedDateTime getMinRequestTime() { return _min_request_time; }
+    public ZonedDateTime getMinRequestTime() {
+        return _min_request_time;
+    }
 
     public Key getDimensions() {
         return _dimensions;

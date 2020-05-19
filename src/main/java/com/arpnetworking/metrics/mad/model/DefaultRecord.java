@@ -23,7 +23,9 @@ import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
+import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 /**
  * Default implementation of the <code>Record</code> interface.
@@ -46,8 +48,8 @@ public final class DefaultRecord implements Record {
     }
 
     @Override
-    public ZonedDateTime getRequestTime() {
-        return _request_time;
+    public Optional<ZonedDateTime> getRequestTime() {
+        return Optional.ofNullable(_request_time);
     }
 
     @Override
@@ -105,7 +107,7 @@ public final class DefaultRecord implements Record {
         _metrics = builder._metrics;
         _id = builder._id;
         _time = builder._time;
-        _request_time= builder._request_time;
+        _request_time = Optional.ofNullable(builder._request_time);
         _annotations = builder._annotations;
         _dimensions = builder._dimensions;
     }
@@ -215,7 +217,7 @@ public final class DefaultRecord implements Record {
         private String _id;
         @NotNull
         private ZonedDateTime _time;
-        @NotNull
+        @Nullable
         private ZonedDateTime _request_time;
         @NotNull
         private ImmutableMap<String, String> _annotations = ImmutableMap.of();

@@ -18,6 +18,7 @@ package com.arpnetworking.metrics.mad.model;
 import com.google.common.collect.ImmutableMap;
 
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 /**
  * The interface to a record. Records consistent of a timestamp, any number of
@@ -48,7 +49,7 @@ public interface Record {
      *
      * @return the time stamp
      */
-    ZonedDateTime getRequestTime();
+    Optional<ZonedDateTime> getRequestTime();
 
     /**
      * Gets metrics.
