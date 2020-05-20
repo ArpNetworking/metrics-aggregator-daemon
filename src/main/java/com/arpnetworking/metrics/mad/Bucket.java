@@ -361,7 +361,7 @@ import java.util.function.BiFunction;
     }
 
     private boolean _isOpen = true;
-    private Optional<ZonedDateTime> _min_request_time;
+    private Optional<ZonedDateTime> _min_request_time = Optional.empty();
 
     private final Map<String, Collection<Calculator<?>>> _counterMetricCalculators = Maps.newHashMap();
     private final Map<String, Collection<Calculator<?>>> _gaugeMetricCalculators = Maps.newHashMap();
