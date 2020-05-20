@@ -49,7 +49,7 @@ public final class DefaultRecord implements Record {
 
     @Override
     public Optional<ZonedDateTime> getRequestTime() {
-        return _request_time;
+        return _requestTime;
     }
 
     @Override
@@ -107,7 +107,7 @@ public final class DefaultRecord implements Record {
         _metrics = builder._metrics;
         _id = builder._id;
         _time = builder._time;
-        _request_time = Optional.ofNullable(builder._request_time);
+        _requestTime = Optional.ofNullable(builder._requestTime);
         _annotations = builder._annotations;
         _dimensions = builder._dimensions;
     }
@@ -115,7 +115,7 @@ public final class DefaultRecord implements Record {
     private final ImmutableMap<String, ? extends Metric> _metrics;
     private final String _id;
     private final ZonedDateTime _time;
-    private final Optional<ZonedDateTime> _request_time;
+    private final Optional<ZonedDateTime> _requestTime;
     private final ImmutableMap<String, String> _annotations;
     private final ImmutableMap<String, String> _dimensions;
 
@@ -173,7 +173,7 @@ public final class DefaultRecord implements Record {
          * @return This instance of <code>Builder</code>.
          */
         public Builder setRequestTime(final ZonedDateTime value) {
-            _request_time = value;
+            _requestTime = value;
             return this;
         }
 
@@ -218,7 +218,7 @@ public final class DefaultRecord implements Record {
         @NotNull
         private ZonedDateTime _time;
         @Nullable
-        private ZonedDateTime _request_time;
+        private ZonedDateTime _requestTime;
         @NotNull
         private ImmutableMap<String, String> _annotations = ImmutableMap.of();
         @NotNull

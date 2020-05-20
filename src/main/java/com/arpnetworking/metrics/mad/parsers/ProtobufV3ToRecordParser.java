@@ -35,7 +35,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Option;
 import io.inscopemetrics.client.protocol.ClientV3;
 import net.sf.oval.exception.ConstraintsViolatedException;
 

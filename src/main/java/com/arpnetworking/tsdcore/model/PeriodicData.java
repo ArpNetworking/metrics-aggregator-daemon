@@ -45,7 +45,7 @@ public final class PeriodicData {
     }
 
     public Optional<ZonedDateTime> getMinRequestTime() {
-        return _min_request_time;
+        return _minRequestTime;
     }
 
     public Key getDimensions() {
@@ -96,14 +96,14 @@ public final class PeriodicData {
     private PeriodicData(final Builder builder) {
         _period = builder._period;
         _start = builder._start;
-        _min_request_time = Optional.ofNullable(builder._min_request_time);
+        _minRequestTime = Optional.ofNullable(builder._minRequestTime);
         _dimensions = builder._dimensions;
         _data = builder._data;
     }
 
     private final Duration _period;
     private final ZonedDateTime _start;
-    private final Optional<ZonedDateTime> _min_request_time;
+    private final Optional<ZonedDateTime> _minRequestTime;
     private final Key _dimensions;
     private final ImmutableMultimap<String, AggregatedData> _data;
 
@@ -148,7 +148,7 @@ public final class PeriodicData {
          * @return This <code>Builder</code> instance.
          */
         public Builder setMinRequestTime(@Nullable final ZonedDateTime value) {
-            _min_request_time = value;
+            _minRequestTime = value;
             return this;
         }
 
@@ -188,7 +188,7 @@ public final class PeriodicData {
         @NotNull
         private ZonedDateTime _start;
         @Nullable
-        private ZonedDateTime _min_request_time;
+        private ZonedDateTime _minRequestTime;
 
         @NotNull
         private Key _dimensions;
