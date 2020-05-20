@@ -147,7 +147,7 @@ public final class PeriodicData {
          * @return This <code>Builder</code> instance.
          */
         public Builder setMinRequestTime(final ZonedDateTime value) {
-            _min_request_time=value;
+            _min_request_time = value;
             return this;
         }
 
