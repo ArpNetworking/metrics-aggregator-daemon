@@ -76,7 +76,7 @@ public final class AggregationServerSink extends VertxSink {
                 .setMetric(metricName)
                 .setPeriod(periodicData.getPeriod().toString())
                 .setPeriodStart(periodicData.getStart().toString())
-                .setMinRequestTime(periodicData.getMinRequestTime().toString())
+                .setClientMinimumRequestTime(periodicData.getMinRequestTime().toString())
                 .putAllDimensions(periodicData.getDimensions().getParameters())
                 .setCluster(periodicData.getDimensions().getCluster())
                 .setService(periodicData.getDimensions().getService());
