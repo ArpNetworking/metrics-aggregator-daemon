@@ -49,7 +49,7 @@ public final class DefaultRecord implements Record {
 
     @Override
     public Optional<ZonedDateTime> getRequestTime() {
-        return Optional.ofNullable(_request_time);
+        return _request_time;
     }
 
     @Override
@@ -115,7 +115,7 @@ public final class DefaultRecord implements Record {
     private final ImmutableMap<String, ? extends Metric> _metrics;
     private final String _id;
     private final ZonedDateTime _time;
-    private final ZonedDateTime _request_time;
+    private final Optional<ZonedDateTime> _request_time;
     private final ImmutableMap<String, String> _annotations;
     private final ImmutableMap<String, String> _dimensions;
 
@@ -167,13 +167,13 @@ public final class DefaultRecord implements Record {
         }
 
         /**
-         * The timestamp at which the record was received. Cannot be null.
+         * The timestamp at which the record was received. Can be null.
          *
          * @param value The timestamp.
          * @return This instance of <code>Builder</code>.
          */
         public Builder setRequestTime(final ZonedDateTime value) {
-            _request_time= value;
+            _request_time = value;
             return this;
         }
 

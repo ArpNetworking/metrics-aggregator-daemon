@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Option;
 import io.inscopemetrics.client.protocol.ClientV3;
 import net.sf.oval.exception.ConstraintsViolatedException;
 
@@ -42,10 +43,7 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import javax.annotation.Nullable;
 
 /**
@@ -56,6 +54,14 @@ import javax.annotation.Nullable;
 public final class ProtobufV3ToRecordParser implements Parser<List<Record>, HttpRequest> {
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
+
+    private static Optional<ZonedDateTime> maybeParseMillisSinceEpoch(final long millisSinceEpoch) {
+        if (millisSinceEpoch == 0) {
+            return Optional.empty();
+        }
+
+        return Optional.of(ZonedDateTime.ofInstant(Instant.ofEpochMilli(millisSinceEpoch), ZoneOffset.UTC));
+    }
 
     @Override
     public List<Record> parse(final HttpRequest data) throws ParsingException {
@@ -70,7 +76,7 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
                         DefaultRecord.Builder.class,
                         builder -> builder.setId(new UUID(high, low).toString())
                                 .setTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getEndMillisSinceEpoch()), ZoneOffset.UTC))
-                                .setRequestTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getRequestMillisSinceEpoch()), ZoneOffset.UTC))
+                                .setRequestTime(maybeParseMillisSinceEpoch(record.getRequestMillisSinceEpoch()).orElse(null))
                                 .setDimensions(buildDimensions(record))
                                 .setMetrics(buildMetrics(record))));
             }
