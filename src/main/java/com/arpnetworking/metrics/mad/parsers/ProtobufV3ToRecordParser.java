@@ -54,14 +54,6 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
 
-    private static Optional<ZonedDateTime> maybeParseMillisSinceEpoch(final long millisSinceEpoch) {
-        if (millisSinceEpoch == 0) {
-            return Optional.empty();
-        }
-
-        return Optional.of(ZonedDateTime.ofInstant(Instant.ofEpochMilli(millisSinceEpoch), ZoneOffset.UTC));
-    }
-
     @Override
     public List<Record> parse(final HttpRequest data) throws ParsingException {
         try {
@@ -73,11 +65,15 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
                 final long low = byteBuffer.getLong();
                 records.add(ThreadLocalBuilder.build(
                         DefaultRecord.Builder.class,
-                        builder -> builder.setId(new UUID(high, low).toString())
-                                .setTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getEndMillisSinceEpoch()), ZoneOffset.UTC))
-                                .setRequestTime(maybeParseMillisSinceEpoch(record.getRequestMillisSinceEpoch()).orElse(null))
-                                .setDimensions(buildDimensions(record))
-                                .setMetrics(buildMetrics(record))));
+                        builder -> {
+                            builder.setId(new UUID(high, low).toString())
+                                    .setTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getEndMillisSinceEpoch()), ZoneOffset.UTC))
+                                    .setDimensions(buildDimensions(record))
+                                    .setMetrics(buildMetrics(record));
+                            if (record.getRequestMillisSinceEpoch() != 0) {
+                                builder.setRequestTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getRequestMillisSinceEpoch()), ZoneOffset.UTC));
+                            }
+                        }));
             }
             return records;
         } catch (final InvalidProtocolBufferException e) {
