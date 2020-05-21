@@ -23,9 +23,10 @@ import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
-import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import javax.annotation.Nullable;
+
 
 /**
  * Default implementation of the <code>Record</code> interface.

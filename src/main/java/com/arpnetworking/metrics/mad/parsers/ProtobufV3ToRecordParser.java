@@ -42,7 +42,10 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import javax.annotation.Nullable;
 
 /**
@@ -71,7 +74,8 @@ public final class ProtobufV3ToRecordParser implements Parser<List<Record>, Http
                                     .setDimensions(buildDimensions(record))
                                     .setMetrics(buildMetrics(record));
                             if (record.getRequestMillisSinceEpoch() != 0) {
-                                builder.setRequestTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getRequestMillisSinceEpoch()), ZoneOffset.UTC));
+                                builder.setRequestTime(
+                                        ZonedDateTime.ofInstant(Instant.ofEpochMilli(record.getRequestMillisSinceEpoch()), ZoneOffset.UTC));
                             }
                         }));
             }
