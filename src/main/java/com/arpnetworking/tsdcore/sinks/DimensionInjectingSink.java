@@ -39,9 +39,11 @@ public final class DimensionInjectingSink extends BaseSink {
         final Map<String, String> mergedDimensions = Maps.newHashMap(_defaultDimensions);
         mergedDimensions.putAll(data.getDimensions().getParameters());
         mergedDimensions.putAll(_overrideDimensions);
-        final PeriodicData.Builder dataBuilder = ThreadLocalBuilder.clone(data);
-        dataBuilder.setDimensions(new DefaultKey(ImmutableMap.copyOf(mergedDimensions)));
-        _sink.recordAggregateData(dataBuilder.build());
+        final PeriodicData dataWithInjection = ThreadLocalBuilder.clone(
+                data,
+                PeriodicData.Builder.class,
+                b -> b.setDimensions(new DefaultKey(ImmutableMap.copyOf(mergedDimensions))));
+        _sink.recordAggregateData(dataWithInjection);
     }
 
     /**
