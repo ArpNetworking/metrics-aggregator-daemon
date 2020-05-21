@@ -132,9 +132,6 @@ public class BucketTest {
                         .build());
     }
 
-    final Optional<ZonedDateTime> low = Optional.of(START.plusMinutes(27));
-    final Optional<ZonedDateTime> high = Optional.of(low.get().plusMinutes(10));
-
     private void requestTimeCase(
             final Optional<ZonedDateTime> first,
             final Optional<ZonedDateTime> second,
@@ -157,42 +154,42 @@ public class BucketTest {
 
     @Test
     public void testRequestTimeEmptyLow() {
-        requestTimeCase(Optional.empty(), low, low);
+        requestTimeCase(Optional.empty(), LOWTIME, LOWTIME);
     }
 
     @Test
     public void testRequestTimeEmptyHigh() {
-        requestTimeCase(Optional.empty(), high, high);
+        requestTimeCase(Optional.empty(), HIGHTIME, HIGHTIME);
     }
 
     @Test
     public void testRequestTimeLowEmpty() {
-        requestTimeCase(low, Optional.empty(), low);
+        requestTimeCase(LOWTIME, Optional.empty(), LOWTIME);
     }
 
     @Test
     public void testRequestTimeLowLow() {
-        requestTimeCase(low, low, low);
+        requestTimeCase(LOWTIME, LOWTIME, LOWTIME);
     }
 
     @Test
     public void testRequestTimeLowHigh() {
-        requestTimeCase(low, high, low);
+        requestTimeCase(LOWTIME, HIGHTIME, LOWTIME);
     }
 
     @Test
     public void testRequestTimeHighEmpty() {
-        requestTimeCase(high, Optional.empty(), high);
+        requestTimeCase(HIGHTIME, Optional.empty(), HIGHTIME);
     }
 
     @Test
     public void testRequestTimeHighLow() {
-        requestTimeCase(high, low, low);
+        requestTimeCase(HIGHTIME, LOWTIME, LOWTIME);
     }
 
     @Test
     public void testRequestTimeHighHigh() {
-        requestTimeCase(high, high, high);
+        requestTimeCase(HIGHTIME, HIGHTIME, HIGHTIME);
     }
 
     @Test
@@ -433,6 +430,9 @@ public class BucketTest {
     private Sink _sink;
 
     private static final ZonedDateTime START = ZonedDateTime.parse("2015-02-05T00:00:00Z");
+    private static final Optional<ZonedDateTime> LOWTIME = Optional.of(START.plusMinutes(27));
+    private static final Optional<ZonedDateTime> HIGHTIME = Optional.of(LOWTIME.get().plusMinutes(10));
+
 
     private static final Quantity ONE = new DefaultQuantity.Builder().setValue(1.0).build();
     private static final Quantity TWO = new DefaultQuantity.Builder().setValue(2.0).build();
