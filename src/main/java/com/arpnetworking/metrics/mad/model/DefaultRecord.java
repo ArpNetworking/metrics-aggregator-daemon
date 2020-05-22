@@ -209,6 +209,7 @@ public final class DefaultRecord implements Record {
             _time = null;
             _annotations = ImmutableMap.of();
             _dimensions = ImmutableMap.of();
+            _requestTime = null;
         }
 
         @NotNull
