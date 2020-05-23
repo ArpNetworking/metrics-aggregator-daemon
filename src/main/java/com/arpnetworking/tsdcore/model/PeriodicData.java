@@ -179,6 +179,7 @@ public final class PeriodicData {
         protected void reset() {
             _period = null;
             _start = null;
+            _minRequestTime = null;
             _dimensions = null;
             _data = ImmutableMultimap.of();
         }
