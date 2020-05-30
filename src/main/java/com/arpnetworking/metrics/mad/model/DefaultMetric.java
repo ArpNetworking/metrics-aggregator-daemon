@@ -161,7 +161,7 @@ public final class DefaultMetric implements Metric {
         @Override
         protected void reset() {
             _statistics = ImmutableMap.of();
-            _values = null;
+            _values = ImmutableList.of();
             _type = null;
         }
 

@@ -214,7 +214,7 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
 
         @Override
         protected void reset() {
-            _timestampUnit = null;
+            _timestampUnit = TimestampUnit.SECONDS;
         }
 
         @NotNull

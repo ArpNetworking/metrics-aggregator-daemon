@@ -16,6 +16,8 @@
 package com.arpnetworking.metrics.mad.parsers;
 
 import akka.util.ByteString;
+import com.arpnetworking.commons.test.BuildableTestHelper;
+import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
@@ -24,24 +26,64 @@ import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.Key;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.io.Resources;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
- * Tests for the CollectdJsonToRecord parser.
+ * Tests for the {@link CollectdJsonToRecordParser} parser.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class CollectdJsonToRecordParserTest {
+
+    private static final ImmutableMultimap<String, String> DEFAULT_HEADERS = ImmutableMultimap.<String, String>builder()
+            .put("x-tag-service", "MyService")
+            .put("x-tag-Cluster", "MyCluster")
+            .build();
+
+    private final Supplier<CollectdJsonToRecordParser.CollectdRecord.Builder> _collectdRecordBuilder =
+            () -> new CollectdJsonToRecordParser.CollectdRecord.Builder()
+                    .setDsNames(ImmutableList.of("value"))
+                    .setDsTypes(ImmutableList.of("counter"))
+                    .setHost("localhost")
+                    .setPlugin("cpu")
+                    .setPluginInstance("0")
+                    .setTime((double) System.currentTimeMillis())
+                    .setType("cpu")
+                    .setTypeInstance("idle")
+                    .setValues(ImmutableList.of(11d));
+
+
+    @Test
+    public void testBuilder() throws InvocationTargetException, IllegalAccessException {
+        BuildableTestHelper.testBuild(
+                _collectdRecordBuilder.get(),
+                CollectdJsonToRecordParser.CollectdRecord.class);
+    }
+
+    @Test
+    public void testReset() throws Exception {
+        ThreadLocalBuildableTestHelper.testReset(_collectdRecordBuilder.get());
+    }
+
+    @Test
+    public void testToString() {
+        final String asString = _collectdRecordBuilder.get().build().toString();
+        Assert.assertNotNull(asString);
+        Assert.assertFalse(asString.isEmpty());
+    }
 
     @Test
     public void testParse() throws ParsingException, IOException {
@@ -86,11 +128,16 @@ public class CollectdJsonToRecordParserTest {
                                 .build()));
     }
 
+    @Test(expected = ParsingException.class)
+    public void testParseInvalid() throws ParsingException, IOException {
+        parseFile("CollectdJsonParserTest/testParseInvalid.json", DEFAULT_HEADERS);
+    }
+
     private void verifyMetric(final List<Record> records,
-            final ZonedDateTime timestamp,
-            final String name,
-            final MetricType type,
-            final List<Quantity> values) {
+                              final ZonedDateTime timestamp,
+                              final String name,
+                              final MetricType type,
+                              final List<Quantity> values) {
         Assert.assertTrue(!records.isEmpty());
         final Record record = records.remove(0);
         Assert.assertEquals(timestamp, record.getTime().withZoneSameInstant(ZoneOffset.UTC));
@@ -103,20 +150,10 @@ public class CollectdJsonToRecordParserTest {
         }
     }
 
-    @Test(expected = ParsingException.class)
-    public void testParseInvalid() throws ParsingException, IOException {
-        parseFile("CollectdJsonParserTest/testParseInvalid.json", DEFAULT_HEADERS);
-    }
-
     private static List<Record> parseFile(final String fileName, final ImmutableMultimap<String, String> headers)
             throws IOException, ParsingException {
         final ByteString body =
                 ByteString.fromArray(Resources.toByteArray(Resources.getResource(CollectdJsonToRecordParser.class, fileName)));
         return new CollectdJsonToRecordParser().parse(new HttpRequest(headers, body));
     }
-
-    private static final ImmutableMultimap<String, String> DEFAULT_HEADERS = ImmutableMultimap.<String, String>builder()
-            .put("x-tag-service", "MyService")
-            .put("x-tag-Cluster", "MyCluster")
-            .build();
 }

@@ -15,21 +15,60 @@
  */
 package com.arpnetworking.metrics.mad.model.statistics;
 
+import com.arpnetworking.commons.test.BuildableTestHelper;
+import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.Unit;
+import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
+import com.google.common.collect.ImmutableMap;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Tests the HistogramStatistic class.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
-public class HistogramStatisticTest {
+public final class HistogramStatisticTest {
+
+    private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
+    private static final Statistic TP99_STATISTIC = STATISTIC_FACTORY.getStatistic("tp99");
+    private static final HistogramStatistic HISTOGRAM_STATISTIC = (HistogramStatistic) STATISTIC_FACTORY.getStatistic("histogram");
+
+    private final Supplier<HistogramStatistic.HistogramSupportingData.Builder> _histogramSupportingDataBuilder =
+            () -> new HistogramStatistic.HistogramSupportingData.Builder()
+                    .setHistogramSnapshot(new HistogramStatistic.HistogramAccumulator(TP99_STATISTIC)
+                            .accumulate(TestBeanFactory.createSample())
+                            .calculate(ImmutableMap.of())
+                            .getData()
+                            .getHistogramSnapshot())
+                    .setUnit(Unit.SECOND);
+
+    @Test
+    public void testBuilder() throws InvocationTargetException, IllegalAccessException {
+        BuildableTestHelper.testBuild(
+                _histogramSupportingDataBuilder.get(),
+                HistogramStatistic.HistogramSupportingData.class);
+    }
+
+    @Test
+    public void testReset() throws Exception {
+        ThreadLocalBuildableTestHelper.testReset(_histogramSupportingDataBuilder.get());
+    }
+
+    @Test
+    public void testToString() {
+        final String asString = _histogramSupportingDataBuilder.get().build().toString();
+        Assert.assertNotNull(asString);
+        Assert.assertFalse(asString.isEmpty());
+    }
+
     @Test
     public void histogramAccumulateQuantities() {
         final Accumulator<HistogramStatistic.HistogramSupportingData> accumulator = HISTOGRAM_STATISTIC.createCalculator();
@@ -162,7 +201,4 @@ public class HistogramStatisticTest {
         Assert.assertEquals(histogram.truncateToLong(val), Double.doubleToLongBits(unpacked));
         Assert.assertTrue(Math.abs(val - unpacked) / val < error);
     }
-
-    private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
-    private static final HistogramStatistic HISTOGRAM_STATISTIC = (HistogramStatistic) STATISTIC_FACTORY.getStatistic("histogram");
 }

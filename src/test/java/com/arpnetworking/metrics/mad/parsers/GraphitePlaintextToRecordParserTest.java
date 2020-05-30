@@ -15,6 +15,8 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
+import com.arpnetworking.commons.test.BuildableTestHelper;
+import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.Metric;
@@ -29,12 +31,14 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Tests for the Graphite plaintext parser.
@@ -42,6 +46,31 @@ import java.util.Map;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class GraphitePlaintextToRecordParserTest {
+
+    private final Supplier<GraphitePlaintextToRecordParser.Builder> _graphiteParserBuilder =
+            () -> new GraphitePlaintextToRecordParser.Builder()
+                    .setGlobalTags(ImmutableMap.of("host", "localhost"))
+                    .setParseCarbonTags(true);
+
+
+    @Test
+    public void testBuilder() throws InvocationTargetException, IllegalAccessException {
+        BuildableTestHelper.testBuild(
+                _graphiteParserBuilder.get(),
+                GraphitePlaintextToRecordParser.class);
+    }
+
+    @Test
+    public void testReset() throws Exception {
+        ThreadLocalBuildableTestHelper.testReset(_graphiteParserBuilder.get());
+    }
+
+    @Test
+    public void testToString() {
+        final String asString = _graphiteParserBuilder.get().build().toString();
+        Assert.assertNotNull(asString);
+        Assert.assertFalse(asString.isEmpty());
+    }
 
     @Test
     public void testParseSingleLineNoLineEnding() throws ParsingException, IOException {

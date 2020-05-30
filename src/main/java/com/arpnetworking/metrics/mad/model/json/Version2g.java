@@ -332,7 +332,7 @@ public final class Version2g {
             /**
              * Builder for the 2G Unit class.
              */
-            public static class Builder extends ThreadLocalBuilder<Unit> {
+            public static final class Builder extends ThreadLocalBuilder<Unit> {
                 /**
                  * Public constructor.
                  */
