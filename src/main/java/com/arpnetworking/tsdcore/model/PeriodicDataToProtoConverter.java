@@ -34,7 +34,7 @@ import java.util.Objects;
  *
  * @author William Ehlhardt (whale at dropbox dot com)
  */
-public final class MetricsDataSerializer {
+public final class PeriodicDataToProtoConverter {
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic EXPRESSION_STATISTIC = STATISTIC_FACTORY.getStatistic("expression");
 
@@ -44,7 +44,7 @@ public final class MetricsDataSerializer {
     private final String _cluster;
     private final String _service;
 
-    public MetricsDataSerializer(final PeriodicData periodicData) {
+    public PeriodicDataToProtoConverter(final PeriodicData periodicData) {
         _period = periodicData.getPeriod();
         _periodStart = periodicData.getStart();
         _dimensionParameters = periodicData.getDimensions().getParameters();

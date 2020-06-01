@@ -22,7 +22,7 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.AggregationMessage;
-import com.arpnetworking.tsdcore.model.MetricsDataSerializer;
+import com.arpnetworking.tsdcore.model.PeriodicDataToProtoConverter;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 
 import java.time.ZonedDateTime;
@@ -44,7 +44,7 @@ public final class AggregationServerSink extends VertxSink {
                 .addData("dataSize", periodicData.getData().size())
                 .log();
 
-        final MetricsDataSerializer converter = new MetricsDataSerializer(periodicData);
+        final PeriodicDataToProtoConverter converter = new PeriodicDataToProtoConverter(periodicData);
         for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
             final String metricName = entry.getKey();
             final Collection<AggregatedData> data = entry.getValue();
