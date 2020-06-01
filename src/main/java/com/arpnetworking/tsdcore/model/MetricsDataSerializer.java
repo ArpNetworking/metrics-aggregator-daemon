@@ -20,8 +20,11 @@ import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.statistics.HistogramStatistic;
 import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -35,27 +38,39 @@ public final class MetricsDataSerializer {
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic EXPRESSION_STATISTIC = STATISTIC_FACTORY.getStatistic("expression");
 
+    private final Duration _period;
+    private final ZonedDateTime _periodStart;
+    private final ImmutableMap<String, String> _dimensionParameters;
+    private final String _cluster;
+    private final String _service;
+
+    public MetricsDataSerializer(final PeriodicData periodicData) {
+        _period = periodicData.getPeriod();
+        _periodStart = periodicData.getStart();
+        _dimensionParameters = periodicData.getDimensions().getParameters();
+        _cluster = periodicData.getDimensions().getCluster();
+        _service = periodicData.getDimensions().getService();
+    }
+
     /**
      * Serialize a metric's data to a StatisticSetRecord.
      *
-     * @param periodicData Originating PeriodicData
-     * @param metricName Name of metric being serialized.
-     * @param data Recorded metric data to serialize.
+     * @param metricName   Name of metric being serialized.
+     * @param data         Recorded metric data to serialize.
      * @return StatisticSetRecord protobuf corresponding to the above.
      */
-    public static Messages.StatisticSetRecord serializeMetricData(
-            final PeriodicData periodicData,
+    public Messages.StatisticSetRecord serializeMetricData(
             final String metricName,
             final Collection<AggregatedData> data) {
 
         // Create a statistic record set
         final Messages.StatisticSetRecord.Builder builder = Messages.StatisticSetRecord.newBuilder()
                 .setMetric(metricName)
-                .setPeriod(periodicData.getPeriod().toString())
-                .setPeriodStart(periodicData.getStart().toString())
-                .putAllDimensions(periodicData.getDimensions().getParameters())
-                .setCluster(periodicData.getDimensions().getCluster())
-                .setService(periodicData.getDimensions().getService());
+                .setPeriod(_period.toString())
+                .setPeriodStart(_periodStart.toString())
+                .putAllDimensions(_dimensionParameters)
+                .setCluster(_cluster)
+                .setService(_service);
 
         for (final AggregatedData datum : data) {
             if (Objects.equals(EXPRESSION_STATISTIC, datum.getStatistic())) {
@@ -114,9 +129,5 @@ public final class MetricsDataSerializer {
             return null;
         }
         return byteString;
-    }
-
-    private MetricsDataSerializer() {
-        throw new AssertionError("utility class should not be instantiated");
     }
 }

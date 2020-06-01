@@ -44,11 +44,12 @@ public final class AggregationServerSink extends VertxSink {
                 .addData("dataSize", periodicData.getData().size())
                 .log();
 
+        final MetricsDataSerializer converter = new MetricsDataSerializer(periodicData);
         for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
             final String metricName = entry.getKey();
             final Collection<AggregatedData> data = entry.getValue();
             if (!data.isEmpty()) {
-                final Messages.StatisticSetRecord record = MetricsDataSerializer.serializeMetricData(periodicData, metricName, data);
+                final Messages.StatisticSetRecord record = converter.serializeMetricData(metricName, data);
                 enqueueData(AggregationMessage.create(record).serializeToBuffer());
             }
         }
