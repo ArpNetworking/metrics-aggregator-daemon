@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.tsdcore.sinks;
+package com.arpnetworking.tsdcore.model;
 
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.statistics.HistogramStatistic;
 import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
-import com.arpnetworking.tsdcore.model.AggregationMessage;
-import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.google.protobuf.ByteString;
 
 import java.util.Collection;

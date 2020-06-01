@@ -20,6 +20,7 @@ import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.tsdcore.model.AggregationMessage;
+import com.arpnetworking.tsdcore.model.MetricsDataSerializer;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.MediaType;
