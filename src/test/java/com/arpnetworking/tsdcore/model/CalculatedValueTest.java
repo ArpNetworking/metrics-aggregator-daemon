@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Groupon.com
+ * Copyright 2020 Inscope Metrics
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.metrics.mad.model;
+package com.arpnetworking.tsdcore.model;
 
 import com.arpnetworking.commons.test.BuildableTestHelper;
 import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
-import com.arpnetworking.metrics.mad.model.statistics.Statistic;
-import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.utility.test.BuildableEqualsAndHashCodeTester;
 import org.junit.Assert;
@@ -28,50 +26,40 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 /**
- * Tests for the {@link AggregatedData} class.
+ * Tests for the {@link CalculatedValue} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
-public final class AggregatedDataTest {
+public final class CalculatedValueTest {
 
-    private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
-    private static final Statistic MEDIAN_STATISTIC = STATISTIC_FACTORY.getStatistic("median");
-    private static final Statistic TP99_STATISTIC = STATISTIC_FACTORY.getStatistic("tp99");
-
-    private final Supplier<AggregatedData.Builder> _aggregatedDataBuilder = () -> new AggregatedData.Builder()
-            .setStatistic(TP99_STATISTIC)
-            .setSupportingData(new Object())
+    private final Supplier<CalculatedValue.Builder<Object>> _calculatedValueBuilder = () -> new CalculatedValue.Builder<>()
             .setValue(TestBeanFactory.createSample())
-            .setIsSpecified(true)
-            .setPopulationSize(111L);
+            .setData(new Object());
 
     @Test
     public void testBuilder() throws InvocationTargetException, IllegalAccessException {
         BuildableTestHelper.testBuild(
-                _aggregatedDataBuilder.get(),
-                AggregatedData.class);
+                _calculatedValueBuilder.get(),
+                CalculatedValue.class);
     }
 
     @Test
     public void testReset() throws Exception {
-        ThreadLocalBuildableTestHelper.testReset(_aggregatedDataBuilder.get());
+        ThreadLocalBuildableTestHelper.testReset(_calculatedValueBuilder.get());
     }
 
     @Test
     public void testEqualsAndHashCode() {
         BuildableEqualsAndHashCodeTester.assertEqualsAndHashCode(
-                _aggregatedDataBuilder.get(),
-                new AggregatedData.Builder()
-                        .setStatistic(MEDIAN_STATISTIC)
+                _calculatedValueBuilder.get(),
+                new CalculatedValue.Builder<>()
                         .setValue(TestBeanFactory.createSample())
-                        .setIsSpecified(false)
-                        .setPopulationSize(2L)
-                        .setSupportingData(new Object()));
+                        .setData(new Object()));
     }
 
     @Test
     public void testToString() {
-        final String asString = _aggregatedDataBuilder.get().build().toString();
+        final String asString = _calculatedValueBuilder.get().build().toString();
         Assert.assertNotNull(asString);
         Assert.assertFalse(asString.isEmpty());
     }

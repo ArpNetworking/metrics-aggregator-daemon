@@ -15,15 +15,19 @@
  */
 package com.arpnetworking.metrics.mad.model;
 
+import com.arpnetworking.commons.test.BuildableTestHelper;
+import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
- * Tests for the Quantity class.
+ * Tests for the {@link DefaultQuantity} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
-public class QuantityTest {
+public final class DefaultQuantityTest {
 
     @Test
     public void testConstructor() {
@@ -36,6 +40,22 @@ public class QuantityTest {
         Assert.assertEquals(expectedValue, sample.getValue(), 0.001);
         Assert.assertTrue(sample.getUnit().isPresent());
         Assert.assertEquals(expectedUnit, sample.getUnit().get());
+    }
+
+    @Test
+    public void testBuilder() throws InvocationTargetException, IllegalAccessException {
+        BuildableTestHelper.testBuild(
+                new DefaultQuantity.Builder()
+                        .setValue(1.23d)
+                        .setUnit(Unit.BYTE),
+                DefaultQuantity.class);
+    }
+
+    @Test
+    public void testReset() throws Exception {
+        ThreadLocalBuildableTestHelper.testReset(new DefaultQuantity.Builder()
+                .setValue(1.23d)
+                .setUnit(Unit.BYTE));
     }
 
     @Test
