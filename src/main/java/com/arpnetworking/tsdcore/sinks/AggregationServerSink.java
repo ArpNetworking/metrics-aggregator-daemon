@@ -22,8 +22,8 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.AggregationMessage;
-import com.arpnetworking.tsdcore.model.PeriodicDataToProtoConverter;
 import com.arpnetworking.tsdcore.model.PeriodicData;
+import com.arpnetworking.tsdcore.model.PeriodicDataToProtoConverter;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;

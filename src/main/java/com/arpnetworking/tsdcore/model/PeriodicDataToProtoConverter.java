@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Utility class to convert to metrics-aggregator-protocol protobuf messages.
+ * Helper class to convert PeriodicDatas to metrics-aggregator-protocol protobuf messages.
  *
  * @author William Ehlhardt (whale at dropbox dot com)
  */
@@ -44,6 +44,11 @@ public final class PeriodicDataToProtoConverter {
     private final String _cluster;
     private final String _service;
 
+    /**
+     * Create a converter to generate protobuf messages for a given PeriodicData.
+     *
+     * @param periodicData Originating PeriodicData
+     */
     public PeriodicDataToProtoConverter(final PeriodicData periodicData) {
         _period = periodicData.getPeriod();
         _periodStart = periodicData.getStart();
