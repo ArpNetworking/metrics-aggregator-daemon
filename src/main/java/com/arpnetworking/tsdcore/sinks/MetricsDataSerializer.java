@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Utility class to serialize to metrics-aggregator-protocol protobuf messages.
+ * Utility class to convert to metrics-aggregator-protocol protobuf messages.
  *
  * @author William Ehlhardt (whale at dropbox dot com)
  */
