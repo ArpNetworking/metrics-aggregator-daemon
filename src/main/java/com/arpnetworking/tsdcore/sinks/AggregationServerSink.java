@@ -90,7 +90,7 @@ public final class AggregationServerSink extends VertxSink {
     private static final Logger LOGGER = LoggerFactory.getLogger(AggregationServerSink.class);
 
     /**
-     * Implementation of builder pattern for ${code AggreationServerSink}.
+     * Implementation of builder pattern for ${code AggregationServerSink}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
