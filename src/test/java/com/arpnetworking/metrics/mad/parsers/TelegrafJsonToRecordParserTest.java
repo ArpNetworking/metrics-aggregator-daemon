@@ -16,6 +16,8 @@
 
 package com.arpnetworking.metrics.mad.parsers;
 
+import com.arpnetworking.commons.test.BuildableTestHelper;
+import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.MetricType;
@@ -27,6 +29,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -35,13 +38,37 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
- * Tests for Telegraf JSON format.
+ * Tests for {@link TelegrafJsonToRecordParser} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class TelegrafJsonToRecordParserTest {
+
+    private final Supplier<TelegrafJsonToRecordParser.Builder> _telegrahJsonParserBuilder =
+            () -> new TelegrafJsonToRecordParser.Builder()
+                    .setTimestampUnit(TelegrafJsonToRecordParser.TimestampUnit.MICROSECONDS);
+
+    @Test
+    public void testBuilder() throws InvocationTargetException, IllegalAccessException {
+        BuildableTestHelper.testBuild(
+                _telegrahJsonParserBuilder.get(),
+                TelegrafJsonToRecordParser.class);
+    }
+
+    @Test
+    public void testReset() throws Exception {
+        ThreadLocalBuildableTestHelper.testReset(_telegrahJsonParserBuilder.get());
+    }
+
+    @Test
+    public void testToString() {
+        final String asString = _telegrahJsonParserBuilder.get().build().toString();
+        Assert.assertNotNull(asString);
+        Assert.assertFalse(asString.isEmpty());
+    }
 
     @Test
     public void testParse() throws ParsingException, IOException {

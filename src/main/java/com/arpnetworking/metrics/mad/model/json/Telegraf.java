@@ -17,6 +17,8 @@ package com.arpnetworking.metrics.mad.model.json;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
@@ -45,6 +47,39 @@ public final class Telegraf {
 
     public String getName() {
         return _name;
+    }
+
+    @Override
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof Telegraf)) {
+            return false;
+        }
+
+        final Telegraf otherTelegraf = (Telegraf) other;
+        return Objects.equal(getFields(), otherTelegraf.getFields())
+                && Objects.equal(getTimestamp(), otherTelegraf.getTimestamp())
+                && Objects.equal(getTags(), otherTelegraf.getTags())
+                && Objects.equal(getName(), otherTelegraf.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getFields(), getTimestamp(), getTags(), getName());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", Integer.toHexString(System.identityHashCode(this)))
+                .add("Fields", _fields)
+                .add("Timestamp", _timestamp)
+                .add("Tags", _tags)
+                .add("Name", _name)
+                .toString();
     }
 
     private Telegraf(final Builder builder) {

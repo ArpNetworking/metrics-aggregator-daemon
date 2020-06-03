@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Groupon.com
+ * Copyright 2020 Inscope Metrics
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.utility.test.BuildableEqualsAndHashCodeTester;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,50 +30,50 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 /**
- * Tests for the {@link AggregatedData} class.
+ * Tests for the {@link DefaultMetric} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
-public final class AggregatedDataTest {
+public final class DefaultMetricTest {
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic MEDIAN_STATISTIC = STATISTIC_FACTORY.getStatistic("median");
     private static final Statistic TP99_STATISTIC = STATISTIC_FACTORY.getStatistic("tp99");
 
-    private final Supplier<AggregatedData.Builder> _aggregatedDataBuilder = () -> new AggregatedData.Builder()
-            .setStatistic(TP99_STATISTIC)
-            .setSupportingData(new Object())
-            .setValue(TestBeanFactory.createSample())
-            .setIsSpecified(true)
-            .setPopulationSize(111L);
+    private final Supplier<DefaultMetric.Builder> _defaultMetricBuilder = () -> new DefaultMetric.Builder()
+            .setType(MetricType.GAUGE)
+            .setValues(ImmutableList.of(TestBeanFactory.createSample()))
+            .setStatistics(ImmutableMap.of(
+                    TP99_STATISTIC,
+                    ImmutableList.of()));
 
     @Test
     public void testBuilder() throws InvocationTargetException, IllegalAccessException {
         BuildableTestHelper.testBuild(
-                _aggregatedDataBuilder.get(),
-                AggregatedData.class);
+                _defaultMetricBuilder.get(),
+                Metric.class);
     }
 
     @Test
     public void testReset() throws Exception {
-        ThreadLocalBuildableTestHelper.testReset(_aggregatedDataBuilder.get());
+        ThreadLocalBuildableTestHelper.testReset(_defaultMetricBuilder.get());
     }
 
     @Test
     public void testEqualsAndHashCode() {
         BuildableEqualsAndHashCodeTester.assertEqualsAndHashCode(
-                _aggregatedDataBuilder.get(),
-                new AggregatedData.Builder()
-                        .setStatistic(MEDIAN_STATISTIC)
-                        .setValue(TestBeanFactory.createSample())
-                        .setIsSpecified(false)
-                        .setPopulationSize(2L)
-                        .setSupportingData(new Object()));
+                _defaultMetricBuilder.get(),
+                new DefaultMetric.Builder()
+                        .setType(MetricType.TIMER)
+                        .setValues(ImmutableList.of(TestBeanFactory.createSample()))
+                        .setStatistics(ImmutableMap.of(
+                                MEDIAN_STATISTIC,
+                                ImmutableList.of())));
     }
 
     @Test
     public void testToString() {
-        final String asString = _aggregatedDataBuilder.get().build().toString();
+        final String asString = _defaultMetricBuilder.get().build().toString();
         Assert.assertNotNull(asString);
         Assert.assertFalse(asString.isEmpty());
     }

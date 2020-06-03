@@ -17,6 +17,8 @@ package com.arpnetworking.tsdcore.model;
 
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.mad.model.Quantity;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import net.sf.oval.constraint.NotNull;
 
 /**
@@ -33,6 +35,35 @@ public final class CalculatedValue<T> {
 
     public T getData() {
         return _data;
+    }
+
+    @Override
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof CalculatedValue)) {
+            return false;
+        }
+
+        final CalculatedValue<?> otherCalculatedValue = (CalculatedValue<?>) other;
+        return Objects.equal(getValue(), otherCalculatedValue.getValue())
+                && Objects.equal(getData(), otherCalculatedValue.getData());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getValue(), getData());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", Integer.toHexString(System.identityHashCode(this)))
+                .add("Value", _value)
+                .add("Data", _data)
+                .toString();
     }
 
     private CalculatedValue(final Builder<T> builder) {

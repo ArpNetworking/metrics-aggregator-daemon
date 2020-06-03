@@ -31,6 +31,10 @@ import javax.annotation.Nullable;
 /**
  * Default implementation of the <code>Record</code> interface.
  *
+ * <b>IMPORTANT:</b> Instances are only hashed and compare based on their
+ * identifier, and are considered interchangeable if their identifiers match
+ * irregardless of their content.
+ *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  * @author Ryan Ascheman (rascheman at groupon dot com)
@@ -68,9 +72,6 @@ public final class DefaultRecord implements Record {
         return _dimensions;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object other) {
         if (this == other) {

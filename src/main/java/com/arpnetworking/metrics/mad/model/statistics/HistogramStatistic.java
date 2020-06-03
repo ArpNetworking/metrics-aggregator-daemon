@@ -206,7 +206,7 @@ public final class HistogramStatistic extends BaseStatistic {
          *
          * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
          */
-        public static class Builder extends ThreadLocalBuilder<HistogramSupportingData> {
+        public static final class Builder extends ThreadLocalBuilder<HistogramSupportingData> {
             /**
              * Public constructor.
              */

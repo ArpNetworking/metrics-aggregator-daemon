@@ -21,6 +21,7 @@ import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.tsdcore.model.AggregationMessage;
 import com.arpnetworking.tsdcore.model.PeriodicData;
+import com.arpnetworking.tsdcore.model.PeriodicDataToProtoConverter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.MediaType;
 
@@ -50,11 +51,12 @@ public final class AggregationServerHttpSink extends HttpPostSink {
     @Override
     protected Collection<byte[]> serialize(final PeriodicData periodicData) {
         final ImmutableList.Builder<byte[]> serializedPeriodicData = ImmutableList.builder();
+        final PeriodicDataToProtoConverter converter = new PeriodicDataToProtoConverter(periodicData);
         for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
             final String metricName = entry.getKey();
             final Collection<AggregatedData> data = entry.getValue();
             if (!data.isEmpty()) {
-                final Messages.StatisticSetRecord record = MetricsDataSerializer.serializeMetricData(periodicData, metricName, data);
+                final Messages.StatisticSetRecord record = converter.serializeMetricData(metricName, data);
                 serializedPeriodicData.add(AggregationMessage.create(record).serializeToByteString().toArray());
             }
         }

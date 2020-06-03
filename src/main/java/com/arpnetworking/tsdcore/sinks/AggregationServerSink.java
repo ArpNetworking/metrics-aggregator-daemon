@@ -23,6 +23,7 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.AggregationMessage;
 import com.arpnetworking.tsdcore.model.PeriodicData;
+import com.arpnetworking.tsdcore.model.PeriodicDataToProtoConverter;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -43,11 +44,12 @@ public final class AggregationServerSink extends VertxSink {
                 .addData("dataSize", periodicData.getData().size())
                 .log();
 
+        final PeriodicDataToProtoConverter converter = new PeriodicDataToProtoConverter(periodicData);
         for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
             final String metricName = entry.getKey();
             final Collection<AggregatedData> data = entry.getValue();
             if (!data.isEmpty()) {
-                final Messages.StatisticSetRecord record = MetricsDataSerializer.serializeMetricData(periodicData, metricName, data);
+                final Messages.StatisticSetRecord record = converter.serializeMetricData(metricName, data);
                 enqueueData(AggregationMessage.create(record).serializeToBuffer());
             }
         }
@@ -88,7 +90,7 @@ public final class AggregationServerSink extends VertxSink {
     private static final Logger LOGGER = LoggerFactory.getLogger(AggregationServerSink.class);
 
     /**
-     * Implementation of builder pattern for ${code AggreationServerSink}.
+     * Implementation of builder pattern for ${code AggregationServerSink}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */

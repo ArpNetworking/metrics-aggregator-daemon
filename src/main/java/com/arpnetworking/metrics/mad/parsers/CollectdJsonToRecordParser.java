@@ -51,7 +51,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -62,6 +61,8 @@ import javax.annotation.Nullable;
 
 /**
  * Parses Collectd JSON data as a {@link Record}.
+ *
+ * TODO(ville): Convert CollectdRecord fields to Optional.
  *
  * @author Brandon Arp (brandon dot arp at smartsheet dot com)
  */
@@ -87,28 +88,37 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             for (final CollectdRecord record : records) {
                 final Multimap<String, Metric> metrics = HashMultimap.create();
 
-                metricTags.put(Key.HOST_DIMENSION_KEY, record.getHost());
+                if (record.getHost() != null) {
+                    metricTags.put(Key.HOST_DIMENSION_KEY, record.getHost());
+                }
 
                 final String plugin = record.getPlugin();
                 final String pluginInstance = record.getPluginInstance();
                 final String type = record.getType();
                 final String typeInstance = record.getTypeInstance();
 
-                for (final CollectdRecord.Sample sample : record.getSamples()) {
-                    if (sample.getValue() == null) {
-                        continue;
+                final List<String> dsTypes = record.getDsTypes();
+                final List<String> dsNames = record.getDsNames();
+                final List<Double> values = record.getValues();
+
+                if (values != null && dsTypes != null && dsNames != null) {
+                    final Iterator<Double> valuesIterator = values.iterator();
+                    final Iterator<String> typesIterator = dsTypes.iterator();
+                    final Iterator<String> namesIterator = dsNames.iterator();
+
+                    while (valuesIterator.hasNext() && typesIterator.hasNext() && namesIterator.hasNext()) {
+                        final String metricName = computeMetricName(plugin, pluginInstance, type, typeInstance, namesIterator.next());
+                        final MetricType metricType = mapDsType(typesIterator.next());
+                        // TODO(ville): Support units and normalize
+                        final Metric metric = ThreadLocalBuilder.build(
+                                DefaultMetric.Builder.class,
+                                b1 -> b1.setType(metricType)
+                                        .setValues(ImmutableList.of(
+                                                ThreadLocalBuilder.build(
+                                                        DefaultQuantity.Builder.class,
+                                                        b2 -> b2.setValue(valuesIterator.next())))));
+                        metrics.put(metricName, metric);
                     }
-                    final String metricName = computeMetricName(plugin, pluginInstance, type, typeInstance, sample.getDsName());
-                    final MetricType metricType = mapDsType(sample.getDsType());
-                    // TODO(ville): Support units and normalize
-                    final Metric metric = ThreadLocalBuilder.build(
-                            DefaultMetric.Builder.class,
-                            b1 -> b1.setType(metricType)
-                                    .setValues(ImmutableList.of(
-                                            ThreadLocalBuilder.build(
-                                                    DefaultQuantity.Builder.class,
-                                                    b2 -> b2.setValue(sample.getValue())))));
-                    metrics.put(metricName, metric);
                 }
                 final Map<String, Metric> collectedMetrics = metrics.asMap()
                         .entrySet()
@@ -118,7 +128,9 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                 final Record defaultRecord = ThreadLocalBuilder.build(
                         DefaultRecord.Builder.class,
                         b -> b.setId(UUID.randomUUID().toString())
-                                .setTime(record.getTime())
+                                .setTime(ZonedDateTime.ofInstant(
+                                        Instant.ofEpochMilli(Math.round(record.getTime() * 1000)),
+                                        ZoneOffset.UTC))
                                 .setAnnotations(ImmutableMap.copyOf(metricTags))
                                 .setDimensions(ImmutableMap.copyOf(metricTags))
                                 .setMetrics(ImmutableMap.copyOf(collectedMetrics)));
@@ -209,7 +221,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             return _host;
         }
 
-        public ZonedDateTime getTime() {
+        public Double getTime() {
             return _time;
         }
 
@@ -229,38 +241,39 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             return _typeInstance;
         }
 
-        public List<Sample> getSamples() {
-            return _samples;
+        public List<Double> getValues() {
+            return _values;
+        }
+
+        public List<String> getDsTypes() {
+            return _dsTypes;
+        }
+
+        public List<String> getDsNames() {
+            return _dsNames;
         }
 
         private CollectdRecord(final Builder builder) {
             _host = builder._host;
-            _time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Math.round(builder._time * 1000)), ZoneOffset.UTC);
+            _time = builder._time;
             _plugin = builder._plugin;
             _pluginInstance = builder._pluginInstance;
             _type = builder._type;
             _typeInstance = builder._typeInstance;
-            if (builder._values != null && builder._dsTypes != null && builder._dsNames != null) {
-                _samples = Lists.newArrayListWithExpectedSize(builder._values.size());
-
-                final Iterator<Double> valuesIterator = builder._values.iterator();
-                final Iterator<String> typesIterator = builder._dsTypes.iterator();
-                final Iterator<String> namesIterator = builder._dsNames.iterator();
-                while (valuesIterator.hasNext() && typesIterator.hasNext() && namesIterator.hasNext()) {
-                    _samples.add(new Sample(valuesIterator.next(), typesIterator.next(), namesIterator.next()));
-                }
-            } else {
-                _samples = Collections.emptyList();
-            }
+            _values = builder._values;
+            _dsTypes = builder._dsTypes;
+            _dsNames = builder._dsNames;
         }
 
         private final String _host;
-        private final ZonedDateTime _time;
+        private final Double _time;
         private final String _plugin;
         private final String _pluginInstance;
         private final String _type;
         private final String _typeInstance;
-        private final List<Sample> _samples;
+        private final List<Double> _values;
+        private final List<String> _dsTypes;
+        private final List<String> _dsNames;
 
         /**
          * Builder for the {@link CollectdRecord} class.
@@ -335,7 +348,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
              * @param value Value
              * @return This builder
              */
-            public Builder setValues(final List<Double> value) {
+            public Builder setValues(final ImmutableList<Double> value) {
                 _values = value;
                 return this;
             }
@@ -347,7 +360,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
              * @return This builder
              */
             @JsonProperty("dstypes")
-            public Builder setDsTypes(final List<String> value) {
+            public Builder setDsTypes(final ImmutableList<String> value) {
                 _dsTypes = value;
                 return this;
             }
@@ -359,7 +372,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
              * @return This builder
              */
             @JsonProperty("dsnames")
-            public Builder setDsNames(final List<String> value) {
+            public Builder setDsNames(final ImmutableList<String> value) {
                 _dsNames = value;
                 return this;
             }
@@ -384,30 +397,33 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                 _pluginInstance = null;
                 _type = null;
                 _typeInstance = null;
-                _values = Collections.emptyList();
-                _dsTypes = Collections.emptyList();
-                _dsNames = Collections.emptyList();
+                _values = ImmutableList.of();
+                _dsTypes = ImmutableList.of();
+                _dsNames = ImmutableList.of();
             }
 
             @NotNull
             private String _host;
+            // TODO(ville): Verify required as not null; see Instant.ofEpochMilli
             @NotNull
             private Double _time;
+            // TODO(ville): Verify required as not null; see computeMetricName
             @NotNull
             private String _plugin;
             @NotNull
             private String _pluginInstance;
+            // TODO(ville): Verify required as not null; see computeMetricName
             @NotNull
             private String _type;
             @NotNull
             private String _typeInstance;
             @Nullable
             @CheckWith(value = ValueArraysValid.class, message = "values, dstypes, and dsnames must have the same number of entries")
-            private List<Double> _values = Collections.emptyList();
+            private ImmutableList<Double> _values = ImmutableList.of();
             @Nullable
-            private List<String> _dsTypes = Collections.emptyList();
+            private ImmutableList<String> _dsTypes = ImmutableList.of();
             @Nullable
-            private List<String> _dsNames = Collections.emptyList();
+            private ImmutableList<String> _dsNames = ImmutableList.of();
 
             private static class ValueArraysValid implements CheckWithCheck.SimpleCheck {
                 @Override
@@ -426,40 +442,6 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
 
                 private static final long serialVersionUID = 1L;
             }
-        }
-
-        /**
-         * Represents a single sample in a collectd metric post.
-         */
-        public static final class Sample {
-            public Double getValue() {
-                return _value;
-            }
-
-            public String getDsType() {
-                return _dsType;
-            }
-
-            public String getDsName() {
-                return _dsName;
-            }
-
-            /**
-             * Public constructor.
-             *
-             * @param value  The value
-             * @param dsType The DS type
-             * @param dsName The DS name
-             */
-            public Sample(final Double value, final String dsType, final String dsName) {
-                _value = value;
-                _dsType = dsType;
-                _dsName = dsName;
-            }
-
-            private final Double _value;
-            private final String _dsType;
-            private final String _dsName;
         }
     }
 }
