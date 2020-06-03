@@ -49,7 +49,7 @@ public final class AggregationServerSink extends VertxSink {
             final String metricName = entry.getKey();
             final Collection<AggregatedData> data = entry.getValue();
             if (!data.isEmpty()) {
-                final Messages.StatisticSetRecord record = converter.serializeMetricData(metricName, data);
+                final Messages.StatisticSetRecord record = converter.convert(metricName, data);
                 enqueueData(AggregationMessage.create(record).serializeToBuffer());
             }
         }
