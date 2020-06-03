@@ -19,10 +19,17 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
+import akka.pattern.Patterns;
+import com.arpnetworking.steno.Logger;
+import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -41,9 +48,44 @@ public abstract class ActorSource extends BaseSource {
     @Override
     public void stop() {
         if (_actor != null) {
-            _actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+            try {
+                final Future<Boolean> stopFuture = Patterns.gracefulStop(
+                        _actor,
+                        SHUTDOWN_TIMEOUT,
+                        PoisonPill.getInstance());
+
+                Await.result(stopFuture, SHUTDOWN_TIMEOUT);
+                // CHECKSTYLE.OFF: IllegalCatch - Conforming to Akka
+            } catch (final Exception e) {
+                // CHECKSTYLE.ON: IllegalCatch
+                LOGGER.error()
+                        .setMessage("Actor source shutdown timed out or failed")
+                        .addData("actor", _actor)
+                        .addData("actorName", _actorName)
+                        .addData("timeout", SHUTDOWN_TIMEOUT)
+                        .setThrowable(e)
+                        .log();
+            }
             _actor = null;
         }
+    }
+
+    /**
+     * Return the {@link ActorSystem} used by this source.
+     *
+     * @return The {@link ActorSystem} used by this source.
+     */
+    protected ActorSystem getActorSystem() {
+        return _actorSystem;
+    }
+
+    /**
+     * Return an {@link ActorRef} to this source's Akka actor.
+     *
+     * @return An {@link ActorRef} to this source's Akka actor.
+     */
+    protected ActorRef getActor() {
+        return _actor;
     }
 
     /**
@@ -68,6 +110,9 @@ public abstract class ActorSource extends BaseSource {
 
     private final String _actorName;
     private final ActorSystem _actorSystem;
+
+    private static final FiniteDuration SHUTDOWN_TIMEOUT = FiniteDuration.apply(1, TimeUnit.SECONDS);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActorSource.class);
 
     /**
      * ActorSource {@link BaseSource.Builder} implementation.

@@ -15,7 +15,9 @@
  */
 package com.arpnetworking.metrics.mad;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatcher;
@@ -44,6 +46,7 @@ import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.incubator.impl.TsdPeriodicMetrics;
 import com.arpnetworking.metrics.jvm.ExecutorServiceMetricsRunnable;
 import com.arpnetworking.metrics.jvm.JvmMetricsRunnable;
+import com.arpnetworking.metrics.mad.actors.DeadLetterLogger;
 import com.arpnetworking.metrics.mad.actors.Status;
 import com.arpnetworking.metrics.mad.configuration.AggregatorConfiguration;
 import com.arpnetworking.metrics.mad.configuration.PipelineConfiguration;
@@ -224,6 +227,12 @@ public final class Main implements Launchable {
 
         // Retrieve the actor system
         final ActorSystem actorSystem = injector.getInstance(ActorSystem.class);
+
+        // Create the dead letter logger
+        if (_configuration.getLogDeadLetters()) {
+            final ActorRef deadMailMan = actorSystem.actorOf(Props.create(DeadLetterLogger.class), "deadmailman");
+            actorSystem.eventStream().subscribe(deadMailMan, DeadLetter.class);
+        }
 
         // Create the status actor
         actorSystem.actorOf(Props.create(Status.class), "status");

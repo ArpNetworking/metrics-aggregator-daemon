@@ -18,17 +18,24 @@ package com.arpnetworking.metrics.common.sources;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.dispatch.OnComplete;
 import akka.io.Tcp;
 import akka.io.TcpMessage;
+import akka.pattern.Patterns;
+import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
+import scala.concurrent.Await;
+import scala.concurrent.duration.FiniteDuration;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 
 /**
  * Base source that listens on a tcp port. Subclasses should set appropriate
@@ -50,10 +57,33 @@ public abstract class BaseTcpSource extends ActorSource {
         _acceptQueue = builder._acceptQueue;
     }
 
+    @Override
+    public void stop() {
+        final ActorRef tcpManager = Tcp.get(getActorSystem()).manager();
+        try {
+            Await.result(
+                    Patterns.ask(
+                            getActor(),
+                            BaseTcpListenerActor.UNBIND,
+                            UNBIND_TIMEOUT.toMillis()),
+                    UNBIND_TIMEOUT);
+            // CHECKSTYLE.OFF: IllegalCatch - Conforming to Akka
+        } catch (final Exception e) {
+            // CHECKSTYLE.ON: IllegalCatch
+            LOGGER.error()
+                    .setMessage("Tcp source unbind timed out on close")
+                    .addData("name", getName())
+                    .addData("tcpManager", tcpManager)
+                    .log();
+        }
+        super.stop();
+    }
+
     private final String _host;
     private final int _port;
     private final int _acceptQueue;
 
+    private static final FiniteDuration UNBIND_TIMEOUT = FiniteDuration.apply(1, TimeUnit.SECONDS);
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseTcpSource.class);
 
     /**
@@ -84,13 +114,58 @@ public abstract class BaseTcpSource extends ActorSource {
         @Override
         public Receive createReceive() {
             return receiveBuilder()
-                    .matchEquals(IS_READY, message -> {
-                        getSender().tell(_isReady, getSelf());
+                    .matchEquals(IS_READY, message -> getSender().tell(_isReady, getSelf()))
+                    .matchEquals(UNBIND, unbindRequest -> {
+                        final ActorRef requester = getSender();
+                        if (_connectionActor != null) {
+                            LOGGER.debug()
+                                    .setMessage("Tcp server starting unbinding...")
+                                    .addData("requester", requester)
+                                    .addData("connectionActor", _connectionActor)
+                                    .addData("name", _sink.getName())
+                                    .log();
+                            Patterns.ask(
+                                    _connectionActor,
+                                    TcpMessage.unbind(),
+                                    UNBIND_TIMEOUT.toMillis())
+                                    .andThen(
+                                            new OnComplete<Object>() {
+                                                @Override
+                                                public void onComplete(final Throwable throwable, final Object response) {
+                                                    final LogBuilder logBuilder;
+                                                    if (throwable != null) {
+                                                        logBuilder = LOGGER.warn()
+                                                                .setThrowable(throwable);
+                                                    } else {
+                                                        logBuilder = LOGGER.info();
+                                                    }
+                                                    logBuilder
+                                                            .setMessage("Tcp server completed unbinding")
+                                                            .addData("requester", requester)
+                                                            .addData("connectionActor", _connectionActor)
+                                                            .addData("name", _sink.getName())
+                                                            .addData("success", throwable == null)
+                                                            .log();
+
+                                                    requester.tell(response, getSelf());
+                                                }
+                                            },
+                                            getContext().dispatcher());
+                        } else {
+                            LOGGER.warn()
+                                    .setMessage("Tcp server cannot unbind; no connection")
+                                    .addData("sender", getSender())
+                                    .addData("name", _sink.getName())
+                                    .log();
+                            requester.tell(new Tcp.Unbound$(), getSelf());
+                        }
                     })
                     .match(Tcp.Bound.class, tcpBound -> {
+                        _connectionActor = getSender();
                         LOGGER.info()
                                 .setMessage("Tcp server binding complete")
                                 .addData("name", _sink.getName())
+                                .addData("connectionActor", _connectionActor)
                                 .addData("address", tcpBound.localAddress().getAddress().getHostAddress())
                                 .addData("port", tcpBound.localAddress().getPort())
                                 .log();
@@ -145,12 +220,14 @@ public abstract class BaseTcpSource extends ActorSource {
         }
 
         private boolean _isReady = false;
+        @Nullable private ActorRef _connectionActor = null;
         private final BaseTcpSource _sink;
         private final String _host;
         private final int _port;
         private final int _acceptQueue;
 
         private static final String IS_READY = "IsReady";
+        private static final String UNBIND = "Unbind";
     }
 
     /**
