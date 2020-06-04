@@ -58,13 +58,13 @@ public final class PeriodicDataToProtoConverter {
     }
 
     /**
-     * Serialize a metric's data to a StatisticSetRecord.
+     * Convert a metric's data to a StatisticSetRecord.
      *
-     * @param metricName   Name of metric being serialized.
+     * @param metricName   Name of metric being converted.
      * @param data         Recorded metric data to serialize.
      * @return StatisticSetRecord protobuf corresponding to the above.
      */
-    public Messages.StatisticSetRecord serializeMetricData(
+    public Messages.StatisticSetRecord convert(
             final String metricName,
             final Collection<AggregatedData> data) {
 
