@@ -54,6 +54,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 /**
@@ -93,18 +94,19 @@ public final class Aggregator implements Observer, Launchable {
             }
         }
         try {
-            CompletableFutures.allOf(shutdownStages).get();
+            CompletableFutures.allOf(shutdownStages).get(
+                    SHUTDOWN_TIMEOUT.duration().toMillis(),
+                    TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             LOGGER.warn()
                     .setMessage("Interrupted waiting for actors to shutdown")
                     .log();
-        } catch (final ExecutionException e) {
+        } catch (final TimeoutException | ExecutionException e) {
             LOGGER.error()
-                    .setMessage("Waiting for actors to shutdown failed")
+                    .setMessage("Waiting for actors to shutdown timed out or failed")
                     .setThrowable(e)
                     .log();
         }
-
     }
 
     @Override

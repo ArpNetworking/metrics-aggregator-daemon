@@ -31,7 +31,9 @@ import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 
@@ -62,14 +64,21 @@ public abstract class BaseTcpSource extends ActorSource {
             PatternsCS.ask(
                     getActor(),
                     BaseTcpListenerActor.UNBIND,
-                    UNBIND_TIMEOUT).toCompletableFuture().get();
-            // CHECKSTYLE.OFF: IllegalCatch - Conforming to Akka
-        } catch (final Exception e) {
-            // CHECKSTYLE.ON: IllegalCatch
-            LOGGER.error()
-                    .setMessage("Tcp source unbind timed out or failed on close")
+                    UNBIND_TIMEOUT).toCompletableFuture().get(
+                            UNBIND_TIMEOUT.duration().toMillis(),
+                            TimeUnit.MILLISECONDS);
+        } catch (final InterruptedException e) {
+            LOGGER.warn()
+                    .setMessage("Interrupted unbinding tcp source")
                     .addData("name", getName())
                     .addData("tcpManager", tcpManager)
+                    .log();
+        } catch (final TimeoutException | ExecutionException e) {
+            LOGGER.error()
+                    .setMessage("Tcp source unbind on close timed out or failed")
+                    .addData("name", getName())
+                    .addData("tcpManager", tcpManager)
+                    .setThrowable(e)
                     .log();
         }
         super.stop();

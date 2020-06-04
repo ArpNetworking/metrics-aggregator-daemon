@@ -27,7 +27,9 @@ import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import scala.concurrent.duration.FiniteDuration;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 /**
@@ -50,12 +52,20 @@ public abstract class ActorSource extends BaseSource {
                 PatternsCS.gracefulStop(
                         _actor,
                         SHUTDOWN_TIMEOUT,
-                        PoisonPill.getInstance()).toCompletableFuture().get();
-                // CHECKSTYLE.OFF: IllegalCatch - Conforming to Akka
-            } catch (final Exception e) {
-                // CHECKSTYLE.ON: IllegalCatch
+                        PoisonPill.getInstance()).toCompletableFuture().get(
+                                SHUTDOWN_TIMEOUT.toMillis(),
+                                TimeUnit.MILLISECONDS);
+            } catch (final InterruptedException e) {
+                LOGGER.warn()
+                        .setMessage("Interrupted stopping actor source")
+                        .addData("name", getName())
+                        .addData("actor", _actor)
+                        .addData("actorName", _actorName)
+                        .log();
+            } catch (final TimeoutException | ExecutionException e) {
                 LOGGER.error()
-                        .setMessage("Actor source shutdown timed out or failed")
+                        .setMessage("Actor source stop timed out or failed")
+                        .addData("name", getName())
                         .addData("actor", _actor)
                         .addData("actorName", _actorName)
                         .addData("timeout", SHUTDOWN_TIMEOUT)
