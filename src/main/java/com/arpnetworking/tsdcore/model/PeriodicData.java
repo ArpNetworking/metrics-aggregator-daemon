@@ -70,7 +70,8 @@ public final class PeriodicData {
         return Objects.equal(_data, other._data)
                 && Objects.equal(_dimensions, other._dimensions)
                 && Objects.equal(_period, other._period)
-                && Objects.equal(_start, other._start);
+                && Objects.equal(_start, other._start)
+                && Objects.equal(_minRequestTime, other._minRequestTime);
     }
 
     @Override
@@ -79,7 +80,8 @@ public final class PeriodicData {
                 _data,
                 _dimensions,
                 _period,
-                _start);
+                _start,
+                _minRequestTime);
     }
 
     @Override
@@ -90,6 +92,7 @@ public final class PeriodicData {
                 .add("Start", _start)
                 .add("Dimensions", _dimensions)
                 .add("Data", _data)
+                .add("MinRequestTime", _minRequestTime)
                 .toString();
     }
 
