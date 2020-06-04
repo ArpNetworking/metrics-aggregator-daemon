@@ -16,11 +16,11 @@
 package com.arpnetworking.metrics.mad.model;
 
 import com.arpnetworking.commons.test.BuildableTestHelper;
+import com.arpnetworking.commons.test.EqualityTestHelper;
 import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.test.TestBeanFactory;
-import com.arpnetworking.utility.test.BuildableEqualsAndHashCodeTester;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -58,15 +58,16 @@ public final class AggregatedDataTest {
     }
 
     @Test
-    public void testEqualsAndHashCode() {
-        BuildableEqualsAndHashCodeTester.assertEqualsAndHashCode(
+    public void testEqualsAndHashCode() throws Exception {
+        EqualityTestHelper.testEquality(
                 _aggregatedDataBuilder.get(),
                 new AggregatedData.Builder()
                         .setStatistic(MEDIAN_STATISTIC)
                         .setValue(TestBeanFactory.createSample())
                         .setIsSpecified(false)
                         .setPopulationSize(2L)
-                        .setSupportingData(new Object()));
+                        .setSupportingData(new Object()),
+                AggregatedData.class);
     }
 
     @Test

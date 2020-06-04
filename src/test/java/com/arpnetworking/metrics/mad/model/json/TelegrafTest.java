@@ -16,8 +16,8 @@
 package com.arpnetworking.metrics.mad.model.json;
 
 import com.arpnetworking.commons.test.BuildableTestHelper;
+import com.arpnetworking.commons.test.EqualityTestHelper;
 import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
-import com.arpnetworking.utility.test.BuildableEqualsAndHashCodeTester;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Assert;
 import org.junit.Test;
@@ -51,14 +51,15 @@ public class TelegrafTest {
     }
 
     @Test
-    public void testEqualsAndHashCode() {
-        BuildableEqualsAndHashCodeTester.assertEqualsAndHashCode(
+    public void testEqualsAndHashCode() throws Exception {
+        EqualityTestHelper.testEquality(
                 _telegrafBuilder.get(),
                 new Telegraf.Builder()
                         .setTimestamp(System.currentTimeMillis() + 1000)
                         .setName("test2")
                         .setFields(ImmutableMap.of("metric2", "60"))
-                        .setTags(ImmutableMap.of("host", "localhost2")));
+                        .setTags(ImmutableMap.of("host", "localhost2")),
+                Telegraf.class);
     }
 
     @Test
