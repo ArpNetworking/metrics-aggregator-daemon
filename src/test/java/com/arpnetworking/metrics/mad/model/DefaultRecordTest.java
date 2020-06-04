@@ -41,7 +41,8 @@ public final class DefaultRecordTest {
             .setAnnotations(ImmutableMap.of("aKey", "aValue"))
             .setMetrics(ImmutableMap.of(
                     "metric",
-                    TestBeanFactory.createMetric()));
+                    TestBeanFactory.createMetric()))
+            .setRequestTime(ZonedDateTime.now());
 
     @Test
     public void testBuilder() throws InvocationTargetException, IllegalAccessException {
