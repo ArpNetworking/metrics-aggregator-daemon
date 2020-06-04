@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -93,7 +94,7 @@ public final class PeriodicDataToProtoConverter {
      * @param periodicData PeriodicData being converted.
      * @return List of StatisticSetRecord protobufs corresponding to the above.
      */
-    public static Collection<Messages.StatisticSetRecord> convert(
+    public static List<Messages.StatisticSetRecord> convert(
             final PeriodicData periodicData
     ) {
         final ImmutableList.Builder<Messages.StatisticSetRecord> convertedData = ImmutableList.builder();
