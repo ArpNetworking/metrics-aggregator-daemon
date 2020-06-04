@@ -84,7 +84,8 @@ public class PeriodicDataToProtoConverterTest {
                 + "dimensions {\n"
                 + "  key: \"cluster\"\n"
                 + "  value: \"cluster-test\"\n"
-                + "}\n",
+                + "}\n"
+                + "client_minimum_request_time: \"2019-01-03T05:06:07.890-08:00[America/Los_Angeles]\"\n",
 
                 converted.get(0).toString());
     }
