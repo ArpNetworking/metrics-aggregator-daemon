@@ -16,9 +16,9 @@
 package com.arpnetworking.tsdcore.model;
 
 import com.arpnetworking.commons.test.BuildableTestHelper;
+import com.arpnetworking.commons.test.EqualityTestHelper;
 import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.test.TestBeanFactory;
-import com.arpnetworking.utility.test.BuildableEqualsAndHashCodeTester;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -49,12 +49,13 @@ public final class CalculatedValueTest {
     }
 
     @Test
-    public void testEqualsAndHashCode() {
-        BuildableEqualsAndHashCodeTester.assertEqualsAndHashCode(
+    public void testEqualsAndHashCode() throws Exception {
+        EqualityTestHelper.testEquality(
                 _calculatedValueBuilder.get(),
                 new CalculatedValue.Builder<>()
                         .setValue(TestBeanFactory.createSample())
-                        .setData(new Object()));
+                        .setData(new Object()),
+                CalculatedValue.class);
     }
 
     @Test

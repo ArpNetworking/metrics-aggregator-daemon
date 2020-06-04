@@ -16,11 +16,11 @@
 package com.arpnetworking.metrics.mad.model;
 
 import com.arpnetworking.commons.test.BuildableTestHelper;
+import com.arpnetworking.commons.test.EqualityTestHelper;
 import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.test.TestBeanFactory;
-import com.arpnetworking.utility.test.BuildableEqualsAndHashCodeTester;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Assert;
@@ -60,15 +60,16 @@ public final class DefaultMetricTest {
     }
 
     @Test
-    public void testEqualsAndHashCode() {
-        BuildableEqualsAndHashCodeTester.assertEqualsAndHashCode(
+    public void testEqualsAndHashCode() throws Exception {
+        EqualityTestHelper.testEquality(
                 _defaultMetricBuilder.get(),
                 new DefaultMetric.Builder()
                         .setType(MetricType.TIMER)
                         .setValues(ImmutableList.of(TestBeanFactory.createSample()))
                         .setStatistics(ImmutableMap.of(
                                 MEDIAN_STATISTIC,
-                                ImmutableList.of())));
+                                ImmutableList.of())),
+                Metric.class);
     }
 
     @Test

@@ -68,7 +68,6 @@ public final class PeriodicDataToProtoConverter {
             final String metricName,
             final Collection<AggregatedData> data) {
 
-        // Create a statistic record set
         final Messages.StatisticSetRecord.Builder builder = Messages.StatisticSetRecord.newBuilder()
                 .setMetric(metricName)
                 .setPeriod(_period.toString())
@@ -94,7 +93,7 @@ public final class PeriodicDataToProtoConverter {
                     .setStatistic(datum.getStatistic().getName())
                     .setValue(datum.getValue().getValue())
                     .setUnit(unit)
-                    .setUserSpecified(datum.isSpecified());
+                    .setUserSpecified(datum.getIsSpecified());
 
             final ByteString supportingData = serializeSupportingData(datum);
             if (supportingData != null) {

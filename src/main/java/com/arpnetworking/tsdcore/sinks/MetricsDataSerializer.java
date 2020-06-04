@@ -77,7 +77,7 @@ public final class MetricsDataSerializer {
                     .setStatistic(datum.getStatistic().getName())
                     .setValue(datum.getValue().getValue())
                     .setUnit(unit)
-                    .setUserSpecified(datum.isSpecified());
+                    .setUserSpecified(datum.getIsSpecified());
 
             final ByteString supportingData = serializeSupportingData(datum);
             if (supportingData != null) {
