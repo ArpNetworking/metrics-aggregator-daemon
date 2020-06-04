@@ -76,7 +76,8 @@ import java.util.function.BiFunction;
                     b -> b.setData(data.build())
                             .setDimensions(_key)
                             .setPeriod(_period)
-                            .setStart(_start));
+                            .setStart(_start)
+                            .setMinRequestTime(_minRequestTime.orElse(null)));
             _sink.recordAggregateData(periodicData);
         } else {
             LOGGER.warn()
@@ -105,6 +106,7 @@ import java.util.function.BiFunction;
                     .log();
             return;
         }
+
 
 
         for (final Map.Entry<String, ? extends Metric> entry : record.getMetrics().entrySet()) {
@@ -177,6 +179,19 @@ import java.util.function.BiFunction;
                 }
             }
             addMetric(metric, calculators);
+        }
+
+        updateMinRequestTime(record);
+    }
+
+    private void updateMinRequestTime(final Record record) {
+        if (record.getRequestTime().isPresent()) {
+            if (!_minRequestTime.isPresent()) {
+                _minRequestTime = record.getRequestTime();
+            }
+            if (record.getRequestTime().get().isBefore(_minRequestTime.get())) {
+                _minRequestTime = record.getRequestTime();
+            }
         }
     }
 
@@ -349,6 +364,7 @@ import java.util.function.BiFunction;
     }
 
     private boolean _isOpen = true;
+    private Optional<ZonedDateTime> _minRequestTime = Optional.empty();
 
     private final Map<String, Collection<Calculator<?>>> _counterMetricCalculators = Maps.newHashMap();
     private final Map<String, Collection<Calculator<?>>> _gaugeMetricCalculators = Maps.newHashMap();

@@ -24,6 +24,9 @@ import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
 import java.time.ZonedDateTime;
+import java.util.Optional;
+import javax.annotation.Nullable;
+
 
 /**
  * Default implementation of the <code>Record</code> interface.
@@ -47,6 +50,11 @@ public final class DefaultRecord implements Record {
     @Override
     public ZonedDateTime getTime() {
         return _time;
+    }
+
+    @Override
+    public Optional<ZonedDateTime> getRequestTime() {
+        return _requestTime;
     }
 
     @Override
@@ -101,6 +109,7 @@ public final class DefaultRecord implements Record {
         _metrics = builder._metrics;
         _id = builder._id;
         _time = builder._time;
+        _requestTime = Optional.ofNullable(builder._requestTime);
         _annotations = builder._annotations;
         _dimensions = builder._dimensions;
     }
@@ -108,6 +117,7 @@ public final class DefaultRecord implements Record {
     private final ImmutableMap<String, ? extends Metric> _metrics;
     private final String _id;
     private final ZonedDateTime _time;
+    private final Optional<ZonedDateTime> _requestTime;
     private final ImmutableMap<String, String> _annotations;
     private final ImmutableMap<String, String> _dimensions;
 
@@ -159,6 +169,17 @@ public final class DefaultRecord implements Record {
         }
 
         /**
+         * The timestamp at which the record was received. Can be null.
+         *
+         * @param value The timestamp.
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setRequestTime(final ZonedDateTime value) {
+            _requestTime = value;
+            return this;
+        }
+
+        /**
          * The annotations <code>ImmutableMap</code>. Optional. Default is an empty
          * <code>ImmutableMap</code>. Cannot be null.
          *
@@ -189,6 +210,7 @@ public final class DefaultRecord implements Record {
             _time = null;
             _annotations = ImmutableMap.of();
             _dimensions = ImmutableMap.of();
+            _requestTime = null;
         }
 
         @NotNull
@@ -198,6 +220,8 @@ public final class DefaultRecord implements Record {
         private String _id;
         @NotNull
         private ZonedDateTime _time;
+        @Nullable
+        private ZonedDateTime _requestTime;
         @NotNull
         private ImmutableMap<String, String> _annotations = ImmutableMap.of();
         @NotNull

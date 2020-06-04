@@ -226,6 +226,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
         _uniqueStatisticsName = "sinks/periodic_statistics/" + getMetricSafeName() + "/unique_statistics";
         _metricSamplesName = "sinks/periodic_statistics/" + getMetricSafeName() + "/metric_samples";
         _ageName = "sinks/periodic_statistics/" + getMetricSafeName() + "/age";
+        _maxRequestAgeName = "sinks/periodic_statistics/" + getMetricSafeName() + "/request_age";
 
         // Write the metrics periodically
         _executor = executor;
@@ -253,6 +254,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
     private final String _uniqueStatisticsName;
     private final String _metricSamplesName;
     private final String _ageName;
+    private final String _maxRequestAgeName;
 
     private final ScheduledExecutorService _executor;
 
@@ -338,6 +340,8 @@ public final class PeriodicStatisticsSink extends BaseSink {
             }
 
             _age.accumulate(now - periodicData.getStart().plus(periodicData.getPeriod()).toInstant().toEpochMilli());
+            periodicData.getMinRequestTime().ifPresent(
+                    t -> _maxRequestAge.accumulate(now - t.toInstant().toEpochMilli()));
         }
 
         public boolean flushMetrics() {
@@ -359,6 +363,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
                 metrics.incrementCounter(_uniqueStatisticsName, oldUniqueStatistics.size());
                 metrics.incrementCounter(_metricSamplesName, _metricSamples.getAndSet(0));
                 metrics.setTimer(_ageName, _age.getThenReset(), TimeUnit.MILLISECONDS);
+                metrics.setTimer(_maxRequestAgeName, _maxRequestAge.getThenReset(), TimeUnit.MILLISECONDS);
                 metrics.close();
 
                 // Periodic data was flushed
@@ -394,6 +399,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
         private final AtomicReference<Metrics> _metrics = new AtomicReference<>();
 
         private final LongAccumulator _age = new LongAccumulator(Math::max, 0);
+        private final LongAccumulator _maxRequestAge = new LongAccumulator(Math::max, 0);
         private final AtomicLong _metricSamples = new AtomicLong(0);
         private final AtomicLong _aggregatedData = new AtomicLong(0);
         private final AtomicReference<Set<String>> _uniqueMetrics = new AtomicReference<>(

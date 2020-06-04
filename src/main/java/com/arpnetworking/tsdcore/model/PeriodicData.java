@@ -25,6 +25,8 @@ import net.sf.oval.constraint.NotNull;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Contains the data for a specific period in time.
@@ -40,6 +42,10 @@ public final class PeriodicData {
 
     public ZonedDateTime getStart() {
         return _start;
+    }
+
+    public Optional<ZonedDateTime> getMinRequestTime() {
+        return _minRequestTime;
     }
 
     public Key getDimensions() {
@@ -64,7 +70,8 @@ public final class PeriodicData {
         return Objects.equal(_data, other._data)
                 && Objects.equal(_dimensions, other._dimensions)
                 && Objects.equal(_period, other._period)
-                && Objects.equal(_start, other._start);
+                && Objects.equal(_start, other._start)
+                && Objects.equal(_minRequestTime, other._minRequestTime);
     }
 
     @Override
@@ -73,7 +80,8 @@ public final class PeriodicData {
                 _data,
                 _dimensions,
                 _period,
-                _start);
+                _start,
+                _minRequestTime);
     }
 
     @Override
@@ -84,18 +92,21 @@ public final class PeriodicData {
                 .add("Start", _start)
                 .add("Dimensions", _dimensions)
                 .add("Data", _data)
+                .add("MinRequestTime", _minRequestTime)
                 .toString();
     }
 
     private PeriodicData(final Builder builder) {
         _period = builder._period;
         _start = builder._start;
+        _minRequestTime = Optional.ofNullable(builder._minRequestTime);
         _dimensions = builder._dimensions;
         _data = builder._data;
     }
 
     private final Duration _period;
     private final ZonedDateTime _start;
+    private final Optional<ZonedDateTime> _minRequestTime;
     private final Key _dimensions;
     private final ImmutableMultimap<String, AggregatedData> _data;
 
@@ -134,6 +145,18 @@ public final class PeriodicData {
         }
 
         /**
+         * Set the earliest time at which data in this bucket was recorded. May be null.
+         *
+         * @param value The timestamp
+         * @return This <code>Builder</code> instance.
+         */
+        public Builder setMinRequestTime(@Nullable final ZonedDateTime value) {
+            _minRequestTime = value;
+            return this;
+        }
+
+
+        /**
          * Set the dimensions. Required. Cannot be null.
          *
          * @param value The dimensions.
@@ -159,6 +182,7 @@ public final class PeriodicData {
         protected void reset() {
             _period = null;
             _start = null;
+            _minRequestTime = null;
             _dimensions = null;
             _data = ImmutableMultimap.of();
         }
@@ -167,6 +191,9 @@ public final class PeriodicData {
         private Duration _period;
         @NotNull
         private ZonedDateTime _start;
+        @Nullable
+        private ZonedDateTime _minRequestTime;
+
         @NotNull
         private Key _dimensions;
         @NotNull

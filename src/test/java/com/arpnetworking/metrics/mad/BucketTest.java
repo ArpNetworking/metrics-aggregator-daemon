@@ -112,6 +112,86 @@ public class BucketTest {
                                 .build()));
     }
 
+    private void addRequestTimeData(final Optional<ZonedDateTime> requestTime) {
+        _bucket.add(
+                new DefaultRecord.Builder()
+                        .setTime(START)
+                        .setDimensions(
+                                ImmutableMap.of(
+                                        Key.HOST_DIMENSION_KEY, "MyHost",
+                                        Key.SERVICE_DIMENSION_KEY, "MyService",
+                                        Key.CLUSTER_DIMENSION_KEY, "MyCluster"))
+                        .setId(UUID.randomUUID().toString())
+                        .setMetrics(ImmutableMap.of(
+                                "MyCounter",
+                                new DefaultMetric.Builder()
+                                        .setType(MetricType.COUNTER)
+                                        .setValues(ImmutableList.of(ONE))
+                                        .build()))
+                        .setRequestTime(requestTime.orElse(null))
+                        .build());
+    }
+
+    private void requestTimeCase(
+            final Optional<ZonedDateTime> first,
+            final Optional<ZonedDateTime> second,
+            final Optional<ZonedDateTime> expected) {
+        addRequestTimeData(first);
+        addRequestTimeData(second);
+
+        _bucket.close();
+
+        final ArgumentCaptor<PeriodicData> dataCaptor = ArgumentCaptor.forClass(PeriodicData.class);
+        Mockito.verify(_sink).recordAggregateData(dataCaptor.capture());
+
+        Assert.assertEquals(expected, dataCaptor.getValue().getMinRequestTime());
+    }
+
+    @Test
+    public void testRequestTimeEmptyEmpty() {
+        requestTimeCase(Optional.empty(), Optional.empty(), Optional.empty());
+    }
+
+    @Test
+    public void testRequestTimeEmptyLow() {
+        requestTimeCase(Optional.empty(), LOWTIME, LOWTIME);
+    }
+
+    @Test
+    public void testRequestTimeEmptyHigh() {
+        requestTimeCase(Optional.empty(), HIGHTIME, HIGHTIME);
+    }
+
+    @Test
+    public void testRequestTimeLowEmpty() {
+        requestTimeCase(LOWTIME, Optional.empty(), LOWTIME);
+    }
+
+    @Test
+    public void testRequestTimeLowLow() {
+        requestTimeCase(LOWTIME, LOWTIME, LOWTIME);
+    }
+
+    @Test
+    public void testRequestTimeLowHigh() {
+        requestTimeCase(LOWTIME, HIGHTIME, LOWTIME);
+    }
+
+    @Test
+    public void testRequestTimeHighEmpty() {
+        requestTimeCase(HIGHTIME, Optional.empty(), HIGHTIME);
+    }
+
+    @Test
+    public void testRequestTimeHighLow() {
+        requestTimeCase(HIGHTIME, LOWTIME, LOWTIME);
+    }
+
+    @Test
+    public void testRequestTimeHighHigh() {
+        requestTimeCase(HIGHTIME, HIGHTIME, HIGHTIME);
+    }
+
     @Test
     public void testEmptyCounter() {
         _bucket.add(
@@ -350,6 +430,9 @@ public class BucketTest {
     private Sink _sink;
 
     private static final ZonedDateTime START = ZonedDateTime.parse("2015-02-05T00:00:00Z");
+    private static final Optional<ZonedDateTime> LOWTIME = Optional.of(START.plusMinutes(27));
+    private static final Optional<ZonedDateTime> HIGHTIME = Optional.of(LOWTIME.get().plusMinutes(10));
+
 
     private static final Quantity ONE = new DefaultQuantity.Builder().setValue(1.0).build();
     private static final Quantity TWO = new DefaultQuantity.Builder().setValue(2.0).build();
