@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
+import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.commons.uuidfactory.SplittableRandomUuidFactory;
@@ -192,7 +193,7 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
     /**
      * Implementation of <code>Builder</code> for {@link TelegrafJsonToRecordParser}.
      */
-    public static final class Builder extends ThreadLocalBuilder<TelegrafJsonToRecordParser> {
+    public static final class Builder extends OvalBuilder<TelegrafJsonToRecordParser> {
 
         /**
          * Public constructor.
@@ -210,11 +211,6 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
         public Builder setTimestampUnit(final TimestampUnit value) {
             this._timestampUnit = value;
             return this;
-        }
-
-        @Override
-        protected void reset() {
-            _timestampUnit = TimestampUnit.SECONDS;
         }
 
         @NotNull

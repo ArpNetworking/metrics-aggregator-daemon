@@ -17,7 +17,6 @@
 package com.arpnetworking.metrics.mad.parsers;
 
 import com.arpnetworking.commons.test.BuildableTestHelper;
-import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.MetricType;
@@ -56,11 +55,6 @@ public class TelegrafJsonToRecordParserTest {
         BuildableTestHelper.testBuild(
                 _telegrahJsonParserBuilder.get(),
                 TelegrafJsonToRecordParser.class);
-    }
-
-    @Test
-    public void testReset() throws Exception {
-        ThreadLocalBuildableTestHelper.testReset(_telegrahJsonParserBuilder.get());
     }
 
     @Test

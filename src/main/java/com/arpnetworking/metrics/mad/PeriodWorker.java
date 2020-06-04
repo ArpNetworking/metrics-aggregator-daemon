@@ -16,6 +16,7 @@
 package com.arpnetworking.metrics.mad;
 
 import akka.actor.AbstractActor;
+import akka.actor.Cancellable;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
+import javax.annotation.Nullable;
 
 /**
  * Actor that aggregates a particular slice of the data set over time and metric.
@@ -58,6 +60,19 @@ import java.util.TreeMap;
         // creating a race condition. Note that period worker clean-up did not exist
         // in the previous implementation either (not that it shouldn't; just one
         // problem at a time).
+    }
+
+    @Override
+    public void postStop() {
+        if (_nextScheduledRotation != null) {
+            final boolean cancelResult = _nextScheduledRotation.cancel();
+            _nextScheduledRotation = null;
+
+            LOGGER.trace()
+                    .setMessage("Shutdown canceled next scheduled rotation")
+                    .addData("cancelResult", cancelResult)
+                    .log();
+        }
     }
 
     @Override
@@ -91,7 +106,7 @@ import java.util.TreeMap;
                 timeToRotate = MINIMUM_ROTATION_CHECK_INTERVAL;
             }
 
-            context().system().scheduler().scheduleOnce(
+            _nextScheduledRotation = context().system().scheduler().scheduleOnce(
                     timeToRotate,
                     self(),
                     ROTATE_MESSAGE,
@@ -238,6 +253,7 @@ import java.util.TreeMap;
     }
 
     private boolean _hasRotateScheduled;
+    @Nullable private Cancellable _nextScheduledRotation;
 
     private final Duration _period;
     private final Bucket.Builder _bucketBuilder;
