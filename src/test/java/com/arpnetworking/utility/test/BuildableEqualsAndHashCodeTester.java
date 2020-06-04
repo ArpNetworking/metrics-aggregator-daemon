@@ -57,7 +57,7 @@ public final class BuildableEqualsAndHashCodeTester {
 
         // Test equality
         Assert.assertTrue(instanceA1.equals(instanceA2));
-        Assert.assertTrue(instanceA1.equals(instanceA2));
+        Assert.assertTrue(instanceA2.equals(instanceA1));
         Assert.assertEquals(instanceA1.hashCode(), instanceA2.hashCode());
 
         // Check all member permutations for equality
