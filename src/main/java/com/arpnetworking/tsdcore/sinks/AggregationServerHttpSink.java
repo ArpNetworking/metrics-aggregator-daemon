@@ -17,7 +17,6 @@ package com.arpnetworking.tsdcore.sinks;
 
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
-import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.tsdcore.model.AggregationMessage;
 import com.arpnetworking.tsdcore.model.PeriodicData;
@@ -26,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.net.MediaType;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Publisher to send data to an upstream aggregation server over HTTP.
