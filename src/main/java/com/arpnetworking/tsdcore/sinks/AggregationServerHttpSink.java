@@ -56,7 +56,7 @@ public final class AggregationServerHttpSink extends HttpPostSink {
             final String metricName = entry.getKey();
             final Collection<AggregatedData> data = entry.getValue();
             if (!data.isEmpty()) {
-                final Messages.StatisticSetRecord record = converter.serializeMetricData(metricName, data);
+                final Messages.StatisticSetRecord record = converter.convert(metricName, data);
                 serializedPeriodicData.add(AggregationMessage.create(record).serializeToByteString().toArray());
             }
         }
