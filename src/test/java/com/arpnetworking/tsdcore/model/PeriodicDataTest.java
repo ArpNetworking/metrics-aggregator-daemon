@@ -16,12 +16,12 @@
 package com.arpnetworking.tsdcore.model;
 
 import com.arpnetworking.commons.test.BuildableTestHelper;
+import com.arpnetworking.commons.test.EqualityTestHelper;
 import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.test.TestBeanFactory;
-import com.arpnetworking.utility.test.BuildableEqualsAndHashCodeTester;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import org.junit.Assert;
@@ -70,8 +70,8 @@ public final class PeriodicDataTest {
     }
 
     @Test
-    public void testEqualsAndHashCode() {
-        BuildableEqualsAndHashCodeTester.assertEqualsAndHashCode(
+    public void testEqualsAndHashCode() throws Exception {
+        EqualityTestHelper.testEquality(
                 _periodicDataBuilder.get(),
                 new PeriodicData.Builder()
                         .setPeriod(Duration.ofMinutes(2))
@@ -85,7 +85,8 @@ public final class PeriodicDataTest {
                                         .setIsSpecified(false)
                                         .setValue(TestBeanFactory.createSample())
                                         .setPopulationSize(2L)
-                                        .build())));
+                                        .build())),
+                PeriodicData.class);
     }
 
     @Test

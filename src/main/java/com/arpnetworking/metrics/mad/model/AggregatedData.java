@@ -40,7 +40,7 @@ public final class AggregatedData implements Serializable {
         return _statistic;
     }
 
-    public boolean isSpecified() {
+    public boolean getIsSpecified() {
         return _isSpecified;
     }
 
@@ -80,7 +80,7 @@ public final class AggregatedData implements Serializable {
                 getStatistic(),
                 getValue(),
                 getPopulationSize(),
-                isSpecified(),
+                getIsSpecified(),
                 getSupportingData());
     }
 
@@ -105,7 +105,7 @@ public final class AggregatedData implements Serializable {
                 .put("statistic", _statistic)
                 .put("value", _value)
                 .put("populationSize", _populationSize)
-                .put("isSpecified", _isSpecified)
+                .put("getIsSpecified", _isSpecified)
                 .build();
     }
 
@@ -206,7 +206,7 @@ public final class AggregatedData implements Serializable {
                 throw new IllegalStateException("populationSize must not be null");
             }
             if (_isSpecified == null) {
-                throw new IllegalStateException("isSpecified must not be null");
+                throw new IllegalStateException("getIsSpecified must not be null");
             }
             return new AggregatedData(this);
         }
