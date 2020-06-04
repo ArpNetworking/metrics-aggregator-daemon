@@ -55,7 +55,8 @@ public final class PeriodicDataTest {
                             .setIsSpecified(true)
                             .setValue(TestBeanFactory.createSample())
                             .setPopulationSize(1L)
-                            .build()));
+                            .build()))
+            .setMinRequestTime(ZonedDateTime.now());
 
     @Test
     public void testBuilder() throws InvocationTargetException, IllegalAccessException {
