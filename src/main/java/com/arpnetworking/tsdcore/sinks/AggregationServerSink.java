@@ -44,6 +44,7 @@ public final class AggregationServerSink extends VertxSink {
                 .addData("dataSize", periodicData.getData().size())
                 .log();
 
+        TODO REFACTOR
         final PeriodicDataToProtoConverter converter = new PeriodicDataToProtoConverter(periodicData);
         for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
             final String metricName = entry.getKey();

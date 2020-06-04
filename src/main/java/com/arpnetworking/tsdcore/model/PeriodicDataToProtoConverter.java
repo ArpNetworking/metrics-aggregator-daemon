@@ -20,11 +20,9 @@ import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.statistics.HistogramStatistic;
 import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 
-import java.time.Duration;
-import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -38,43 +36,25 @@ public final class PeriodicDataToProtoConverter {
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic EXPRESSION_STATISTIC = STATISTIC_FACTORY.getStatistic("expression");
 
-    private final Duration _period;
-    private final ZonedDateTime _periodStart;
-    private final ImmutableMap<String, String> _dimensionParameters;
-    private final String _cluster;
-    private final String _service;
-
-    /**
-     * Create a converter to generate protobuf messages for a given PeriodicData.
-     *
-     * @param periodicData Originating PeriodicData
-     */
-    public PeriodicDataToProtoConverter(final PeriodicData periodicData) {
-        _period = periodicData.getPeriod();
-        _periodStart = periodicData.getStart();
-        _dimensionParameters = periodicData.getDimensions().getParameters();
-        _cluster = periodicData.getDimensions().getCluster();
-        _service = periodicData.getDimensions().getService();
-    }
-
     /**
      * Convert a metric's data to a StatisticSetRecord.
      *
+     * @param periodicData PeriodicData being converted.
      * @param metricName   Name of metric being converted.
      * @param data         Recorded metric data to serialize.
      * @return StatisticSetRecord protobuf corresponding to the above.
      */
-    public Messages.StatisticSetRecord convert(
+    private static Messages.StatisticSetRecord convertAggregatedData(
+            final PeriodicData periodicData,
             final String metricName,
             final Collection<AggregatedData> data) {
-
         final Messages.StatisticSetRecord.Builder builder = Messages.StatisticSetRecord.newBuilder()
                 .setMetric(metricName)
-                .setPeriod(_period.toString())
-                .setPeriodStart(_periodStart.toString())
-                .putAllDimensions(_dimensionParameters)
-                .setCluster(_cluster)
-                .setService(_service);
+                .setPeriod(periodicData.getPeriod().toString())
+                .setPeriodStart(periodicData.getStart().toString())
+                .putAllDimensions(periodicData.getDimensions().getParameters())
+                .setCluster(periodicData.getDimensions().getCluster())
+                .setService(periodicData.getDimensions().getService());
 
         for (final AggregatedData datum : data) {
             if (Objects.equals(EXPRESSION_STATISTIC, datum.getStatistic())) {
@@ -103,6 +83,31 @@ public final class PeriodicDataToProtoConverter {
         }
 
         return builder.build();
+
+
+    }
+
+    /**
+     * Convert a PeriodicData to a set of corresponding protobuf messages.
+     *
+     * @param periodicData PeriodicData being converted.
+     * @return List of StatisticSetRecord protobufs corresponding to the above.
+     */
+    public static Collection<Messages.StatisticSetRecord> convert(
+            final PeriodicData periodicData
+    ) {
+        final ImmutableList.Builder<Messages.StatisticSetRecord> convertedData = ImmutableList.builder();
+        for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
+            final String metricName = entry.getKey();
+            final Collection<AggregatedData> data = entry.getValue();
+            if (!data.isEmpty()) {
+                final Messages.StatisticSetRecord record = convertAggregatedData(
+                        periodicData, metricName, data);
+                convertedData.add(record);
+            }
+        }
+        return convertedData.build();
+
     }
 
     private static ByteString serializeSupportingData(final AggregatedData datum) {
@@ -133,5 +138,9 @@ public final class PeriodicDataToProtoConverter {
             return null;
         }
         return byteString;
+    }
+
+    private PeriodicDataToProtoConverter() {
+        throw new AssertionError("can't construct utility class");
     }
 }

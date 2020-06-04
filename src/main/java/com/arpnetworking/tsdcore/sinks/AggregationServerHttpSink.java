@@ -50,15 +50,11 @@ public final class AggregationServerHttpSink extends HttpPostSink {
 
     @Override
     protected Collection<byte[]> serialize(final PeriodicData periodicData) {
+        final Collection<Messages.StatisticSetRecord> records = PeriodicDataToProtoConverter.convert(periodicData);
+
         final ImmutableList.Builder<byte[]> serializedPeriodicData = ImmutableList.builder();
-        final PeriodicDataToProtoConverter converter = new PeriodicDataToProtoConverter(periodicData);
-        for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
-            final String metricName = entry.getKey();
-            final Collection<AggregatedData> data = entry.getValue();
-            if (!data.isEmpty()) {
-                final Messages.StatisticSetRecord record = converter.convert(metricName, data);
-                serializedPeriodicData.add(AggregationMessage.create(record).serializeToByteString().toArray());
-            }
+        for (final Messages.StatisticSetRecord record : records) {
+            serializedPeriodicData.add(AggregationMessage.create(record).serializeToByteString().toArray());
         }
         return serializedPeriodicData.build();
     }
