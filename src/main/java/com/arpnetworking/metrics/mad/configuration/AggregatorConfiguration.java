@@ -73,6 +73,10 @@ public final class AggregatorConfiguration {
         return _supplementalHttpRoutesClass;
     }
 
+    public boolean getLogDeadLetters() {
+        return _logDeadLetters;
+    }
+
     public String getMetricsClientHost() {
         return _metricsClientHost;
     }
@@ -102,6 +106,7 @@ public final class AggregatorConfiguration {
                 .add("HttpHealthCheckPath", _httpHealthCheckPath)
                 .add("HttpStatusPath", _httpStatusPath)
                 .add("SupplementalHttpRoutesClass", _supplementalHttpRoutesClass)
+                .add("LogDeadLetters", _logDeadLetters)
                 .add("AkkaConfiguration", _akkaConfiguration)
                 .add("MetricsClientHost", _metricsClientHost)
                 .add("MetricsClientPort", _metricsClientPort)
@@ -119,6 +124,7 @@ public final class AggregatorConfiguration {
         _httpHealthCheckPath = builder._httpHealthCheckPath;
         _httpStatusPath = builder._httpStatusPath;
         _supplementalHttpRoutesClass = Optional.ofNullable(builder._supplementalHttpRoutesClass);
+        _logDeadLetters = builder._logDeadLetters;
         _metricsClientHost = Optional.ofNullable(builder._metricsClientHost).orElse(
                 "0.0.0.0".equals(_httpHost) ? "localhost" : _httpHost);
         _metricsClientPort = Optional.ofNullable(builder._metricsClientPort).orElse(_httpPort);
@@ -134,7 +140,8 @@ public final class AggregatorConfiguration {
     private final String _httpHealthCheckPath;
     private final String _httpStatusPath;
     private final int _httpPort;
-    private Optional<Class<? extends SupplementalRoutes>> _supplementalHttpRoutesClass;
+    private final Optional<Class<? extends SupplementalRoutes>> _supplementalHttpRoutesClass;
+    private final boolean _logDeadLetters;
     private final String _metricsClientHost;
     private final int _metricsClientPort;
     private final Duration _jvmMetricsCollectionInterval;
@@ -256,6 +263,20 @@ public final class AggregatorConfiguration {
         }
 
         /**
+         * Whether to install the {@link com.arpnetworking.metrics.mad.actors.DeadLetterLogger}
+         * to log all dead letter senders, recipients and messages. It differs
+         * from the built-in Akka logging in that it actually logs the message
+         * (as provided by {@code toString()}) instead of just the message type.
+         *
+         * @param value {@code True} if dead letter logging should be enabled
+         * @return This instance of <code>Builder</code>.
+         */
+        public Builder setLogDeadLetters(final Boolean value) {
+            _logDeadLetters = value;
+            return this;
+        }
+
+        /**
          * The metrics client http host address to send to. Optional. Cannot be
          * empty. Defaults to the http address unless it's 0.0.0.0 in which
          * case it defaults to localhost.
@@ -331,6 +352,8 @@ public final class AggregatorConfiguration {
         @NotEmpty
         private String _httpStatusPath = "/status";
         private Class<? extends SupplementalRoutes> _supplementalHttpRoutesClass;
+        @NotNull
+        private Boolean _logDeadLetters = false;
         @NotEmpty
         private String _metricsClientHost;
         @Range(min = 1, max = 65535)
