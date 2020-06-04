@@ -68,6 +68,7 @@ public final class PeriodicDataToProtoConverter {
                 .setMetric(metricName)
                 .setPeriod(periodicData.getPeriod().toString())
                 .setPeriodStart(periodicData.getStart().toString())
+                .setClientMinimumRequestTime(periodicData.getMinRequestTime().map(t -> t.toString()).orElse(""))
                 .putAllDimensions(periodicData.getDimensions().getParameters())
                 .setCluster(periodicData.getDimensions().getCluster())
                 .setService(periodicData.getDimensions().getService());
