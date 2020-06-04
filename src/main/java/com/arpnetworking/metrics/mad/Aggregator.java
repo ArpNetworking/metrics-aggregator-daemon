@@ -19,9 +19,10 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.dispatch.OnComplete;
-import akka.pattern.Patterns;
+import akka.pattern.PatternsCS;
+import akka.util.Timeout;
 import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.java.util.concurrent.CompletableFutures;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
@@ -42,15 +43,16 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.sf.oval.constraint.NotNull;
-import scala.concurrent.duration.FiniteDuration;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -78,30 +80,28 @@ public final class Aggregator implements Observer, Launchable {
                 .addData("aggregator", this)
                 .log();
 
-        final Semaphore barrier = new Semaphore(0);
-        int actorCount = 0;
+        final List<CompletableFuture<Object>> shutdownStages = new ArrayList<>();
         for (final List<ActorRef> actorRefList : _periodWorkerActors.values()) {
             for (final ActorRef actorRef : actorRefList) {
-                ++actorCount;
-                Patterns.ask(
-                        actorRef,
-                        PoisonPill.getInstance(),
-                        SHUTDOWN_TIMEOUT.toMillis())
-                        .andThen(
-                                new OnComplete<Object>() {
-                                    @Override
-                                    public void onComplete(final Throwable throwable, final Object result) {
-                                        barrier.release();
-                                    }
-                                },
-                        _actorSystem.getDispatcher());
+                shutdownStages.add(
+                        PatternsCS.ask(
+                                actorRef,
+                                PoisonPill.getInstance(),
+                                SHUTDOWN_TIMEOUT).toCompletableFuture());
+
+
             }
         }
         try {
-            barrier.acquire(actorCount);
+            CompletableFutures.allOf(shutdownStages).get();
         } catch (final InterruptedException e) {
             LOGGER.warn()
                     .setMessage("Interrupted waiting for actors to shutdown")
+                    .log();
+        } catch (final ExecutionException e) {
+            LOGGER.error()
+                    .setMessage("Waiting for actors to shutdown failed")
+                    .setThrowable(e)
                     .log();
         }
 
@@ -246,7 +246,7 @@ public final class Aggregator implements Observer, Launchable {
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedDependentStatistics;
     private final Map<Key, List<ActorRef>> _periodWorkerActors = Maps.newConcurrentMap();
 
-    private static final FiniteDuration SHUTDOWN_TIMEOUT = FiniteDuration.apply(1, TimeUnit.SECONDS);
+    private static final Timeout SHUTDOWN_TIMEOUT = Timeout.apply(1, TimeUnit.SECONDS);
     private static final Logger LOGGER = LoggerFactory.getLogger(Aggregator.class);
 
     /**

@@ -19,14 +19,12 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.pattern.Patterns;
+import akka.pattern.PatternsCS;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.concurrent.TimeUnit;
@@ -49,12 +47,10 @@ public abstract class ActorSource extends BaseSource {
     public void stop() {
         if (_actor != null) {
             try {
-                final Future<Boolean> stopFuture = Patterns.gracefulStop(
+                PatternsCS.gracefulStop(
                         _actor,
                         SHUTDOWN_TIMEOUT,
-                        PoisonPill.getInstance());
-
-                Await.result(stopFuture, SHUTDOWN_TIMEOUT);
+                        PoisonPill.getInstance()).toCompletableFuture().get();
                 // CHECKSTYLE.OFF: IllegalCatch - Conforming to Akka
             } catch (final Exception e) {
                 // CHECKSTYLE.ON: IllegalCatch
