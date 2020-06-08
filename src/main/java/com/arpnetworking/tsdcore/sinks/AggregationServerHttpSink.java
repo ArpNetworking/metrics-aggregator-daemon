@@ -17,7 +17,6 @@ package com.arpnetworking.tsdcore.sinks;
 
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
-import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.tsdcore.model.AggregationMessage;
 import com.arpnetworking.tsdcore.model.PeriodicData;
@@ -26,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.net.MediaType;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Publisher to send data to an upstream aggregation server over HTTP.
@@ -50,15 +48,11 @@ public final class AggregationServerHttpSink extends HttpPostSink {
 
     @Override
     protected Collection<byte[]> serialize(final PeriodicData periodicData) {
+        final Collection<Messages.StatisticSetRecord> records = PeriodicDataToProtoConverter.convert(periodicData);
+
         final ImmutableList.Builder<byte[]> serializedPeriodicData = ImmutableList.builder();
-        final PeriodicDataToProtoConverter converter = new PeriodicDataToProtoConverter(periodicData);
-        for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
-            final String metricName = entry.getKey();
-            final Collection<AggregatedData> data = entry.getValue();
-            if (!data.isEmpty()) {
-                final Messages.StatisticSetRecord record = converter.convert(metricName, data);
-                serializedPeriodicData.add(AggregationMessage.create(record).serializeToByteString().toArray());
-            }
+        for (final Messages.StatisticSetRecord record : records) {
+            serializedPeriodicData.add(AggregationMessage.create(record).serializeToByteString().toArray());
         }
         return serializedPeriodicData.build();
     }
