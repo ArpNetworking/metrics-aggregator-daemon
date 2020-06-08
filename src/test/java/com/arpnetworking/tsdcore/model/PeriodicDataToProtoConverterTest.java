@@ -55,6 +55,7 @@ public class PeriodicDataToProtoConverterTest {
                         .setPopulationSize((long) 1337).build()))
                 .setPeriod(Duration.ofMinutes(5))
                 .setStart(ZonedDateTime.parse("2020-06-04T16:04:38.424-07:00[America/Los_Angeles]"))
+                .setMinRequestTime(ZonedDateTime.parse("2019-01-03T05:06:07.890-07:00[America/Los_Angeles]"))
                 .build();
 
         final List<Messages.StatisticSetRecord> converted = PeriodicDataToProtoConverter.convert(data);
@@ -83,7 +84,8 @@ public class PeriodicDataToProtoConverterTest {
                 + "dimensions {\n"
                 + "  key: \"cluster\"\n"
                 + "  value: \"cluster-test\"\n"
-                + "}\n",
+                + "}\n"
+                + "client_minimum_request_time: \"2019-01-03T05:06:07.890-08:00[America/Los_Angeles]\"\n",
 
                 converted.get(0).toString());
     }
