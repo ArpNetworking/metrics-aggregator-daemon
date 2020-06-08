@@ -38,13 +38,28 @@ public final class PeriodicDataToProtoConverter {
     private static final Statistic EXPRESSION_STATISTIC = STATISTIC_FACTORY.getStatistic("expression");
 
     /**
-     * Convert a metric's data to a StatisticSetRecord.
+     * Convert a PeriodicData to a set of corresponding protobuf messages.
      *
      * @param periodicData PeriodicData being converted.
-     * @param metricName   Name of metric being converted.
-     * @param data         Recorded metric data to serialize.
-     * @return StatisticSetRecord protobuf corresponding to the above.
+     * @return List of StatisticSetRecord protobufs corresponding to the above.
      */
+    public static List<Messages.StatisticSetRecord> convert(
+            final PeriodicData periodicData
+    ) {
+        final ImmutableList.Builder<Messages.StatisticSetRecord> convertedData = ImmutableList.builder();
+        for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
+            final String metricName = entry.getKey();
+            final Collection<AggregatedData> data = entry.getValue();
+            if (!data.isEmpty()) {
+                final Messages.StatisticSetRecord record = convertAggregatedData(
+                        periodicData, metricName, data);
+                convertedData.add(record);
+            }
+        }
+        return convertedData.build();
+
+    }
+
     private static Messages.StatisticSetRecord convertAggregatedData(
             final PeriodicData periodicData,
             final String metricName,
@@ -88,29 +103,6 @@ public final class PeriodicDataToProtoConverter {
 
     }
 
-    /**
-     * Convert a PeriodicData to a set of corresponding protobuf messages.
-     *
-     * @param periodicData PeriodicData being converted.
-     * @return List of StatisticSetRecord protobufs corresponding to the above.
-     */
-    public static List<Messages.StatisticSetRecord> convert(
-            final PeriodicData periodicData
-    ) {
-        final ImmutableList.Builder<Messages.StatisticSetRecord> convertedData = ImmutableList.builder();
-        for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
-            final String metricName = entry.getKey();
-            final Collection<AggregatedData> data = entry.getValue();
-            if (!data.isEmpty()) {
-                final Messages.StatisticSetRecord record = convertAggregatedData(
-                        periodicData, metricName, data);
-                convertedData.add(record);
-            }
-        }
-        return convertedData.build();
-
-    }
-
     private static ByteString serializeSupportingData(final AggregatedData datum) {
         final Object data = datum.getSupportingData();
         final ByteString byteString;
@@ -141,7 +133,5 @@ public final class PeriodicDataToProtoConverter {
         return byteString;
     }
 
-    private PeriodicDataToProtoConverter() {
-        throw new AssertionError("can't construct utility class");
-    }
+    private PeriodicDataToProtoConverter() {}
 }
