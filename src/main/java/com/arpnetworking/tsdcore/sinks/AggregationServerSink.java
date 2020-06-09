@@ -17,7 +17,6 @@ package com.arpnetworking.tsdcore.sinks;
 
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
-import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
@@ -27,7 +26,6 @@ import com.arpnetworking.tsdcore.model.PeriodicDataToProtoConverter;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Publisher to send data to an upstream aggregation server.
@@ -44,14 +42,10 @@ public final class AggregationServerSink extends VertxSink {
                 .addData("dataSize", periodicData.getData().size())
                 .log();
 
-        final PeriodicDataToProtoConverter converter = new PeriodicDataToProtoConverter(periodicData);
-        for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
-            final String metricName = entry.getKey();
-            final Collection<AggregatedData> data = entry.getValue();
-            if (!data.isEmpty()) {
-                final Messages.StatisticSetRecord record = converter.convert(metricName, data);
-                enqueueData(AggregationMessage.create(record).serializeToBuffer());
-            }
+        final Collection<Messages.StatisticSetRecord> records = PeriodicDataToProtoConverter.convert(periodicData);
+
+        for (final Messages.StatisticSetRecord record : records) {
+            enqueueData(AggregationMessage.create(record).serializeToBuffer());
         }
     }
 
