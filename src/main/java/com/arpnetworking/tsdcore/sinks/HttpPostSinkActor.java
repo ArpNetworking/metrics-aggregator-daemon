@@ -21,6 +21,8 @@ import akka.http.javadsl.model.StatusCodes;
 import akka.pattern.PatternsCS;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
+import com.arpnetworking.metrics.MetricsFactory;
+import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
@@ -88,6 +90,8 @@ public class HttpPostSinkActor extends AbstractActor {
         _sink = sink;
         _maximumConcurrency = maximumConcurrency;
         _pendingRequests = EvictingQueue.create(maximumQueueSize);
+        _metricsFactory = _sink.metricsFactory;
+        _metrics = _metricsFactory.create();
         if (Objects.equals(Duration.ZERO, spreadPeriod)) {
             _spreadingDelayMillis = 0;
         } else {
@@ -200,6 +204,7 @@ public class HttpPostSinkActor extends AbstractActor {
             }
 
             if (evicted > 0) {
+                _metrics.incrementCounter(EVICTED_COUNTER, evicted);
                 EVICTED_LOGGER.warn()
                         .setMessage("Evicted data from HTTP sink queue")
                         .addData("sink", _sink)
@@ -272,11 +277,14 @@ public class HttpPostSinkActor extends AbstractActor {
     private final AsyncHttpClient _client;
     private final HttpPostSink _sink;
     private final int _spreadingDelayMillis;
+    private final MetricsFactory _metricsFactory;
+    private final Metrics _metrics;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
     private static final Logger POST_ERROR_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSink.class, Duration.ofSeconds(30));
     private static final Logger EVICTED_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSink.class, Duration.ofSeconds(30));
     private static final Set<Integer> ACCEPTED_STATUS_CODES = Sets.newHashSet();
+    private static final String EVICTED_COUNTER = "sinks/http_post/request_evicted";
 
     static {
         // TODO(vkoskela): Make accepted status codes configurable [AINT-682]

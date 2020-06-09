@@ -21,6 +21,7 @@ import akka.actor.PoisonPill;
 import akka.http.javadsl.model.HttpMethods;
 import akka.http.javadsl.model.MediaTypes;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
@@ -158,11 +159,13 @@ public abstract class HttpPostSink extends BaseSink {
 
         _sinkActor = builder._actorSystem.actorOf(
                 HttpPostSinkActor.props(CLIENT, this, builder._maximumConcurrency, builder._maximumQueueSize, builder._spreadPeriod));
+        metricsFactory = builder.metricsFactory;
     }
 
     private final URI _uri;
     private final Uri _aysncHttpClientUri;
     private final ActorRef _sinkActor;
+    final MetricsFactory metricsFactory;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
     private static final AsyncHttpClient CLIENT;
@@ -242,6 +245,18 @@ public abstract class HttpPostSink extends BaseSink {
         }
 
         /**
+         * Instance of <code>MetricsFactory</code>. Cannot be null. This field
+         * may be injected automatically by Jackson/Guice if setup to do so.
+         *
+         * @param value Instance of <code>MetricsFactory</code>.
+         * @return This instance of <code>Builder</code>.
+         */
+        public B setMetricsFactory(final MetricsFactory value) {
+            metricsFactory = value;
+            return self();
+        }
+
+        /**
          * Protected constructor for subclasses.
          *
          * @param targetConstructor The constructor for the concrete type to be created by this builder.
@@ -263,5 +278,8 @@ public abstract class HttpPostSink extends BaseSink {
         private Integer _maximumQueueSize = 25000;
         @NotNull
         private Duration _spreadPeriod = Duration.ZERO;
+        @JacksonInject
+        @NotNull
+        private MetricsFactory metricsFactory;
     }
 }
