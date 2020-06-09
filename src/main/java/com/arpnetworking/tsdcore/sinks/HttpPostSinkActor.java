@@ -20,9 +20,9 @@ import akka.actor.Props;
 import akka.http.javadsl.model.StatusCodes;
 import akka.pattern.PatternsCS;
 import com.arpnetworking.logback.annotations.LogValue;
-import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
+import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
@@ -90,7 +90,7 @@ public class HttpPostSinkActor extends AbstractActor {
         _sink = sink;
         _maximumConcurrency = maximumConcurrency;
         _pendingRequests = EvictingQueue.create(maximumQueueSize);
-        _metricsFactory = _sink.metricsFactory;
+        _metricsFactory = _sink.getMetricsFactory();
         _metrics = _metricsFactory.create();
         if (Objects.equals(Duration.ZERO, spreadPeriod)) {
             _spreadingDelayMillis = 0;
