@@ -139,6 +139,15 @@ public abstract class HttpPostSink extends BaseSink {
     }
 
     /**
+     * Accessor for the <code>MetricsFactory</code>.
+     *
+     * @return The <code>MetricsFactory</code>.
+     */
+    protected MetricsFactory getMetricsFactory() {
+        return _metricsFactory;
+    }
+
+    /**
      * Serialize the <code>PeriodicData</code> and <code>Condition</code> instances
      * for posting.
      *
@@ -159,13 +168,13 @@ public abstract class HttpPostSink extends BaseSink {
 
         _sinkActor = builder._actorSystem.actorOf(
                 HttpPostSinkActor.props(CLIENT, this, builder._maximumConcurrency, builder._maximumQueueSize, builder._spreadPeriod));
-        metricsFactory = builder.metricsFactory;
+        _metricsFactory = builder._metricsFactory;
     }
 
     private final URI _uri;
     private final Uri _aysncHttpClientUri;
     private final ActorRef _sinkActor;
-    final MetricsFactory metricsFactory;
+    private final MetricsFactory _metricsFactory;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
     private static final AsyncHttpClient CLIENT;
@@ -252,7 +261,7 @@ public abstract class HttpPostSink extends BaseSink {
          * @return This instance of <code>Builder</code>.
          */
         public B setMetricsFactory(final MetricsFactory value) {
-            metricsFactory = value;
+            _metricsFactory = value;
             return self();
         }
 
@@ -280,6 +289,6 @@ public abstract class HttpPostSink extends BaseSink {
         private Duration _spreadPeriod = Duration.ZERO;
         @JacksonInject
         @NotNull
-        private MetricsFactory metricsFactory;
+        private MetricsFactory _metricsFactory;
     }
 }
