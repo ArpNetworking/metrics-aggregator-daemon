@@ -139,24 +139,6 @@ public abstract class HttpPostSink extends BaseSink {
     }
 
     /**
-     * Accessor for the <code>MetricsFactory</code>.
-     *
-     * @return The <code>MetricsFactory</code>.
-     */
-    protected MetricsFactory getMetricsFactory() {
-        return _metricsFactory;
-    }
-
-    /**
-     * Accessor for the <code>EvictedRequestName</code>.
-     *
-     * @return The <code>EvictedRequestName</code>.
-     */
-    protected String getEvictedRequestName() {
-        return _evictedRequestsName;
-    }
-
-    /**
      * Serialize the <code>PeriodicData</code> and <code>Condition</code> instances
      * for posting.
      *
@@ -176,17 +158,13 @@ public abstract class HttpPostSink extends BaseSink {
         _aysncHttpClientUri = Uri.create(_uri.toString());
 
         _sinkActor = builder._actorSystem.actorOf(
-                HttpPostSinkActor.props(CLIENT, this, builder._maximumConcurrency, builder._maximumQueueSize, builder._spreadPeriod));
-        _metricsFactory = builder._metricsFactory;
-
-        _evictedRequestsName = "sinks/http_post/" + getMetricSafeName() + "/evicted_requests";
+                HttpPostSinkActor.props(CLIENT, this, builder._maximumConcurrency, builder._maximumQueueSize,
+                        builder._spreadPeriod, builder._metricsFactory));
     }
 
     private final URI _uri;
     private final Uri _aysncHttpClientUri;
     private final ActorRef _sinkActor;
-    private final MetricsFactory _metricsFactory;
-    private final String _evictedRequestsName;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
     private static final AsyncHttpClient CLIENT;
