@@ -214,6 +214,28 @@
       </plugin>
       <!-- Project Specific Plugins -->
       <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>${maven.clean.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>clean-assemblies</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <configuration>
+             <excludeDefaultDirectories>true</excludeDefaultDirectories>
+             <verbose>true</verbose>
+             <filesets>
+                <fileset>
+                  <directory>${project.build.directory}/docker-assembly</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>appassembler-maven-plugin</artifactId>
         <configuration>
