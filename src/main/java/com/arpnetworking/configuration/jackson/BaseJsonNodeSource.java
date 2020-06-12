@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * Abstract base class for <code>JsonSource</code> implementations.
+ * Abstract base class for {@link JsonNodeSource} implementations.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -51,12 +51,12 @@ public abstract class BaseJsonNodeSource implements JsonNodeSource {
     }
 
     /**
-     * Find the <code>JsonNode</code> if one exists from a specified root node
+     * Find the {@link JsonNode} if one exists from a specified root node
      * given a sequence of keys to look-up.
      *
-     * @param node The root <code>JsonNode</code>.
+     * @param node The root {@link JsonNode}.
      * @param keys The sequence of keys to search for.
-     * @return The <code>Optional</code> <code>JsonNode</code> instance.
+     * @return The {@link Optional} {@link JsonNode} instance.
      */
     protected static Optional<JsonNode> getValue(final Optional<JsonNode> node, final String... keys) {
         JsonNode jsonNode = node.orElse(null);
@@ -72,7 +72,7 @@ public abstract class BaseJsonNodeSource implements JsonNodeSource {
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     protected BaseJsonNodeSource(final Builder<?, ?> builder) {
         _objectMapper = builder._objectMapper;
@@ -81,7 +81,8 @@ public abstract class BaseJsonNodeSource implements JsonNodeSource {
     protected final ObjectMapper _objectMapper;
 
     /**
-     * Builder for <code>BaseJsonNodeSource</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link BaseJsonNodeSource}.
      *
      * @param <T> type of the builder
      * @param <S> type of the object to be built
@@ -99,11 +100,11 @@ public abstract class BaseJsonNodeSource implements JsonNodeSource {
         }
 
         /**
-         * Set the <code>ObjectMapper</code> instance. Optional. Default is
-         * created by <code>ObjectMapperFactory</code>. Cannot be null.
+         * Set the {@link ObjectMapper} instance. Optional. Default is
+         * created by {@link ObjectMapperFactory}. Cannot be null.
          *
-         * @param value The <code>ObjectMapper</code> instance.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link ObjectMapper} instance.
+         * @return This {@link Builder} instance.
          */
         public T setObjectMapper(final ObjectMapper value) {
             _objectMapper = value;
@@ -112,9 +113,9 @@ public abstract class BaseJsonNodeSource implements JsonNodeSource {
 
         /**
          * Called by setters to always return appropriate subclass of
-         * <code>Builder</code>, even from setters of base class.
+         * {@link Builder}, even from setters of base class.
          *
-         * @return instance with correct <code>Builder</code> class type.
+         * @return instance with correct {@link Builder} class type.
          */
         protected abstract T self();
 

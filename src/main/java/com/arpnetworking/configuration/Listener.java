@@ -24,21 +24,21 @@ public interface Listener {
 
     /**
      * Invoked before new configuration is applied.  Any registered listener
-     * may reject the configuration by throwing an <code>Exception</code>. Any
+     * may reject the configuration by throwing an {@link Exception}. Any
      * listener rejecting the configuration rejects the entire configuration
-     * and the offering instance will log the <code>Exception</code> with an
-     * error. Once any listener rejects the <code>Configuration</code> other
+     * and the offering instance will log the {@link Exception} with an
+     * error. Once any listener rejects the {@link Configuration} other
      * listeners may not be offered that instance.
      *
-     * @param configuration The new <code>Configuration</code> to be validated.
-     * @throws Exception Thrown if the <code>Configuration</code> should be
+     * @param configuration The new {@link Configuration} to be validated.
+     * @throws Exception Thrown if the {@link Configuration} should be
      * rejected.
      */
     void offerConfiguration(Configuration configuration) throws Exception;
 
     /**
      * Invoked to apply the most recently offered configuration. Any
-     * <code>RuntimeException</code> thrown is logged and ignored. All
+     * {@link RuntimeException} thrown is logged and ignored. All
      * validation must be performed during offer.
      */
     void applyConfiguration();

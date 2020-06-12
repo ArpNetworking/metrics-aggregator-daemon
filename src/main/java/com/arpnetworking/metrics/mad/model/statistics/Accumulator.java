@@ -19,8 +19,8 @@ import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 
 /**
- * Specialization of <code>Calculator</code> directly supporting streaming
- * calculations over <code>Quantity</code> and <code>CalculatedValue</code>
+ * Specialization of {@link Calculator} directly supporting streaming
+ * calculations over {@link Quantity} and {@link CalculatedValue}
  * streams.
  *
  * @param <T> The type of supporting data.
@@ -29,39 +29,39 @@ import com.arpnetworking.tsdcore.model.CalculatedValue;
 public interface Accumulator<T> extends Calculator<T> {
 
     /**
-     * Add the specified <code>Quantity</code> to the accumulated value. It is
-     * permissible to mix calls to accumulate with <code>Quantity</code> and
-     * <code>CalculatedValue</code>.
+     * Add the specified {@link Quantity} to the accumulated value. It is
+     * permissible to mix calls to accumulate with {@link Quantity} and
+     * {@link CalculatedValue}.
      *
-     * @param quantity The <code>Quantity</code> to include in the accumulated value.
-     * @return This <code>Accumulator</code>.
+     * @param quantity The {@link Quantity} to include in the accumulated value.
+     * @return This {@link Accumulator}.
      */
     Accumulator<T> accumulate(Quantity quantity);
 
     /**
-     * Add the specified <code>CalculatedValue</code> to the accumulated value. The
-     * <code>CalculatedValue</code> was produced by this <code>Accumulator</code> in
+     * Add the specified {@link CalculatedValue} to the accumulated value. The
+     * {@link CalculatedValue} was produced by this {@link Accumulator} in
      * a different context. For example, for a different time period or a different
-     * host. It is permissible to mix calls to accumulate with <code>Quantity</code>
-     * and <code>CalculatedValue</code>.
+     * host. It is permissible to mix calls to accumulate with {@link Quantity}
+     * and {@link CalculatedValue}.
      *
-     * @param calculatedValue The <code>CalculatedValue</code> to include in the accumulated value.
-     * @return This <code>Accumulator</code>.
+     * @param calculatedValue The {@link CalculatedValue} to include in the accumulated value.
+     * @return This {@link Accumulator}.
      */
     Accumulator<T> accumulate(CalculatedValue<T> calculatedValue);
 
     /**
-     * Add the specified <code>CalculatedValue</code> to the accumulated value. The
-     * <code>CalculatedValue</code> was produced by this <code>Accumulator</code> in
+     * Add the specified {@link CalculatedValue} to the accumulated value. The
+     * {@link CalculatedValue} was produced by this {@link Accumulator} in
      * a different context. For example, for a different time period or a different
-     * host. It is permissible to mix calls to accumulate with <code>Quantity</code>
-     * and <code>CalculatedValue</code>.
+     * host. It is permissible to mix calls to accumulate with {@link Quantity}
+     * and {@link CalculatedValue}.
      *
-     * If the <code>CalculatedValue</code>'s supporting data is of an unsupported
-     * type then an <code>IllegaglArgumentException</code> will be thrown.
+     * If the {@link CalculatedValue}'s supporting data is of an unsupported
+     * type then an {@link IllegalArgumentException} will be thrown.
      *
-     * @param calculatedValue The <code>CalculatedValue</code> to include in the accumulated value.
-     * @return This <code>Accumulator</code>.
+     * @param calculatedValue The {@link CalculatedValue} to include in the accumulated value.
+     * @return This {@link Accumulator}.
      */
     Accumulator<T> accumulateAny(CalculatedValue<?> calculatedValue);
 }

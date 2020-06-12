@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  * <ul>
  * <li>For optional fields null and unspecified are treated the same. Where
  * appropriate this means null is mapped to a default value (e.g. empty map) or
- * wrapped in an <code>Optional</code>.</li>
+ * wrapped in an {@link java.util.Optional}.</li>
  * </ul>
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
@@ -81,7 +81,8 @@ public final class Version2f {
     private final String _version;
 
     /**
-     * Builder for the Data class.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link Version2f}.
      */
     public static final class Builder extends ThreadLocalBuilder<Version2f> {
         /**
@@ -194,7 +195,8 @@ public final class Version2f {
         private final double _value;
 
         /**
-         * Builder for the Sample class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Sample}.
          */
         public static final class Builder extends ThreadLocalBuilder<Sample> {
             /**
@@ -268,7 +270,8 @@ public final class Version2f {
         private final ImmutableList<Sample> _values;
 
         /**
-         * Builder for the Element class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Element}.
          */
         public static final class Builder extends ThreadLocalBuilder<Element> {
             /**
@@ -332,7 +335,8 @@ public final class Version2f {
         private final ImmutableMap<String, String> _otherAnnotations;
 
         /**
-         * Builder for the Annotations class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Annotations}.
          */
         public static final class Builder extends ThreadLocalBuilder<Annotations> {
             /**

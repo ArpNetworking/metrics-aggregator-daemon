@@ -41,7 +41,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Implementation of <code>PositionStore</code> which stores the read
+ * Implementation of {@link PositionStore} which stores the read
  * position in a file on local disk. This class is thread-safe per file
  * identifier.
  *
@@ -237,7 +237,8 @@ public final class FilePositionStore implements PositionStore {
     }
 
     /**
-     * Implementation of builder pattern for <code>FilePositionStore</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link FilePositionStore}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */

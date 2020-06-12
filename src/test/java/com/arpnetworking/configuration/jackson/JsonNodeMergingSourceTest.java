@@ -20,7 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Tests for the <code>JsonNodeMergingSource</code> class.
+ * Tests for the {@link JsonNodeMergingSource} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

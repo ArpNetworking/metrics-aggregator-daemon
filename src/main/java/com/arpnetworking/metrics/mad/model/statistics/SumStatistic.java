@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Takes the sum of the entries. Use <code>StatisticFactory</code> for construction.
+ * Takes the sum of the entries. Use {@link StatisticFactory} for construction.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
@@ -56,7 +56,7 @@ public final class SumStatistic extends BaseStatistic {
         /**
          * Public constructor.
          *
-         * @param statistic The <code>Statistic</code>.
+         * @param statistic The {@link Statistic}.
          */
         public SumAccumulator(final Statistic statistic) {
             super(statistic);

@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 /**
- * <code>JsonNode</code> based configuration sourced from a literal string.
+ * {@link JsonNode} based configuration sourced from a literal string.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -66,7 +66,7 @@ public final class JsonNodeLiteralSource extends BaseJsonNodeSource {
     private final Optional<JsonNode> _jsonNode;
 
     /**
-     * Builder for <code>JsonNodeLiteralSource</code>.
+     * Builder for {@link JsonNodeLiteralSource}.
      */
     public static final class Builder extends BaseJsonNodeSource.Builder<Builder, JsonNodeLiteralSource> {
 
@@ -81,7 +81,7 @@ public final class JsonNodeLiteralSource extends BaseJsonNodeSource {
          * Set the source.
          *
          * @param value The source.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setSource(final String value) {
             _source = value;

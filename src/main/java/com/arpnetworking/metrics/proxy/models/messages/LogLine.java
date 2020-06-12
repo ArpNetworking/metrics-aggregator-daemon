@@ -62,21 +62,21 @@ public final class LogLine {
     }
 
     /**
-     * Return the log line as a <code>String</code>. Callers should cache this
+     * Return the log line as a {@link String}. Callers should cache this
      * value. The data is interpreted as UTF-8 by default.
      *
-     * @return The line data as a <code>String</code> interpreted as UTF-8.
+     * @return The line data as a {@link String} interpreted as UTF-8.
      */
     public String convertLineToString() {
         return convertLineToString(Charsets.UTF_8);
     }
 
     /**
-     * Return the log line as a <code>String</code>. Callers should cache this
+     * Return the log line as a {@link String}. Callers should cache this
      * value.
      *
      * @param charset The character set to use.
-     * @return The line data as a <code>String</code>.
+     * @return The line data as a {@link String}.
      */
     public String convertLineToString(final Charset charset) {
         // CHECKSTYLE.OFF: IllegalInstantiation - Unavoidable.

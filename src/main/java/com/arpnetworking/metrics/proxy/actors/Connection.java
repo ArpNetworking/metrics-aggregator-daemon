@@ -55,8 +55,8 @@ public class Connection extends AbstractActor {
     /**
      * Public constructor.
      *
-     * @param metrics Instance of <code>PeriodicMetrics</code>.
-     * @param processorsFactory Factory for producing the protocol's <code>MessagesProcessor</code>
+     * @param metrics Instance of {@link PeriodicMetrics}.
+     * @param processorsFactory Factory for producing the protocol's {@link MessagesProcessor}
      */
     public Connection(
             final PeriodicMetrics metrics,
@@ -66,11 +66,11 @@ public class Connection extends AbstractActor {
     }
 
     /**
-     * Factory for creating a <code>Props</code> with strong typing.
+     * Factory for creating a {@link Props} with strong typing.
      *
-     * @param metrics Instance of <code>PeriodicMetrics</code>.
-     * @param messageProcessorsFactory Factory to create a <code>Metrics</code> object.
-     * @return a new Props object to create a <code>ConnectionContext</code>.
+     * @param metrics Instance of {@link PeriodicMetrics}.
+     * @param messageProcessorsFactory Factory to create a {@link MessagesProcessor} object.
+     * @return a new Props object to create a {@link Connection} actor.
      */
     public static Props props(
             final PeriodicMetrics metrics,

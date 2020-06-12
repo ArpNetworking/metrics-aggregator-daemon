@@ -58,7 +58,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 /**
- * Performs aggregation of <code>Record</code> instances per <code>Period</code>.
+ * Performs aggregation of {@link Record} instances per {@link Duration}.
  * This class is thread safe.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
@@ -252,7 +252,8 @@ public final class Aggregator implements Observer, Launchable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Aggregator.class);
 
     /**
-     * <code>Builder</code> implementation for <code>Aggregator</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link Aggregator}.
      */
     public static final class Builder extends OvalBuilder<Aggregator> {
 
@@ -267,7 +268,7 @@ public final class Aggregator implements Observer, Launchable {
          * Set the Akka {@link ActorSystem}. Cannot be null.
          *
          * @param value The Akka {@link ActorSystem}.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setActorSystem(final ActorSystem value) {
             _actorSystem = value;
@@ -278,7 +279,7 @@ public final class Aggregator implements Observer, Launchable {
          * Set the sink. Cannot be null or empty.
          *
          * @param value The sink.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setSink(final Sink value) {
             _sink = value;
@@ -289,7 +290,7 @@ public final class Aggregator implements Observer, Launchable {
          * Set the periods. Cannot be null or empty.
          *
          * @param value The periods.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setPeriods(final Set<Duration> value) {
             _periods = value;
@@ -300,7 +301,7 @@ public final class Aggregator implements Observer, Launchable {
          * Set the timer statistics. Cannot be null or empty.
          *
          * @param value The timer statistics.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setTimerStatistics(final Set<Statistic> value) {
             _timerStatistics = value;
@@ -311,7 +312,7 @@ public final class Aggregator implements Observer, Launchable {
          * Set the counter statistics. Cannot be null or empty.
          *
          * @param value The counter statistics.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setCounterStatistics(final Set<Statistic> value) {
             _counterStatistics = value;
@@ -322,7 +323,7 @@ public final class Aggregator implements Observer, Launchable {
          * Set the gauge statistics. Cannot be null or empty.
          *
          * @param value The gauge statistics.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setGaugeStatistics(final Set<Statistic> value) {
             _gaugeStatistics = value;
@@ -334,7 +335,7 @@ public final class Aggregator implements Observer, Launchable {
          * Default is empty.
          *
          * @param value The gauge statistics.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setStatistics(final Map<String, Set<Statistic>> value) {
             _statistics = value;

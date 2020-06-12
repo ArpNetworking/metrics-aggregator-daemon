@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * Tests for the <code>BaseConfiguration</code> class.
+ * Tests for the {@link BaseConfiguration} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

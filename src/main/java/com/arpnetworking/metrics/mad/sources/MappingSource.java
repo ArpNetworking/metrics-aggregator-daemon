@@ -44,8 +44,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Implementation of <code>Source</code> which wraps another <code>Source</code>
- * and merges <code>Metric</code> instances within each <code>Record</code>
+ * Implementation of {@link Source} which wraps another {@link Source}
+ * and merges {@link Metric} instances within each {@link Record}
  * together if the name matches a regular expression with a new name generated
  * through replacement of all matches in the original name.
  *
@@ -235,7 +235,7 @@ public final class MappingSource extends BaseSource {
     }
 
     /**
-     * Implementation of builder pattern for <code>FileSource</code>.
+     * Implementation of builder pattern for {@link MappingSource}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
@@ -252,7 +252,7 @@ public final class MappingSource extends BaseSource {
          * Sets the underlying source. Cannot be null.
          *
          * @param value The underlying source.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setSource(final Source value) {
             _source = value;
@@ -263,7 +263,7 @@ public final class MappingSource extends BaseSource {
          * Sets find and replace expression map. Cannot be null.
          *
          * @param value The find and replace expression map.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setFindAndReplace(final Map<String, ? extends List<String>> value) {
             _findAndReplace = value;

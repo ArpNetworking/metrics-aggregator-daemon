@@ -42,7 +42,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Tests for the <code>StatefulTailer</code> class.
+ * Tests for the {@link StatefulTailer} class.
  *
  * TODO(vkoskela): Add tests for interacting with position store. [MAI-321]
  *

@@ -22,16 +22,16 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import java.io.IOException;
 
 /**
- * Jackson <code>JsonDeserializer</code> implementation for <code>Statistic</code> using <code>StatisticFactory</code>.
+ * Jackson {@link JsonDeserializer} implementation for {@link Statistic} using {@link StatisticFactory}.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public class StatisticDeserializer extends JsonDeserializer<Statistic> {
 
     /**
-     * Create a new instance of <code>JsonDeserializer&lt;Statistic&gt;</code>.
+     * Create a new instance of {@code JsonDeserializer<Statistic>}.
      *
-     * @return New instance of <code>JsonDeserializer&lt;Statistic&gt;</code>.
+     * @return New instance of {@code JsonDeserializer<Statistic>}.
      */
     public static JsonDeserializer<Statistic> newInstance() {
         return new StatisticDeserializer();

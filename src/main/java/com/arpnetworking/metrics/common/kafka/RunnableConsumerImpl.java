@@ -90,7 +90,8 @@ public class RunnableConsumerImpl<V> implements RunnableConsumer {
     }
 
     /**
-     * Implementation of builder pattern for {@link RunnableConsumerImpl}.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link RunnableConsumerImpl}.
      *
      * @param <V> the type of the values pulled from kafka records
      *

@@ -23,7 +23,7 @@ import java.util.Set;
  * The aggregation is performed with a user-defined expression. At this time
  * this class is only a place holder, but evaluation of the expression will
  * in theory be moved into each unique instance in the future. Use
- * <code>StatisticFactory</code> for construction.
+ * {@link StatisticFactory} for construction.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

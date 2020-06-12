@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Dynamic configuration implementation of <code>Configuration</code>.
+ * Dynamic configuration implementation of {@link com.arpnetworking.configuration.Configuration}.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -262,7 +262,7 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
     }
 
     /**
-     * Builder for <code>DynamicConfiguration</code>.
+     * Builder for {@link DynamicConfiguration}.
      */
     public static final class Builder extends BaseJacksonConfiguration.Builder<Builder, DynamicConfiguration> {
 
@@ -274,12 +274,12 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
         }
 
         /**
-         * Set the <code>List</code> of <code>JsonSource</code> instance
-         * <code>Builder</code> instances. Cannot be null.
+         * Set the {@link List} of {@link JsonNodeSource} instance
+         * {@link Builder} instances. Cannot be null.
          *
-         * @param value The <code>List</code> of <code>JsonSource</code>
-         * instance <code>Builder</code> instances.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link List} of {@link JsonNodeSource}
+         * instance {@link Builder} instances.
+         * @return This {@link Builder} instance.
          */
         public Builder setSourceBuilders(final List<com.arpnetworking.commons.builder.Builder<? extends JsonNodeSource>> value) {
             _sourceBuilders = Lists.newArrayList(value);
@@ -287,10 +287,10 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
         }
 
         /**
-         * Add a <code>JsonSource</code> <code>Builder</code> instance.
+         * Add a {@link JsonNodeSource} {@link Builder} instance.
          *
-         * @param value The <code>JsonSource</code> <code>Builder</code> instance.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link JsonNodeSource} {@link Builder} instance.
+         * @return This {@link Builder} instance.
          */
         public Builder addSourceBuilder(final com.arpnetworking.commons.builder.Builder<? extends JsonNodeSource> value) {
             if (_sourceBuilders == null) {
@@ -301,11 +301,11 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
         }
 
         /**
-         * Set the <code>List</code> of <code>Trigger</code> instances. Cannot
+         * Set the {@link List} of {@link Trigger} instances. Cannot
          * be null.
          *
-         * @param value The <code>List</code> of <code>Trigger</code> instances.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link List} of {@link Trigger} instances.
+         * @return This {@link Builder} instance.
          */
         public Builder setTriggers(final List<Trigger> value) {
             _triggers = Lists.newArrayList(value);
@@ -313,10 +313,10 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
         }
 
         /**
-         * Add a <code>ConfigurationTrigger</code> instance.
+         * Add a {@link Trigger} instance.
          *
-         * @param value The <code>ConfigurationTrigger</code> instance.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link Trigger} instance.
+         * @return This {@link Builder} instance.
          */
         public Builder addTrigger(final Trigger value) {
             if (_triggers == null) {
@@ -327,11 +327,11 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
         }
 
         /**
-         * Set the <code>List</code> of <code>Listener</code> instances. Cannot
+         * Set the {@link List} of {@link Listener} instances. Cannot
          * be null.
          *
-         * @param value The <code>List</code> of <code>Listener</code> instances.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link List} of {@link Listener} instances.
+         * @return This {@link Builder} instance.
          */
         public Builder setListeners(final List<Listener> value) {
             _listeners = Lists.newArrayList(value);
@@ -339,10 +339,10 @@ public final class DynamicConfiguration extends BaseJacksonConfiguration impleme
         }
 
         /**
-         * Add a <code>ConfigurationListener</code> instance.
+         * Add a {@link Listener} instance.
          *
-         * @param value The <code>ConfigurationListener</code> instance.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link Listener} instance.
+         * @return This {@link Builder} instance.
          */
         public Builder addListener(final Listener value) {
             if (_listeners == null) {

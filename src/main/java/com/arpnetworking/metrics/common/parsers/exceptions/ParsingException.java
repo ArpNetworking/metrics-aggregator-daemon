@@ -19,7 +19,7 @@ import com.arpnetworking.logback.annotations.Loggable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
- * Exception thrown when a <code>Parser</code> fails to parse the data.
+ * Exception thrown when a {@link com.arpnetworking.metrics.common.parsers.Parser} fails to parse the data.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */

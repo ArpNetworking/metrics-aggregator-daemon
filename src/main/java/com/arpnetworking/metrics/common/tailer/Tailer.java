@@ -17,7 +17,7 @@ package com.arpnetworking.metrics.common.tailer;
 
 /**
  * Interface for classes which stream data from files (or other sources). Based
- * on Apache <code>Tailer</code> but implemented as an interface to improve
+ * on Apache {@link Tailer} but implemented as an interface to improve
  * extensibility.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
@@ -25,7 +25,7 @@ package com.arpnetworking.metrics.common.tailer;
 public interface Tailer extends Runnable{
 
     /**
-     * Stop the <code>Tailer</code> instance.
+     * Stop the {@link Tailer} instance.
      */
     void stop();
 }

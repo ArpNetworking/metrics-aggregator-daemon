@@ -23,7 +23,7 @@ import org.junit.Test;
 import java.util.Optional;
 
 /**
- * Tests for the <code>Configurator</code> class.
+ * Tests for the {@link Configurator} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

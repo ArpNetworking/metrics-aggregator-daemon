@@ -53,7 +53,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 /**
- * Tests for the <code>Bucket</code> class.
+ * Tests for the {@link Bucket} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

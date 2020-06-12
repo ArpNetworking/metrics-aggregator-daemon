@@ -111,7 +111,8 @@ public final class PeriodicData {
     private final ImmutableMultimap<String, AggregatedData> _data;
 
     /**
-     * <code>Builder</code> implementation for <code>PeriodicData</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link PeriodicData}.
      */
     public static final class Builder extends ThreadLocalBuilder<PeriodicData> {
 
@@ -126,7 +127,7 @@ public final class PeriodicData {
          * Set the period. Required. Cannot be null.
          *
          * @param value The period.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setPeriod(final Duration value) {
             _period = value;
@@ -137,7 +138,7 @@ public final class PeriodicData {
          * Set the start. Required. Cannot be null.
          *
          * @param value The start.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setStart(final ZonedDateTime value) {
             _start = value;
@@ -148,7 +149,7 @@ public final class PeriodicData {
          * Set the earliest time at which data in this bucket was recorded. May be null.
          *
          * @param value The timestamp
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setMinRequestTime(@Nullable final ZonedDateTime value) {
             _minRequestTime = value;
@@ -160,7 +161,7 @@ public final class PeriodicData {
          * Set the dimensions. Required. Cannot be null.
          *
          * @param value The dimensions.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setDimensions(final Key value) {
             _dimensions = value;
@@ -168,10 +169,10 @@ public final class PeriodicData {
         }
 
         /**
-         * Set the data. Optional. Cannot be null. Defaults to an empty <code>ImmutableMap</code>.
+         * Set the data. Optional. Cannot be null. Defaults to an empty {@link ImmutableMultimap}.
          *
          * @param value The data.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setData(final ImmutableMultimap<String, AggregatedData> value) {
             _data = value;

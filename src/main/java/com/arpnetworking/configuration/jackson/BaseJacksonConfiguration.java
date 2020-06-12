@@ -32,8 +32,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * Common base class for <code>Configuration</code> implementations based on
- * Jackson's <code>ObjectMapper</code>.
+ * Common base class for {@link Configuration} implementations based on
+ * Jackson's {@link ObjectMapper}.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -141,16 +141,16 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
     }
 
     /**
-     * Accessor for active root <code>JsonSource</code> instance.
+     * Accessor for active root {@link JsonNodeSource} instance.
      *
-     * @return Instance of <code>JsonSource</code>.
+     * @return Instance of {@link JsonNodeSource}.
      */
     protected abstract JsonNodeSource getJsonSource();
 
     /**
      * Protected constructor.
      *
-     * @param builder The <code>Builder</code> instance to construct from.
+     * @param builder The {@link Builder} instance to construct from.
      */
     protected BaseJacksonConfiguration(final Builder<?, ?> builder) {
         _objectMapper = builder._objectMapper;
@@ -159,7 +159,8 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
     protected final ObjectMapper _objectMapper;
 
     /**
-     * Builder for <code>BaseObjectMapperConfiguration</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link BaseJacksonConfiguration}.
      *
      * @param <T> type of the builder
      * @param <S> type of the object to be built
@@ -177,11 +178,11 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
         }
 
         /**
-         * Set the <code>ObjectMapper</code> instance. Optional. Default is
-         * created by <code>ObjectMapperFactory</code>. Cannot be null.
+         * Set the {@link ObjectMapper} instance. Optional. Default is
+         * created by {@link ObjectMapperFactory}. Cannot be null.
          *
-         * @param value The <code>ObjectMapper</code> instance.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link ObjectMapper} instance.
+         * @return This {@link Builder} instance.
          */
         public T setObjectMapper(final ObjectMapper value) {
             _objectMapper = value;
@@ -190,9 +191,9 @@ public abstract class BaseJacksonConfiguration extends com.arpnetworking.configu
 
         /**
          * Called by setters to always return appropriate subclass of
-         * <code>Builder</code>, even from setters of base class.
+         * {@link Builder}, even from setters of base class.
          *
-         * @return instance with correct <code>Builder</code> class type.
+         * @return instance with correct {@link Builder} class type.
          */
         protected abstract T self();
 

@@ -23,12 +23,12 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import java.util.Optional;
 
 /**
- * Manages configuration and reconfiguration of a <code>Launchable</code> instance
- * using a POJO representation of its configuration. The <code>Launchable</code>
+ * Manages configuration and reconfiguration of a {@link Launchable} instance
+ * using a POJO representation of its configuration. The {@link Launchable}
  * is instantiated with each new configuration. The configuration must validate
  * on construction and throw an exception if the configuration is invalid.
  *
- * @param <T> The <code>Launchable</code> type to configure.
+ * @param <T> The {@link Launchable} type to configure.
  * @param <S> The type representing the validated configuration.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)

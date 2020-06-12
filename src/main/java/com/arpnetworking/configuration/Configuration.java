@@ -30,7 +30,7 @@ public interface Configuration {
      * Retrieve the value of a particular property by its name.
      *
      * @param name The name of the property value to retrieve.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
      */
     Optional<String> getProperty(String name);
@@ -42,268 +42,268 @@ public interface Configuration {
      * @param name The name of the property value to retrieve.
      * @param defaultValue The value to return if the specified property name
      * does not exist in the configuration.
-     * @return Returns the property value or <code>defaultValue</code> if
+     * @return Returns the property value or {@code defaultValue} if
      * the property name has not been defined.
      */
     String getProperty(String name, String defaultValue);
 
     /**
      * Retrieve the value of a particular property by its name and if it does
-     * not exist throw a <code>RuntimeException</code>.
+     * not exist throw a {@link RuntimeException}.
      *
      * @param name The name of the property value to retrieve.
      * @return Returns the property value.
-     * @throws NoSuchElementException throws the <code>RuntimeException</code>
+     * @throws NoSuchElementException throws the {@link RuntimeException}
      * if the specified property name is not defined.
      */
     String getRequiredProperty(String name) throws NoSuchElementException;
 
     /**
-     * <code>Boolean</code> specific accessor. Anything other than "true",
-     * ignoring case, is treated as <code>false</code>.
+     * {@link Boolean} specific accessor. Anything other than "true",
+     * ignoring case, is treated as {@code false}.
      *
      * @see Configuration#getProperty(String)
      *
      * @param name The name of the property value to retrieve.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
      */
     Optional<Boolean> getPropertyAsBoolean(String name);
 
     /**
-     * <code>Boolean</code> specific accessor. Anything other than "true",
-     * ignoring case, is treated as <code>false</code>.
+     * {@link Boolean} specific accessor. Anything other than {@code "true"},
+     * ignoring case, is treated as {@code false}.
      *
      * @see Configuration#getProperty(String, String)
      *
      * @param name The name of the property value to retrieve.
      * @param defaultValue The value to return if the specified property name
      * does not exist in the configuration.
-     * @return Returns the property value or <code>defaultValue</code> if
+     * @return Returns the property value or {@code defaultValue} if
      * the property name has not been defined.
      */
     boolean getPropertyAsBoolean(String name, boolean defaultValue);
 
     /**
-     * <code>Boolean</code> specific accessor. Anything other than "true",
-     * ignoring case, is treated as <code>false</code>.
+     * {@link Boolean} specific accessor. Anything other than {@code "true"},
+     * ignoring case, is treated as {@code false}.
      *
      * @see Configuration#getRequiredProperty(String)
      *
      * @param name The name of the property value to retrieve.
      * @return Returns the property value.
-     * @throws NoSuchElementException throws the <code>RuntimeException</code>
+     * @throws NoSuchElementException throws the {@link RuntimeException}
      * if the specified property name is not defined.
      */
     boolean getRequiredPropertyAsBoolean(String name) throws NoSuchElementException;
 
     /**
-     * <code>Integer</code> specific accessor.
+     * {@link Integer} specific accessor.
      *
      * @see Configuration#getProperty(String)
      *
      * @param name The name of the property value to retrieve.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
      * @throws NumberFormatException if the value cannot be converted to an
-     * <code>Integer</code>.
+     * {@link Integer}.
      */
     Optional<Integer> getPropertyAsInteger(String name) throws NumberFormatException;
 
     /**
-     * <code>Integer</code> specific accessor.
+     * {@link Integer} specific accessor.
      *
      * @see Configuration#getProperty(String, String)
      *
      * @param name The name of the property value to retrieve.
      * @param defaultValue The value to return if the specified property name
      * does not exist in the configuration.
-     * @return Returns the property value or <code>defaultValue</code> if
+     * @return Returns the property value or {@code defaultValue} if
      * the property name has not been defined.
      * @throws NumberFormatException if the value cannot be converted to an
-     * <code>Integer</code>.
+     * {@link Integer}.
      */
     int getPropertyAsInteger(String name, int defaultValue) throws NumberFormatException;
 
     /**
-     * <code>Integer</code> specific accessor.
+     * {@link Integer} specific accessor.
      *
      * @see Configuration#getRequiredProperty(String)
      *
      * @param name The name of the property value to retrieve.
      * @return Returns the property value.
-     * @throws NoSuchElementException throws the <code>RuntimeException</code>
+     * @throws NoSuchElementException throws the {@link RuntimeException}
      * if the specified property name is not defined.
      * @throws NumberFormatException if the value cannot be converted to an
-     * <code>Integer</code>.
+     * {@link Integer}.
      */
     int getRequiredPropertyAsInteger(String name) throws NoSuchElementException, NumberFormatException;
 
     /**
-     * <code>Long</code> specific accessor.
+     * {@link Long} specific accessor.
      *
      * @see Configuration#getProperty(String)
      *
      * @param name The name of the property value to retrieve.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Long</code>.
+     * {@link Long}.
      */
     Optional<Long> getPropertyAsLong(String name) throws NumberFormatException;
 
     /**
-     * <code>Long</code> specific accessor.
+     * {@link Long} specific accessor.
      *
      * @see Configuration#getProperty(String, String)
      *
      * @param name The name of the property value to retrieve.
      * @param defaultValue The value to return if the specified property name
      * does not exist in the configuration.
-     * @return Returns the property value or <code>defaultValue</code> if
+     * @return Returns the property value or {@code defaultValue} if
      * the property name has not been defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Long</code>.
+     * {@link Long}.
      */
     long getPropertyAsLong(String name, long defaultValue) throws NumberFormatException;
 
     /**
-     * <code>Long</code> specific accessor.
+     * {@link Long} specific accessor.
      *
      * @see Configuration#getRequiredProperty(String)
      *
      * @param name The name of the property value to retrieve.
      * @return Returns the property value.
-     * @throws NoSuchElementException throws the <code>RuntimeException</code>
+     * @throws NoSuchElementException throws the {@link RuntimeException}
      * if the specified property name is not defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Long</code>.
+     * {@link Long}.
      */
     long getRequiredPropertyAsLong(String name) throws NoSuchElementException, NumberFormatException;
 
     /**
-     * <code>Double</code> specific accessor.
+     * {@link Double} specific accessor.
      *
      * @see Configuration#getProperty(String)
      *
      * @param name The name of the property value to retrieve.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Double</code>.
+     * {@link Double}.
      */
     Optional<Double> getPropertyAsDouble(String name) throws NumberFormatException;
 
     /**
-     * <code>Double</code> specific accessor.
+     * {@link Double} specific accessor.
      *
      * @see Configuration#getProperty(String, String)
      *
      * @param name The name of the property value to retrieve.
      * @param defaultValue The value to return if the specified property name
      * does not exist in the configuration.
-     * @return Returns the property value or <code>defaultValue</code> if
+     * @return Returns the property value or {@code defaultValue} if
      * the property name has not been defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Double</code>.
+     * {@link Double}.
      */
     double getPropertyAsDouble(String name, double defaultValue) throws NumberFormatException;
 
     /**
-     * <code>Double</code> specific accessor.
+     * {@link Double} specific accessor.
      *
      * @see Configuration#getRequiredProperty(String)
      *
      * @param name The name of the property value to retrieve.
      * @return Returns the property value.
-     * @throws NoSuchElementException throws the <code>RuntimeException</code>
+     * @throws NoSuchElementException throws the {@link RuntimeException}
      * if the specified property name is not defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Double</code>.
+     * {@link Double}.
      */
     double getRequiredPropertyAsDouble(String name) throws NoSuchElementException, NumberFormatException;
 
     /**
-     * <code>Float</code> specific accessor.
+     * {@link Float} specific accessor.
      *
      * @see Configuration#getProperty(String)
      *
      * @param name The name of the property value to retrieve.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Float</code>.
+     * {@link Float}.
      */
     Optional<Float> getPropertyAsFloat(String name) throws NumberFormatException;
 
     /**
-     * <code>Float</code> specific accessor.
+     * {@link Float} specific accessor.
      *
      * @see Configuration#getProperty(String, String)
      *
      * @param name The name of the property value to retrieve.
      * @param defaultValue The value to return if the specified property name
      * does not exist in the configuration.
-     * @return Returns the property value or <code>defaultValue</code> if
+     * @return Returns the property value or {@code defaultValue} if
      * the property name has not been defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Float</code>.
+     * {@link Float}.
      */
     float getPropertyAsFloat(String name, float defaultValue) throws NumberFormatException;
 
     /**
-     * <code>Float</code> specific accessor.
+     * {@link Float} specific accessor.
      *
      * @see Configuration#getRequiredProperty(String)
      *
      * @param name The name of the property value to retrieve.
      * @return Returns the property value.
-     * @throws NoSuchElementException throws the <code>RuntimeException</code>
+     * @throws NoSuchElementException throws the {@link RuntimeException}
      * if the specified property name is not defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Float</code>.
+     * {@link Float}.
      */
     float getRequiredPropertyAsFloat(String name) throws NoSuchElementException, NumberFormatException;
 
     /**
-     * <code>Short</code> specific accessor.
+     * {@link Short} specific accessor.
      *
      * @see Configuration#getProperty(String)
      *
      * @param name The name of the property value to retrieve.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Short</code>.
+     * {@link Short}.
      */
     Optional<Short> getPropertyAsShort(String name) throws NumberFormatException;
 
     /**
-     * <code>Short</code> specific accessor.
+     * {@link Short} specific accessor.
      *
      * @see Configuration#getProperty(String, String)
      *
      * @param name The name of the property value to retrieve.
      * @param defaultValue The value to return if the specified property name
      * does not exist in the configuration.
-     * @return Returns the property value or <code>defaultValue</code> if
+     * @return Returns the property value or {@code defaultValue} if
      * the property name has not been defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Short</code>.
+     * {@link Short}.
      */
     short getPropertyAsShort(String name, short defaultValue) throws NumberFormatException;
 
     /**
-     * <code>Short</code> specific accessor.
+     * {@link Short} specific accessor.
      *
      * @see Configuration#getRequiredProperty(String)
      *
      * @param name The name of the property value to retrieve.
      * @return Returns the property value.
-     * @throws NoSuchElementException throws the <code>RuntimeException</code>
+     * @throws NoSuchElementException throws the {@link RuntimeException}
      * if the specified property name is not defined.
      * @throws NumberFormatException if the value cannot be converted to a
-     * <code>Short</code>.
+     * {@link Short}.
      */
     short getRequiredPropertyAsShort(String name) throws NoSuchElementException, NumberFormatException;
 
@@ -313,10 +313,10 @@ public interface Configuration {
      * @param <T> The type to return.
      * @param name The name of the property value to retrieve.
      * @param clazz The type of the object to instantiate.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@code T}.
      */
     <T> Optional<T> getPropertyAs(String name, Class<? extends T> clazz) throws IllegalArgumentException;
 
@@ -328,10 +328,10 @@ public interface Configuration {
      * @param clazz The type of the object to instantiate.
      * @param defaultValue The value to return if the specified property name
      * does not exist in the configuration.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@code T}.
      */
     <T> T getPropertyAs(String name, Class<? extends T> clazz, T defaultValue) throws IllegalArgumentException;
 
@@ -341,12 +341,12 @@ public interface Configuration {
      * @param <T> The type to return.
      * @param name The name of the property value to retrieve.
      * @param clazz The type of the object to instantiate.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
-     * @throws NoSuchElementException throws the <code>RuntimeException</code>
+     * @throws NoSuchElementException throws the {@link RuntimeException}
      * if the specified property name is not defined.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@link T}.
      */
     <T> T getRequiredPropertyAs(String name, Class<? extends T> clazz) throws NoSuchElementException, IllegalArgumentException;
 
@@ -355,9 +355,9 @@ public interface Configuration {
      *
      * @param <T> The type to return.
      * @param clazz The type of the object to instantiate.
-     * @return Returns the entire configuration as an instance of <code>T</code>.
+     * @return Returns the entire configuration as an instance of {@code T}.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@code T}.
      */
     <T> Optional<T> getAs(Class<? extends T> clazz) throws IllegalArgumentException;
 
@@ -370,9 +370,9 @@ public interface Configuration {
      * @param clazz The type of the object to instantiate.
      * @param defaultValue The value to return if the specified property name
      * does not exist in the configuration.
-     * @return Returns the entire configuration as an instance of <code>T</code>.
+     * @return Returns the entire configuration as an instance of {@code T}.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@code T}.
      */
     <T> T getAs(Class<? extends T> clazz, T defaultValue) throws IllegalArgumentException;
 
@@ -381,11 +381,11 @@ public interface Configuration {
      *
      * @param <T> The type to return.
      * @param clazz The type of the object to instantiate.
-     * @return Returns the entire configuration as an instance of <code>T</code>.
-     * @throws NoSuchElementException throws the <code>RuntimeException</code>
+     * @return Returns the entire configuration as an instance of {@code T}.
+     * @throws NoSuchElementException throws the {@link RuntimeException}
      * if the configuration is not available.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@code T}.
      */
     <T> T getRequiredAs(Class<? extends T> clazz) throws NoSuchElementException, IllegalArgumentException;
 
@@ -395,10 +395,10 @@ public interface Configuration {
      * @param <T> The type to return.
      * @param name The name of the property value to retrieve.
      * @param type The type of the object to instantiate.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@code T}.
      */
     <T> Optional<T> getPropertyAs(String name, Type type) throws IllegalArgumentException;
 
@@ -410,10 +410,10 @@ public interface Configuration {
      * @param type The type of the object to instantiate.
      * @param defaultValue The value to return if the specified property name
      * does not exist in the configuration.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@code T}.
      */
     <T> T getPropertyAs(String name, Type type, T defaultValue) throws IllegalArgumentException;
 
@@ -423,12 +423,12 @@ public interface Configuration {
      * @param <T> The type to return.
      * @param name The name of the property value to retrieve.
      * @param type The type of the object to instantiate.
-     * @return Returns the property value or <code>Optional.absent</code> if
+     * @return Returns the property value or {@link Optional#empty()} if
      * the property name has not been defined.
-     * @throws NoSuchElementException throws the <code>RuntimeException</code>
+     * @throws NoSuchElementException throws the {@link RuntimeException}
      * if the specified property name is not defined.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@code T}.
      */
     <T> T getRequiredPropertyAs(String name, Type type) throws NoSuchElementException, IllegalArgumentException;
 
@@ -437,9 +437,9 @@ public interface Configuration {
      *
      * @param <T> The type to return.
      * @param type The type of the object to instantiate.
-     * @return Returns the entire configuration as an instance of <code>T</code>.
+     * @return Returns the entire configuration as an instance of {@code T}.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@code T}.
      */
     <T> Optional<T> getAs(Type type) throws IllegalArgumentException;
 
@@ -452,9 +452,9 @@ public interface Configuration {
      * @param type The type of the object to instantiate.
      * @param defaultValue The value to return if the specified property name
      * does not exist in the configuration.
-     * @return Returns the entire configuration as an instance of <code>T</code>.
+     * @return Returns the entire configuration as an instance of {@code T}.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@code T}.
      */
     <T> T getAs(Type type, T defaultValue) throws IllegalArgumentException;
 
@@ -463,11 +463,11 @@ public interface Configuration {
      *
      * @param <T> The type to return.
      * @param type The type of the object to instantiate.
-     * @return Returns the entire configuration as an instance of <code>T</code>.
-     * @throws NoSuchElementException throws the <code>RuntimeException</code>
+     * @return Returns the entire configuration as an instance of {@code T}.
+     * @throws NoSuchElementException throws the {@link RuntimeException}
      * if the configuration is not available.
      * @throws IllegalArgumentException if the value cannot be converted to an
-     * instance of <code>T</code>.
+     * instance of {@code T}.
      */
     <T> T getRequiredAs(Type type) throws NoSuchElementException, IllegalArgumentException;
 }

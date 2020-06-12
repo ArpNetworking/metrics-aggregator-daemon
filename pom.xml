@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>2.0.1</version>
+    <version>2.0.6</version>
     <relativePath />
   </parent>
 
@@ -213,6 +213,28 @@
         <inherited>false</inherited>
       </plugin>
       <!-- Project Specific Plugins -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>${maven.clean.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>clean-assemblies</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <configuration>
+             <excludeDefaultDirectories>true</excludeDefaultDirectories>
+             <verbose>true</verbose>
+             <filesets>
+                <fileset>
+                  <directory>${project.build.directory}/docker-assembly</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>appassembler-maven-plugin</artifactId>

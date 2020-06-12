@@ -75,12 +75,12 @@ public abstract class HttpPostSink extends BaseSink {
     }
 
     /**
-     * Creates an HTTP request from a serialized data entry. Default is an <code>HttpPost</code> containing
+     * Creates an HTTP request from a serialized data entry. Default is an {@code POST} containing
      * serializedData as the body with content type of application/json
      *
      * @param client The http client to build the request with.
      * @param serializedData The serialized data.
-     * @return <code>HttpRequest</code> to execute
+     * @return {@link Request} to execute
      */
     protected Request createRequest(final AsyncHttpClient client, final byte[] serializedData) {
         return new RequestBuilder()
@@ -105,8 +105,8 @@ public abstract class HttpPostSink extends BaseSink {
      * guaranteed to be non-empty.
      *
      * @param client The http client to build the request with.
-     * @param periodicData The <code>PeriodicData</code> to be serialized.
-     * @return The <code>HttpRequest</code> instance to execute.
+     * @param periodicData The {@link PeriodicData} to be serialized.
+     * @return The {@link Request} instance to execute.
      */
     protected Collection<Request> createRequests(
             final AsyncHttpClient client,
@@ -120,36 +120,35 @@ public abstract class HttpPostSink extends BaseSink {
     }
 
     /**
-     * Accessor for the <code>URI</code>.
+     * Accessor for the {@link URI}.
      *
-     * @return The <code>URI</code>.
+     * @return The {@link URI}.
      */
     protected URI getUri() {
         return _uri;
     }
 
     /**
-     * Accessor for the AysncHttpClient <code>Uri</code>.
+     * Accessor for the AysncHttpClient {@link Uri}.
      *
-     * @return The AysncHttpClient <code>Uri</code>.
+     * @return The AysncHttpClient {@link Uri}.
      */
     protected Uri getAysncHttpClientUri() {
         return _aysncHttpClientUri;
     }
 
     /**
-     * Serialize the <code>PeriodicData</code> and <code>Condition</code> instances
-     * for posting.
+     * Serialize the {@link PeriodicData} instances for posting.
      *
-     * @param periodicData The <code>PeriodicData</code> to be serialized.
-     * @return The serialized representation of <code>PeriodicData</code>.
+     * @param periodicData The {@link PeriodicData} to be serialized.
+     * @return The serialized representation of {@link PeriodicData}.
      */
     protected abstract Collection<byte[]> serialize(PeriodicData periodicData);
 
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     protected HttpPostSink(final Builder<?, ?> builder) {
         super(builder);
@@ -175,7 +174,7 @@ public abstract class HttpPostSink extends BaseSink {
     }
 
     /**
-     * Implementation of abstract builder pattern for <code>HttpPostSink</code>.
+     * Implementation of abstract builder pattern for {@link HttpPostSink}.
      *
      * @param <B> type of the builder
      * @param <S> type of the object to be built
@@ -184,10 +183,10 @@ public abstract class HttpPostSink extends BaseSink {
     public abstract static class Builder<B extends BaseSink.Builder<B, S>, S extends HttpPostSink> extends BaseSink.Builder<B, S> {
 
         /**
-         * The <code>URI</code> to post the aggregated data to. Cannot be null.
+         * The {@link URI} to post the aggregated data to. Cannot be null.
          *
-         * @param value The <code>URI</code> to post the aggregated data to.
-         * @return This instance of <code>Builder</code>.
+         * @param value The {@link URI} to post the aggregated data to.
+         * @return This instance of {@link Builder}.
          */
         public B setUri(final URI value) {
             _uri = value;

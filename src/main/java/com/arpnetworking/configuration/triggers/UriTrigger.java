@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * <code>Trigger</code> implementation based on a uri's last modified date and
+ * {@link Trigger} implementation based on a uri's last modified date and
  * ETag. Either can trigger a reload; the last modified if is later than the
  * previous value or the ETag if it differs from the previous value. If
  * the uri is unavailable it is not considered changed to prevent flickering
@@ -201,7 +201,8 @@ public final class UriTrigger implements Trigger {
             .build();
 
     /**
-     * Builder for <code>UriTrigger</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link UriTrigger}.
      */
     public static final class Builder extends OvalBuilder<UriTrigger> {
 
@@ -213,10 +214,10 @@ public final class UriTrigger implements Trigger {
         }
 
         /**
-         * Set the source <code>URI</code>.
+         * Set the source {@link URI}.
          *
-         * @param value The source <code>URI</code>.
-         * @return This <code>Builder</code> instance.
+         * @param value The source {@link URI}.
+         * @return This {@link Builder} instance.
          */
         public Builder setUri(final URI value) {
             _uri = value;
@@ -224,10 +225,10 @@ public final class UriTrigger implements Trigger {
         }
 
         /**
-         * Add a <code>Header</code> to the uri.
+         * Add a {@link Header} to the uri.
          *
          * @param value A HTTP header.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder addHeader(final Header value) {
             _headers.add(value);
@@ -235,10 +236,10 @@ public final class UriTrigger implements Trigger {
         }
 
         /**
-         * Add a <code>List</code> of <code>Header</code> to the uri.
+         * Add a {@link List} of {@link Header} to the uri.
          *
-         * @param values A <code>List</code> of HTTP headers.
-         * @return This <code>Builder</code> instance.
+         * @param values A {@link List} of HTTP headers.
+         * @return This {@link Builder} instance.
          */
         public Builder addHeaders(final List<Header> values) {
             _headers.addAll(values);
@@ -246,10 +247,10 @@ public final class UriTrigger implements Trigger {
         }
 
         /**
-         * Overrides the existing headers with  a <code>List</code> of <code>Header</code>.
+         * Overrides the existing headers with  a {@link List} of {@link Header}.
          *
-         * @param values A <code>List</code> of HTTP headers.
-         * @return This <code>Builder</code> instance.
+         * @param values A {@link List} of HTTP headers.
+         * @return This {@link Builder} instance.
          */
         public Builder setHeaders(final List<Header> values) {
             _headers = new ArrayList<>(values);

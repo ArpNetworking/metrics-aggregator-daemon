@@ -40,16 +40,16 @@ public interface Statistic extends Serializable {
     Set<String> getAliases();
 
     /**
-     * Create a <code>Calculator</code> for this statistic.
+     * Create a {@link Calculator} for this statistic.
      *
-     * @return The new <code>Calculator</code> instance.
+     * @return The new {@link Calculator} instance.
      */
     Calculator<?> createCalculator();
 
     /**
      * Accessor for any dependencies.
      *
-     * @return The <code>Set</code> of <code>Statistic</code> dependencies.
+     * @return The {@link Set} of {@link Statistic} dependencies.
      */
     Set<Statistic> getDependencies();
 }

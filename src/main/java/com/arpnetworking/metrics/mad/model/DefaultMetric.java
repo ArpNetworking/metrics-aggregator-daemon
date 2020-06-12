@@ -112,7 +112,8 @@ public final class DefaultMetric implements Metric {
     private final ImmutableMap<Statistic, ImmutableList<CalculatedValue<?>>> _statistics;
 
     /**
-     * Implementation of builder pattern for {@link DefaultMetric}.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link DefaultMetric}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */

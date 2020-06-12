@@ -72,7 +72,8 @@ public final class Version2c {
     private final String _version;
 
     /**
-     * Builder for the Version2c class.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link Version2c}.
      */
     public static final class Builder extends ThreadLocalBuilder<Version2c> {
         /**
@@ -187,7 +188,8 @@ public final class Version2c {
         private final ImmutableMap<String, String> _otherAnnotations;
 
         /**
-         * Builder for the Annotations class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Annotations}.
          */
         public static final class Builder extends ThreadLocalBuilder<Annotations> {
             /**

@@ -38,8 +38,8 @@ import java.util.regex.Pattern;
  * <ul>
  * <li>For optional fields null and unspecified are treated the same. Where
  * appropriate this means null is mapped to a default value (e.g. empty map) or
- * wrapped in an <code>Optional</code>.</li>
- * <li>Although Steno specifies the <code>data</code> element is optional, it is
+ * wrapped in an {@link java.util.Optional}.</li>
+ * <li>Although Steno specifies the {@code data} element is optional, it is
  * required for consumption by Tsd Aggregator.</li>
  * </ul>
  *
@@ -88,7 +88,8 @@ public final class Version2fSteno {
     private final Context _context;
 
     /**
-     * Builder for the Version2fSteno class.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link Version2fSteno}.
      */
     public static final class Builder extends ThreadLocalBuilder<Version2fSteno> {
         /**
@@ -212,7 +213,8 @@ public final class Version2fSteno {
         private final ImmutableMap<String, String> _otherContext;
 
         /**
-         * Builder for the Context class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Context}.
          */
         public static final class Builder extends ThreadLocalBuilder<Context> {
             /**
@@ -301,7 +303,8 @@ public final class Version2fSteno {
         private final String _version;
 
         /**
-         * Builder for the Data class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Data}.
          */
         public static final class Builder extends ThreadLocalBuilder<Data> {
             /**
@@ -415,7 +418,8 @@ public final class Version2fSteno {
         private final double _value;
 
         /**
-         * Builder for the Sample class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Sample}.
          */
         public static final class Builder extends ThreadLocalBuilder<Sample> {
             /**
@@ -489,7 +493,8 @@ public final class Version2fSteno {
         private final ImmutableList<Sample> _values;
 
         /**
-         * Builder for the Element class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Element}.
          */
         public static final class Builder extends ThreadLocalBuilder<Element> {
             /**
@@ -547,7 +552,8 @@ public final class Version2fSteno {
         private final ImmutableMap<String, String> _otherAnnotations;
 
         /**
-         * Builder for the Annotations class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Annotations}.
          */
         public static final class Builder extends ThreadLocalBuilder<Annotations> {
             /**

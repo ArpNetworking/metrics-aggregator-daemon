@@ -81,8 +81,8 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     /**
      * Public constructor.
      *
-     * @param actorSystem Instance of <code>ActorSystem</code>.
-     * @param metrics Instance of <code>PeriodicMetrics</code>.
+     * @param actorSystem Instance of {@link ActorSystem}.
+     * @param metrics Instance of {@link PeriodicMetrics}.
      * @param healthCheckPath The path for the health check.
      * @param statusPath The path for the status.
      * @param supplementalRoutes List of supplemental routes in priority order.

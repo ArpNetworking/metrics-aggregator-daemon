@@ -102,7 +102,7 @@ public final class PeriodFilteringSink extends BaseSink {
     private final Sink _sink;
 
     /**
-     * Base <code>Builder</code> implementation.
+     * Base {@link Builder} implementation.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
@@ -119,7 +119,7 @@ public final class PeriodFilteringSink extends BaseSink {
          * Sets excluded periods. Optional. Default is no excluded periods.
          *
          * @param value The excluded periods.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setExclude(final Set<Duration> value) {
             _exclude = value;
@@ -131,7 +131,7 @@ public final class PeriodFilteringSink extends BaseSink {
          * settings. Optional. Default is no included periods.
          *
          * @param value The included periods.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setInclude(final Set<Duration> value) {
             _include = value;
@@ -142,7 +142,7 @@ public final class PeriodFilteringSink extends BaseSink {
          * Sets excluded periods less than this period. Optional. Default is no threshold.
          *
          * @param value The excluded period threshold.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setExcludeLessThan(final Duration value) {
             _excludeLessThan = value;
@@ -153,7 +153,7 @@ public final class PeriodFilteringSink extends BaseSink {
          * Sets excluded periods greater than this period. Optional. Default is no threshold.
          *
          * @param value The excluded period threshold.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setExcludeGreaterThan(final Duration value) {
             _excludeGreaterThan = value;
@@ -164,7 +164,7 @@ public final class PeriodFilteringSink extends BaseSink {
          * The aggregated data sink to filter. Cannot be null.
          *
          * @param value The aggregated data sink to filter.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setSink(final Sink value) {
             _sink = value;

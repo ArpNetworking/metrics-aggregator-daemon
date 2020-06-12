@@ -26,8 +26,9 @@ import net.sf.oval.constraint.NotNull;
 import java.util.function.Function;
 
 /**
- * Abstract base class for common functionality for reading
- * <code>AggregatedData</code>. This class is thread safe.
+ * Abstract base class for common functionality for obtaining
+ * {@link com.arpnetworking.metrics.mad.model.Record}. This
+ * class is thread safe.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -44,7 +45,7 @@ public abstract class BaseSource implements Source {
     }
 
     /**
-     * Dispatch an event to all attached <code>Observer</code> instances.
+     * Dispatch an event to all attached {@link Observer} instances.
      *
      * @param event The event to dispatch.
      */
@@ -80,7 +81,7 @@ public abstract class BaseSource implements Source {
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     protected BaseSource(final Builder<?, ?> builder) {
         _name = builder._name;
@@ -90,7 +91,8 @@ public abstract class BaseSource implements Source {
     private final ObservableDelegate _observable = ObservableDelegate.newInstance();
 
     /**
-     * Base <code>Builder</code> implementation.
+     * Base {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link Source} subclasses.
      *
      * @param <B> type of the builder
      * @param <S> type of the source to build
@@ -102,7 +104,7 @@ public abstract class BaseSource implements Source {
          * Sets name. Cannot be null or empty.
          *
          * @param value The name.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public final B setName(final String value) {
             _name = value;
@@ -111,9 +113,9 @@ public abstract class BaseSource implements Source {
 
         /**
          * Called by setters to always return appropriate subclass of
-         * <code>Builder</code>, even from setters of base class.
+         * {@link Builder}, even from setters of base class.
          *
-         * @return instance with correct <code>Builder</code> class type.
+         * @return instance with correct {@link Builder} class type.
          */
         protected abstract B self();
 

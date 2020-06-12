@@ -31,7 +31,7 @@ import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Tests for the <code>AggregationServerSink</code> class.
+ * Tests for the {@link AggregationServerSink} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

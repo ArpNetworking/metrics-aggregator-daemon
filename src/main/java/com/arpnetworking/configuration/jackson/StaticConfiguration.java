@@ -23,7 +23,7 @@ import net.sf.oval.constraint.NotNull;
 import java.util.List;
 
 /**
- * Static configuration implementation of <code>Configuration</code>.
+ * Static configuration implementation of {@link com.arpnetworking.configuration.Configuration}.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -53,7 +53,7 @@ public final class StaticConfiguration extends BaseJacksonConfiguration {
     private final JsonNodeSource _source;
 
     /**
-     * Builder for <code>StaticConfiguration</code>.
+     * Builder for {@link StaticConfiguration}.
      */
     public static final class Builder extends BaseJacksonConfiguration.Builder<Builder, StaticConfiguration> {
 
@@ -65,11 +65,11 @@ public final class StaticConfiguration extends BaseJacksonConfiguration {
         }
 
         /**
-         * Set the <code>List</code> of <code>JsonSource</code>
+         * Set the {@link List} of {@link JsonNodeSource}
          * instances. Cannot be null.
          *
-         * @param value The <code>List</code> of <code>JsonSource</code> instances.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link List} of {@link JsonNodeSource} instances.
+         * @return This {@link Builder} instance.
          */
         public Builder setSources(final List<JsonNodeSource> value) {
             _sources = Lists.newArrayList(value);
@@ -77,10 +77,10 @@ public final class StaticConfiguration extends BaseJacksonConfiguration {
         }
 
         /**
-         * Add a <code>JsonSource</code> instance.
+         * Add a {@link JsonNodeSource} instance.
          *
-         * @param value The <code>JsonSource</code> instance.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link JsonNodeSource} instance.
+         * @return This {@link Builder} instance.
          */
         public Builder addSource(final JsonNodeSource value) {
             if (_sources == null) {

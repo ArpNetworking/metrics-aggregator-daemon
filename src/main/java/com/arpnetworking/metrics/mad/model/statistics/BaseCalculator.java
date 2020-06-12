@@ -18,7 +18,7 @@ package com.arpnetworking.metrics.mad.model.statistics;
 /**
  * A calculator base class.
  *
- * @param <T> The type of the supporting data produced by the <code>Calculator</code>.
+ * @param <T> The type of the supporting data produced by the {@link Calculator}.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -42,7 +42,7 @@ public abstract class BaseCalculator<T> implements Calculator<T> {
     /**
      * Protected constructor.
      *
-     * @param statistic The <code>Statistic</code> this <code>Calculator</code> is for.
+     * @param statistic The {@link Statistic} this {@link Calculator} is for.
      */
     protected BaseCalculator(final Statistic statistic) {
         _statistic = statistic;

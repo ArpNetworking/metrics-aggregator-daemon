@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Min statistic (e.g. top 0th percentile). Use <code>StatisticFactory</code> for construction.
+ * Min statistic (e.g. top 0th percentile). Use {@link StatisticFactory} for construction.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
@@ -69,7 +69,7 @@ public final class MinStatistic extends BaseStatistic {
         /**
          * Public constructor.
          *
-         * @param statistic The <code>Statistic</code>.
+         * @param statistic The {@link Statistic}.
          */
         public MinAccumulator(final Statistic statistic) {
             super(statistic);

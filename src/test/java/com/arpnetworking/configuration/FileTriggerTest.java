@@ -27,7 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
 
 /**
- * Tests for the <code>FileTrigger</code> class.
+ * Tests for the {@link FileTrigger} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

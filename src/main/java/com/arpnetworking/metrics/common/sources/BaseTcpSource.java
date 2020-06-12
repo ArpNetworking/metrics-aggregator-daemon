@@ -48,7 +48,7 @@ public abstract class BaseTcpSource extends ActorSource {
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     protected BaseTcpSource(final Builder<?, ?> builder) {
         super(builder);
