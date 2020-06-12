@@ -23,6 +23,7 @@ import net.sf.oval.constraint.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Default sample implementation.
@@ -198,7 +199,7 @@ public final class DefaultQuantity implements Quantity {
          * @param value The unit.
          * @return This {@link Builder} instance.
          */
-        public Builder setUnit(final Unit value) {
+        public Builder setUnit(@Nullable final Unit value) {
             _unit = value;
             return this;
         }

@@ -23,6 +23,7 @@ import com.google.common.base.Objects;
 import net.sf.oval.constraint.NotNull;
 
 import java.io.Serializable;
+import javax.annotation.Nullable;
 
 /**
  * Representation of aggregated data; also known as a statistic. However, not
@@ -190,7 +191,7 @@ public final class AggregatedData implements Serializable {
          * @param value The supporting data.
          * @return This instance of {@link Builder}.
          */
-        public Builder setSupportingData(final Object value) {
+        public Builder setSupportingData(@Nullable final Object value) {
             _supportingData = value;
             return this;
         }

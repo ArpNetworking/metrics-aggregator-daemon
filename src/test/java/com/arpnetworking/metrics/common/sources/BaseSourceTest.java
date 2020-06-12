@@ -16,6 +16,7 @@
 package com.arpnetworking.metrics.common.sources;
 
 import com.arpnetworking.commons.observer.Observer;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.exception.ConstraintsViolatedException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -73,6 +74,7 @@ public class BaseSourceTest {
     }
 
     @Test(expected = ConstraintsViolatedException.class)
+    @SuppressFBWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void testBuilderNullName() {
         new TestSource.Builder()
                 .setName(null)

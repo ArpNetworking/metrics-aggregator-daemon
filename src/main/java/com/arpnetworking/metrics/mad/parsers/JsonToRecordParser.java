@@ -420,7 +420,8 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                             element.getValues(),
                             VERSION_2F_STENO_SAMPLE_TO_QUANTITY)
                     .stream()
-                    .filter(Predicates.notNull()::apply)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
                     .collect(ImmutableList.toImmutableList());
             variables.put(
                     entry.getKey(),
@@ -624,13 +625,14 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         }
     };
 
-    private static final Function<Version2fSteno.Sample, Quantity> VERSION_2F_STENO_SAMPLE_TO_QUANTITY = sample -> {
+    private static final Function<Version2fSteno.Sample, Optional<Quantity>> VERSION_2F_STENO_SAMPLE_TO_QUANTITY = sample -> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
-                return ThreadLocalBuilder.build(
-                        DefaultQuantity.Builder.class,
-                        b -> b.setValue(sample.getValue())
-                                .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null)));
+                return Optional.of(
+                        ThreadLocalBuilder.build(
+                                DefaultQuantity.Builder.class,
+                                b -> b.setValue(sample.getValue())
+                                        .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))));
                         // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
                         //.setNumeratorUnits(sample.getUnitNumerators())
                         //.setDenominatorUnits(sample.getUnitDenominators())
@@ -641,14 +643,15 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                         .setMessage("Invalid sample for metric")
                         .addData("value", sample.getValue())
                         .log();
-                return null;
+                return Optional.empty();
             }
         } else {
-            return null;
+            return Optional.empty();
         }
     };
 
-    private static Quantity version2gSampleToQuantity(final Version2g.Sample sample) {
+    @Nullable
+    private static Quantity version2gSampleToQuantity(@Nullable final Version2g.Sample sample) {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
                 @Nullable final CompositeUnit sampleUnit = sample.getUnit2g() != null
