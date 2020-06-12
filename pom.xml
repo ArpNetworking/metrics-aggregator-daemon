@@ -83,7 +83,7 @@
     <fastutil.version>8.2.2</fastutil.version>
     <guava.version>25.1-jre</guava.version>
     <guice.version>4.2.2</guice.version>
-    <jackson.version>2.9.8</jackson.version>
+    <jackson.version>2.11.0</jackson.version>
     <javassist.version>3.24.1-GA</javassist.version>
     <javassist.maven.core.version>0.2.2</javassist.maven.core.version>
     <jsr305.version>3.0.2</jsr305.version>
