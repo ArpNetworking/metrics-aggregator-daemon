@@ -45,8 +45,8 @@ public final class LogScanner extends AbstractActor {
     /**
      * Public constructor.
      *
-     * @param fileSourceManager <code>ActorRef</code> for the singleton FileSourceManager actor
-     * @param logs The <code>List</code> of files to monitor.
+     * @param fileSourceManager {@link ActorRef} for the singleton FileSourceManager actor
+     * @param logs The {@link List} of files to monitor.
      */
     @Inject
     public LogScanner(@Named("FileSourceManager") final ActorRef fileSourceManager, final List<Path> logs) {

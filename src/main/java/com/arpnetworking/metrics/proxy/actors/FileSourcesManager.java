@@ -50,7 +50,7 @@ public final class FileSourcesManager extends AbstractActor {
     /**
      * Public constructor.
      *
-     * @param streamContextActor <code>ActorRef</code> for the singleton stream context actor
+     * @param streamContextActor {@link ActorRef} for the singleton stream context actor
      */
     @Inject
     public FileSourcesManager(@Named("StreamContext") final ActorRef streamContextActor) {

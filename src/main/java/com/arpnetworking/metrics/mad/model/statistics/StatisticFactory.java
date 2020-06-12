@@ -54,7 +54,7 @@ public class StatisticFactory {
      * Get a statistic by name.
      *
      * @param name The name of the desired statistic.
-     * @return A new <code>Statistic</code>.
+     * @return A new {@link Statistic}.
      */
     public Optional<Statistic> tryGetStatistic(final String name) {
         return Optional.ofNullable(STATISTICS_BY_NAME_AND_ALIAS.get(name));

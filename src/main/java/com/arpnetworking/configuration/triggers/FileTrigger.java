@@ -32,7 +32,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 /**
- * <code>Trigger</code> implementation based on a file's modified date and
+ * {@link Trigger} implementation based on a file's modified date and
  * its hash. If the file is created or removed the evaluation will return
  * true.
  *
@@ -141,7 +141,8 @@ public final class FileTrigger implements Trigger {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileTrigger.class);
 
     /**
-     * Builder for <code>FileTrigger</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link FileTrigger}.
      */
     public static final class Builder extends OvalBuilder<FileTrigger> {
 
@@ -153,10 +154,10 @@ public final class FileTrigger implements Trigger {
         }
 
         /**
-         * Set the <code>File</code> to monitor. Cannot be null.
+         * Set the {@link File} to monitor. Cannot be null.
          *
-         * @param value The <code>File</code> to monitor.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link File} to monitor.
+         * @return This {@link Builder} instance.
          */
         public Builder setFile(final File value) {
             _file = value;

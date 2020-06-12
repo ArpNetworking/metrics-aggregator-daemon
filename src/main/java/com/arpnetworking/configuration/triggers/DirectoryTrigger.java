@@ -169,7 +169,8 @@ public final class DirectoryTrigger implements Trigger {
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryTrigger.class);
 
     /**
-     * Builder for {@link DirectoryTrigger}.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link DirectoryTrigger}.
      */
     public static final class Builder extends OvalBuilder<DirectoryTrigger> {
 

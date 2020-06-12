@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
 
 
 /**
- * Default implementation of the <code>Record</code> interface.
+ * Default implementation of the {@link Record} interface.
  *
  * <b>IMPORTANT:</b> Instances are only hashed and compare based on their
  * identifier, and are considered interchangeable if their identifiers match
@@ -122,7 +122,8 @@ public final class DefaultRecord implements Record {
     private final ImmutableMap<String, String> _dimensions;
 
     /**
-     * Implementation of builder pattern for <code>DefaultRecord</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link DefaultRecord}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
@@ -136,10 +137,10 @@ public final class DefaultRecord implements Record {
         }
 
         /**
-         * The named metrics <code>ImmutableMap</code>. Cannot be null.
+         * The named metrics {@link ImmutableMap}. Cannot be null.
          *
-         * @param value The named metrics <code>ImmutableMap</code>.
-         * @return This instance of <code>Builder</code>.
+         * @param value The named metrics {@link ImmutableMap}.
+         * @return This instance of {@link Builder}.
          */
         public Builder setMetrics(final ImmutableMap<String, ? extends Metric> value) {
             _metrics = value;
@@ -150,7 +151,7 @@ public final class DefaultRecord implements Record {
          * The identifier of the record. Cannot be null or empty.
          *
          * @param value The identifier.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setId(final String value) {
             _id = value;
@@ -161,7 +162,7 @@ public final class DefaultRecord implements Record {
          * The timestamp of the record. Cannot be null.
          *
          * @param value The timestamp.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setTime(final ZonedDateTime value) {
             _time = value;
@@ -172,7 +173,7 @@ public final class DefaultRecord implements Record {
          * The timestamp at which the record was received. Can be null.
          *
          * @param value The timestamp.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setRequestTime(final ZonedDateTime value) {
             _requestTime = value;
@@ -180,11 +181,11 @@ public final class DefaultRecord implements Record {
         }
 
         /**
-         * The annotations <code>ImmutableMap</code>. Optional. Default is an empty
-         * <code>ImmutableMap</code>. Cannot be null.
+         * The annotations {@link ImmutableMap}. Optional. Default is an empty
+         * {@link ImmutableMap}. Cannot be null.
          *
-         * @param value The annotations <code>ImmutableMap</code>.
-         * @return This instance of <code>Builder</code>.
+         * @param value The annotations {@link ImmutableMap}.
+         * @return This instance of {@link Builder}.
          */
         public Builder setAnnotations(final ImmutableMap<String, String> value) {
             _annotations = value;
@@ -192,11 +193,11 @@ public final class DefaultRecord implements Record {
         }
 
         /**
-         * The dimension mappings <code>ImmutableMap</code>. Optional. Default is an empty
-         * <code>ImmutableMap</code>. Cannot be null.
+         * The dimension mappings {@link ImmutableMap}. Optional. Default is an empty
+         * {@link ImmutableMap}. Cannot be null.
          *
-         * @param value The dimension mappings <code>ImmutableMap</code>
-         * @return This instance of <code>Builder</code>.
+         * @param value The dimension mappings {@link ImmutableMap}
+         * @return This instance of {@link Builder}.
          */
         public Builder setDimensions(final ImmutableMap<String, String> value) {
             _dimensions = value;

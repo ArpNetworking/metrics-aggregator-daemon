@@ -50,7 +50,7 @@ public final class StatsdSource extends ActorSource {
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     private StatsdSource(final Builder builder) {
         super(builder);

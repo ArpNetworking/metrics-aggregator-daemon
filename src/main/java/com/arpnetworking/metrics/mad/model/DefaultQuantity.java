@@ -158,7 +158,8 @@ public final class DefaultQuantity implements Quantity {
     private static final long serialVersionUID = -6339526234042605516L;
 
     /**
-     * <code>Builder</code> implementation for <code>Quantity</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link Quantity}.
      */
     public static final class Builder extends ThreadLocalBuilder<DefaultQuantity> {
 
@@ -172,7 +173,7 @@ public final class DefaultQuantity implements Quantity {
         /**
          * Public constructor.
          *
-         * @param quantity the <code>Quantity</code> to initialize from
+         * @param quantity the {@link Quantity} to initialize from
          */
         public Builder(final DefaultQuantity quantity) {
             super((java.util.function.Function<Builder, DefaultQuantity>) DefaultQuantity::new);
@@ -184,7 +185,7 @@ public final class DefaultQuantity implements Quantity {
          * Set the value. Required. Cannot be null.
          *
          * @param value The value.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setValue(final Double value) {
             _value = value;
@@ -195,7 +196,7 @@ public final class DefaultQuantity implements Quantity {
          * Set the unit. Optional. Default is no unit.
          *
          * @param value The unit.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setUnit(final Unit value) {
             _unit = value;

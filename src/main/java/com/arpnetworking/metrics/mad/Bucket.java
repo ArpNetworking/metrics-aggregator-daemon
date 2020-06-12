@@ -88,9 +88,9 @@ import java.util.function.BiFunction;
     }
 
     /**
-     * Add data in the form of a <code>Record</code> to this <code>Bucket</code>.
+     * Add data in the form of a {@link Record} to this {@link Bucket}.
      *
-     * @param record The data to add to this <code>Bucket</code>.
+     * @param record The data to add to this {@link Bucket}.
      */
     public void add(final Record record) {
         if (!_isOpen) {
@@ -394,7 +394,8 @@ import java.util.function.BiFunction;
     }
 
     /**
-     * <code>Builder</code> implementation for <code>Bucket</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link Bucket}.
      */
     public static final class Builder extends OvalBuilder<Bucket> {
 
@@ -409,7 +410,7 @@ import java.util.function.BiFunction;
          * Set the key. Cannot be null or empty.
          *
          * @param value The key.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setKey(final Key value) {
             _key = value;
@@ -420,7 +421,7 @@ import java.util.function.BiFunction;
          * Set the sink. Cannot be null or empty.
          *
          * @param value The sink.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setSink(final Sink value) {
             _sink = value;
@@ -431,7 +432,7 @@ import java.util.function.BiFunction;
          * Set the specified timer statistics. Cannot be null or empty.
          *
          * @param value The specified timer statistics.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setSpecifiedTimerStatistics(final ImmutableSet<Statistic> value) {
             _specifiedTimerStatistics = value;
@@ -442,7 +443,7 @@ import java.util.function.BiFunction;
          * Set the specified counter statistics. Cannot be null or empty.
          *
          * @param value The specified counter statistics.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setSpecifiedCounterStatistics(final ImmutableSet<Statistic> value) {
             _specifiedCounterStatistics = value;
@@ -453,7 +454,7 @@ import java.util.function.BiFunction;
          * Set the specified gauge statistics. Cannot be null or empty.
          *
          * @param value The specified gauge statistics.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setSpecifiedGaugeStatistics(final ImmutableSet<Statistic> value) {
             _specifiedGaugeStatistics = value;
@@ -464,7 +465,7 @@ import java.util.function.BiFunction;
          * Set the dependent timer statistics. Cannot be null or empty.
          *
          * @param value The dependent timer statistics.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setDependentTimerStatistics(final ImmutableSet<Statistic> value) {
             _dependentTimerStatistics = value;
@@ -475,7 +476,7 @@ import java.util.function.BiFunction;
          * Set the dependent counter statistics. Cannot be null or empty.
          *
          * @param value The dependent counter statistics.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setDependentCounterStatistics(final ImmutableSet<Statistic> value) {
             _dependentCounterStatistics = value;
@@ -486,7 +487,7 @@ import java.util.function.BiFunction;
          * Set the dependent gauge statistics. Cannot be null or empty.
          *
          * @param value The dependent gauge statistics.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setDependentGaugeStatistics(final ImmutableSet<Statistic> value) {
             _dependentGaugeStatistics = value;
@@ -497,7 +498,7 @@ import java.util.function.BiFunction;
          * Set the start. Cannot be null or empty.
          *
          * @param value The start.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setStart(final ZonedDateTime value) {
             _start = value;
@@ -508,7 +509,7 @@ import java.util.function.BiFunction;
          * Set the period. Cannot be null or empty.
          *
          * @param value The period.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setPeriod(final Duration value) {
             _period = value;
@@ -519,7 +520,7 @@ import java.util.function.BiFunction;
          * Set the specified statistics for a given metric. Cannot be null or empty.
          *
          * @param value The dependent timer statistics.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setSpecifiedStatistics(final LoadingCache<String, Optional<ImmutableSet<Statistic>>> value) {
             _specifiedStatistics = value;
@@ -530,7 +531,7 @@ import java.util.function.BiFunction;
          * Set the dependent statistics for a given metric. Cannot be null or empty.
          *
          * @param value The dependent timer statistics.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setDependentStatistics(final LoadingCache<String, Optional<ImmutableSet<Statistic>>> value) {
             _dependentStatistics = value;

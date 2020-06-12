@@ -56,7 +56,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Tests for the <code>Aggregator</code> class.
+ * Tests for the {@link Aggregator} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

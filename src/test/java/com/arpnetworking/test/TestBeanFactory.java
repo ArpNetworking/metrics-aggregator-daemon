@@ -51,9 +51,9 @@ import java.util.UUID;
 public final class TestBeanFactory {
 
     /**
-     * Create a builder for pseudo-random <code>Record</code>.
+     * Create a builder for pseudo-random {@link Record}.
      *
-     * @return New builder for pseudo-random <code>Record</code>.
+     * @return New builder for pseudo-random {@link Record}.
      */
     public static DefaultRecord.Builder createRecordBuilder() {
         return new DefaultRecord.Builder()
@@ -71,18 +71,18 @@ public final class TestBeanFactory {
     }
 
     /**
-     * Create a new reasonable pseudo-random <code>Record</code>.
+     * Create a new reasonable pseudo-random {@link Record}.
      *
-     * @return New reasonable pseudo-random <code>Record</code>.
+     * @return New reasonable pseudo-random {@link Record}.
      */
     public static Record createRecord() {
         return createRecordBuilder().build();
     }
 
     /**
-     * Create a builder for pseudo-random <code>Metric</code>.
+     * Create a builder for pseudo-random {@link Metric}.
      *
-     * @return New builder for pseudo-random <code>Metric</code>.
+     * @return New builder for pseudo-random {@link Metric}.
      */
     public static DefaultMetric.Builder createMetricBuilder() {
         return new DefaultMetric.Builder()
@@ -93,18 +93,18 @@ public final class TestBeanFactory {
     }
 
     /**
-     * Create a new reasonable pseudo-random <code>Metric</code>.
+     * Create a new reasonable pseudo-random {@link Metric}.
      *
-     * @return New reasonable pseudo-random <code>Metric</code>.
+     * @return New reasonable pseudo-random {@link Metric}.
      */
     public static Metric createMetric() {
         return createMetricBuilder().build();
     }
 
     /**
-     * Create a builder for pseudo-random <code>AggregatedData</code>.
+     * Create a builder for pseudo-random {@link AggregatedData}.
      *
-     * @return New builder for pseudo-random <code>AggregatedData</code>.
+     * @return New builder for pseudo-random {@link AggregatedData}.
      */
     public static AggregatedData.Builder createAggregatedDataBuilder() {
         return new AggregatedData.Builder()
@@ -115,18 +115,18 @@ public final class TestBeanFactory {
     }
 
     /**
-     * Create a new reasonable pseudo-random <code>AggregatedData</code>.
+     * Create a new reasonable pseudo-random {@link AggregatedData}.
      *
-     * @return New reasonable pseudo-random <code>AggregatedData</code>.
+     * @return New reasonable pseudo-random {@link AggregatedData}.
      */
     public static AggregatedData createAggregatedData() {
         return createAggregatedDataBuilder().build();
     }
 
     /**
-     * Create a builder for pseudo-random <code>PeriodicData</code>.
+     * Create a builder for pseudo-random {@link PeriodicData}.
      *
-     * @return New builder for pseudo-random <code>PeriodicData</code>.
+     * @return New builder for pseudo-random {@link PeriodicData}.
      */
     public static PeriodicData.Builder createPeriodicDataBuilder() {
         return new PeriodicData.Builder()
@@ -142,39 +142,39 @@ public final class TestBeanFactory {
     }
 
     /**
-     * Create a new reasonable pseudo-random <code>PeriodicData</code>.
+     * Create a new reasonable pseudo-random {@link PeriodicData}.
      *
-     * @return New reasonable pseudo-random <code>PeriodicData</code>.
+     * @return New reasonable pseudo-random {@link PeriodicData}.
      */
     public static PeriodicData createPeriodicData() {
         return createPeriodicDataBuilder().build();
     }
 
     /**
-     * Create a builder for reasonable pseudo-random <code>Quantity</code>.
+     * Create a builder for reasonable pseudo-random {@link Quantity}.
      *
-     * @return New builder for reasonable pseudo-random <code>Quantity</code>.
+     * @return New builder for reasonable pseudo-random {@link Quantity}.
      */
     public static DefaultQuantity.Builder createSampleBuilder() {
         return new DefaultQuantity.Builder().setValue(Math.random()).setUnit(Unit.BIT);
     }
 
     /**
-     * Create a new reasonable pseudo-random <code>Quantity</code>.
+     * Create a new reasonable pseudo-random {@link Quantity}.
      *
-     * @return New reasonable pseudo-random <code>Quantity</code>.
+     * @return New reasonable pseudo-random {@link Quantity}.
      */
     public static Quantity createSample() {
         return new DefaultQuantity.Builder().setValue(Math.random()).setUnit(Unit.BIT).build();
     }
 
     /**
-     * Create a <code>List</code> of <code>Quantity</code> instances in
-     * <code>Unit.MILLISECOND</code> from a <code>List</code> of <code>Double</code>
+     * Create a {@link List} of {@link Quantity} instances in
+     * {@link Unit#MILLISECOND} from a {@link List} of {@link Double}
      * values.
      *
      * @param values The values.
-     * @return <code>List</code> of <code>Quantity</code> instances.
+     * @return {@link List} of {@link Quantity} instances.
      */
     public static List<Quantity> createSamples(final List<Double> values) {
         return FluentIterable.from(Lists.newArrayList(values)).transform(CREATE_SAMPLE).toList();

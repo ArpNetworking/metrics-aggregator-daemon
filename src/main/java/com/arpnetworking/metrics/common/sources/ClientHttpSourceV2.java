@@ -27,7 +27,7 @@ public final class ClientHttpSourceV2 extends HttpSource {
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     private ClientHttpSourceV2(final Builder builder) {
         super(builder);

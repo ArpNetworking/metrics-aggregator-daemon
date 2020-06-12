@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 /**
- * A <code>PositionStore</code> that always returns absent.
+ * A {@link PositionStore} that always returns absent.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */

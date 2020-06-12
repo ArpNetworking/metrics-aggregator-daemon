@@ -69,10 +69,10 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 /**
- * Implementation of <code>Parser</code> for the JSON metrics formats. The
- * format represents each <code>Record</code> instance with one json object per
+ * Implementation of {@link Parser} for the JSON metrics formats. The
+ * format represents each {@link Record} instance with one json object per
  * line. Specifications for each version of the query log can be found in the
- * <code>metrics-client-doc</code> repository.
+ * {@code metrics-client-doc} repository.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
@@ -296,11 +296,11 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     }
 
     /**
-     * Get the existing <code>Unit</code> that corresponds to the compound unit, or null if the compound unit has no
-     * <code>Unit</code> analogue.
+     * Get the existing {@link Unit} that corresponds to the compound unit, or null if the compound unit has no
+     * {@link Unit} analogue.
      *
-     * @param compositeUnit The <code>CompoundUnit</code> for which to find the existing analogue.
-     * @return The existing <code>Unit</code> to which the <code>CompoundUnit</code> maps.
+     * @param compositeUnit The {@link CompositeUnit} for which to find the existing analogue.
+     * @return The existing {@link Unit} to which the {@link CompositeUnit} maps.
      */
     @Nullable
     private static Unit getLegacyUnit(@Nullable final CompositeUnit compositeUnit) {
@@ -708,7 +708,8 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     }
 
     /**
-     * Implementation of <code>Builder</code> for {@link JsonToRecordParser}.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link JsonToRecordParser}.
      */
     public static final class Builder extends ThreadLocalBuilder<JsonToRecordParser> {
 
@@ -723,7 +724,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
          * The default host. Set to the name of the local host if left unset here.
          *
          * @param value The default host.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setDefaultHost(final String value) {
             _defaultHost = value;
@@ -734,7 +735,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
          * The default service.
          *
          * @param value The default service.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setDefaultService(final String value) {
             _defaultService = value;
@@ -745,7 +746,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
          * The default cluster.
          *
          * @param value The default cluster.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setDefaultCluster(final String value) {
             _defaultCluster = value;

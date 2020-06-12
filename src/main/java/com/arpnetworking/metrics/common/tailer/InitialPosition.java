@@ -58,7 +58,7 @@ public enum InitialPosition {
     InitialPosition() { }
 
     /**
-     * Given a <code>SeekableByteChannel</code>, returns the position in that stream to start from.
+     * Given a {@link SeekableByteChannel}, returns the position in that stream to start from.
      *
      * @param channel Channel to evaluate the position against
      * @return The position (in bytes) to start reading

@@ -40,40 +40,40 @@ public interface Quantity extends Comparable<Quantity>, Serializable {
     Optional<Unit> getUnit();
 
     /**
-     * Add this <code>Quantity</code> to the specified one returning the
-     * result. Both <code>Quantity</code> instances must either not have a
-     * <code>Unit</code> or the <code>Unit</code> must be of the same type.
+     * Add this {@link Quantity} to the specified one returning the
+     * result. Both {@link Quantity} instances must either not have a
+     * {@link Unit} or the {@link Unit} must be of the same type.
      *
-     * @param otherQuantity The other <code>Quantity</code>.
-     * @return The resulting sum <code>Quantity</code>.
+     * @param otherQuantity The other {@link Quantity}.
+     * @return The resulting sum {@link Quantity}.
      */
     Quantity add(Quantity otherQuantity);
 
     /**
-     * Subtract the specified <code>Quantity</code> from this one returning
-     * the result. Both <code>Quantity</code> instances must either not have
-     * a <code>Unit</code> or the <code>Unit</code> must be of the same type.
+     * Subtract the specified {@link Quantity} from this one returning
+     * the result. Both {@link Quantity} instances must either not have
+     * a {@link Unit} or the {@link Unit} must be of the same type.
      *
-     * @param otherQuantity The other <code>Quantity</code>.
-     * @return The resulting difference <code>Quantity</code>.
+     * @param otherQuantity The other {@link Quantity}.
+     * @return The resulting difference {@link Quantity}.
      */
     Quantity subtract(Quantity otherQuantity);
 
     /**
-     * Multiply this <code>Quantity</code> with the specified one returning
+     * Multiply this {@link Quantity} with the specified one returning
      * the result.
      *
-     * @param otherQuantity The other <code>Quantity</code>.
-     * @return The resulting product <code>Quantity</code>.
+     * @param otherQuantity The other {@link Quantity}.
+     * @return The resulting product {@link Quantity}.
      */
     Quantity multiply(Quantity otherQuantity);
 
     /**
-     * Divide this <code>Quantity</code> by the specified one returning
+     * Divide this {@link Quantity} by the specified one returning
      * the result.
      *
-     * @param otherQuantity The other <code>Quantity</code>.
-     * @return The resulting quotient <code>Quantity</code>.
+     * @param otherQuantity The other {@link Quantity}.
+     * @return The resulting quotient {@link Quantity}.
      */
     Quantity divide(Quantity otherQuantity);
 }

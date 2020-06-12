@@ -276,7 +276,8 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
         private final List<String> _dsNames;
 
         /**
-         * Builder for the {@link CollectdRecord} class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link CollectdRecord}.
          */
         public static final class Builder extends ThreadLocalBuilder<CollectdRecord> {
             /**

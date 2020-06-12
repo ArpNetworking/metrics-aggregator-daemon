@@ -24,7 +24,7 @@ import com.google.common.collect.Multiset;
 import java.util.Map;
 
 /**
- * Implementation of <code>Comparator</code> which compares <code>Record</code>
+ * Implementation of comparison which compares {@link Record}
  * instances ignoring the order of values in each metric.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
@@ -32,12 +32,12 @@ import java.util.Map;
 public final class UnorderedRecordEquality {
 
     /**
-     * Compare two <code>Record</code> instances ignoring the ordering of the
+     * Compare two {@link Record} instances ignoring the ordering of the
      * values in each metric.
      *
-     * @param r1 First <code>Record</code> instance.
-     * @param r2 Second <code>Record</code> instance.
-     * @return True if and only if <code>Record</code> instances are equal
+     * @param r1 First {@link Record} instance.
+     * @param r2 Second {@link Record} instance.
+     * @return True if and only if {@link Record} instances are equal
      * irregardless of the order of the values of each metric.
      */
     public static boolean equals(final Record r1, final Record r2) {

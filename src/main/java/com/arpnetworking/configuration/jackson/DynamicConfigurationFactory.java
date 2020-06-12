@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Interface for classes which create <code>DynamicConfiguration</code>
+ * Interface for classes which create {@link DynamicConfiguration}
  * instances. The factory enables dynamic configurations where the definition
  * of the dynamic configuration, namely its source builders and triggers vary
  * based on data available at runtime.
@@ -49,24 +49,24 @@ import java.util.Objects;
 public interface DynamicConfigurationFactory {
 
     /**
-     * Create a new <code>DynamicConfiguration</code> from the specified builder
+     * Create a new {@link DynamicConfiguration} from the specified builder
      * updated with the specified keys using the strategy defined by the specific
      * implementation.
      *
-     * @param builder The <code>Builder</code> for <code>DynamicConfiguration</code>.
-     * @param keys The <code>Collection</code> of <code>Key</code> instances.
-     * @return New instance of <code>DynamicConfiguration</code>.
+     * @param builder The {@link DynamicConfiguration.Builder} instance.
+     * @param keys The {@link Collection} of {@link Key} instances.
+     * @return New instance of {@link DynamicConfiguration}.
      */
     DynamicConfiguration create(
             DynamicConfiguration.Builder builder,
             Collection<Key> keys);
 
     /**
-     * Update a <code>DynamicConfiguration$Builder</code> with the specified keys using
+     * Update a {@link DynamicConfiguration.Builder} with the specified keys using
      * the strategy defined by the specific implementation.
      *
-     * @param builder The <code>Builder</code> for <code>DynamicConfiguration</code>.
-     * @param keys The <code>Collection</code> of <code>Key</code> instances.
+     * @param builder The {@link DynamicConfiguration.Builder} instance.
+     * @param keys The {@link Collection} of {@link Key} instances.
      */
     void update(
             DynamicConfiguration.Builder builder,

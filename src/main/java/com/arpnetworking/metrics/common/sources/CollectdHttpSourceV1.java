@@ -27,7 +27,7 @@ public final class CollectdHttpSourceV1 extends HttpSource {
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     private CollectdHttpSourceV1(final Builder builder) {
         super(builder);

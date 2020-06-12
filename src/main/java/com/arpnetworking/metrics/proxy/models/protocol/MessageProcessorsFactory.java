@@ -22,18 +22,18 @@ import com.arpnetworking.metrics.proxy.actors.Connection;
 import java.util.List;
 
 /**
- * A factory that creates a <code>List</code> of <code>MessagesProcessor</code> that
+ * A factory that creates a {@link List} of {@link MessagesProcessor} that
  * implement a protocol version.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public interface MessageProcessorsFactory {
     /**
-     * Create a list of <code>MessagesProcessor</code> that define a protocol.
+     * Create a list of {@link MessagesProcessor} that define a protocol.
      *
      * @param connection the connection context to use for message processing
      * @param metrics {@link PeriodicMetrics} instance to record metrics to
-     * @return a list of <code>MessagesProcessor</code>
+     * @return a list of {@link MessagesProcessor}
      */
     List<MessagesProcessor> create(Connection connection, PeriodicMetrics metrics);
 }

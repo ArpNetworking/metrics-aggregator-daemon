@@ -75,7 +75,8 @@ public final class CalculatedValue<T> {
     private final T _data;
 
     /**
-     * <code>Builder</code> implementation for <code>CalculatedValue</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link CalculatedValue}.
      *
      * @param <T> type of the object to be built
      */
@@ -92,7 +93,7 @@ public final class CalculatedValue<T> {
          * Set the value. Required. Cannot be null.
          *
          * @param value The value.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder<T> setValue(final Quantity value) {
             _value = value;
@@ -103,7 +104,7 @@ public final class CalculatedValue<T> {
          * Set the data. Optional. Defaults to null.
          *
          * @param data The data.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder<T> setData(final T data) {
             _data = data;

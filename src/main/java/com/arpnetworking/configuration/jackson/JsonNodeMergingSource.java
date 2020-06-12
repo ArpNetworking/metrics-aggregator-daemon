@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Json based configuration sourced by merging zero or more <code>JsonSource</code>
+ * Json based configuration sourced by merging zero or more {@link JsonNodeSource}
  * instances together.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
@@ -120,7 +120,8 @@ public final class JsonNodeMergingSource implements JsonNodeSource {
     private final Optional<JsonNode> _mergedNode;
 
     /**
-     * Builder for <code>JsonNodeMergingSource</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link JsonNodeMergingSource}.
      */
     public static final class Builder extends OvalBuilder<JsonNodeMergingSource> {
 
@@ -132,12 +133,12 @@ public final class JsonNodeMergingSource implements JsonNodeSource {
         }
 
         /**
-         * Set the <code>List</code> of <code>JsonSource</code> instances in
+         * Set the {@link List} of {@link JsonNodeSource} instances in
          * order of importance (least significant first). Cannot be null.
          *
-         * @param value The <code>List</code> of <code>JsonSource</code>
+         * @param value The {@link List} of {@link JsonNodeSource}
          * instances in order of importance (least significant first).
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setSources(final List<JsonNodeSource> value) {
             _sources = Lists.newArrayList(value);
@@ -145,10 +146,10 @@ public final class JsonNodeMergingSource implements JsonNodeSource {
         }
 
         /**
-         * Add a <code>JsonSource</code> instance.
+         * Add a {@link JsonNodeSource} instance.
          *
-         * @param value The <code>JsonSource</code> instance.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link JsonNodeSource} instance.
+         * @return This {@link Builder} instance.
          */
         public Builder addSource(final JsonNodeSource value) {
             if (_sources == null) {

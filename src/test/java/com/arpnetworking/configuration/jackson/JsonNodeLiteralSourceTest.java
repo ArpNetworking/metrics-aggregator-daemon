@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Tests for the <code>JsonNodeLiteralSource</code> class.
+ * Tests for the {@link JsonNodeLiteralSource} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

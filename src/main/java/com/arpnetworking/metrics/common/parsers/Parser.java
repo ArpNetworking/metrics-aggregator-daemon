@@ -19,7 +19,7 @@ import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * Interface for classes which create instances of <code>T</code>.
+ * Interface for classes which create instances of {@link T}.
  *
  * @param <T> The data type of the result.
  * @param <D> The type of the entity to parse.
@@ -33,10 +33,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public interface Parser<T, D> {
 
     /**
-     * Create a <code>Record</code> from a serialized representation.
+     * Create a {@link com.arpnetworking.metrics.mad.model.Record} from a serialized representation.
      *
-     * @param data Some serialized representation of a <code>Record</code>.
-     * @return Instance of <code>Record</code> from the data.
+     * @param data Some serialized representation of a {@link com.arpnetworking.metrics.mad.model.Record}.
+     * @return Instance of {@link com.arpnetworking.metrics.mad.model.Record} from the data.
      * @throws ParsingException If parsing of the data fails for any reason.
      */
     T parse(D data) throws ParsingException;

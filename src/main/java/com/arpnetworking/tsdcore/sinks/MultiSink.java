@@ -78,7 +78,7 @@ public final class MultiSink extends BaseSink {
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiSink.class);
 
     /**
-     * Implementation of builder pattern for <code>MultiSink</code>.
+     * Implementation of builder pattern for {@link MultiSink}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
@@ -95,7 +95,7 @@ public final class MultiSink extends BaseSink {
          * The aggregated data sinks to wrap. Cannot be null.
          *
          * @param value The aggregated data sinks to wrap.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setSinks(final Collection<Sink> value) {
             _sinks = Lists.newArrayList(value);
@@ -106,7 +106,7 @@ public final class MultiSink extends BaseSink {
          * Adds a sink to the list of sinks.
          *
          * @param value A sink.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder addSink(final Sink value) {
             if (_sinks == null) {

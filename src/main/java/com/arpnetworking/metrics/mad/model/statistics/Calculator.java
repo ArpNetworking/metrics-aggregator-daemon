@@ -28,17 +28,17 @@ import java.util.Map;
 public interface Calculator<T> {
 
     /**
-     * Accessor for the <code>Statistic</code> computed by this <code>Calculator</code>.
+     * Accessor for the {@link Statistic} computed by this {@link Calculator}.
      *
-     * @return The <code>Statistic</code> computed by this <code>Calculator</code>.
+     * @return The {@link Statistic} computed by this {@link Calculator}.
      */
     Statistic getStatistic();
 
     /**
      * Compute the value of a statistic.
      *
-     * @param dependencies The <code>Map</code> of <code>Statistic</code> to its <code>Calculator</code>.
-     * @return The <code>CalculatedValue</code> for the statistic.
+     * @param dependencies The {@link Map} of {@link Statistic} to its {@link Calculator}.
+     * @return The {@link CalculatedValue} for the statistic.
      */
     CalculatedValue<T> calculate(Map<Statistic, Calculator<?>> dependencies);
 }

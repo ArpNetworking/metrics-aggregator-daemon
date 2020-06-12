@@ -23,12 +23,12 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import java.util.Optional;
 
 /**
- * Manages configuration and reconfiguration of a <code>Relaunchable</code> instance
- * using a POJO representation of its configuration. The <code>Relaunchable</code>
+ * Manages configuration and reconfiguration of a {@link Relaunchable} instance
+ * using a POJO representation of its configuration. The {@link Relaunchable}
  * is updated with each new configuration. The configuration must validate
  * on construction and throw an exception if the configuration is invalid.
  *
- * @param <T> The <code>Relaunchable</code> type to configure.
+ * @param <T> The {@link Relaunchable} type to configure.
  * @param <S> The type representing the validated configuration.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
@@ -38,7 +38,7 @@ public class Reconfigurator<T extends Relaunchable<? super S>, S> implements Lis
     /**
      * Public constructor.
      *
-     * @param relaunchable The <code>Relaunchable</code> instance.
+     * @param relaunchable The {@link Relaunchable} instance.
      * @param configurationClass The configuration class.
      */
     public Reconfigurator(final Relaunchable<S> relaunchable, final Class<? extends S> configurationClass) {

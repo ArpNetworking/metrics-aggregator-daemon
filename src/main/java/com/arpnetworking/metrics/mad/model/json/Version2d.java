@@ -74,7 +74,8 @@ public final class Version2d {
     private final String _version;
 
     /**
-     * Builder for the Version2d class.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link Version2d}.
      */
     public static final class Builder extends ThreadLocalBuilder<Version2d> {
         /**
@@ -183,7 +184,8 @@ public final class Version2d {
         private final double _value;
 
         /**
-         * Builder for the Sample class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Sample}.
          */
         public static final class Builder extends ThreadLocalBuilder<Sample> {
             /**
@@ -245,7 +247,8 @@ public final class Version2d {
         private final ImmutableList<Sample> _values;
 
         /**
-         * Builder for the Element class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Element}.
          */
         public static final class Builder extends ThreadLocalBuilder<Element> {
             /**
@@ -304,7 +307,8 @@ public final class Version2d {
         private final ImmutableMap<String, String> _otherAnnotations;
 
         /**
-         * Builder for the Annotations class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Annotations}.
          */
         public static final class Builder extends ThreadLocalBuilder<Annotations> {
             /**

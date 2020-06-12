@@ -57,10 +57,10 @@ import java.util.Set;
 public final class PipelineConfiguration {
 
     /**
-     * Create an <code>ObjectMapper</code> for Pipeline configuration.
+     * Create an {@link ObjectMapper} for Pipeline configuration.
      *
-     * @param injector The Guice <code>Injector</code> instance.
-     * @return An <code>ObjectMapper</code> for Pipeline configuration.
+     * @param injector The Guice {@link Injector} instance.
+     * @return An {@link ObjectMapper} for Pipeline configuration.
      */
     public static ObjectMapper createObjectMapper(final Injector injector) {
         final ObjectMapper objectMapper = ObjectMapperFactory.createInstance();
@@ -158,7 +158,8 @@ public final class PipelineConfiguration {
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
 
     /**
-     * Implementation of builder pattern for <code>PipelineConfiguration</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * .{@link PipelineConfiguration}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
@@ -175,7 +176,7 @@ public final class PipelineConfiguration {
          * The Akka {@link ActorSystem}. Cannot be null.
          *
          * @param value The Akka {@link ActorSystem}.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setActorSystem(final ActorSystem value) {
             _actorSystem = value;
@@ -186,7 +187,7 @@ public final class PipelineConfiguration {
          * The name of the pipeline. Cannot be null or empty.
          *
          * @param value The name of the pipeline.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setName(final String value) {
             _name = value;
@@ -197,7 +198,7 @@ public final class PipelineConfiguration {
          * The query log sources. Cannot be null.
          *
          * @param value The query log sources.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setSources(final List<Source> value) {
             _sources = value;
@@ -208,7 +209,7 @@ public final class PipelineConfiguration {
          * The sinks. Cannot be null.
          *
          * @param value The sinks.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setSinks(final List<Sink> value) {
             _sinks = value;
@@ -220,7 +221,7 @@ public final class PipelineConfiguration {
          * second and five minute periods.
          *
          * @param value The sinks.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setPeriods(final Set<Duration> value) {
             _periods = value;
@@ -232,7 +233,7 @@ public final class PipelineConfiguration {
          * Default is TP50, TP90, TP99, Mean and Count.
          *
          * @param value The timer statistics.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setTimerStatistics(final Set<Statistic> value) {
             _timerStatistics = value;
@@ -244,7 +245,7 @@ public final class PipelineConfiguration {
          * Default is Mean, Sum and Count.
          *
          * @param value The counter statistics.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setCounterStatistics(final Set<Statistic> value) {
             _counterStatistics = value;
@@ -256,7 +257,7 @@ public final class PipelineConfiguration {
          * Default is Min, Max and Mean.
          *
          * @param value The gauge statistics.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setGaugeStatistics(final Set<Statistic> value) {
             _gaugeStatistics = value;
@@ -268,7 +269,7 @@ public final class PipelineConfiguration {
          * Default is empty.
          *
          * @param value The gauge statistics.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setStatistics(final Map<String, Set<Statistic>> value) {
             _statistics = value;
