@@ -157,8 +157,13 @@ public abstract class HttpPostSink extends BaseSink {
         _aysncHttpClientUri = Uri.create(_uri.toString());
 
         _sinkActor = builder._actorSystem.actorOf(
-                HttpPostSinkActor.props(CLIENT, this, builder._maximumConcurrency, builder._maximumQueueSize,
-                        builder._spreadPeriod, builder._metricsFactory));
+                HttpPostSinkActor.props(
+                        CLIENT,
+                        this,
+                        builder._maximumConcurrency,
+                        builder._maximumQueueSize,
+                        builder._spreadPeriod,
+                        builder._metricsFactory));
     }
 
     private final URI _uri;
@@ -243,11 +248,11 @@ public abstract class HttpPostSink extends BaseSink {
         }
 
         /**
-         * Instance of <code>MetricsFactory</code>. Cannot be null. This field
+         * Instance of  {@link MetricsFactory}. Cannot be null. This field
          * may be injected automatically by Jackson/Guice if setup to do so.
          *
-         * @param value Instance of <code>MetricsFactory</code>.
-         * @return This instance of <code>Builder</code>.
+         * @param value Instance of {@link MetricsFactory}.
+         * @return This instance of {@link Builder}.
          */
         public B setMetricsFactory(final MetricsFactory value) {
             _metricsFactory = value;
