@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import javax.annotation.Nullable;
 
 /**
  * {@link Trigger} implementation based on a file's modified date and
@@ -99,6 +100,7 @@ public final class FileTrigger implements Trigger {
     }
 
     @SuppressFBWarnings("PZLA_PREFER_ZERO_LENGTH_ARRAYS")
+    @Nullable
     private byte[] createHash(final File file) {
         try (FileInputStream inputStream = new FileInputStream(file)) {
             final byte[] bytesBuffer = new byte[1024];

@@ -27,7 +27,4 @@
     <suppress checks="ExecutableStatementCount" files=".*PT\.java"/>
     <suppress checks="ThrowsCount" files=".*PT\.java"/>
     <suppress checks="JavadocVariable" files=".*PT\.java"/>
-
-    <!-- Master-2.0 will add package-info.java files -->
-    <suppress checks="JavadocPackage" files=".*"/>
 </suppressions>

@@ -21,6 +21,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.sf.oval.constraint.NotNull;
 
+import javax.annotation.Nullable;
+
 /**
  * Represents a value that is reaggregatable.
  *
@@ -33,6 +35,7 @@ public final class CalculatedValue<T> {
         return _value;
     }
 
+    @Nullable
     public T getData() {
         return _data;
     }
@@ -106,7 +109,7 @@ public final class CalculatedValue<T> {
          * @param data The data.
          * @return This {@link Builder} instance.
          */
-        public Builder<T> setData(final T data) {
+        public Builder<T> setData(@Nullable final T data) {
             _data = data;
             return this;
         }

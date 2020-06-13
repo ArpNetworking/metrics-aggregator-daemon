@@ -25,6 +25,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 /**
  * Model for the version 2g query log line.
@@ -245,6 +246,7 @@ public final class Version2g {
      */
     public static final class Sample {
 
+        @Nullable
         public Unit getUnit2g() {
             return _unit;
         }
@@ -290,7 +292,7 @@ public final class Version2g {
              * @param value Value
              * @return This builder
              */
-            public Builder setUnit(final Unit value) {
+            public Builder setUnit(@Nullable final Unit value) {
                 _unit = value;
                 return this;
             }
@@ -303,6 +305,7 @@ public final class Version2g {
 
             @NotNull
             private Double _value;
+            @Nullable
             private Unit _unit;
         }
 
@@ -442,7 +445,7 @@ public final class Version2g {
          * @param scale Scale of the unit
          * @param type Type fo the unit
          */
-        public CompositeUnit(final Scale scale, final Type type) {
+        public CompositeUnit(@Nullable final Scale scale, final Type type) {
             _type = type;
             _scale = scale;
         }
