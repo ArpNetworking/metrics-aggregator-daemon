@@ -191,7 +191,8 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
     private static final String METRICS_JSON_KEY = "metrics";
 
     /**
-     * Implementation of <code>Builder</code> for {@link TelegrafJsonToRecordParser}.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link TelegrafJsonToRecordParser}.
      */
     public static final class Builder extends OvalBuilder<TelegrafJsonToRecordParser> {
 
@@ -206,7 +207,7 @@ public final class TelegrafJsonToRecordParser implements Parser<List<Record>, By
          * The timestamp unit. Optional. Cannot be null if set. Default is seconds.
          *
          * @param value The timestamp unit.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setTimestampUnit(final TimestampUnit value) {
             this._timestampUnit = value;

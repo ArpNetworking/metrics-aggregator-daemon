@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Counts the entries. Use <code>StatisticFactory</code> for construction.
+ * Counts the entries. Use {@link StatisticFactory} for construction.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
@@ -62,7 +62,7 @@ public final class CountStatistic extends BaseStatistic {
         /**
          * Public constructor.
          *
-         * @param statistic The <code>Statistic</code>.
+         * @param statistic The {@link Statistic}.
          */
         private CountAccumulator(final Statistic statistic) {
             super(statistic);

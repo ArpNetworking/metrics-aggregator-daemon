@@ -62,7 +62,7 @@ public class Telemetry extends AbstractActor {
     /**
      * Public constructor.
      *
-     * @param metricsFactory Instance of <code>MetricsFactory</code>.
+     * @param metricsFactory Instance of {@link MetricsFactory}.
      */
     @Inject
     public Telemetry(final MetricsFactory metricsFactory) {

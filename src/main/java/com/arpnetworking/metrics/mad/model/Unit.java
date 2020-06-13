@@ -225,12 +225,12 @@ public enum Unit {
     }
 
     /**
-     * Return the smaller of two <code>Optional</code> units or absent if neither is present. If
-     * only one is present this throws an <code>IllegalArgumentException</code>.
+     * Return the smaller of two {@link Optional} units or absent if neither is present. If
+     * only one is present this throws an {@link IllegalArgumentException}.
      *
-     * @param unitA <code>Optional</code> unit.
-     * @param unitB <code>Optional</code> unit.
-     * @return <code>Optional</code> unit.
+     * @param unitA {@link Optional} unit.
+     * @param unitB {@link Optional} unit.
+     * @return {@link Optional} unit.
      */
     public static Optional<Unit> getSmallerUnit(final Optional<Unit> unitA, final Optional<Unit> unitB) {
         assertSameType(unitA, unitB);

@@ -46,7 +46,7 @@ import javax.xml.bind.DatatypeConverter;
  * version. This version attempts to address several shortcomings of the Apache
  * Commons implementation. In particular, more robust support for rename-
  * recreate file rotations and some progress for copy-truncate cases. The major
- * new feature is the <code>PositionStore</code> which is used to checkpoint
+ * new feature is the {@link PositionStore} which is used to checkpoint
  * the offset in the tailed file as identified by a hash of the file prefix.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
@@ -100,9 +100,9 @@ public final class StatefulTailer implements Tailer {
     }
 
     /**
-     * Determine if the <code>Tailer</code> is running.
+     * Determine if the {@link Tailer} is running.
      *
-     * @return <code>True</code> if and only if the <code>Tailer</code> is running.
+     * @return {@code True} if and only if the {@link Tailer} is running.
      */
     protected boolean isRunning() {
         return _isRunning;
@@ -584,7 +584,8 @@ public final class StatefulTailer implements Tailer {
     }
 
     /**
-     * Implementation of builder pattern for <code>StatefulTailer</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link StatefulTailer}.
      *
      * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
      */
@@ -609,10 +610,10 @@ public final class StatefulTailer implements Tailer {
         }
 
         /**
-         * Sets the <code>PositionStore</code> to be used to checkpoint the
+         * Sets the {@link PositionStore} to be used to checkpoint the
          * file read position. Cannot be null.
          *
-         * @param value The <code>PositionStore</code> instance.
+         * @param value The {@link PositionStore} instance.
          * @return This instance of {@link Builder}
          */
         public Builder setPositionStore(final PositionStore value) {
@@ -621,9 +622,9 @@ public final class StatefulTailer implements Tailer {
         }
 
         /**
-         * Sets the <code>TailerListener</code> instance. Cannot be null.
+         * Sets the {@link TailerListener} instance. Cannot be null.
          *
-         * @param value The <code>TailerListener</code> instance.
+         * @param value The {@link TailerListener} instance.
          * @return This instance of {@link Builder}
          */
         public Builder setListener(final TailerListener value) {

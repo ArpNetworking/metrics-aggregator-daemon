@@ -30,9 +30,10 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import javax.annotation.Nullable;
 
 /**
- * <code>Trigger</code> implementation based on a file's modified date and
+ * {@link Trigger} implementation based on a file's modified date and
  * its hash. If the file is created or removed the evaluation will return
  * true.
  *
@@ -99,6 +100,7 @@ public final class FileTrigger implements Trigger {
     }
 
     @SuppressFBWarnings("PZLA_PREFER_ZERO_LENGTH_ARRAYS")
+    @Nullable
     private byte[] createHash(final File file) {
         try (FileInputStream inputStream = new FileInputStream(file)) {
             final byte[] bytesBuffer = new byte[1024];
@@ -141,7 +143,8 @@ public final class FileTrigger implements Trigger {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileTrigger.class);
 
     /**
-     * Builder for <code>FileTrigger</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link FileTrigger}.
      */
     public static final class Builder extends OvalBuilder<FileTrigger> {
 
@@ -153,10 +156,10 @@ public final class FileTrigger implements Trigger {
         }
 
         /**
-         * Set the <code>File</code> to monitor. Cannot be null.
+         * Set the {@link File} to monitor. Cannot be null.
          *
-         * @param value The <code>File</code> to monitor.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link File} to monitor.
+         * @return This {@link Builder} instance.
          */
         public Builder setFile(final File value) {
             _file = value;

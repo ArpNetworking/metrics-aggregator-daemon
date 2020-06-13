@@ -88,9 +88,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             for (final CollectdRecord record : records) {
                 final Multimap<String, Metric> metrics = HashMultimap.create();
 
-                if (record.getHost() != null) {
-                    metricTags.put(Key.HOST_DIMENSION_KEY, record.getHost());
-                }
+                metricTags.put(Key.HOST_DIMENSION_KEY, record.getHost());
 
                 final String plugin = record.getPlugin();
                 final String pluginInstance = record.getPluginInstance();
@@ -241,14 +239,17 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             return _typeInstance;
         }
 
+        @Nullable
         public List<Double> getValues() {
             return _values;
         }
 
+        @Nullable
         public List<String> getDsTypes() {
             return _dsTypes;
         }
 
+        @Nullable
         public List<String> getDsNames() {
             return _dsNames;
         }
@@ -276,7 +277,8 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
         private final List<String> _dsNames;
 
         /**
-         * Builder for the {@link CollectdRecord} class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link CollectdRecord}.
          */
         public static final class Builder extends ThreadLocalBuilder<CollectdRecord> {
             /**
@@ -348,7 +350,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
              * @param value Value
              * @return This builder
              */
-            public Builder setValues(final ImmutableList<Double> value) {
+            public Builder setValues(@Nullable final ImmutableList<Double> value) {
                 _values = value;
                 return this;
             }
@@ -360,7 +362,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
              * @return This builder
              */
             @JsonProperty("dstypes")
-            public Builder setDsTypes(final ImmutableList<String> value) {
+            public Builder setDsTypes(@Nullable final ImmutableList<String> value) {
                 _dsTypes = value;
                 return this;
             }
@@ -372,7 +374,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
              * @return This builder
              */
             @JsonProperty("dsnames")
-            public Builder setDsNames(final ImmutableList<String> value) {
+            public Builder setDsNames(@Nullable final ImmutableList<String> value) {
                 _dsNames = value;
                 return this;
             }

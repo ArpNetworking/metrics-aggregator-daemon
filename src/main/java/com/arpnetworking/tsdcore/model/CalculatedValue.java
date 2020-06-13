@@ -21,6 +21,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.sf.oval.constraint.NotNull;
 
+import javax.annotation.Nullable;
+
 /**
  * Represents a value that is reaggregatable.
  *
@@ -33,6 +35,7 @@ public final class CalculatedValue<T> {
         return _value;
     }
 
+    @Nullable
     public T getData() {
         return _data;
     }
@@ -75,7 +78,8 @@ public final class CalculatedValue<T> {
     private final T _data;
 
     /**
-     * <code>Builder</code> implementation for <code>CalculatedValue</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link CalculatedValue}.
      *
      * @param <T> type of the object to be built
      */
@@ -92,7 +96,7 @@ public final class CalculatedValue<T> {
          * Set the value. Required. Cannot be null.
          *
          * @param value The value.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder<T> setValue(final Quantity value) {
             _value = value;
@@ -103,9 +107,9 @@ public final class CalculatedValue<T> {
          * Set the data. Optional. Defaults to null.
          *
          * @param data The data.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
-        public Builder<T> setData(final T data) {
+        public Builder<T> setData(@Nullable final T data) {
             _data = data;
             return this;
         }

@@ -28,7 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 
 /**
- * Tests for the <code>HoconFileSource</code> class.
+ * Tests for the {@link HoconFileSource} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

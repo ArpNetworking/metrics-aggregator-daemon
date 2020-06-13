@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 /**
- * Abstract publisher to send data to a server via Vertx <code>NetSocket</code>.
+ * Abstract publisher to send data to a server via Vertx {@link NetSocket}.
  *
  * This class is best described as 3 separate parts:
  * <ul>
@@ -106,7 +106,7 @@ public abstract class VertxSink extends BaseSink {
      * Perform tasks when the connection is first established. This method is
      * invoked while holding a lock on the socket.
      *
-     * @param socket The <code>NetSocket</code> instance that was connected.
+     * @param socket The {@link NetSocket} instance that was connected.
      */
     protected void onConnect(final NetSocket socket) { }
 
@@ -129,7 +129,7 @@ public abstract class VertxSink extends BaseSink {
     }
 
     /**
-     * Sends a <code>Buffer</code> of bytes to the socket if the client is connected.
+     * Sends a {@link Buffer} of bytes to the socket if the client is connected.
      *
      * @param data the data to send
      */
@@ -164,9 +164,9 @@ public abstract class VertxSink extends BaseSink {
     }
 
     /**
-     * Accessor for <code>Vertx</code> instance.
+     * Accessor for {@link Vertx} instance.
      *
-     * @return The <code>Vertx</code> instance.
+     * @return The {@link Vertx} instance.
      */
     protected Vertx getVertx() {
         return _vertx;
@@ -331,7 +331,7 @@ public abstract class VertxSink extends BaseSink {
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     protected VertxSink(final Builder<?, ?> builder) {
         super(builder);
@@ -445,7 +445,7 @@ public abstract class VertxSink extends BaseSink {
     }
 
     /**
-     * Implementation of base builder pattern for <code>VertxSink</code>.
+     * Implementation of base builder pattern for {@link VertxSink}.
      *
      * @param <B> type of the builder
      * @param <S> type of the object to be built
@@ -457,7 +457,7 @@ public abstract class VertxSink extends BaseSink {
          * The server host name. Cannot be null or empty.
          *
          * @param value The aggregation server host name.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public B setServerAddress(final String value) {
             _serverAddress = value;
@@ -468,7 +468,7 @@ public abstract class VertxSink extends BaseSink {
          * The host name resolver. Optional. Defaults to {@link DefaultHostNameResolver}. Cannot be null.
          *
          * @param value The host name resolver.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public B setHostNameResolver(final HostNameResolver value) {
             _hostnameResolver = value;
@@ -479,7 +479,7 @@ public abstract class VertxSink extends BaseSink {
          * The server port. Cannot be null; must be between 1 and 65535.
          *
          * @param value The server port.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public B setServerPort(final Integer value) {
             _serverPort = value;
@@ -490,7 +490,7 @@ public abstract class VertxSink extends BaseSink {
          * The maximum queue size. Cannot be null. Default is 10000.
          *
          * @param value The maximum queue size.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public B setMaxQueueSize(final Integer value) {
             _maxQueueSize = value;

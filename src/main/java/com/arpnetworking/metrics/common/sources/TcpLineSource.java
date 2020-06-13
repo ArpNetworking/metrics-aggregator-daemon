@@ -52,7 +52,7 @@ public final class TcpLineSource extends BaseTcpSource {
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     private TcpLineSource(final Builder builder) {
         super(builder);

@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Default implementation of the <code>Key</code> interface.
+ * Default implementation of the {@link Key} interface.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

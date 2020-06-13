@@ -148,7 +148,8 @@ public final class AggregatorConfiguration {
     private final Map<String, ?> _akkaConfiguration;
 
     /**
-     * Implementation of builder pattern for <code>TsdAggregatorConfiguration</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link AggregatorConfiguration}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
@@ -165,7 +166,7 @@ public final class AggregatorConfiguration {
          * The monitoring cluster. Cannot be null or empty.
          *
          * @param value The monitoring cluster.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setMonitoringCluster(final String value) {
             _monitoringCluster = value;
@@ -177,7 +178,7 @@ public final class AggregatorConfiguration {
          * default value is {@code mad}.
          *
          * @param value The monitoring service.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setMonitoringService(final String value) {
             _monitoringService = value;
@@ -188,7 +189,7 @@ public final class AggregatorConfiguration {
          * The log directory. Cannot be null.
          *
          * @param value The log directory.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setLogDirectory(final File value) {
             _logDirectory = value;
@@ -199,7 +200,7 @@ public final class AggregatorConfiguration {
          * The pipelines directory. Cannot be null.
          *
          * @param value The pipelines directory.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setPipelinesDirectory(final File value) {
             _pipelinesDirectory = value;
@@ -210,7 +211,7 @@ public final class AggregatorConfiguration {
          * The http host address to bind to. Cannot be null or empty.
          *
          * @param value The host address to bind to.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setHttpHost(final String value) {
             _httpHost = value;
@@ -221,7 +222,7 @@ public final class AggregatorConfiguration {
          * The http health check path. Cannot be null or empty. Optional. Default is "/ping".
          *
          * @param value The health check path.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setHttpHealthCheckPath(final String value) {
             _httpHealthCheckPath = value;
@@ -232,7 +233,7 @@ public final class AggregatorConfiguration {
          * The http status path. Cannot be null or empty. Optional. Default is "/status".
          *
          * @param value The status path.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setHttpStatusPath(final String value) {
             _httpStatusPath = value;
@@ -244,7 +245,7 @@ public final class AggregatorConfiguration {
          * 65535 (inclusive).
          *
          * @param value The port to listen on.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setHttpPort(final Integer value) {
             _httpPort = value;
@@ -255,7 +256,7 @@ public final class AggregatorConfiguration {
          * The supplemental routes class. Optional.
          *
          * @param value The class of the supplement routes.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setSupplementalHttpRoutesClass(final Class<? extends SupplementalRoutes> value) {
             _supplementalHttpRoutesClass = value;
@@ -269,7 +270,7 @@ public final class AggregatorConfiguration {
          * (as provided by {@code toString()}) instead of just the message type.
          *
          * @param value {@code True} if dead letter logging should be enabled
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setLogDeadLetters(final Boolean value) {
             _logDeadLetters = value;
@@ -282,7 +283,7 @@ public final class AggregatorConfiguration {
          * case it defaults to localhost.
          *
          * @param value The metrics client host address to send to.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setMetricsClientHost(final String value) {
             _metricsClientHost = value;
@@ -294,7 +295,7 @@ public final class AggregatorConfiguration {
          * 1 and 65535 (inclusive). Defaults to the http port.
          *
          * @param value The metrics client port to listen send to.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setMetricsClientPort(final Integer value) {
             _metricsClientPort = value;
@@ -304,8 +305,8 @@ public final class AggregatorConfiguration {
         /**
          * Period for collecting JVM metrics. Optional. Default is 500 milliseconds.
          *
-         * @param value A <code>Period</code> value.
-         * @return This instance of <code>Builder</code>.
+         * @param value A {@link Duration} value.
+         * @return This instance of {@link Builder}.
          */
         public Builder setJvmMetricsCollectionInterval(final Duration value) {
             _jvmMetricsCollectionInterval = value;
@@ -322,7 +323,7 @@ public final class AggregatorConfiguration {
          * NOTE: No validation is performed on the Akka configuration itself.
          *
          * @param value The Akka configuration.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setAkkaConfiguration(final Map<String, ?> value) {
             _akkaConfiguration = value;

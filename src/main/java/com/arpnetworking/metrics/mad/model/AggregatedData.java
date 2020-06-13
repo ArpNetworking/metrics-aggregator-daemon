@@ -23,6 +23,7 @@ import com.google.common.base.Objects;
 import net.sf.oval.constraint.NotNull;
 
 import java.io.Serializable;
+import javax.annotation.Nullable;
 
 /**
  * Representation of aggregated data; also known as a statistic. However, not
@@ -126,7 +127,8 @@ public final class AggregatedData implements Serializable {
     private static final long serialVersionUID = 9124136139360447095L;
 
     /**
-     * Implementation of builder pattern for <code>AggregatedData</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link AggregatedData}.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
@@ -142,8 +144,8 @@ public final class AggregatedData implements Serializable {
         /**
          * The statistic. Required. Cannot be null.
          *
-         * @param value The <code>Statistic</code>.
-         * @return This instance of <code>Builder</code>.
+         * @param value The {@link Statistic}.
+         * @return This instance of {@link Builder}.
          */
         public Builder setStatistic(final Statistic value) {
             _statistic = value;
@@ -154,7 +156,7 @@ public final class AggregatedData implements Serializable {
          * The value. Required. Cannot be null.
          *
          * @param value The value.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setValue(final Quantity value) {
             _value = value;
@@ -165,7 +167,7 @@ public final class AggregatedData implements Serializable {
          * The population size. Required. Cannot be null.
          *
          * @param value The samples.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setPopulationSize(final Long value) {
             _populationSize = value;
@@ -176,7 +178,7 @@ public final class AggregatedData implements Serializable {
          * The aggregated data was specified. Required. Cannot be null.
          *
          * @param value The metric type.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setIsSpecified(final Boolean value) {
             _isSpecified = value;
@@ -187,9 +189,9 @@ public final class AggregatedData implements Serializable {
          * The supporting data.
          *
          * @param value The supporting data.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
-        public Builder setSupportingData(final Object value) {
+        public Builder setSupportingData(@Nullable final Object value) {
             _supportingData = value;
             return this;
         }

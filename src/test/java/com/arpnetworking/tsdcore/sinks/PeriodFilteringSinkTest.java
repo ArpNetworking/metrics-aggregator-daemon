@@ -27,7 +27,7 @@ import java.time.Duration;
 import java.util.Collections;
 
 /**
- * Tests for the <code>PeriodFilteringSink</code> class.
+ * Tests for the {@link PeriodFilteringSink} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

@@ -18,7 +18,7 @@ package com.arpnetworking.metrics.mad.model.statistics;
 import com.arpnetworking.logback.annotations.Loggable;
 
 /**
- * Top median statistic (aka 50th percentile). Use <code>StatisticFactory</code> for construction. This is not a true
+ * Top median statistic (aka 50th percentile). Use {@link StatisticFactory} for construction. This is not a true
  * median but the nearest value; more of a 50th percentile although it is advertised with the more commonly recognized
  * name.
  *

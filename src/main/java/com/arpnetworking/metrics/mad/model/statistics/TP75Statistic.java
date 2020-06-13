@@ -18,7 +18,7 @@ package com.arpnetworking.metrics.mad.model.statistics;
 import com.arpnetworking.logback.annotations.Loggable;
 
 /**
- * Top 75th percentile statistic. Use <code>StatisticFactory</code> for construction.
+ * Top 75th percentile statistic. Use {@link StatisticFactory} for construction.
  *
  * @author Gilligan Markham (gmarkham at dropbox dot com)
  */

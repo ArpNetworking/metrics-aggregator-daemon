@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Groupon.com
+ * Copyright 2020 Inscope Metrics
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.tsdcore.sinks;
 
-import org.junit.Test;
+@ParametersAreNonnullByDefault
+@ReturnValuesAreNonnullByDefault
+package com.arpnetworking.metrics.proxy.models.protocol.v1;
 
-/**
- * Tests for the <code>CarbonSink</code> class.
- *
- * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
- */
-public class VertxSinkTest {
+import com.arpnetworking.commons.javax.annotation.ReturnValuesAreNonnullByDefault;
 
-    @Test
-    public void placeHolder() {
-        // TODO(vkoskela): Complete tests using tcp mock library [MAI-112]
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

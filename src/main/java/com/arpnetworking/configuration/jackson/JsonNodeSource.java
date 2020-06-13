@@ -20,19 +20,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
 
 /**
- * Interface for sourcing <code>JsonNode</code> based configuration.
+ * Interface for sourcing {@link JsonNode} based configuration.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public interface JsonNodeSource {
 
     /**
-     * Retrieve the <code>JsonNode</code> by looking up the sequence of keys or
-     * return <code>Optional.absent()</code> if any key in the sequence does
+     * Retrieve the {@link JsonNode} by looking up the sequence of keys or
+     * return {@link Optional#empty()} if any key in the sequence does
      * not exist.
      *
      * @param keys The sequence of keys to look-up to find the value.
-     * @return The <code>JsonNode</code> representing the value.
+     * @return The {@link JsonNode} representing the value.
      */
     Optional<JsonNode> getValue(String... keys);
 }

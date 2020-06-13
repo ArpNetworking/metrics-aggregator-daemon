@@ -41,10 +41,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Produce instances of <code>T</code>from a file. Supports rotating files
- * using <code>Tailer</code> from Apache Commons IO.
+ * Produce instances of {@link T}from a file. Supports rotating files
+ * using {@link Tailer} from Apache Commons IO.
  *
- * @param <T> The data type to parse from the <code>Source</code>.
+ * @param <T> The data type to parse from the {@link Source}.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -224,7 +224,7 @@ public final class FileSource<T> extends BaseSource {
     }
 
     /**
-     * Implementation of builder pattern for <code>FileSource</code>.
+     * Implementation of builder pattern for {@link FileSource}.
      *
      * @param <T> the type parsed from the parser.
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
@@ -242,7 +242,7 @@ public final class FileSource<T> extends BaseSource {
          * Sets source file. Cannot be null.
          *
          * @param value The file path.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public final Builder<T> setSourceFile(final Path value) {
             _sourceFile = value;
@@ -254,7 +254,7 @@ public final class FileSource<T> extends BaseSource {
          * Default is 500 milliseconds.
          *
          * @param value The file read interval in milliseconds.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public final Builder<T> setInterval(final Duration value) {
             _interval = value;
@@ -266,7 +266,7 @@ public final class FileSource<T> extends BaseSource {
          * Default InitialPosition.START;
          *
          * @param value Initial position to tail from.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public final Builder<T> setInitialPosition(final InitialPosition value) {
             _initialPosition = value;
@@ -274,10 +274,10 @@ public final class FileSource<T> extends BaseSource {
         }
 
         /**
-         * Sets <code>Parser</code>. Cannot be null.
+         * Sets {@link Parser}. Cannot be null.
          *
-         * @param value The <code>Parser</code>.
-         * @return This instance of <code>Builder</code>.
+         * @param value The {@link Parser}.
+         * @return This instance of {@link Builder}.
          */
         public final Builder<T> setParser(final Parser<T, byte[]> value) {
             _parser = value;
@@ -286,10 +286,10 @@ public final class FileSource<T> extends BaseSource {
 
         /**
          * Sets state file. Optional. Default is null.
-         * If null, uses a <code>NoPositionStore</code> in the underlying tailer.
+         * If null, uses a {@link NoPositionStore} in the underlying tailer.
          *
          * @param value The state file.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public final Builder<T> setStateFile(final Path value) {
             _stateFile = value;

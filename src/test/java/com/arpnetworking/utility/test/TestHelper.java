@@ -61,7 +61,7 @@ public final class TestHelper {
      * Return the corresponding getter method for a setter method.
      *
      * @param setterMethod The setter method.
-     * @param clazz The <code>Class</code> to inspect.
+     * @param clazz The {@link Class} to inspect.
      * @return The name of the corresponding getter method.
      */
     public static Method getterMethodForSetter(final Method setterMethod, final Class<?> clazz) {

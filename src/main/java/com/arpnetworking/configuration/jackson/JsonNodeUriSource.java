@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * <code>JsonNode</code> based configuration sourced from a file.
+ * {@link JsonNode} based configuration sourced from a file.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -105,7 +105,7 @@ public final class JsonNodeUriSource extends BaseJsonNodeSource {
             .build();
 
     /**
-     * Builder for <code>JsonNodeUriSource</code>.
+     * Builder for {@link JsonNodeUriSource}.
      */
     public static final class Builder extends BaseJsonNodeSource.Builder<Builder, JsonNodeUriSource> {
 
@@ -117,10 +117,10 @@ public final class JsonNodeUriSource extends BaseJsonNodeSource {
         }
 
         /**
-         * Set the source <code>URI</code>.
+         * Set the source {@link URI}.
          *
-         * @param value The source <code>URI</code>.
-         * @return This <code>Builder</code> instance.
+         * @param value The source {@link URI}.
+         * @return This {@link Builder} instance.
          */
         public Builder setUri(final URI value) {
             _uri = value;
@@ -130,8 +130,8 @@ public final class JsonNodeUriSource extends BaseJsonNodeSource {
         /**
          * Add a request header for the source.
          *
-         * @param value The <code>Header</code> value.
-         * @return This <code>Builder</code> instance.
+         * @param value The {@link Header} value.
+         * @return This {@link Builder} instance.
          */
         public Builder addHeader(final Header value) {
             _headers.add(value);
@@ -141,8 +141,8 @@ public final class JsonNodeUriSource extends BaseJsonNodeSource {
         /**
          * Add a list of request headers for the source.
          *
-         * @param values The <code>List</code> of <code>Header</code> values.
-         * @return This <code>Builder</code> instance.
+         * @param values The {@link List} of {@link Header} values.
+         * @return This {@link Builder} instance.
          */
         public Builder addHeaders(final List<Header> values) {
             _headers.addAll(values);
@@ -150,10 +150,10 @@ public final class JsonNodeUriSource extends BaseJsonNodeSource {
         }
 
         /**
-         * Overrides the existing headers with  a <code>List</code> of <code>Header</code>.
+         * Overrides the existing headers with  a {@link List} of {@link Header}.
          *
-         * @param values A <code>List</code> of HTTP headers.
-         * @return This <code>Builder</code> instance.
+         * @param values A {@link List} of HTTP headers.
+         * @return This {@link Builder} instance.
          */
         public Builder setHeaders(final List<Header> values) {
             _headers = new ArrayList<>(values);

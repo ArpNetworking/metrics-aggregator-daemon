@@ -216,7 +216,8 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
             "^(?<NAME>[^ ]+) (?<VALUE>[^ ]+)( (?<TIMESTAMP>[0-9]+))?[\\s]*$");
 
     /**
-     * Implementation of <code>Builder</code> for {@link GraphitePlaintextToRecordParser}.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link GraphitePlaintextToRecordParser}.
      */
     public static final class Builder extends ThreadLocalBuilder<GraphitePlaintextToRecordParser> {
 

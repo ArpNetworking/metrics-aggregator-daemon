@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * Abstract base class for <code>Configuration</code> implementations which
+ * Abstract base class for {@link Configuration} implementations which
  * implements the shared convenience methods which rely core methods. The
  * core methods are left for implementation by each concrete subclass.
  *

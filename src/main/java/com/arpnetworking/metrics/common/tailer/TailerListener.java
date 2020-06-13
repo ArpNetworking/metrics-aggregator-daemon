@@ -16,7 +16,7 @@
 package com.arpnetworking.metrics.common.tailer;
 
 /**
- * Based on the Apache <code>TailerListener</code> but uses a <code>Tailer</code>
+ * Based on the Apache {@link TailerListener} but uses a {@link Tailer}
  * interface instead of a class for improved extensibility.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
@@ -24,17 +24,17 @@ package com.arpnetworking.metrics.common.tailer;
 public interface TailerListener {
 
     /**
-     * The <code>Tailer</code> instance invokes this method during construction
-     * giving the listening class a method of stopping the <code>Tailer</code>.
+     * The {@link Tailer} instance invokes this method during construction
+     * giving the listening class a method of stopping the {@link Tailer}.
      *
-     * @param tailer the <code>Tailer</code> instance.
+     * @param tailer the {@link Tailer} instance.
      */
     void initialize(Tailer tailer);
 
     /**
      * This method is called if the tailed file is not found.
      * <p>
-     * <b>Note:</b> this is called from the <code>Tailer</code> thread.
+     * <b>Note:</b> this is called from the {@link Tailer} thread.
      */
     void fileNotFound();
 
@@ -44,7 +44,7 @@ public interface TailerListener {
      * This method is called before the file is reopened, and fileNotFound may
      * be called if the new file has not been created yet.
      * <p>
-     * <b>Note:</b> this is called from the <code>Tailer</code> thread.
+     * <b>Note:</b> this is called from the {@link Tailer} thread.
      */
     void fileRotated();
 
@@ -52,23 +52,23 @@ public interface TailerListener {
      * Called if a file is successfully opened.
      *
      * <p>
-     * <b>Note:</b> this is called from the <code>Tailer</code> thread.
+     * <b>Note:</b> this is called from the {@link Tailer} thread.
      */
     void fileOpened();
 
     /**
-     * Handles a line from a <code>Tailer</code>.
+     * Handles a line from a {@link Tailer}.
      * <p>
-     * <b>Note:</b> this is called from the <code>Tailer</code> thread.
+     * <b>Note:</b> this is called from the {@link Tailer} thread.
      * @param line the raw line.
      */
     void handle(byte[] line);
 
     /**
-     * Handles a <code>Throwable</code> encountered during tailing.
+     * Handles a {@link Throwable} encountered during tailing.
      * <p>
-     * <b>Note:</b> this is called from the <code>Tailer</code> thread.
-     * @param throwable the <code>Throwable</code>.
+     * <b>Note:</b> this is called from the {@link Tailer} thread.
+     * @param throwable the {@link Throwable}.
      */
     void handle(Throwable throwable);
 

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of <code>DynamicConfigurationFactory</code> which maps keys
+ * Implementation of {@link DynamicConfigurationFactory} which maps keys
  * to file names in a directory.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
@@ -84,9 +84,9 @@ public final class DirectoryDynamicConfigurationFactory implements DynamicConfig
     }
 
     /**
-     * Convert the <code>Key</code> to a file name.
+     * Convert the {@link Key} to a file name.
      *
-     * @param key The <code>Key</code> to convert.
+     * @param key The {@link Key} to convert.
      * @return The corresponding file name.
      */
     protected String keyToFileName(final Key key) {
@@ -100,7 +100,8 @@ public final class DirectoryDynamicConfigurationFactory implements DynamicConfig
     private final List<File> _directories;
 
     /**
-     * <code>Builder</code> implementation for <code>DirectoryDynamicConfigurationFactory</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link DirectoryDynamicConfigurationFactory}.
      */
     public static final class Builder extends OvalBuilder<DirectoryDynamicConfigurationFactory> {
 
@@ -115,7 +116,7 @@ public final class DirectoryDynamicConfigurationFactory implements DynamicConfig
          * Set the directories.
          *
          * @param value The directories.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setDirectories(final List<File> value) {
             _directories = value;

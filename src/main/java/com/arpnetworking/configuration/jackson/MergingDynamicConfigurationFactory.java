@@ -24,8 +24,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Implementation of <code>DynamicConfigurationFactory</code> which maps keys
- * to zero or more subordinate <code>DynamicConfigurationFactory</code> instances.
+ * Implementation of {@link DynamicConfigurationFactory} which maps keys
+ * to zero or more subordinate {@link DynamicConfigurationFactory} instances.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -73,7 +73,8 @@ public final class MergingDynamicConfigurationFactory implements DynamicConfigur
     private final List<DynamicConfigurationFactory> _factories;
 
     /**
-     * <code>Builder</code> implementation for <code>MergingDynamicConfigurationFactory</code>.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link MergingDynamicConfigurationFactory}.
      */
     public static final class Builder extends OvalBuilder<MergingDynamicConfigurationFactory> {
 
@@ -88,7 +89,7 @@ public final class MergingDynamicConfigurationFactory implements DynamicConfigur
          * Set the factories.
          *
          * @param value The factories.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setFactories(final List<DynamicConfigurationFactory> value) {
             _factories = value;

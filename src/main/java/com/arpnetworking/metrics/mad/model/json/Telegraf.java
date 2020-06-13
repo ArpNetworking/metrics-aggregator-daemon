@@ -95,7 +95,8 @@ public final class Telegraf {
     private final String _name;
 
     /**
-     * Builder for the Telegraf class.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link Telegraf}.
      */
     public static final class Builder extends ThreadLocalBuilder<Telegraf> {
         /**

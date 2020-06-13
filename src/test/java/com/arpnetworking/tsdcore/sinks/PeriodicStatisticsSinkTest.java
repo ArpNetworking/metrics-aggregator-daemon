@@ -40,7 +40,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests for the <code>PeriodicStatisticsSink</code> class.
+ * Tests for the {@link PeriodicStatisticsSink} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

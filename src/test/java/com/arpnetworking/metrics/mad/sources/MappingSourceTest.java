@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * Tests for the <code>MergingSource</code> class.
+ * Tests for the {@link MappingSource} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

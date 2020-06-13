@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 /**
- * Typesafe config based configuration sourced from a file and mapped to a <code>JsonNode</code>.
+ * Typesafe config based configuration sourced from a file and mapped to a {@link JsonNode}.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -99,7 +99,7 @@ public final class HoconFileSource extends BaseJsonNodeSource {
     private static final Logger LOGGER = LoggerFactory.getLogger(HoconFileSource.class);
 
     /**
-     * Builder for <code>HoconFileSource</code>.
+     * Builder for {@link HoconFileSource}.
      */
     public static final class Builder extends BaseJsonNodeSource.Builder<Builder, HoconFileSource> {
 
@@ -111,10 +111,10 @@ public final class HoconFileSource extends BaseJsonNodeSource {
         }
 
         /**
-         * Set the source <code>File</code>.
+         * Set the source {@link File}.
          *
-         * @param value The source <code>File</code>.
-         * @return This <code>Builder</code> instance.
+         * @param value The source {@link File}.
+         * @return This {@link Builder} instance.
          */
         public Builder setFile(final File value) {
             _file = value;

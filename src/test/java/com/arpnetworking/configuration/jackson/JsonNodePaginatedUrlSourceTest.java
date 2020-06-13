@@ -28,7 +28,7 @@ import java.net.URI;
 import java.util.Optional;
 
 /**
- * Tests for the <code>JsonNodePaginatedUrlSource</code> class.
+ * Tests for the {@link JsonNodePaginatedUriSource} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

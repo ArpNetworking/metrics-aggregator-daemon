@@ -25,6 +25,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 /**
  * Model for the version 2g query log line.
@@ -33,7 +34,7 @@ import java.util.regex.Pattern;
  * <ul>
  * <li>For optional fields null and unspecified are treated the same. Where
  * appropriate this means null is mapped to a default value (e.g. empty map) or
- * wrapped in an <code>Optional</code>.</li>
+ * wrapped in an {@link java.util.Optional}.</li>
  * </ul>
  *
  * @author Ryan Ascheman (rascheman at groupon dot com)
@@ -99,7 +100,8 @@ public final class Version2g {
     private final String _version;
 
     /**
-     * Builder for the Data class.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link Version2g}.
      */
     public static final class Builder extends ThreadLocalBuilder<Version2g> {
         /**
@@ -244,6 +246,7 @@ public final class Version2g {
      */
     public static final class Sample {
 
+        @Nullable
         public Unit getUnit2g() {
             return _unit;
         }
@@ -261,7 +264,8 @@ public final class Version2g {
         private final double _value;
 
         /**
-         * Builder for the Sample class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Sample}.
          */
         public static final class Builder extends ThreadLocalBuilder<Sample> {
             /**
@@ -288,7 +292,7 @@ public final class Version2g {
              * @param value Value
              * @return This builder
              */
-            public Builder setUnit(final Unit value) {
+            public Builder setUnit(@Nullable final Unit value) {
                 _unit = value;
                 return this;
             }
@@ -301,6 +305,7 @@ public final class Version2g {
 
             @NotNull
             private Double _value;
+            @Nullable
             private Unit _unit;
         }
 
@@ -330,7 +335,8 @@ public final class Version2g {
             private final List<CompositeUnit> _denominators;
 
             /**
-             * Builder for the 2G Unit class.
+             * {@link com.arpnetworking.commons.builder.Builder} implementation for
+             * {@link Unit}.
              */
             public static final class Builder extends ThreadLocalBuilder<Unit> {
                 /**
@@ -390,7 +396,8 @@ public final class Version2g {
         private final ImmutableList<Sample> _values;
 
         /**
-         * Builder for the Element class.
+         * {@link com.arpnetworking.commons.builder.Builder} implementation for
+         * {@link Element}.
          */
         public static final class Builder extends ThreadLocalBuilder<Element> {
             /**
@@ -438,7 +445,7 @@ public final class Version2g {
          * @param scale Scale of the unit
          * @param type Type fo the unit
          */
-        public CompositeUnit(final Scale scale, final Type type) {
+        public CompositeUnit(@Nullable final Scale scale, final Type type) {
             _type = type;
             _scale = scale;
         }

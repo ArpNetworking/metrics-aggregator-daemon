@@ -26,7 +26,8 @@ import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
 /**
- * A publisher that sends a message to the <code>Telemetry</code> actor.
+ * A publisher that sends a message to the
+ * {@link com.arpnetworking.metrics.proxy.actors.Telemetry} actor.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -59,7 +60,7 @@ public final class TelemetrySink extends BaseSink {
     private final ActorSelection _telemetryActor;
 
     /**
-     * Base <code>Builder</code> implementation.
+     * Base {@link Builder} implementation.
      *
      * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
      */
@@ -84,9 +85,11 @@ public final class TelemetrySink extends BaseSink {
         }
 
         /**
-         * Sets the <code>Telemetry</code> actor path. Optional. Cannot be null or empty. "/users/telemetry" by default.
+         * Sets the {@link com.arpnetworking.metrics.proxy.actors.Telemetry}
+         * actor path. Optional. Cannot be null or empty. "/users/telemetry"
+         * by default.
          *
-         * @param value the path to the <code>Telemetry</code> actor
+         * @param value the path to the {@link com.arpnetworking.metrics.proxy.actors.Telemetry} actor
          * @return this builder
          */
         public Builder setTelemetryActorPath(final String value) {

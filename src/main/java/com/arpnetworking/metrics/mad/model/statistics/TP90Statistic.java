@@ -18,7 +18,7 @@ package com.arpnetworking.metrics.mad.model.statistics;
 import com.arpnetworking.logback.annotations.Loggable;
 
 /**
- * Top 90th percentile statistic. Use <code>StatisticFactory</code> for construction.
+ * Top 90th percentile statistic. Use {@link StatisticFactory} for construction.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */

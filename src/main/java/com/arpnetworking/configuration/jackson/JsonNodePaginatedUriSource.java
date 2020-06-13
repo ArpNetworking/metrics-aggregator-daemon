@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * <code>JsonNode</code> based configuration sourced from a paginated <code>URI</code>.
+ * {@link JsonNode} based configuration sourced from a paginated {@link URI}.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -110,7 +110,7 @@ public final class JsonNodePaginatedUriSource extends BaseJsonNodeSource {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonNodePaginatedUriSource.class);
 
     /**
-     * Builder for <code>JsonNodeUrlSource</code>.
+     * Builder for {@link JsonNodePaginatedUriSource}.
      */
     public static final class Builder extends BaseJsonNodeSource.Builder<Builder, JsonNodePaginatedUriSource> {
 
@@ -122,13 +122,13 @@ public final class JsonNodePaginatedUriSource extends BaseJsonNodeSource {
         }
 
         /**
-         * Set the source <code>URI</code>. Required. The full URI to
+         * Set the source {@link URI}. Required. The full URI to
          * the first page's results. The protocol, host and port will
          * be used from this uri to complete the path-only uri found
          * at each next page key.
          *
-         * @param value The source <code>URL</code>.
-         * @return This <code>Builder</code> instance.
+         * @param value The source {@link URI}.
+         * @return This {@link Builder} instance.
          */
         public Builder setUri(final URI value) {
             _uri = value;
@@ -141,7 +141,7 @@ public final class JsonNodePaginatedUriSource extends BaseJsonNodeSource {
          * be an array.
          *
          * @param value The keys from the root to the data.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setDataKeys(final List<String> value) {
             _dataKeys = value;
@@ -155,7 +155,7 @@ public final class JsonNodePaginatedUriSource extends BaseJsonNodeSource {
          * page's results.
          *
          * @param value The keys from the root to the next page uri.
-         * @return This <code>Builder</code> instance.
+         * @return This {@link Builder} instance.
          */
         public Builder setNextPageKeys(final List<String> value) {
             _nextPageKeys = value;

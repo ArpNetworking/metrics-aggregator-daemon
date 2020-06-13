@@ -26,10 +26,10 @@ import java.util.Set;
 public interface AnnotationDatabase {
 
     /**
-     * Retrieve the <code>Set</code> of classes with the declared annotation.
+     * Retrieve the {@link Set} of classes with the declared annotation.
      *
      * @param annotationClass The annotation class to search for.
-     * @return The <code>Set</code> of classes that are declared with the
+     * @return The {@link Set} of classes that are declared with the
      * specified annotation.
      */
     Set<Class<?>> findClassesWithAnnotation(Class<? extends Annotation> annotationClass);

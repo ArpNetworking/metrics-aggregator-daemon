@@ -25,11 +25,11 @@ import java.util.Set;
 public interface InterfaceDatabase {
 
     /**
-     * Retrieve the <code>Set</code> of classes with the implemented interface.
+     * Retrieve the {@link Set} of classes with the implemented interface.
      *
      * @param <T> The interface type.
      * @param interfaceClass The interface class to search for.
-     * @return The <code>Set</code> of classes that are implementing the
+     * @return The {@link Set} of classes that are implementing the
      * specified interface.
      */
     <T> Set<Class<? extends T>> findClassesWithInterface(Class<T> interfaceClass);

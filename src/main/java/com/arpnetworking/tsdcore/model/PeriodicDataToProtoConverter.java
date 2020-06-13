@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.Nullable;
 
 /**
  * Helper class to convert PeriodicDatas to metrics-aggregator-protocol protobuf messages.
@@ -104,6 +105,7 @@ public final class PeriodicDataToProtoConverter {
 
     }
 
+    @Nullable
     private static ByteString serializeSupportingData(final AggregatedData datum) {
         final Object data = datum.getSupportingData();
         final ByteString byteString;

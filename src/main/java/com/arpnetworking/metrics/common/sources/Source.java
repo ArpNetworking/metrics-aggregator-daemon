@@ -19,7 +19,7 @@ import com.arpnetworking.commons.observer.Observable;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * Interface for sources of <code>Record</code> data entries. All
+ * Interface for sources of {@link com.arpnetworking.metrics.mad.model.Record} data entries. All
  * implementations must be thread safe.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)

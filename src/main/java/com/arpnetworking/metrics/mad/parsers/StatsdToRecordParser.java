@@ -286,7 +286,11 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
             return _unit;
         }
 
-        public static StatsdType fromToken(final String token) {
+        @Nullable
+        public static StatsdType fromToken(@Nullable final String token) {
+            if (token == null) {
+                return null;
+            }
             return TOKEN_TO_TYPE.get(token);
         }
 

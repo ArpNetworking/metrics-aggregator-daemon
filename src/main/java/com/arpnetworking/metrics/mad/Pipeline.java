@@ -32,9 +32,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Single data pathway through the time series data aggregator. The pathway
- * consists of zero or more sources, typically at least one source is specified,
- * a <code>LineProcessor</code> and zero or more sinks, again typically at least
- * one sink is specified.
+ * consists of zero or more sources, typically at least one source is specified
+ * and zero or more sinks, again typically at least one sink is specified.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
@@ -43,7 +42,7 @@ public final class Pipeline implements Launchable {
     /**
      * Public constructor.
      *
-     * @param pipelineConfiguration Instance of <code>PipelineConfiguration</code>.
+     * @param pipelineConfiguration Instance of {@link PipelineConfiguration}.
      */
     public Pipeline(final PipelineConfiguration pipelineConfiguration) {
         _pipelineConfiguration = pipelineConfiguration;

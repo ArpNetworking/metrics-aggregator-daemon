@@ -104,7 +104,7 @@ public abstract class ActorSource extends BaseSource {
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     protected ActorSource(final Builder<?, ? extends ActorSource> builder) {
         super(builder);

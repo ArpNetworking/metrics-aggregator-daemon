@@ -23,7 +23,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 /**
- * Tests for the <code>PeriodWorker</code> class.
+ * Tests for the {@link PeriodWorker} class.
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */

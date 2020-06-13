@@ -69,7 +69,7 @@ public class HttpSource extends ActorSource {
     /**
      * Protected constructor.
      *
-     * @param builder Instance of <code>Builder</code>.
+     * @param builder Instance of {@link Builder}.
      */
     protected HttpSource(final Builder<?, ? extends HttpSource> builder) {
         super(builder);

@@ -69,10 +69,10 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 /**
- * Implementation of <code>Parser</code> for the JSON metrics formats. The
- * format represents each <code>Record</code> instance with one json object per
+ * Implementation of {@link Parser} for the JSON metrics formats. The
+ * format represents each {@link Record} instance with one json object per
  * line. Specifications for each version of the query log can be found in the
- * <code>metrics-client-doc</code> repository.
+ * {@code metrics-client-doc} repository.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
@@ -296,11 +296,11 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     }
 
     /**
-     * Get the existing <code>Unit</code> that corresponds to the compound unit, or null if the compound unit has no
-     * <code>Unit</code> analogue.
+     * Get the existing {@link Unit} that corresponds to the compound unit, or null if the compound unit has no
+     * {@link Unit} analogue.
      *
-     * @param compositeUnit The <code>CompoundUnit</code> for which to find the existing analogue.
-     * @return The existing <code>Unit</code> to which the <code>CompoundUnit</code> maps.
+     * @param compositeUnit The {@link CompositeUnit} for which to find the existing analogue.
+     * @return The existing {@link Unit} to which the {@link CompositeUnit} maps.
      */
     @Nullable
     private static Unit getLegacyUnit(@Nullable final CompositeUnit compositeUnit) {
@@ -420,7 +420,8 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                             element.getValues(),
                             VERSION_2F_STENO_SAMPLE_TO_QUANTITY)
                     .stream()
-                    .filter(Predicates.notNull()::apply)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
                     .collect(ImmutableList.toImmutableList());
             variables.put(
                     entry.getKey(),
@@ -624,13 +625,14 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         }
     };
 
-    private static final Function<Version2fSteno.Sample, Quantity> VERSION_2F_STENO_SAMPLE_TO_QUANTITY = sample -> {
+    private static final Function<Version2fSteno.Sample, Optional<Quantity>> VERSION_2F_STENO_SAMPLE_TO_QUANTITY = sample -> {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
-                return ThreadLocalBuilder.build(
-                        DefaultQuantity.Builder.class,
-                        b -> b.setValue(sample.getValue())
-                                .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null)));
+                return Optional.of(
+                        ThreadLocalBuilder.build(
+                                DefaultQuantity.Builder.class,
+                                b -> b.setValue(sample.getValue())
+                                        .setUnit(Iterables.getFirst(sample.getUnitNumerators(), null))));
                         // TODO(vkoskela): Support compound units in Tsd Aggregator [AINT-679]
                         //.setNumeratorUnits(sample.getUnitNumerators())
                         //.setDenominatorUnits(sample.getUnitDenominators())
@@ -641,14 +643,15 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                         .setMessage("Invalid sample for metric")
                         .addData("value", sample.getValue())
                         .log();
-                return null;
+                return Optional.empty();
             }
         } else {
-            return null;
+            return Optional.empty();
         }
     };
 
-    private static Quantity version2gSampleToQuantity(final Version2g.Sample sample) {
+    @Nullable
+    private static Quantity version2gSampleToQuantity(@Nullable final Version2g.Sample sample) {
         if (sample != null) {
             if (Double.isFinite(sample.getValue())) {
                 @Nullable final CompositeUnit sampleUnit = sample.getUnit2g() != null
@@ -708,7 +711,8 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
     }
 
     /**
-     * Implementation of <code>Builder</code> for {@link JsonToRecordParser}.
+     * {@link com.arpnetworking.commons.builder.Builder} implementation for
+     * {@link JsonToRecordParser}.
      */
     public static final class Builder extends ThreadLocalBuilder<JsonToRecordParser> {
 
@@ -723,7 +727,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
          * The default host. Set to the name of the local host if left unset here.
          *
          * @param value The default host.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setDefaultHost(final String value) {
             _defaultHost = value;
@@ -734,7 +738,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
          * The default service.
          *
          * @param value The default service.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setDefaultService(final String value) {
             _defaultService = value;
@@ -745,7 +749,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
          * The default cluster.
          *
          * @param value The default cluster.
-         * @return This instance of <code>Builder</code>.
+         * @return This instance of {@link Builder}.
          */
         public Builder setDefaultCluster(final String value) {
             _defaultCluster = value;
