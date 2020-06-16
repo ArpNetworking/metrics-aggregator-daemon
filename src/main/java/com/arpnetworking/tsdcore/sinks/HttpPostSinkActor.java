@@ -209,6 +209,7 @@ public class HttpPostSinkActor extends AbstractActor {
             }
 
             if (evicted > 0) {
+                // TODO(qinyanl): Convert to periodic metric in the future.
                 try (Metrics metrics = _metricsFactory.create()) {
                     metrics.incrementCounter(_evictedRequestsName, evicted);
                 }
