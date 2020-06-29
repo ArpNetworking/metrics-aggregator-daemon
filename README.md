@@ -37,16 +37,15 @@ appropriate directory on your application host(s).
 If you use Docker, we publish a base docker image that makes it easy for you to layer configuration on top of.  Create
 a Docker image based on the image arpnetworking/mad.  Configuration files are typically located at /opt/mad/config/
 with pipeline files located at /opt/mad/config/pipelines.  In addition, you can specify CONFIG_FILE (defaults to
-/opt/mad/config/config.json), PARAMS (defaults to $CONFIG_FILE), LOGGING_CONFIG (defaults to
-"-Dlogback.configurationFile=/opt/mad/config/logback.xml"), and JAVA_OPTS (defaults to "") environment variables to
-control startup.
+/opt/mad/config/config.conf), LOGGING_CONFIG (defaults to "-Dlogback.configurationFile=/opt/mad/config/logback.xml"),
+and JAVA_OPTS (defaults to "") environment variables to control startup.
 
 ### Execution
 
 In the installation's *bin* directory there are scripts to start Metrics Aggregator Daemon: *mad* (Linux) and
 *mad.bat* (Windows).  One of these should be executed on system start with appropriate parameters; for example:
 
-    /usr/local/lib/metrics-aggregator-daemon/bin/mad /usr/local/lib/metrics-aggregator-daemon/config/config.json
+    /usr/local/lib/metrics-aggregator-daemon/bin/mad /usr/local/lib/metrics-aggregator-daemon/config/config.conf
 
 ### Configuration
 
@@ -59,7 +58,7 @@ Outside of Docker, set the `JAVA_OPTS` environment variable to configure logging
 
     export JAVA_OPTS="-Dlogback.configurationFile=/usr/local/lib/metrics-aggregator-daemon/config/logback-console.xml"
 
-Where */usr/local/lib/metrics-aggregator-daemon/config/logger.xml* is the path to your logging configuration file.
+Where */usr/local/lib/metrics-aggregator-daemon/config/logger-console.xml* is the path to your logging configuration file.
 
 Under Docker, set the `LOGBACK_CONFIG` environment variable to configure logging:
 
