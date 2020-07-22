@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 Inscope Metrics
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,8 +38,8 @@ public class RoutesTest extends BaseActorTest {
     @Override
     public void startup() {
         super.startup();
-        final ImmutableList.Builder<SupplementalRoutes> supplementalHttpRoutes = ImmutableList.builder();
-        _routes = new Routes(
+        final ImmutableList.Builder<com.arpnetworking.http.SupplementalRoutes> supplementalHttpRoutes = ImmutableList.builder();
+        _routes = new com.arpnetworking.http.Routes(
                 getSystem(),
                 _metrics,
                 HEALTH_CHECK_PATH,
