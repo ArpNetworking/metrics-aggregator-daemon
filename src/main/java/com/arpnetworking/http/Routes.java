@@ -117,9 +117,6 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     @Override
     public CompletionStage<HttpResponse> apply(final HttpRequest request) {
         final Stopwatch requestTimer = Stopwatch.createStarted();
-        _metrics.recordGauge(
-                createMetricName(request, BODY_SIZE_METRIC),
-                request.entity().getContentLengthOption().orElse(0L));
         final UUID requestId = UUID.randomUUID();
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace()
@@ -144,10 +141,6 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
         return process(request).whenComplete(
                 (response, failure) -> {
                     requestTimer.stop();
-                    _metrics.recordTimer(
-                            createMetricName(request, REQUEST_METRIC),
-                            requestTimer.elapsed(TimeUnit.NANOSECONDS),
-                            Optional.of(TimeUnit.NANOSECONDS));
 
                     final int responseStatus;
                     if (response != null) {
@@ -156,10 +149,18 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                         // TODO(ville): Figure out how to intercept post-exception mapping.
                         responseStatus = 599;
                     }
+
+                    _metrics.recordTimer(
+                            createMetricName(request, responseStatus, REQUEST_METRIC),
+                            requestTimer.elapsed(TimeUnit.NANOSECONDS),
+                            Optional.of(TimeUnit.NANOSECONDS));
+                    _metrics.recordGauge(
+                            createMetricName(request, responseStatus, BODY_SIZE_METRIC),
+                            request.entity().getContentLengthOption().orElse(0L));
                     final int responseStatusClass = responseStatus / 100;
                     for (final int i : STATUS_CLASSES) {
                         _metrics.recordCounter(
-                                createMetricName(request, String.format("%s/%dxx", STATUS_METRIC, i)),
+                                createMetricName(request, responseStatus, String.format("%s/%dxx", STATUS_METRIC, i)),
                                 responseStatusClass == i ? 1 : 0);
                     }
 
@@ -318,14 +319,18 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                 .exceptionally(throwable -> defaultValue);
     }
 
-    private String createMetricName(final HttpRequest request, final String actionPart) {
+    private String createMetricName(final HttpRequest request, final int responseStatus, final String actionPart) {
         final StringBuilder nameBuilder = new StringBuilder()
                 .append(REST_SERVICE_METRIC_ROOT)
                 .append(request.method().value());
-        if (!request.getUri().path().startsWith("/")) {
-            nameBuilder.append("/");
+        if (responseStatus == StatusCodes.NOT_FOUND.intValue()) {
+            nameBuilder.append("/unknown_route");
+        } else {
+            if (!request.getUri().path().startsWith("/")) {
+                nameBuilder.append("/");
+            }
+            nameBuilder.append(request.getUri().path());
         }
-        nameBuilder.append(request.getUri().path());
         nameBuilder.append("/");
         nameBuilder.append(actionPart);
         return nameBuilder.toString();
