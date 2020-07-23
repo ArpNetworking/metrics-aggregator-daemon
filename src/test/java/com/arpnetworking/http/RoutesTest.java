@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inscope Metrics
+ * Copyright 2020 Dropbox
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class RoutesTest extends BaseActorTest {
     @Override
     public void startup() {
         super.startup();
-        final ImmutableList.Builder<com.arpnetworking.http.SupplementalRoutes> supplementalHttpRoutes = ImmutableList.builder();
+        final ImmutableList.Builder<SupplementalRoutes> supplementalHttpRoutes = ImmutableList.builder();
         _routes = new com.arpnetworking.http.Routes(
                 getSystem(),
                 _metrics,
@@ -48,7 +48,7 @@ public class RoutesTest extends BaseActorTest {
     }
 
     @Test
-    public void testApply() throws InterruptedException {
+    public void testApplyKnownRequest() throws InterruptedException {
         final HttpRequest request = HttpRequest.create("test_health_check");
         _routes.apply(request);
 
@@ -63,7 +63,10 @@ public class RoutesTest extends BaseActorTest {
                 Mockito.eq("rest_service/GET/test_health_check/body_size"),
                 Mockito.anyLong());
         Mockito.verify(_metrics).recordCounter("rest_service/GET/test_health_check/status/5xx", 1);
+    }
 
+    @Test
+    public void testApplyUnknownRequest() throws InterruptedException {
         final HttpRequest unknownRequest = HttpRequest.create("kb23k1dnlkns02");
         _routes.apply(unknownRequest);
 

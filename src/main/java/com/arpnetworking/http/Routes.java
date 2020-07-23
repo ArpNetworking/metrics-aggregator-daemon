@@ -323,7 +323,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
         final StringBuilder nameBuilder = new StringBuilder()
                 .append(REST_SERVICE_METRIC_ROOT)
                 .append(request.method().value());
-        if (responseStatus == 404) {
+        if (responseStatus == StatusCodes.NOT_FOUND.intValue()) {
             nameBuilder.append("/unknown_route");
         } else {
             if (!request.getUri().path().startsWith("/")) {
