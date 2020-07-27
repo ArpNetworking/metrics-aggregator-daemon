@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>2.0.6</version>
+    <version>2.0.7</version>
     <relativePath />
   </parent>
 
@@ -463,6 +463,10 @@
                 <env>
                   <JAVA_OPTS>${debugJavaOptions}</JAVA_OPTS>
                   <KAFKA_SOURCE_BOOTSTRAP_HOST>kafka</KAFKA_SOURCE_BOOTSTRAP_HOST>
+                  <!-- TODO(ville): Obtain these from the current user! -->
+                  <!-- Ref: https://github.com/rynr/user-id-maven-plugin -->
+                  <KDB_UID>1000</KDB_UID>
+                  <KDB_GID>1000</KDB_GID>
                 </env>
                 <volumes>
                   <bind>
