@@ -102,10 +102,10 @@ public class HttpPostSinkActor extends AbstractActor {
         }
         _metricsFactory = metricsFactory;
         _evictedRequestsName = "sinks/http_post/" + sink.getMetricSafeName() + "/evicted_requests";
-        _requestLatencyName = "sinks/http_post" + sink.getMetricSafeName() + "/request_latency";
-        _inQueueLatencyName = "sinks/http_post" + sink.getMetricSafeName() + "/queue_time";
-        _requestSuccessName = "sinks/http_post" + sink.getMetricSafeName() + "/success";
-        _responseStatusName = "sinks/http_post" + sink.getMetricSafeName() + "/status";
+        _requestLatencyName = "sinks/http_post/" + sink.getMetricSafeName() + "/request_latency";
+        _inQueueLatencyName = "sinks/http_post/" + sink.getMetricSafeName() + "/queue_time";
+        _requestSuccessName = "sinks/http_post/" + sink.getMetricSafeName() + "/success";
+        _responseStatusName = "sinks/http_post/" + sink.getMetricSafeName() + "/status";
     }
 
     /**
