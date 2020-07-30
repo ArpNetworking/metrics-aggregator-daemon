@@ -15,14 +15,20 @@
  */
 package com.arpnetworking.tsdcore.model;
 
+import akka.util.ByteIterator;
 import akka.util.ByteString;
 import akka.util.ByteStringBuilder;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.InvalidProtocolBufferException;
+import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.buffer.Buffer;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.util.Optional;
 
 /**
  * Class for building on-the-wire bytes for messages.
@@ -103,6 +109,87 @@ public final class AggregationMessage {
         return sizePrefix.result().concat(bs);
     }
 
+
+    /**
+     * Deserialize message from {@link Buffer}.
+     *
+     * @param data The {@link Buffer} containing the serialized message.
+     * @return The deserialized {@link AggregationMessage} or absent if
+     * the {@link Buffer} could not be deserialized.
+     */
+    public static Optional<AggregationMessage> deserialize(final ByteString data) {
+        int position = 0;
+        // Make sure we have enough data to get the size
+        if (data.length() < HEADER_SIZE_IN_BYTES) {
+            return Optional.empty();
+        }
+
+        // Deserialize and validate buffer length
+        final ByteIterator reader = data.iterator();
+        final int length = reader.getInt(ByteOrder.BIG_ENDIAN);
+        position += INTEGER_SIZE_IN_BYTES;
+        if (data.length() < length) {
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace(String.format("we only have %d of %d bytes.", data.length(), length));
+            }
+            return Optional.empty();
+        }
+
+        // Deserialize message type
+        final byte type = reader.getByte();
+        position += BYTE_SIZE_IN_BYTES;
+
+        final byte subType;
+        if (typeHasSubtype(type)) {
+            subType = reader.getByte();
+            position += BYTE_SIZE_IN_BYTES;
+        } else {
+            subType = 0x00;
+        }
+
+        // Obtain the serialized payload
+        final byte[] payloadBytes = new byte [length - position];
+        reader.getBytes(payloadBytes);
+
+        // Deserialize the message based on the type
+        try {
+            switch (type) {
+                case 0x01:
+                    return Optional.of(new AggregationMessage(Messages.HostIdentification.parseFrom(payloadBytes)));
+                case 0x03:
+                    return Optional.of(new AggregationMessage(Messages.HeartbeatRecord.parseFrom(payloadBytes)));
+                case 0x04:
+                    return Optional.of(new AggregationMessage(Messages.StatisticSetRecord.parseFrom(payloadBytes)));
+                case 0x05:
+                    // 0x05 is the message type for all supporting data
+                    switch (subType) {
+                        case 0x01:
+                            return Optional.of(new AggregationMessage(Messages.SamplesSupportingData.parseFrom(payloadBytes)));
+                        case 0x02:
+                            return Optional.of(new AggregationMessage(Messages.SparseHistogramSupportingData.parseFrom(payloadBytes)));
+                        default:
+                            LOGGER.warn(
+                                    String.format("Invalid protocol buffer, unknown subtype; type=%s, subtype=%s, bytes=%s",
+                                            type,
+                                            subType,
+                                            Hex.encodeHexString(payloadBytes)));
+                            return Optional.empty();
+                    }
+                default:
+                    LOGGER.warn(String.format("Unsupported message type; type=%s", type));
+                    return Optional.empty();
+            }
+        } catch (final InvalidProtocolBufferException e) {
+            LOGGER.warn(
+                    String.format("Invalid protocol buffer; type=%s bytes=%s", type, Hex.encodeHexString(payloadBytes)), e);
+            return Optional.empty();
+        }
+    }
+
+    private static boolean typeHasSubtype(final byte type) {
+        return type == 0x05;
+    }
+
     public GeneratedMessageV3 getMessage() {
         return _message;
     }
@@ -117,6 +204,8 @@ public final class AggregationMessage {
 
     private final GeneratedMessageV3 _message;
 
+    private static final int BYTE_SIZE_IN_BYTES = 1;
     private static final int INTEGER_SIZE_IN_BYTES = Integer.SIZE / 8;
     private static final int HEADER_SIZE_IN_BYTES = INTEGER_SIZE_IN_BYTES + 1;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AggregationMessage.class);
 }

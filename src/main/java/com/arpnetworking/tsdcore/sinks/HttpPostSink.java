@@ -26,6 +26,7 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.PeriodicData;
+import com.arpnetworking.tsdcore.model.RequestEntry;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.google.common.collect.Lists;
 import net.sf.oval.constraint.Min;
@@ -109,15 +110,17 @@ public abstract class HttpPostSink extends BaseSink {
      * @param periodicData The {@link PeriodicData} to be serialized.
      * @return The {@link Request} instance to execute.
      */
-    protected Collection<Request> createRequests(
+    protected Collection<RequestEntry.Builder> createRequests(
             final AsyncHttpClient client,
             final PeriodicData periodicData) {
-        final Collection<byte[]> serializedData = serialize(periodicData);
-        final Collection<Request> requests = Lists.newArrayListWithExpectedSize(serializedData.size());
-        for (final byte[] serializedDatum : serializedData) {
-            requests.add(createRequest(client, serializedDatum));
+        final Collection<SerializedDatum> serializedData = serialize(periodicData);
+        final Collection<RequestEntry.Builder> requestEntryBuilders = Lists.newArrayListWithExpectedSize(serializedData.size());
+        for (final SerializedDatum serializedDatum : serializedData) {
+            requestEntryBuilders.add(new RequestEntry.Builder()
+                            .setRequest(createRequest(client, serializedDatum.getDatum()))
+                            .setPopulationSize(serializedDatum.getPopulationSize()));
         }
-        return requests;
+        return requestEntryBuilders;
     }
 
     /**
@@ -144,7 +147,7 @@ public abstract class HttpPostSink extends BaseSink {
      * @param periodicData The {@link PeriodicData} to be serialized.
      * @return The serialized representation of {@link PeriodicData}.
      */
-    protected abstract Collection<byte[]> serialize(PeriodicData periodicData);
+    protected abstract Collection<SerializedDatum> serialize(PeriodicData periodicData);
 
     /**
      * Protected constructor.
@@ -284,5 +287,23 @@ public abstract class HttpPostSink extends BaseSink {
         @JacksonInject
         @NotNull
         private MetricsFactory _metricsFactory;
+    }
+
+    static final class SerializedDatum {
+        SerializedDatum(final byte[] datum, final long populationSize) {
+            _datum = datum;
+            _populationSize = populationSize;
+        }
+
+        public byte[] getDatum() {
+            return _datum;
+        }
+
+        public long getPopulationSize() {
+            return _populationSize;
+        }
+
+        private final byte[] _datum;
+        private final long _populationSize;
     }
 }

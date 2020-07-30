@@ -27,6 +27,7 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.PeriodicData;
+import com.arpnetworking.tsdcore.model.RequestEntry;
 import com.google.common.base.Charsets;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.ImmutableList;
@@ -106,6 +107,7 @@ public class HttpPostSinkActor extends AbstractActor {
         _inQueueLatencyName = "sinks/http_post/" + sink.getMetricSafeName() + "/queue_time";
         _requestSuccessName = "sinks/http_post/" + sink.getMetricSafeName() + "/success";
         _responseStatusName = "sinks/http_post/" + sink.getMetricSafeName() + "/status";
+        _samplesDroppedName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_dropped";
     }
 
     /**
@@ -208,14 +210,14 @@ public class HttpPostSinkActor extends AbstractActor {
                 .log();
 
         if (!periodicData.getData().isEmpty()) {
-            final Collection<Request> requests = _sink.createRequests(_client, periodicData);
+            final Collection<RequestEntry.Builder> requestEntryBuilders = _sink.createRequests(_client, periodicData);
             final boolean pendingWasEmpty = _pendingRequests.isEmpty();
 
-            final int evicted = Math.max(0, requests.size() - _pendingRequests.remainingCapacity());
-            for (final Request request : requests) {
+            final int evicted = Math.max(0, requestEntryBuilders.size() - _pendingRequests.remainingCapacity());
+            for (final RequestEntry.Builder requestEntryBuilder : requestEntryBuilders) {
                 // TODO(vkoskela): Add logging to client [MAI-89]
                 // TODO(vkoskela): Add instrumentation to client [MAI-90]
-                _pendingRequests.offer(new RequestEntry(request, System.currentTimeMillis()));
+                _pendingRequests.offer(requestEntryBuilder.setEnterTime(System.currentTimeMillis()).build());
             }
 
             if (evicted > 0) {
@@ -292,9 +294,11 @@ public class HttpPostSinkActor extends AbstractActor {
                              returnValue =  new PostSuccess(result);
                         } else {
                              returnValue =  new PostRejected(request, result);
+                             metrics.incrementCounter(_samplesDroppedName, requestEntry.getPopulationSize());
                         }
                     } else {
                         returnValue = new PostFailure(request, err);
+                        metrics.incrementCounter(_samplesDroppedName, requestEntry.getPopulationSize());
                     }
                     metrics.incrementCounter(_requestSuccessName, (returnValue instanceof PostSuccess) ? 1 : 0);
                     metrics.close();
@@ -328,6 +332,7 @@ public class HttpPostSinkActor extends AbstractActor {
     private final String _inQueueLatencyName;
     private final String _requestSuccessName;
     private final String _responseStatusName;
+    private final String _samplesDroppedName;
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
@@ -446,23 +451,5 @@ public class HttpPostSinkActor extends AbstractActor {
         }
 
         private final CompletableFuture<Response> _promise;
-    }
-
-    private static final class RequestEntry {
-        private RequestEntry(final Request request, final long enterTime) {
-            _request = request;
-            _enterTime = enterTime;
-        }
-
-        public Request getRequest() {
-            return _request;
-        }
-
-        public long getEnterTime() {
-            return _enterTime;
-        }
-
-        private final Request _request;
-        private final long _enterTime;
     }
 }
