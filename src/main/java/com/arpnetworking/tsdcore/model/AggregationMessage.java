@@ -120,7 +120,7 @@ public final class AggregationMessage {
     public static Optional<AggregationMessage> deserialize(final ByteString data) {
         int position = 0;
         // Make sure we have enough data to get the size
-        if (data.length() < HEADER_SIZE_IN_BYTES) {
+        if (data.size() < HEADER_SIZE_IN_BYTES) {
             return Optional.empty();
         }
 
@@ -128,9 +128,9 @@ public final class AggregationMessage {
         final ByteIterator reader = data.iterator();
         final int length = reader.getInt(ByteOrder.BIG_ENDIAN);
         position += INTEGER_SIZE_IN_BYTES;
-        if (data.length() < length) {
+        if (data.size() < length) {
             if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace(String.format("we only have %d of %d bytes.", data.length(), length));
+                LOGGER.trace(String.format("we only have %d of %d bytes.", data.size(), length));
             }
             return Optional.empty();
         }

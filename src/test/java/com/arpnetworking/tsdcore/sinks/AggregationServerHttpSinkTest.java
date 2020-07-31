@@ -18,6 +18,8 @@ package com.arpnetworking.tsdcore.sinks;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
+import com.arpnetworking.metrics.mad.model.Unit;
+import com.arpnetworking.metrics.mad.model.statistics.HistogramStatistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.PeriodicData;
@@ -53,6 +55,9 @@ public class AggregationServerHttpSinkTest extends BaseActorTest {
 
     @Test
     public void testSerialize() {
+        final HistogramStatistic.Histogram histogramForTest = new HistogramStatistic.Histogram();
+        histogramForTest.recordValue(1.0, 2);
+        histogramForTest.recordValue(2.0, 3);
         final Collection<HttpPostSink.SerializedDatum> serializedData = _aggregationServerHttpSinkBuilder.build().serialize(
                 new PeriodicData.Builder()
                         .setPeriod(java.time.Duration.ofMinutes(1))
@@ -61,8 +66,7 @@ public class AggregationServerHttpSinkTest extends BaseActorTest {
                                 "service", "test_service",
                                 "cluster", "test_cluster")))
                         .setData(ImmutableMultimap.of(
-                                "metric",
-                                new AggregatedData.Builder()
+                                "metric1", new AggregatedData.Builder()
                                         .setSupportingData(new Object())
                                         .setStatistic(STATISTIC_FACTORY.getStatistic("count"))
                                         .setIsSpecified(true)
@@ -70,11 +74,24 @@ public class AggregationServerHttpSinkTest extends BaseActorTest {
                                                 .setValue(3.02)
                                                 .build())
                                         .setPopulationSize(3L)
+                                        .build(),
+                                "metric2", new AggregatedData.Builder()
+                                        .setSupportingData(new HistogramStatistic.HistogramSupportingData.Builder()
+                                                .setHistogramSnapshot(histogramForTest.getSnapshot())
+                                                .setUnit(Unit.SECOND)
+                                                .build())
+                                        .setStatistic(STATISTIC_FACTORY.getStatistic("histogram"))
+                                        .setIsSpecified(true)
+                                        .setValue(new DefaultQuantity.Builder()
+                                                .setValue(3.02)
+                                                .build())
+                                        .setPopulationSize(5L)
                                         .build()))
                         .setMinRequestTime(java.time.ZonedDateTime.now())
                         .build()
         );
-        Assert.assertEquals(((HttpPostSink.SerializedDatum) serializedData.toArray()[0]).getPopulationSize(), 3L);
+        Assert.assertEquals(3L, ((HttpPostSink.SerializedDatum) serializedData.toArray()[0]).getPopulationSize());
+        Assert.assertEquals(5L, ((HttpPostSink.SerializedDatum) serializedData.toArray()[1]).getPopulationSize());
     }
 
 
