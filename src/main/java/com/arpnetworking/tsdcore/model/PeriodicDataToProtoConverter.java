@@ -21,6 +21,7 @@ import com.arpnetworking.metrics.mad.model.statistics.HistogramStatistic;
 import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 
 import java.util.Collection;
@@ -37,31 +38,33 @@ import javax.annotation.Nullable;
 public final class PeriodicDataToProtoConverter {
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic EXPRESSION_STATISTIC = STATISTIC_FACTORY.getStatistic("expression");
+    private static final Statistic HISTOGRAM_STATISTIC = STATISTIC_FACTORY.getStatistic("histogram");
+    private static final Statistic COUNT_STATISTIC = STATISTIC_FACTORY.getStatistic("count");
 
     /**
-     * Convert a PeriodicData to a set of corresponding protobuf messages.
+     * Convert a PeriodicData to a set of {@link ConvertedDatum}.
      *
      * @param periodicData PeriodicData being converted.
-     * @return List of StatisticSetRecord protobufs corresponding to the above.
+     * @return List of {@link ConvertedDatum} corresponding to the above.
      */
-    public static List<Messages.StatisticSetRecord> convert(
+    public static List<ConvertedDatum> convert(
             final PeriodicData periodicData
     ) {
-        final ImmutableList.Builder<Messages.StatisticSetRecord> convertedData = ImmutableList.builder();
+        final ImmutableList.Builder<ConvertedDatum> convertedData = ImmutableList.builder();
         for (final Map.Entry<String, Collection<AggregatedData>> entry : periodicData.getData().asMap().entrySet()) {
             final String metricName = entry.getKey();
             final Collection<AggregatedData> data = entry.getValue();
             if (!data.isEmpty()) {
-                final Messages.StatisticSetRecord record = convertAggregatedData(
+                final ConvertedDatum convertedDatum = convertAggregatedData(
                         periodicData, metricName, data);
-                convertedData.add(record);
+                convertedData.add(convertedDatum);
             }
         }
         return convertedData.build();
 
     }
 
-    private static Messages.StatisticSetRecord convertAggregatedData(
+    private static ConvertedDatum convertAggregatedData(
             final PeriodicData periodicData,
             final String metricName,
             final Collection<AggregatedData> data) {
@@ -74,9 +77,15 @@ public final class PeriodicDataToProtoConverter {
                 .setCluster(periodicData.getDimensions().getCluster())
                 .setService(periodicData.getDimensions().getService());
 
+        final ImmutableMap.Builder<Statistic, Long> populationSizesBuilder = ImmutableMap.builder();
         for (final AggregatedData datum : data) {
-            if (Objects.equals(EXPRESSION_STATISTIC, datum.getStatistic())) {
+            final Statistic statistic = datum.getStatistic();
+            if (Objects.equals(EXPRESSION_STATISTIC, statistic)) {
                 continue;
+            }
+
+            if (Objects.equals(HISTOGRAM_STATISTIC, statistic) || Objects.equals(COUNT_STATISTIC, statistic)) {
+                populationSizesBuilder.put(statistic, datum.getPopulationSize());
             }
 
             final String unit;
@@ -88,7 +97,7 @@ public final class PeriodicDataToProtoConverter {
             }
 
             final Messages.StatisticRecord.Builder entryBuilder = builder.addStatisticsBuilder()
-                    .setStatistic(datum.getStatistic().getName())
+                    .setStatistic(statistic.getName())
                     .setValue(datum.getValue().getValue())
                     .setUnit(unit)
                     .setUserSpecified(datum.getIsSpecified());
@@ -100,7 +109,16 @@ public final class PeriodicDataToProtoConverter {
             entryBuilder.build();
         }
 
-        return builder.build();
+        final ImmutableMap<Statistic, Long> populationSizes = populationSizesBuilder.build();
+
+        final long populationSize;
+        if (populationSizes.containsKey(HISTOGRAM_STATISTIC)) {
+            populationSize = populationSizes.get(HISTOGRAM_STATISTIC);
+        } else {
+            populationSize = populationSizes.getOrDefault(COUNT_STATISTIC, 1L);
+        }
+
+        return new ConvertedDatum(builder.build(), populationSize);
 
 
     }
@@ -137,4 +155,26 @@ public final class PeriodicDataToProtoConverter {
     }
 
     private PeriodicDataToProtoConverter() {}
+
+    /**
+     * Contains the StatisticSetRecord protobuf and its corresponding population size.
+     *
+     */
+    public static final class ConvertedDatum{
+        ConvertedDatum(final Messages.StatisticSetRecord record, final long populationSize) {
+            _record = record;
+            _populationSize = populationSize;
+        }
+
+        public Messages.StatisticSetRecord getStatisticSetRecord() {
+            return _record;
+        }
+
+        public long getPopulationSize() {
+            return _populationSize;
+        }
+
+        private final Messages.StatisticSetRecord _record;
+        private final long _populationSize;
+    }
 }

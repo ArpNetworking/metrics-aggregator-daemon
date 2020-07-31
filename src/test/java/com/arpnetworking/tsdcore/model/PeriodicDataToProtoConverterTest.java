@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.Unit;
@@ -58,7 +57,7 @@ public class PeriodicDataToProtoConverterTest {
                 .setMinRequestTime(ZonedDateTime.parse("2019-01-03T05:06:07.890-07:00[America/Los_Angeles]"))
                 .build();
 
-        final List<Messages.StatisticSetRecord> converted = PeriodicDataToProtoConverter.convert(data);
+        final List<PeriodicDataToProtoConverter.ConvertedDatum> converted = PeriodicDataToProtoConverter.convert(data);
 
         Assert.assertEquals(1, converted.size());
         Assert.assertEquals(
@@ -87,6 +86,6 @@ public class PeriodicDataToProtoConverterTest {
                 + "}\n"
                 + "client_minimum_request_time: \"2019-01-03T05:06:07.890-08:00[America/Los_Angeles]\"\n",
 
-                converted.get(0).toString());
+                converted.get(0).getStatisticSetRecord().toString());
     }
 }
