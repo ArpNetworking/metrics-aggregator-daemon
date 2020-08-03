@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.tsdcore.sinks;
 
-import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
@@ -26,7 +25,6 @@ import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.utility.BaseActorTest;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
@@ -151,7 +149,6 @@ public class AggregationServerHttpSinkTest extends BaseActorTest {
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final String PATH = "/aggregation_server/post/path";
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
 
     @Mock
     private MetricsFactory _mockMetricsFactory;
