@@ -15,6 +15,8 @@
  */
 package com.arpnetworking.tsdcore.sinks;
 
+import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
+import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
@@ -24,15 +26,22 @@ import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.utility.BaseActorTest;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import org.junit.Assert;
+import com.google.common.net.MediaType;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.net.URI;
-import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+
 
 
 /**
@@ -46,19 +55,34 @@ public class AggregationServerHttpSinkTest extends BaseActorTest {
     @Override
     public void startup() {
         super.startup();
+        _wireMockServer = new WireMockServer(0);
+        _wireMockServer.start();
+        _wireMock = new WireMock(_wireMockServer.port());
         _aggregationServerHttpSinkBuilder = new AggregationServerHttpSink.Builder()
                 .setName("aggregation_server_http_sink_test")
-                .setUri(URI.create("http://localhost:" + 0 + PATH))
+                .setUri(URI.create("http://localhost:" + _wireMockServer.port() + PATH))
                 .setActorSystem(getSystem())
                 .setMetricsFactory(_mockMetricsFactory);
+        Mockito.doReturn(_mockMetrics).when(_mockMetricsFactory).create();
+    }
+
+    @After
+    @Override
+    public void shutdown() throws Exception {
+        super.shutdown();
+        _wireMockServer.stop();
     }
 
     @Test
-    public void testSerialize() {
+    public void testPost() throws InterruptedException {
+        // Fake a successful post to aggregation server
+        _wireMock.register(WireMock.post(WireMock.urlEqualTo(PATH))
+                .willReturn(WireMock.aResponse().withStatus(200)));
+
         final HistogramStatistic.Histogram histogramForTest = new HistogramStatistic.Histogram();
         histogramForTest.recordValue(1.0, 2);
         histogramForTest.recordValue(2.0, 3);
-        final Collection<HttpPostSink.SerializedDatum> serializedData = _aggregationServerHttpSinkBuilder.build().serialize(
+        _aggregationServerHttpSinkBuilder.build().recordAggregateData(
                 new PeriodicData.Builder()
                         .setPeriod(java.time.Duration.ofMinutes(1))
                         .setStart(java.time.ZonedDateTime.now())
@@ -90,16 +114,47 @@ public class AggregationServerHttpSinkTest extends BaseActorTest {
                         .setMinRequestTime(java.time.ZonedDateTime.now())
                         .build()
         );
-        Assert.assertEquals(3L, ((HttpPostSink.SerializedDatum) serializedData.toArray()[0]).getPopulationSize());
-        Assert.assertEquals(5L, ((HttpPostSink.SerializedDatum) serializedData.toArray()[1]).getPopulationSize());
+
+        // Allow the request/response to complete
+        Thread.sleep(1000);
+
+        // Request matcher
+        final RequestPatternBuilder requestPattern = WireMock.postRequestedFor(WireMock.urlEqualTo(PATH))
+                .withHeader("Content-Type", WireMock.equalTo(MediaType.PROTOBUF.toString()));
+
+        // Assert that data was sent
+        _wireMock.verifyThat(2, requestPattern);
+
+        // Verify that metrics has been recorded.
+        Mockito.verify(_mockMetricsFactory, Mockito.times(2)).create();
+        Mockito.verify(_mockMetrics, Mockito.times(2))
+                .incrementCounter("sinks/http_post/aggregation_server_http_sink_test/success", 1);
+        Mockito.verify(_mockMetrics, Mockito.times(2))
+                .incrementCounter("sinks/http_post/aggregation_server_http_sink_test/status/2xx", 1);
+        Mockito.verify(_mockMetrics, Mockito.times(2)).setTimer(
+                Mockito.matches("sinks/http_post/aggregation_server_http_sink_test/queue_time"),
+                Mockito.anyLong(),
+                Mockito.any(TimeUnit.class));
+        Mockito.verify(_mockMetrics, Mockito.times(2)).setTimer(
+                Mockito.matches("sinks/http_post/aggregation_server_http_sink_test/request_latency"),
+                Mockito.anyLong(),
+                Mockito.any(TimeUnit.class));
+        Mockito.verify(_mockMetrics).incrementCounter("sinks/http_post/aggregation_server_http_sink_test/samples_sent", 3);
+        Mockito.verify(_mockMetrics).incrementCounter("sinks/http_post/aggregation_server_http_sink_test/samples_sent", 5);
+        Mockito.verify(_mockMetrics, Mockito.times(2)).close();
     }
 
 
     private AggregationServerHttpSink.Builder _aggregationServerHttpSinkBuilder;
+    private WireMockServer _wireMockServer;
+    private WireMock _wireMock;
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final String PATH = "/aggregation_server/post/path";
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
 
     @Mock
     private MetricsFactory _mockMetricsFactory;
+    @Mock
+    private Metrics _mockMetrics;
 }

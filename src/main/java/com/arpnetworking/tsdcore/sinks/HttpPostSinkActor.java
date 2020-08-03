@@ -108,6 +108,7 @@ public class HttpPostSinkActor extends AbstractActor {
         _requestSuccessName = "sinks/http_post/" + sink.getMetricSafeName() + "/success";
         _responseStatusName = "sinks/http_post/" + sink.getMetricSafeName() + "/status";
         _samplesDroppedName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_dropped";
+        _samplesSentName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_sent";
     }
 
     /**
@@ -292,6 +293,7 @@ public class HttpPostSinkActor extends AbstractActor {
                         }
                         if (ACCEPTED_STATUS_CODES.contains(responseStatusCode)) {
                              returnValue =  new PostSuccess(result);
+                             metrics.incrementCounter(_samplesSentName, requestEntry.getPopulationSize());
                         } else {
                              returnValue =  new PostRejected(request, result);
                              metrics.incrementCounter(_samplesDroppedName, requestEntry.getPopulationSize());
@@ -333,6 +335,7 @@ public class HttpPostSinkActor extends AbstractActor {
     private final String _requestSuccessName;
     private final String _responseStatusName;
     private final String _samplesDroppedName;
+    private final String _samplesSentName;
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
