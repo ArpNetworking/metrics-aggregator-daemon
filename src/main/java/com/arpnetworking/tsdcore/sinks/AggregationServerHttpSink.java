@@ -16,7 +16,6 @@
 package com.arpnetworking.tsdcore.sinks;
 
 import com.arpnetworking.logback.annotations.LogValue;
-import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.tsdcore.model.AggregationMessage;
 import com.arpnetworking.tsdcore.model.PeriodicData;
@@ -47,12 +46,16 @@ public final class AggregationServerHttpSink extends HttpPostSink {
     }
 
     @Override
-    protected Collection<byte[]> serialize(final PeriodicData periodicData) {
-        final Collection<Messages.StatisticSetRecord> records = PeriodicDataToProtoConverter.convert(periodicData);
+    protected Collection<SerializedDatum> serialize(final PeriodicData periodicData) {
+        final Collection<PeriodicDataToProtoConverter.ConvertedDatum> convertedData = PeriodicDataToProtoConverter.convert(periodicData);
 
-        final ImmutableList.Builder<byte[]> serializedPeriodicData = ImmutableList.builder();
-        for (final Messages.StatisticSetRecord record : records) {
-            serializedPeriodicData.add(AggregationMessage.create(record).serializeToByteString().toArray());
+        final ImmutableList.Builder<SerializedDatum> serializedPeriodicData = ImmutableList.builder();
+        for (final PeriodicDataToProtoConverter.ConvertedDatum convertedDatum : convertedData) {
+            serializedPeriodicData.add(new SerializedDatum(
+                    AggregationMessage.create(convertedDatum.getStatisticSetRecord()).serializeToByteString().toArray(),
+                    convertedDatum.getPopulationSize()
+                    )
+            );
         }
         return serializedPeriodicData.build();
     }
@@ -60,7 +63,6 @@ public final class AggregationServerHttpSink extends HttpPostSink {
     private AggregationServerHttpSink(final Builder builder) {
         super(builder);
     }
-
     /**
      * Implementation of builder pattern for ${code AggregationServerHttpSink}.
      *

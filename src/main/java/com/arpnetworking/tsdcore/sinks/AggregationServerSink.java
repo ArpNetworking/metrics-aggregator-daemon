@@ -42,10 +42,10 @@ public final class AggregationServerSink extends VertxSink {
                 .addData("dataSize", periodicData.getData().size())
                 .log();
 
-        final Collection<Messages.StatisticSetRecord> records = PeriodicDataToProtoConverter.convert(periodicData);
+        final Collection<PeriodicDataToProtoConverter.ConvertedDatum> convertedData = PeriodicDataToProtoConverter.convert(periodicData);
 
-        for (final Messages.StatisticSetRecord record : records) {
-            enqueueData(AggregationMessage.create(record).serializeToBuffer());
+        for (final PeriodicDataToProtoConverter.ConvertedDatum convertedDatum : convertedData) {
+            enqueueData(AggregationMessage.create(convertedDatum.getStatisticSetRecord()).serializeToBuffer());
         }
     }
 
