@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
+import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.Loggable;
@@ -280,7 +281,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
          * {@link com.arpnetworking.commons.builder.Builder} implementation for
          * {@link CollectdRecord}.
          */
-        public static final class Builder extends ThreadLocalBuilder<CollectdRecord> {
+        public static final class Builder extends OvalBuilder<CollectdRecord> {
             /**
              * Public constructor.
              */
@@ -389,19 +390,6 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             public Builder setTypeInstance(final String value) {
                 _typeInstance = value;
                 return this;
-            }
-
-            @Override
-            protected void reset() {
-                _host = null;
-                _time = null;
-                _plugin = null;
-                _pluginInstance = null;
-                _type = null;
-                _typeInstance = null;
-                _values = ImmutableList.of();
-                _dsTypes = ImmutableList.of();
-                _dsNames = ImmutableList.of();
             }
 
             @NotNull

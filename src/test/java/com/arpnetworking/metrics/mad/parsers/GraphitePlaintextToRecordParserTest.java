@@ -16,7 +16,6 @@
 package com.arpnetworking.metrics.mad.parsers;
 
 import com.arpnetworking.commons.test.BuildableTestHelper;
-import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.Metric;
@@ -58,11 +57,6 @@ public final class GraphitePlaintextToRecordParserTest {
         BuildableTestHelper.testBuild(
                 _graphiteParserBuilder.get(),
                 GraphitePlaintextToRecordParser.class);
-    }
-
-    @Test
-    public void testReset() throws Exception {
-        ThreadLocalBuildableTestHelper.testReset(_graphiteParserBuilder.get());
     }
 
     @Test

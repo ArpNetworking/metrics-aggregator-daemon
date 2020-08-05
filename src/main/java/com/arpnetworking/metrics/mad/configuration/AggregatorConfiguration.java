@@ -16,9 +16,15 @@
 package com.arpnetworking.metrics.mad.configuration;
 
 import com.arpnetworking.commons.builder.OvalBuilder;
+import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.http.SupplementalRoutes;
 import com.arpnetworking.logback.annotations.Loggable;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
@@ -43,6 +49,24 @@ public final class AggregatorConfiguration {
 
     public String getMonitoringService() {
         return _monitoringService;
+    }
+
+    public ImmutableList<JsonNode> getMonitoringSinks() {
+        return _monitoringSinks;
+    }
+
+    @Deprecated
+    public Optional<String> getMetricsClientHost() {
+        return _metricsClientHost;
+    }
+
+    @Deprecated
+    public Optional<Integer> getMetricsClientPort() {
+        return _metricsClientPort;
+    }
+
+    public Duration getJvmMetricsCollectionInterval() {
+        return _jvmMetricsCollectionInterval;
     }
 
     public File getLogDirectory() {
@@ -77,18 +101,6 @@ public final class AggregatorConfiguration {
         return _logDeadLetters;
     }
 
-    public String getMetricsClientHost() {
-        return _metricsClientHost;
-    }
-
-    public Integer getMetricsClientPort() {
-        return _metricsClientPort;
-    }
-
-    public Duration getJvmMetricsCollectionInterval() {
-        return _jvmMetricsCollectionInterval;
-    }
-
     public Map<String, ?> getAkkaConfiguration() {
         return Collections.unmodifiableMap(_akkaConfiguration);
     }
@@ -99,6 +111,10 @@ public final class AggregatorConfiguration {
                 .add("id", Integer.toHexString(System.identityHashCode(this)))
                 .add("MonitoringCluster", _monitoringCluster)
                 .add("MonitoringService", _monitoringService)
+                .add("MonitoringSinks", _monitoringSinks)
+                .add("MetricsClientHost", _metricsClientHost)
+                .add("MetricsClientPort", _metricsClientPort)
+                .add("JvmMetricsCollectorInterval", _jvmMetricsCollectionInterval)
                 .add("LogDirectory", _logDirectory)
                 .add("PipelinesDirectory", _pipelinesDirectory)
                 .add("HttpHost", _httpHost)
@@ -108,15 +124,14 @@ public final class AggregatorConfiguration {
                 .add("SupplementalHttpRoutesClass", _supplementalHttpRoutesClass)
                 .add("LogDeadLetters", _logDeadLetters)
                 .add("AkkaConfiguration", _akkaConfiguration)
-                .add("MetricsClientHost", _metricsClientHost)
-                .add("MetricsClientPort", _metricsClientPort)
-                .add("JvmMetricsCollectorInterval", _jvmMetricsCollectionInterval)
                 .toString();
     }
 
     private AggregatorConfiguration(final Builder builder) {
         _monitoringCluster = builder._monitoringCluster;
         _monitoringService = builder._monitoringService;
+        _monitoringSinks = builder._monitoringSinks;
+        _jvmMetricsCollectionInterval = builder._jvmMetricsCollectionInterval;
         _logDirectory = builder._logDirectory;
         _pipelinesDirectory = builder._pipelinesDirectory;
         _httpHost = builder._httpHost;
@@ -125,15 +140,19 @@ public final class AggregatorConfiguration {
         _httpStatusPath = builder._httpStatusPath;
         _supplementalHttpRoutesClass = Optional.ofNullable(builder._supplementalHttpRoutesClass);
         _logDeadLetters = builder._logDeadLetters;
-        _metricsClientHost = Optional.ofNullable(builder._metricsClientHost).orElse(
-                "0.0.0.0".equals(_httpHost) ? "localhost" : _httpHost);
-        _metricsClientPort = Optional.ofNullable(builder._metricsClientPort).orElse(_httpPort);
-        _jvmMetricsCollectionInterval = builder._jvmMetricsCollectionInterval;
         _akkaConfiguration = builder._akkaConfiguration;
+
+        // Deprecated legacy settings
+        _metricsClientHost = Optional.ofNullable(builder._metricsClientHost);
+        _metricsClientPort = Optional.ofNullable(builder._metricsClientPort);
     }
 
     private final String _monitoringCluster;
     private final String _monitoringService;
+    private final ImmutableList<JsonNode> _monitoringSinks;
+    private final Optional<String> _metricsClientHost;
+    private final Optional<Integer> _metricsClientPort;
+    private final Duration _jvmMetricsCollectionInterval;
     private final File _logDirectory;
     private final File _pipelinesDirectory;
     private final String _httpHost;
@@ -142,10 +161,9 @@ public final class AggregatorConfiguration {
     private final int _httpPort;
     private final Optional<Class<? extends SupplementalRoutes>> _supplementalHttpRoutesClass;
     private final boolean _logDeadLetters;
-    private final String _metricsClientHost;
-    private final int _metricsClientPort;
-    private final Duration _jvmMetricsCollectionInterval;
     private final Map<String, ?> _akkaConfiguration;
+
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
 
     /**
      * {@link com.arpnetworking.commons.builder.Builder} implementation for
@@ -160,6 +178,10 @@ public final class AggregatorConfiguration {
          */
         public Builder() {
             super(AggregatorConfiguration::new);
+
+            final ObjectNode sinkRoot = OBJECT_MAPPER.createObjectNode();
+            sinkRoot.set("class", new TextNode("com.arpnetworking.metrics.impl.ApacheHttpSink"));
+            _monitoringSinks = ImmutableList.of(sinkRoot);
         }
 
         /**
@@ -182,6 +204,58 @@ public final class AggregatorConfiguration {
          */
         public Builder setMonitoringService(final String value) {
             _monitoringService = value;
+            return this;
+        }
+
+        /**
+         * The monitoring sinks. Optional. The default value is the default
+         * instance of {@link com.arpnetworking.metrics.impl.ApacheHttpSink}.
+         *
+         * @param value The monitoring service.
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setMonitoringSinks(final ImmutableList<JsonNode> value) {
+            _monitoringSinks = value;
+            return this;
+        }
+
+        /**
+         * The metrics client http host address to send to. Optional. Cannot be
+         * empty. Defaults to the http address unless it's 0.0.0.0 in which
+         * case it defaults to localhost.
+         *
+         * @param value The metrics client host address to send to.
+         * @return This instance of {@link Builder}.
+         * @deprecated Use {@link Builder#setMonitoringSinks(ImmutableList)}
+         */
+        @Deprecated
+        public Builder setMetricsClientHost(final String value) {
+            _metricsClientHost = value;
+            return this;
+        }
+
+        /**
+         * The metrics client http port to send to. Optional. must be between
+         * 1 and 65535 (inclusive). Defaults to the http port.
+         *
+         * @param value The metrics client port to listen send to.
+         * @return This instance of {@link Builder}.
+         * @deprecated Use {@link Builder#setMonitoringSinks(ImmutableList)}
+         */
+        @Deprecated
+        public Builder setMetricsClientPort(final Integer value) {
+            _metricsClientPort = value;
+            return this;
+        }
+
+        /**
+         * Period for collecting JVM metrics. Optional. Default is 500 milliseconds.
+         *
+         * @param value A {@link Duration} value.
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setJvmMetricsCollectionInterval(final Duration value) {
+            _jvmMetricsCollectionInterval = value;
             return this;
         }
 
@@ -278,42 +352,6 @@ public final class AggregatorConfiguration {
         }
 
         /**
-         * The metrics client http host address to send to. Optional. Cannot be
-         * empty. Defaults to the http address unless it's 0.0.0.0 in which
-         * case it defaults to localhost.
-         *
-         * @param value The metrics client host address to send to.
-         * @return This instance of {@link Builder}.
-         */
-        public Builder setMetricsClientHost(final String value) {
-            _metricsClientHost = value;
-            return this;
-        }
-
-        /**
-         * The metrics client http port to send to. Optional. must be between
-         * 1 and 65535 (inclusive). Defaults to the http port.
-         *
-         * @param value The metrics client port to listen send to.
-         * @return This instance of {@link Builder}.
-         */
-        public Builder setMetricsClientPort(final Integer value) {
-            _metricsClientPort = value;
-            return this;
-        }
-
-        /**
-         * Period for collecting JVM metrics. Optional. Default is 500 milliseconds.
-         *
-         * @param value A {@link Duration} value.
-         * @return This instance of {@link Builder}.
-         */
-        public Builder setJvmMetricsCollectionInterval(final Duration value) {
-            _jvmMetricsCollectionInterval = value;
-            return this;
-        }
-
-        /**
          * Akka configuration. Cannot be null. By convention Akka configuration
          * begins with a map containing a single key "akka" and a value of a
          * nested map. For more information please see:
@@ -337,6 +375,14 @@ public final class AggregatorConfiguration {
         @NotEmpty
         private String _monitoringService = "mad";
         @NotNull
+        private ImmutableList<JsonNode> _monitoringSinks;
+        @NotEmpty
+        private String _metricsClientHost;
+        @Range(min = 1, max = 65535)
+        private Integer _metricsClientPort;
+        @NotNull
+        private Duration _jvmMetricsCollectionInterval = Duration.ofMillis(500);
+        @NotNull
         private File _logDirectory;
         @NotNull
         private File _pipelinesDirectory;
@@ -355,12 +401,6 @@ public final class AggregatorConfiguration {
         private Class<? extends SupplementalRoutes> _supplementalHttpRoutesClass;
         @NotNull
         private Boolean _logDeadLetters = false;
-        @NotEmpty
-        private String _metricsClientHost;
-        @Range(min = 1, max = 65535)
-        private Integer _metricsClientPort;
-        @NotNull
-        private Duration _jvmMetricsCollectionInterval = Duration.ofMillis(500);
         @NotNull
         private Map<String, ?> _akkaConfiguration;
     }
