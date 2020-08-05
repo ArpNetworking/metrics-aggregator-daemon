@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:8u151-jre-alpine
+FROM openjdk:8u212-jre-alpine
 
 MAINTAINER arpnetworking
 
@@ -20,6 +20,9 @@ EXPOSE 7090
 WORKDIR /opt/mad
 
 # Configuration
+ENV MAD_USER="mad"
+ENV MAD_UID=1000
+ENV MAD_GID=1000
 ENV JVM_XMS="64m"
 ENV JVM_XMX="1024m"
 ENV LOGBACK_CONFIG="-Dlogback.configurationFile=/opt/mad/config/logback.xml"
@@ -27,7 +30,8 @@ ENV MAD_CONFIG="/opt/mad/config/config.conf"
 ENV JAVA_OPTS=""
 
 # Build
-RUN mkdir -p /opt/mad/lib/ext && \
+RUN apk add --no-cache su-exec && \
+    mkdir -p /opt/mad/lib/ext && \
     mkdir -p /opt/mad/logs && \
     mkdir -p /opt/mad/config/pipelines
 ADD deps /opt/mad/lib/
@@ -36,7 +40,19 @@ ADD config /opt/mad/config/
 ADD lib /opt/mad/lib/
 
 # Entry point
-ENTRYPOINT [ \
+ENTRYPOINT [ "/opt/mad/bin/docker-entrypoint.sh" ]
+
+# Default arguments
+CMD [ \
+    "-n", \
+    "${MAD_USER}", \
+    "-u", \
+    "${MAD_UID}", \
+    "-g", \
+    "${MAD_GID}", \
+    "-d", \
+    "/opt/mad", \
+    "--", \
     "/opt/mad/bin/mad", \
     "${LOGBACK_CONFIG}", \
     "-XX:+HeapDumpOnOutOfMemoryError", \
