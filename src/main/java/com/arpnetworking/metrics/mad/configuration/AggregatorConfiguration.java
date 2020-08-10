@@ -34,6 +34,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Representation of TsdAggregator configuration.
@@ -221,29 +222,28 @@ public final class AggregatorConfiguration {
 
         /**
          * The metrics client http host address to send to. Optional. Cannot be
-         * empty. Defaults to the http address unless it's 0.0.0.0 in which
-         * case it defaults to localhost.
+         * empty. Defaults to unspecified.
          *
          * @param value The metrics client host address to send to.
          * @return This instance of {@link Builder}.
          * @deprecated Use {@link Builder#setMonitoringSinks(ImmutableList)}
          */
         @Deprecated
-        public Builder setMetricsClientHost(final String value) {
+        public Builder setMetricsClientHost(@Nullable final String value) {
             _metricsClientHost = value;
             return this;
         }
 
         /**
-         * The metrics client http port to send to. Optional. must be between
-         * 1 and 65535 (inclusive). Defaults to the http port.
+         * The metrics client http port to send to. Optional. Must be between
+         * 1 and 65535 (inclusive). Defaults to unspecified.
          *
          * @param value The metrics client port to listen send to.
          * @return This instance of {@link Builder}.
          * @deprecated Use {@link Builder#setMonitoringSinks(ImmutableList)}
          */
         @Deprecated
-        public Builder setMetricsClientPort(final Integer value) {
+        public Builder setMetricsClientPort(@Nullable final Integer value) {
             _metricsClientPort = value;
             return this;
         }
@@ -376,8 +376,10 @@ public final class AggregatorConfiguration {
         private String _monitoringService = "mad";
         @NotNull
         private ImmutableList<JsonNode> _monitoringSinks;
+        @Nullable
         @NotEmpty
         private String _metricsClientHost;
+        @Nullable
         @Range(min = 1, max = 65535)
         private Integer _metricsClientPort;
         @NotNull
