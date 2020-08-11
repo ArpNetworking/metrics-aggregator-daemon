@@ -16,7 +16,6 @@
 package com.arpnetworking.metrics.mad.parsers;
 
 import com.arpnetworking.commons.test.BuildableTestHelper;
-import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -40,11 +39,6 @@ public final class JsonToRecordParserTest {
         BuildableTestHelper.testBuild(
                 _jsonParserBuilder.get(),
                 JsonToRecordParser.class);
-    }
-
-    @Test
-    public void testReset() throws Exception {
-        ThreadLocalBuildableTestHelper.testReset(_jsonParserBuilder.get());
     }
 
     @Test

@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
+import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.commons.jackson.databind.EnumerationDeserializer;
 import com.arpnetworking.commons.jackson.databind.EnumerationDeserializerStrategyUsingToUpperCase;
@@ -714,7 +715,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
      * {@link com.arpnetworking.commons.builder.Builder} implementation for
      * {@link JsonToRecordParser}.
      */
-    public static final class Builder extends ThreadLocalBuilder<JsonToRecordParser> {
+    public static final class Builder extends OvalBuilder<JsonToRecordParser> {
 
         /**
          * Public constructor.
@@ -754,13 +755,6 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
         public Builder setDefaultCluster(final String value) {
             _defaultCluster = value;
             return this;
-        }
-
-        @Override
-        protected void reset() {
-            _defaultHost = LOCAL_HOST_NAME;
-            _defaultService = null;
-            _defaultCluster = null;
         }
 
         // NOTE: There are no constraints on these values as they are only

@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
+import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
@@ -219,7 +220,7 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
      * {@link com.arpnetworking.commons.builder.Builder} implementation for
      * {@link GraphitePlaintextToRecordParser}.
      */
-    public static final class Builder extends ThreadLocalBuilder<GraphitePlaintextToRecordParser> {
+    public static final class Builder extends OvalBuilder<GraphitePlaintextToRecordParser> {
 
         /**
          * Public constructor.
@@ -250,12 +251,6 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
         public Builder setParseCarbonTags(final Boolean value) {
             _parseCarbonTags = value;
             return this;
-        }
-
-        @Override
-        protected void reset() {
-            _globalTags = ImmutableMap.of();
-            _parseCarbonTags = false;
         }
 
         @NotNull

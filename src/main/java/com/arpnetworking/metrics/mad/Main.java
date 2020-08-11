@@ -57,6 +57,7 @@ import com.arpnetworking.utility.AkkaForkJoinPoolAdapter;
 import com.arpnetworking.utility.Configurator;
 import com.arpnetworking.utility.Launchable;
 import com.arpnetworking.utility.ScalaForkJoinPoolAdapter;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -75,7 +76,7 @@ import scala.concurrent.duration.Duration;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -88,6 +89,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 
 /**
  * Class containing entry point for Metrics Data Aggregator (MAD).
@@ -264,6 +266,7 @@ public final class Main implements Launchable {
                 .run(materializer);
     }
 
+    @SuppressWarnings("deprecation")
     private Injector launchGuice(final ActorSystem actorSystem) {
         LOGGER.info().setMessage("Launching guice").log();
 
@@ -282,17 +285,28 @@ public final class Main implements Launchable {
         }
 
         // Instantiate the metrics factory
-        final URI sinkUrl = URI.create(
-                "http://" + _configuration.getMetricsClientHost() + ":"
-                        + _configuration.getMetricsClientPort() + "/metrics/v3/application");
+        final ImmutableList.Builder<com.arpnetworking.metrics.Sink> monitoringSinksBuilder =
+                new ImmutableList.Builder<>();
+        if (_configuration.getMetricsClientHost().isPresent()
+                || _configuration.getMetricsClientPort().isPresent()) {
+            final String endpoint = String.format(
+                    "http://%s:%d/metrics/v3/application",
+                    _configuration.getMetricsClientHost().orElse("localhost"),
+                    _configuration.getMetricsClientPort().orElse(7090));
+
+            monitoringSinksBuilder.add(
+                    new ApacheHttpSink.Builder()
+                            .setUri(URI.create(endpoint))
+                            .build());
+
+        } else {
+            monitoringSinksBuilder.addAll(createSinks(_configuration.getMonitoringSinks()));
+        }
+
         final MetricsFactory metricsFactory = new TsdMetricsFactory.Builder()
                 .setClusterName(_configuration.getMonitoringCluster())
                 .setServiceName(_configuration.getMonitoringService())
-                .setSinks(
-                        Collections.singletonList(
-                                new ApacheHttpSink.Builder()
-                                        .setUri(sinkUrl)
-                                        .build()))
+                .setSinks(monitoringSinksBuilder.build())
                 .build();
 
         final AppShutdown shutdown = new AppShutdown();
@@ -300,6 +314,36 @@ public final class Main implements Launchable {
 
         // Instantiate Guice
         return Guice.createInjector(new MainModule(actorSystem, metricsFactory, shutdown));
+    }
+
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
+    static List<com.arpnetworking.metrics.Sink> createSinks(
+            final ImmutableList<JsonNode> monitoringSinks) {
+        // Until we implement the Commons Builder pattern in the metrics client
+        // library we need to resort to a more brute-force deserialization
+        // style. The benefit of this approach is that it will be forwards
+        // compatible with the Commons Builder approach. The drawbacks are
+        // the ugly way the configuration is passed around (as JsonNode) and
+        // then two-step deserialized.
+        final List<com.arpnetworking.metrics.Sink> sinks = new ArrayList<>();
+        for (final JsonNode sinkNode : monitoringSinks) {
+            @Nullable final JsonNode classNode = sinkNode.get("class");
+            try {
+                if (classNode != null) {
+                    final Class<?> builderClass = Class.forName(classNode.textValue() + "$Builder");
+                    final Object builder = OBJECT_MAPPER.treeToValue(sinkNode, builderClass);
+                    @SuppressWarnings("unchecked")
+                    final com.arpnetworking.metrics.Sink sink =
+                            (com.arpnetworking.metrics.Sink) builderClass.getMethod("build").invoke(builder);
+                    sinks.add(sink);
+                }
+                // CHECKSTYLE.OFF: IllegalCatch - There are so many ways this hack can fail!
+            } catch (final Exception e) {
+                // CHECKSTYLE.ON: IllegalCatch
+                throw new RuntimeException("Unable to create sink from: " + sinkNode.toString(), e);
+            }
+        }
+        return sinks;
     }
 
     private ActorSystem launchAkka() {
