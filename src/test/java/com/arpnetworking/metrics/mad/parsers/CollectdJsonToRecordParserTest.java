@@ -17,6 +17,7 @@ package com.arpnetworking.metrics.mad.parsers;
 
 import akka.util.ByteString;
 import com.arpnetworking.commons.test.BuildableTestHelper;
+import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.HttpRequest;
@@ -70,6 +71,11 @@ public class CollectdJsonToRecordParserTest {
         BuildableTestHelper.testBuild(
                 _collectdRecordBuilder.get(),
                 CollectdJsonToRecordParser.CollectdRecord.class);
+    }
+
+    @Test
+    public void testReset() throws Exception {
+        ThreadLocalBuildableTestHelper.testReset(_collectdRecordBuilder.get());
     }
 
     @Test
