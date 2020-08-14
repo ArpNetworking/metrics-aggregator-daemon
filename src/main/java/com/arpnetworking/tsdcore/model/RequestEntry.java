@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import com.arpnetworking.commons.builder.ThreadLocalBuilder;
+import com.arpnetworking.commons.builder.OvalBuilder;
 import net.sf.oval.constraint.NotNull;
 import org.asynchttpclient.Request;
 
@@ -50,8 +50,11 @@ public final class RequestEntry {
     /**
      * {@link com.arpnetworking.commons.builder.Builder} implementation for
      * {@link RequestEntry}.
+     *
+     * TODO(ville): Convert RequestEntry.Builder would be a ThreadLocalBuilder
+     * See comments in HttpPostSink:createRequests
      */
-    public static final class Builder extends ThreadLocalBuilder<RequestEntry> {
+    public static final class Builder extends OvalBuilder<RequestEntry> {
 
         /**
          * Public constructor.
@@ -91,14 +94,6 @@ public final class RequestEntry {
         public Builder setPopulationSize(final long value) {
             _populationSize = value;
             return this;
-        }
-
-
-        @Override
-        protected void reset() {
-            _request = null;
-            _enterTime = null;
-            _populationSize = null;
         }
 
         @NotNull

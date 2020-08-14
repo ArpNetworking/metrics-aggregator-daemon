@@ -116,6 +116,10 @@ public abstract class HttpPostSink extends BaseSink {
         final Collection<SerializedDatum> serializedData = serialize(periodicData);
         final Collection<RequestEntry.Builder> requestEntryBuilders = Lists.newArrayListWithExpectedSize(serializedData.size());
         for (final SerializedDatum serializedDatum : serializedData) {
+            // TODO(ville): Convert RequestEntry.Builder would be a ThreadLocalBuilder
+            // Unfortunately, the split builder logic across HttpPostSInk and
+            // HttpPostSinkActor does not permit this as-is. The logic would need
+            // to be refactored to permit the use of a TLB.
             requestEntryBuilders.add(new RequestEntry.Builder()
                             .setRequest(createRequest(client, serializedDatum.getDatum()))
                             .setPopulationSize(serializedDatum.getPopulationSize()));
