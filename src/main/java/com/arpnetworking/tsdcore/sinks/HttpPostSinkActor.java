@@ -106,6 +106,7 @@ public class HttpPostSinkActor extends AbstractActor {
         _requestLatencyName = "sinks/http_post/" + sink.getMetricSafeName() + "/request_latency";
         _inQueueLatencyName = "sinks/http_post/" + sink.getMetricSafeName() + "/queue_time";
         _requestSuccessName = "sinks/http_post/" + sink.getMetricSafeName() + "/success";
+        _requestFailureName = "sinks/http_post/" + sink.getMetricSafeName() + "/failure";
         _responseStatusName = "sinks/http_post/" + sink.getMetricSafeName() + "/status";
         _samplesDroppedName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_dropped";
         _samplesSentName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_sent";
@@ -303,6 +304,7 @@ public class HttpPostSinkActor extends AbstractActor {
                         metrics.incrementCounter(_samplesDroppedName, requestEntry.getPopulationSize());
                     }
                     metrics.incrementCounter(_requestSuccessName, (returnValue instanceof PostSuccess) ? 1 : 0);
+                    metrics.incrementCounter(_requestFailureName, (returnValue instanceof PostFailure) ? 1 : 0);
                     metrics.close();
                     return returnValue;
                 });
@@ -333,6 +335,7 @@ public class HttpPostSinkActor extends AbstractActor {
     private final String _requestLatencyName;
     private final String _inQueueLatencyName;
     private final String _requestSuccessName;
+    private final String _requestFailureName;
     private final String _responseStatusName;
     private final String _samplesDroppedName;
     private final String _samplesSentName;
