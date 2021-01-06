@@ -209,10 +209,10 @@ public final class AggregatorConfiguration {
         }
 
         /**
-         * The monitoring sinks. Optional. The default value is the default
-         * instance of {@link com.arpnetworking.metrics.impl.ApacheHttpSink}.
+         * The monitoring sinks. Optional. Cannot be null. The default value is
+         * the default instance of {@link com.arpnetworking.metrics.impl.ApacheHttpSink}.
          *
-         * @param value The monitoring service.
+         * @param value The monitoring sinks.
          * @return This instance of {@link Builder}.
          */
         public Builder setMonitoringSinks(final ImmutableList<JsonNode> value) {
@@ -374,6 +374,7 @@ public final class AggregatorConfiguration {
         @NotNull
         @NotEmpty
         private String _monitoringService = "mad";
+        // TODO(ville): Apply the default here once we migrate off JsonNode.
         @NotNull
         private ImmutableList<JsonNode> _monitoringSinks;
         @Nullable
@@ -383,7 +384,7 @@ public final class AggregatorConfiguration {
         @Range(min = 1, max = 65535)
         private Integer _metricsClientPort;
         @NotNull
-        private Duration _jvmMetricsCollectionInterval = Duration.ofMillis(500);
+        private Duration _jvmMetricsCollectionInterval = Duration.ofMillis(1000);
         @NotNull
         private File _logDirectory;
         @NotNull

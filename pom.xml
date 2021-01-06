@@ -92,7 +92,7 @@
     <log4j.over.slf4j.version>1.7.25</log4j.over.slf4j.version>
     <metrics.aggregator.protocol.prometheus.version>1.0.0</metrics.aggregator.protocol.prometheus.version>
     <metrics.aggregator.protocol.version>1.0.10</metrics.aggregator.protocol.version>
-    <metrics.client.version>0.11.2</metrics.client.version>
+    <metrics.client.version>0.11.3</metrics.client.version>
     <metrics.client.http.version>0.11.2</metrics.client.http.version>
     <metrics.client.incubator.version>0.11.2</metrics.client.incubator.version>
     <metrics.jvm.extra.version>0.11.2</metrics.jvm.extra.version>
@@ -465,8 +465,8 @@
                   <KAFKA_SOURCE_BOOTSTRAP_HOST>kafka</KAFKA_SOURCE_BOOTSTRAP_HOST>
                   <!-- TODO(ville): Obtain these from the current user! -->
                   <!-- Ref: https://github.com/rynr/user-id-maven-plugin -->
-                  <KDB_UID>1000</KDB_UID>
-                  <KDB_GID>1000</KDB_GID>
+                  <MAD_UID>1000</MAD_UID>
+                  <MAD_GID>1000</MAD_GID>
                 </env>
                 <volumes>
                   <bind>
