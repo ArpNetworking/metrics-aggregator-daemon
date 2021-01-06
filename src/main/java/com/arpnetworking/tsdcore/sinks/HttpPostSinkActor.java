@@ -17,7 +17,6 @@ package com.arpnetworking.tsdcore.sinks;
 
 import akka.actor.AbstractActor;
 import akka.actor.Props;
-import akka.http.javadsl.model.StatusCodes;
 import akka.pattern.PatternsCS;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.Metrics;
@@ -31,7 +30,7 @@ import com.arpnetworking.tsdcore.model.RequestEntry;
 import com.google.common.base.Charsets;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Request;
@@ -43,7 +42,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
@@ -94,6 +92,7 @@ public class HttpPostSinkActor extends AbstractActor {
             final MetricsFactory metricsFactory) {
         _client = client;
         _sink = sink;
+        _acceptedStatusCodes = sink.getAcceptedStatusCodes();
         _maximumConcurrency = maximumConcurrency;
         _pendingRequests = EvictingQueue.create(maximumQueueSize);
         if (Objects.equals(Duration.ZERO, spreadPeriod)) {
@@ -120,6 +119,7 @@ public class HttpPostSinkActor extends AbstractActor {
     public Object toLogValue() {
         return LogValueMapFactory.builder(this)
                 .put("sink", _sink)
+                .put("acceptedStatusCodes", _acceptedStatusCodes)
                 .put("maximumConcurrency", _maximumConcurrency)
                 .put("spreadingDelayMillis", _spreadingDelayMillis)
                 .put("waiting", _waiting)
@@ -291,7 +291,7 @@ public class HttpPostSinkActor extends AbstractActor {
                                     String.format("%s/%dxx", _responseStatusName, i),
                                     responseStatusClass == i ? 1 : 0);
                         }
-                        if (ACCEPTED_STATUS_CODES.contains(responseStatusCode)) {
+                        if (_acceptedStatusCodes.contains(responseStatusCode)) {
                              returnValue =  new PostSuccess(result);
                              metrics.incrementCounter(_samplesSentName, requestEntry.getPopulationSize());
                         } else {
@@ -328,6 +328,7 @@ public class HttpPostSinkActor extends AbstractActor {
     private final HttpPostSink _sink;
     private final int _spreadingDelayMillis;
     private final MetricsFactory _metricsFactory;
+    private final ImmutableSet<Integer> _acceptedStatusCodes;
 
     private final String _evictedRequestsName;
     private final String _requestLatencyName;
@@ -337,21 +338,10 @@ public class HttpPostSinkActor extends AbstractActor {
     private final String _samplesDroppedName;
     private final String _samplesSentName;
 
-
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
     private static final Logger POST_ERROR_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSink.class, Duration.ofSeconds(30));
     private static final Logger EVICTED_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSink.class, Duration.ofSeconds(30));
-    private static final Set<Integer> ACCEPTED_STATUS_CODES = Sets.newHashSet();
     private static final com.google.common.collect.ImmutableList<Integer> STATUS_CLASSES = ImmutableList.of(2, 3, 4, 5);
-
-
-    static {
-        // TODO(vkoskela): Make accepted status codes configurable [AINT-682]
-        ACCEPTED_STATUS_CODES.add(StatusCodes.OK.intValue());
-        ACCEPTED_STATUS_CODES.add(StatusCodes.CREATED.intValue());
-        ACCEPTED_STATUS_CODES.add(StatusCodes.ACCEPTED.intValue());
-        ACCEPTED_STATUS_CODES.add(StatusCodes.NO_CONTENT.intValue());
-    }
 
     /**
      * Message class to wrap a list of {@link AggregatedData}.
