@@ -38,6 +38,7 @@ import org.asynchttpclient.Response;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -218,7 +219,7 @@ public class HttpPostSinkActor extends AbstractActor {
             for (final RequestEntry.Builder requestEntryBuilder : requestEntryBuilders) {
                 // TODO(vkoskela): Add logging to client [MAI-89]
                 // TODO(vkoskela): Add instrumentation to client [MAI-90]
-                _pendingRequests.offer(requestEntryBuilder.setEnterTime(System.currentTimeMillis()).build());
+                _pendingRequests.offer(requestEntryBuilder.setEnterTime(Instant.now()).build());
             }
 
             if (evicted > 0) {
@@ -271,7 +272,8 @@ public class HttpPostSinkActor extends AbstractActor {
     private void fireNextRequest() {
         final RequestEntry requestEntry = _pendingRequests.poll();
         final Metrics metrics = _metricsFactory.create();
-        metrics.setTimer(_inQueueLatencyName, System.currentTimeMillis() - requestEntry.getEnterTime(), TimeUnit.MILLISECONDS);
+        final long latencyInMillis = Duration.between(requestEntry.getEnterTime(), Instant.now()).toMillis();
+        metrics.setTimer(_inQueueLatencyName, latencyInMillis, TimeUnit.MILLISECONDS);
 
         final Request request = requestEntry.getRequest();
         _inflightRequestsCount++;

@@ -19,6 +19,8 @@ import com.arpnetworking.commons.builder.OvalBuilder;
 import net.sf.oval.constraint.NotNull;
 import org.asynchttpclient.Request;
 
+import java.time.Instant;
+
 /**
  * Contains the info for a http request.
  *
@@ -29,7 +31,7 @@ public final class RequestEntry {
         return _request;
     }
 
-    public long getEnterTime() {
+    public Instant getEnterTime() {
         return _enterTime;
     }
 
@@ -44,7 +46,7 @@ public final class RequestEntry {
     }
 
     private final Request _request;
-    private long _enterTime;
+    private Instant _enterTime;
     private final long _populationSize;
 
     /**
@@ -80,7 +82,7 @@ public final class RequestEntry {
          * @param value The enter time.
          * @return This {@link Builder} instance.
          */
-        public Builder setEnterTime(final long value) {
+        public Builder setEnterTime(final Instant value) {
             _enterTime = value;
             return this;
         }
@@ -99,7 +101,7 @@ public final class RequestEntry {
         @NotNull
         private Request _request;
         @NotNull
-        private Long _enterTime;
+        private Instant _enterTime;
         @NotNull
         private Long _populationSize;
     }
