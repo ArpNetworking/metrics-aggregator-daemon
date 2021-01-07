@@ -21,6 +21,7 @@ import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.arpnetworking.metrics.common.kafka.ConsumerDeserializer;
 import com.arpnetworking.metrics.common.sources.Source;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticDeserializer;
 import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
@@ -86,6 +87,10 @@ public final class PipelineConfiguration {
         return _actorSystem;
     }
 
+    public PeriodicMetrics getPeriodicMetrics() {
+        return _periodicMetrics;
+    }
+
     public String getName() {
         return _name;
     }
@@ -123,6 +128,7 @@ public final class PipelineConfiguration {
         return MoreObjects.toStringHelper(this)
                 .add("id", Integer.toHexString(System.identityHashCode(this)))
                 .add("ActorSystem", _actorSystem)
+                .add("PeriodicMetrics", _periodicMetrics)
                 .add("Name", _name)
                 .add("Sources", _sources)
                 .add("Sinks", _sinks)
@@ -135,6 +141,7 @@ public final class PipelineConfiguration {
 
     private PipelineConfiguration(final Builder builder) {
         _actorSystem = builder._actorSystem;
+        _periodicMetrics = builder._periodicMetrics;
         _name = builder._name;
         _sources = ImmutableList.copyOf(builder._sources);
         _sinks = ImmutableList.copyOf(builder._sinks);
@@ -146,6 +153,7 @@ public final class PipelineConfiguration {
     }
 
     private final ActorSystem _actorSystem;
+    private final PeriodicMetrics _periodicMetrics;
     private final String _name;
     private final ImmutableList<Source> _sources;
     private final ImmutableList<Sink> _sinks;
@@ -180,6 +188,17 @@ public final class PipelineConfiguration {
          */
         public Builder setActorSystem(final ActorSystem value) {
             _actorSystem = value;
+            return this;
+        }
+
+        /**
+         * The {@link PeriodicMetrics}. Cannot be null.
+         *
+         * @param value The {@link PeriodicMetrics}.
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setPeriodicMetrics(final PeriodicMetrics value) {
+            _periodicMetrics = value;
             return this;
         }
 
@@ -279,6 +298,9 @@ public final class PipelineConfiguration {
         @NotNull
         @JacksonInject
         private ActorSystem _actorSystem;
+        @NotNull
+        @JacksonInject
+        private PeriodicMetrics _periodicMetrics;
         @NotNull
         @NotEmpty
         private String _name;

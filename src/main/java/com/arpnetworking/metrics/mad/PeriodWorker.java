@@ -18,6 +18,7 @@ package com.arpnetworking.metrics.mad;
 import akka.actor.AbstractActor;
 import akka.actor.Cancellable;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
@@ -46,9 +47,13 @@ import javax.annotation.Nullable;
      * Public constructor. Since this is an {@code Actor} this method should not be
      * called directly, but instead you should use {@code Props}.
      */
-    PeriodWorker(final Duration period, final Bucket.Builder bucketBuilder) {
+    PeriodWorker(
+            final Duration period,
+            final Bucket.Builder bucketBuilder,
+            final PeriodicMetrics periodicMetrics) {
         _period = period;
         _bucketBuilder = bucketBuilder;
+        _periodicMetrics = periodicMetrics;
         _hasRotateScheduled = false;
     }
 
@@ -60,6 +65,7 @@ import javax.annotation.Nullable;
         // creating a race condition. Note that period worker clean-up did not exist
         // in the previous implementation either (not that it shouldn't; just one
         // problem at a time).
+        _periodicMetrics.recordCounter("actors/period_worker/started", 1);
     }
 
     @Override
@@ -73,6 +79,12 @@ import javax.annotation.Nullable;
                     .addData("cancelResult", cancelResult)
                     .log();
         }
+        _periodicMetrics.recordCounter("actors/period_worker/stopped", 1);
+    }
+
+    @Override
+    public void preRestart(final Throwable reason, final Optional<Object> message) throws Exception {
+        _periodicMetrics.recordCounter("actors/period_worker/restarted", 1);
     }
 
     @Override
@@ -259,6 +271,7 @@ import javax.annotation.Nullable;
     private final Bucket.Builder _bucketBuilder;
     private final NavigableMap<ZonedDateTime, Bucket> _bucketsByStart = new TreeMap<>();
     private final NavigableMap<ZonedDateTime, List<Bucket>> _bucketsByExpiration = new TreeMap<>();
+    private final PeriodicMetrics _periodicMetrics;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PeriodWorker.class);
     private static final Duration MINIMUM_ROTATION_CHECK_INTERVAL = Duration.ofMillis(100);

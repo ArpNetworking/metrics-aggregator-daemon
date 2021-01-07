@@ -26,6 +26,7 @@ import com.arpnetworking.commons.java.util.concurrent.CompletableFutures;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.model.statistics.Statistic;
 import com.arpnetworking.steno.LogValueMapFactory;
@@ -167,7 +168,7 @@ public final class Aggregator implements Observer, Launchable {
                     .setDependentStatistics(_cachedDependentStatistics)
                     .setPeriod(period)
                     .setSink(_sink);
-            periodWorkerList.add(_actorSystem.actorOf(Props.create(PeriodWorker.class, period, bucketBuilder)));
+            periodWorkerList.add(_actorSystem.actorOf(Props.create(PeriodWorker.class, period, bucketBuilder, _periodicMetrics)));
         }
         LOGGER.debug()
                 .setMessage("Created period worker actors")
@@ -187,6 +188,7 @@ public final class Aggregator implements Observer, Launchable {
 
     private Aggregator(final Builder builder) {
         _actorSystem = builder._actorSystem;
+        _periodicMetrics = builder._periodicMetrics;
         _periods = ImmutableSet.copyOf(builder._periods);
         _sink = builder._sink;
         _specifiedCounterStatistics = ImmutableSet.copyOf(builder._counterStatistics);
@@ -235,6 +237,7 @@ public final class Aggregator implements Observer, Launchable {
     }
 
     private final ActorSystem _actorSystem;
+    private final PeriodicMetrics _periodicMetrics;
     private final ImmutableSet<Duration> _periods;
     private final Sink _sink;
     private final ImmutableSet<Statistic> _specifiedTimerStatistics;
@@ -272,6 +275,17 @@ public final class Aggregator implements Observer, Launchable {
          */
         public Builder setActorSystem(final ActorSystem value) {
             _actorSystem = value;
+            return this;
+        }
+
+        /**
+         * Set the {@link PeriodicMetrics}. Cannot be null.
+         *
+         * @param value The {@link PeriodicMetrics}.
+         * @return This {@link Builder} instance.
+         */
+        public Builder setPeriodicMetrics(final PeriodicMetrics value) {
+            _periodicMetrics = value;
             return this;
         }
 
@@ -344,6 +358,8 @@ public final class Aggregator implements Observer, Launchable {
 
         @NotNull
         private ActorSystem _actorSystem;
+        @NotNull
+        private PeriodicMetrics _periodicMetrics;
         @NotNull
         private Sink _sink;
         @NotNull
