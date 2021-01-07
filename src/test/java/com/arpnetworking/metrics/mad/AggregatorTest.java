@@ -18,6 +18,7 @@ package com.arpnetworking.metrics.mad;
 import akka.actor.ActorSystem;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
@@ -68,6 +69,7 @@ public class AggregatorTest {
         _actorSystem = ActorSystem.create();
        _aggregator = new Aggregator.Builder()
                 .setActorSystem(_actorSystem)
+                .setPeriodicMetrics(_periodicMetrics)
                 .setSink(_sink)
                 .setCounterStatistics(Collections.singleton(MAX_STATISTIC))
                 .setTimerStatistics(Collections.singleton(MAX_STATISTIC))
@@ -404,6 +406,8 @@ public class AggregatorTest {
     private ArgumentCaptor<PeriodicData> _periodicDataCaptor;
     @Mock
     private Sink _sink;
+    @Mock
+    private PeriodicMetrics _periodicMetrics;
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic MAX_STATISTIC = STATISTIC_FACTORY.getStatistic("max");

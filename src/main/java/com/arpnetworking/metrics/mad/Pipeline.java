@@ -66,6 +66,7 @@ public final class Pipeline implements Launchable {
 
         final Aggregator aggregator = new Aggregator.Builder()
                 .setActorSystem(_pipelineConfiguration.getActorSystem())
+                .setPeriodicMetrics(_pipelineConfiguration.getPeriodicMetrics())
                 .setPeriods(_pipelineConfiguration.getPeriods())
                 .setTimerStatistics(_pipelineConfiguration.getTimerStatistics())
                 .setCounterStatistics(_pipelineConfiguration.getCounterStatistics())
