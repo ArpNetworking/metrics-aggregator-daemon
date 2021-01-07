@@ -20,6 +20,7 @@ import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.http.javadsl.model.HttpMethods;
 import akka.http.javadsl.model.MediaTypes;
+import akka.http.javadsl.model.StatusCodes;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.MetricsFactory;
 import com.arpnetworking.steno.LogValueMapFactory;
@@ -28,6 +29,7 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.tsdcore.model.RequestEntry;
 import com.fasterxml.jackson.annotation.JacksonInject;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
@@ -146,6 +148,15 @@ public abstract class HttpPostSink extends BaseSink {
     }
 
     /**
+     * Accessor for the status codes accepted as successful.
+     *
+     * @return the status codes accepted as success
+     */
+    ImmutableSet<Integer> getAcceptedStatusCodes() {
+        return _acceptedStatusCodes;
+    }
+
+    /**
      * Serialize the {@link PeriodicData} instances for posting.
      *
      * @param periodicData The {@link PeriodicData} to be serialized.
@@ -161,6 +172,7 @@ public abstract class HttpPostSink extends BaseSink {
     protected HttpPostSink(final Builder<?, ?> builder) {
         super(builder);
         _uri = builder._uri;
+        _acceptedStatusCodes = builder._acceptedStatusCodes;
         _aysncHttpClientUri = Uri.create(_uri.toString());
 
         _sinkActor = builder._actorSystem.actorOf(
@@ -176,6 +188,7 @@ public abstract class HttpPostSink extends BaseSink {
     private final URI _uri;
     private final Uri _aysncHttpClientUri;
     private final ActorRef _sinkActor;
+    private final ImmutableSet<Integer> _acceptedStatusCodes;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
     private static final AsyncHttpClient CLIENT;
@@ -267,6 +280,18 @@ public abstract class HttpPostSink extends BaseSink {
         }
 
         /**
+         * Sets the http status codes accepted as success. Optional. Cannot be null.
+         * Default is: [200, 201, 202, 204]
+         *
+         * @param value the status codes accepted as success
+         * @return this builder
+         */
+        public B setAcceptedStatusCodes(final ImmutableSet<Integer> value) {
+            _acceptedStatusCodes = value;
+            return self();
+        }
+
+        /**
          * Protected constructor for subclasses.
          *
          * @param targetConstructor The constructor for the concrete type to be created by this builder.
@@ -291,6 +316,19 @@ public abstract class HttpPostSink extends BaseSink {
         @JacksonInject
         @NotNull
         private MetricsFactory _metricsFactory;
+        @NotNull
+        private ImmutableSet<Integer> _acceptedStatusCodes = DEFAULT_ACCEPTED_STATUS_CODES;
+
+        private static final ImmutableSet<Integer> DEFAULT_ACCEPTED_STATUS_CODES;
+
+        static {
+            DEFAULT_ACCEPTED_STATUS_CODES = ImmutableSet.<Integer>builder()
+                    .add(StatusCodes.OK.intValue())
+                    .add(StatusCodes.CREATED.intValue())
+                    .add(StatusCodes.ACCEPTED.intValue())
+                    .add(StatusCodes.NO_CONTENT.intValue())
+                    .build();
+        }
     }
 
     static final class SerializedDatum {
