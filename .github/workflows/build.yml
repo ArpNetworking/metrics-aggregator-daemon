@@ -1,0 +1,74 @@
+name: build
+on:
+  pull_request:
+  push:
+    branches:
+      - "!*"
+    tags:
+      - "metrics-aggregator-daemon-*"
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    # See Maven profile displayPluginUpdates in parent pom
+    env:
+      TRAVIS: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - name: Cache JDK
+        uses: actions/cache@0781355a23dac32fd3bac414512f4b903437991a
+        with:
+          path: ~/.jdk
+          key: ${{ runner.os }}-jdk-${{ hashFiles('.jdkw', 'jdk-wrapper.sh') }}
+      - name: Cache Maven
+        uses: actions/cache@0781355a23dac32fd3bac414512f4b903437991a
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-
+      - name: Build Only
+        if: startsWith(github.ref, 'refs/tags/metrics-aggregator-daemon-') != true
+        run: ./jdk-wrapper.sh ./mvnw clean verify -P rpm -U -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+      - name: Build and Release
+        if: startsWith(github.ref, 'refs/tags/metrics-aggregator-daemon-')
+        env:
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          GPG_PASS: ${{ secrets.GPG_PASS_BRANDON }}
+          OSSRH_PASS: ${{ secrets.OSSRH_PASS }}
+          OSSRH_USER: ${{ secrets.OSSRH_USER }}
+        run: |
+          gpg --batch --import arpnetworking.key 
+          ./jdk-wrapper.sh ./mvnw clean deploy -P release --settings settings.xml -P rpm -U -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+      - name: Create Release
+        id: create_github_release
+        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e
+        if: startsWith(github.ref, 'refs/tags/metrics-aggregator-daemon-')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset RPM
+        uses: csexton/release-asset-action@73f9d3bb8efa2547046ae5130a5c4597e983d543
+        if: startsWith(github.ref, 'refs/tags/metrics-aggregator-daemon-')
+        with:
+          pattern: "./target/rpm/kairosdb/RPMS/noarch/metrics-aggregator-daemon*.rpm"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          release-url: ${{ steps.create_github_release.outputs.upload_url }}
+      - name: Upload Release Asset Tar.gz
+        uses: csexton/release-asset-action@73f9d3bb8efa2547046ae5130a5c4597e983d543
+        if: startsWith(github.ref, 'refs/tags/metrics-aggregator-daemon-')
+        with:
+          pattern: "./target/metrics-aggregator-daemon*-bin.tgz"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          release-url: ${{ steps.create_github_release.outputs.upload_url }}
+
+# To Do:
+# 1) Standard Github Actions upload release asset does not accept wildcards.
+#    Doc: https://github.com/actions/upload-release-asset
+#    Issue: https://github.com/actions/upload-release-asset/issues/47
+
