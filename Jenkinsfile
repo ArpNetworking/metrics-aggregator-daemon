@@ -40,12 +40,12 @@ pipeline {
         }
       }
     }
-    stage('Analysis') {
-      steps {
-        recordIssues(
-            enabledForFailure: true, aggregatingResults: true,
-            tools: [java(), checkStyle(reportEncoding: 'UTF-8'), spotBugs()])
-      }
+  }
+  post('Analysis') {
+    always {
+      recordIssues(
+          enabledForFailure: true, aggregatingResults: true,
+          tools: [java(), checkStyle(reportEncoding: 'UTF-8'), spotBugs()])
     }
   }
 }
