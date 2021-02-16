@@ -29,9 +29,11 @@ import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.model.statistics.Statistic;
+import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.sinks.Sink;
@@ -39,6 +41,7 @@ import com.arpnetworking.utility.Launchable;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -122,6 +125,33 @@ public final class Aggregator implements Observer, Launchable {
 
         final Record record = (Record) event;
         final Key key = new DefaultKey(record.getDimensions());
+
+        _periodicMetrics.recordGauge(
+                "aggregator/samples",
+                record.getMetrics().values().stream()
+                        .map(m -> {
+                            final ImmutableList<CalculatedValue<?>> countStatistic = m.getStatistics().get(
+                                    STATISTIC_FACTORY.getStatistic("count"));
+                            if (countStatistic != null) {
+                                return countStatistic.stream()
+                                        .map(s -> s.getValue().getValue())
+                                        .reduce(Double::sum)
+                                        .orElse(0.0d)
+                                        +
+                                        m.getValues().size();
+                            }
+                            if (!m.getStatistics().isEmpty()) {
+                                LOGGER.warn()
+                                        .setMessage("Received record with statistics but with no count")
+                                        .addData("record", record)
+                                        .addData("key", key)
+                                        .log();
+                            }
+                            return (double) m.getValues().size();
+                        })
+                        .reduce(Double::sum)
+                        .orElse(0.0d));
+
         LOGGER.trace()
                 .setMessage("Sending record to aggregation actor")
                 .addData("record", record)
@@ -251,6 +281,7 @@ public final class Aggregator implements Observer, Launchable {
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedDependentStatistics;
     private final Map<Key, List<ActorRef>> _periodWorkerActors = Maps.newConcurrentMap();
 
+    private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Timeout SHUTDOWN_TIMEOUT = Timeout.apply(1, TimeUnit.SECONDS);
     private static final Logger LOGGER = LoggerFactory.getLogger(Aggregator.class);
 
