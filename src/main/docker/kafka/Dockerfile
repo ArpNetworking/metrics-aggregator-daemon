@@ -15,19 +15,15 @@
 # Original: https://github.com/spotify/docker-kafka
 
 # Kafka and Zookeeper
-FROM java:openjdk-8-jre
+FROM openjdk:8-jre-buster
 
-ENV DEBIAN_FRONTEND noninteractive
 ENV SCALA_VERSION 2.13
-ENV KAFKA_VERSION 2.5.0
+ENV KAFKA_VERSION 2.7.0
 ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
-
-RUN echo "deb [check-valid-until=no] http://archive.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/jessie-backports.list
-RUN sed -i '/deb http:\/\/deb.debian.org\/debian jessie-updates main/d' /etc/apt/sources.list
 
 # Install Kafka, Zookeeper and other needed things
 RUN apt-get -o Acquire::Check-Valid-Until=false update && \
-    apt-get -o Acquire::Check-Valid-Until=false install -y zookeeper wget supervisor dnsutils && \
+    DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Check-Valid-Until=false install -y zookeeper wget supervisor dnsutils && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean && \
     wget -q "http://apache.mirrors.spacedump.net/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" -O "/tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" && \
