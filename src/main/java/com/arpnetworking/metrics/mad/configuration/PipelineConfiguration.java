@@ -107,6 +107,10 @@ public final class PipelineConfiguration {
         return _periods;
     }
 
+    public Duration getIdleTimeout() {
+        return _idleTimeout;
+    }
+
     public Set<Statistic> getTimerStatistics() {
         return _timerStatistic;
     }
@@ -133,6 +137,7 @@ public final class PipelineConfiguration {
                 .add("Sources", _sources)
                 .add("Sinks", _sinks)
                 .add("Periods", _periods)
+                .add("IdleTimeout", _idleTimeout)
                 .add("TimerStatistic", _timerStatistic)
                 .add("CounterStatistic", _counterStatistic)
                 .add("GaugeStatistic", _gaugeStatistic)
@@ -146,6 +151,7 @@ public final class PipelineConfiguration {
         _sources = ImmutableList.copyOf(builder._sources);
         _sinks = ImmutableList.copyOf(builder._sinks);
         _periods = ImmutableSet.copyOf(builder._periods);
+        _idleTimeout = builder._idleTimeout;
         _timerStatistic = ImmutableSet.copyOf(builder._timerStatistics);
         _counterStatistic = ImmutableSet.copyOf(builder._counterStatistics);
         _gaugeStatistic = ImmutableSet.copyOf(builder._gaugeStatistics);
@@ -158,6 +164,7 @@ public final class PipelineConfiguration {
     private final ImmutableList<Source> _sources;
     private final ImmutableList<Sink> _sinks;
     private final ImmutableSet<Duration> _periods;
+    private final Duration _idleTimeout;
     private final ImmutableSet<Statistic> _timerStatistic;
     private final ImmutableSet<Statistic> _counterStatistic;
     private final ImmutableSet<Statistic> _gaugeStatistic;
@@ -237,13 +244,25 @@ public final class PipelineConfiguration {
 
         /**
          * The aggregation periods. Cannot be null or empty. Default is one
-         * second and five minute periods.
+         * second and one minute periods.
          *
-         * @param value The sinks.
+         * @param value The periods.
          * @return This instance of {@link Builder}.
          */
         public Builder setPeriods(final Set<Duration> value) {
             _periods = value;
+            return this;
+        }
+
+        /**
+         * The aggregation worker timeout. Cannot be null. Default is five
+         * minutes.
+         *
+         * @param value The idle timeout.
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setIdleTimeout(final Duration value) {
+            _idleTimeout = value;
             return this;
         }
 
@@ -313,6 +332,8 @@ public final class PipelineConfiguration {
         private Set<Duration> _periods = Sets.newHashSet(
                 Duration.ofSeconds(1),
                 Duration.ofMinutes(1));
+        @NotNull
+        private Duration _idleTimeout = Duration.ofMinutes(5);
         @NotNull
         @NotEmpty
         private Set<Statistic> _timerStatistics = Sets.newHashSet(

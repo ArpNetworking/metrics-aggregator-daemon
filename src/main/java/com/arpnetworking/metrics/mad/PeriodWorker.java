@@ -16,6 +16,8 @@
 package com.arpnetworking.metrics.mad;
 
 import akka.actor.AbstractActor;
+import akka.actor.AbstractActorWithTimers;
+import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
@@ -23,10 +25,12 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.tsdcore.model.Key;
 import com.google.common.collect.Lists;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -41,45 +45,58 @@ import javax.annotation.Nullable;
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
-/* package private */ final class PeriodWorker extends AbstractActor {
+/* package private */ final class PeriodWorker extends AbstractActorWithTimers {
 
     /**
      * Public constructor. Since this is an {@code Actor} this method should not be
      * called directly, but instead you should use {@code Props}.
      */
     PeriodWorker(
+            final ActorRef aggregator,
+            final Key key,
             final Duration period,
+            final Duration idleTimeout,
             final Bucket.Builder bucketBuilder,
             final PeriodicMetrics periodicMetrics) {
+        _aggregator = aggregator;
+        _key = key;
         _period = period;
+        _idleTimeout = idleTimeout;
         _bucketBuilder = bucketBuilder;
         _periodicMetrics = periodicMetrics;
-        _hasRotateScheduled = false;
+        _hasReceivedRecords = false;
+        _nextScheduledRotationTime = Optional.empty();
     }
 
     @Override
     public void preStart() {
-        // TODO(ville): Schedule the actor to self-destruct if it doesn't receive any Record
-        // instances for some period of time (e.g. > the largest period). The caveat is
-        // that we need to deregister the actor from the Aggregator as well without
-        // creating a race condition. Note that period worker clean-up did not exist
-        // in the previous implementation either (not that it shouldn't; just one
-        // problem at a time).
         _periodicMetrics.recordCounter("actors/period_worker/started", 1);
+
+        timers().startPeriodicTimer(
+                IDLE_CHECK_TIMER,
+                IDLE_CHECK_MESSAGE,
+                _idleTimeout);
     }
 
     @Override
     public void postStop() {
-        if (_nextScheduledRotation != null) {
-            final boolean cancelResult = _nextScheduledRotation.cancel();
-            _nextScheduledRotation = null;
+        _periodicMetrics.recordCounter("actors/period_worker/stopped", 1);
 
-            LOGGER.trace()
-                    .setMessage("Shutdown canceled next scheduled rotation")
+        timers().cancel(IDLE_CHECK_TIMER);
+
+        if (_nextScheduledRotationTask != null) {
+            final boolean cancelResult = _nextScheduledRotationTask.cancel();
+            _nextScheduledRotationTask = null;
+            _nextScheduledRotationTime = Optional.empty();
+
+            // Force a rotation of ALL buckets using epoch zero
+            performRotation(ZonedDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault()));
+
+            LOGGER.debug()
+                    .setMessage("Shutdown forced rotations")
                     .addData("cancelResult", cancelResult)
                     .log();
         }
-        _periodicMetrics.recordCounter("actors/period_worker/stopped", 1);
     }
 
     @Override
@@ -92,40 +109,57 @@ import javax.annotation.Nullable;
         return receiveBuilder()
                 .match(Record.class, this::processRecord)
                 .matchEquals(ROTATE_MESSAGE, m -> rotateAndSchedule())
+                .matchEquals(IDLE_CHECK_MESSAGE, m -> checkForIdle())
                 .build();
     }
 
     private void rotateAndSchedule() {
         final ZonedDateTime now = ZonedDateTime.now();
-        _hasRotateScheduled = false;
+        _nextScheduledRotationTime = Optional.empty();
         performRotation(now);
         scheduleRotation(now);
     }
 
-    private void scheduleRotation(final ZonedDateTime now) {
-        final Optional<ZonedDateTime> rotateAt = getRotateAt();
+    private void checkForIdle() {
+        // The check for both no scheduled rotations and having received records
+        // is necessary to ensure that the idle message is only sent after at
+        // least the minimum time has elapsed and no future rotations exist. If
+        // this were only based on rotations then the idle trigger could fire
+        // after the current rotation but before data for the next rotation
+        // arrives, therefore not ensuring that the minimum time has elapsed.
+        if (!_nextScheduledRotationTime.isPresent() && !_hasReceivedRecords) {
+            _aggregator.tell(new Aggregator.PeriodWorkerIdle(_key), self());
+        }
+        _hasReceivedRecords = false;
+    }
 
-        if (rotateAt.isPresent()) {
+    private void scheduleRotation(final ZonedDateTime now) {
+        if (_nextScheduledRotationTask != null) {
+            _nextScheduledRotationTask.cancel();
+            _nextScheduledRotationTask = null;
+        }
+
+        _nextScheduledRotationTime = getRotateAt();
+
+        if (_nextScheduledRotationTime.isPresent()) {
             // If we we don't need to wait then just set the scheduled delay to 0.
             // If we need to wait a really small amount of time, set the delay to a minimum to avoid sleep thrashing.
             // Otherwise schedule the next rotation at the predicted time.
             // Finally, if we wake-up and there's nothing to rotate we'll just re-apply these rules.
 
-            Duration timeToRotate = Duration.between(now, rotateAt.get());
+            Duration timeToRotate = Duration.between(now, _nextScheduledRotationTime.get());
             if (timeToRotate.isNegative()) {
                 timeToRotate = Duration.ZERO;
             } else if (timeToRotate.compareTo(MINIMUM_ROTATION_CHECK_INTERVAL) < 0) {
                 timeToRotate = MINIMUM_ROTATION_CHECK_INTERVAL;
             }
 
-            _nextScheduledRotation = context().system().scheduler().scheduleOnce(
+            _nextScheduledRotationTask = context().system().scheduler().scheduleOnce(
                     timeToRotate,
                     self(),
                     ROTATE_MESSAGE,
                     context().dispatcher(),
                     self());
-
-            _hasRotateScheduled = true;
         }
     }
 
@@ -148,6 +182,9 @@ import javax.annotation.Nullable;
     }
 
     private void processRecord(final Record record) {
+        // Mark the actor as having received records
+        _hasReceivedRecords = true;
+
         // Find an existing bucket for the record
         final Duration timeout = getPeriodTimeout(_period);
         final ZonedDateTime start = getStartTime(record.getTime(), _period);
@@ -184,10 +221,10 @@ import javax.annotation.Nullable;
             });
 
             // Ensure rotation is scheduled (now that we have data)
-            if (!_hasRotateScheduled) {
+            if (!_nextScheduledRotationTime.isPresent() || expiration.isBefore(_nextScheduledRotationTime.get())) {
                 scheduleRotation(ZonedDateTime.now());
             }
-        } else if (!_hasRotateScheduled) {
+        } else if (!_nextScheduledRotationTime.isPresent()) {
             // This is a serious bug!
             LOGGER.error()
                     .setMessage("Rotation not already scheduled while adding to existing bucket")
@@ -264,18 +301,24 @@ import javax.annotation.Nullable;
         return dateTime2;
     }
 
-    private boolean _hasRotateScheduled;
-    @Nullable private Cancellable _nextScheduledRotation;
+    private boolean _hasReceivedRecords;
+    @Nullable private Cancellable _nextScheduledRotationTask;
+    private Optional<ZonedDateTime> _nextScheduledRotationTime;
 
+    private final ActorRef _aggregator;
+    private final Key _key;
     private final Duration _period;
+    private final Duration _idleTimeout;
     private final Bucket.Builder _bucketBuilder;
     private final NavigableMap<ZonedDateTime, Bucket> _bucketsByStart = new TreeMap<>();
     private final NavigableMap<ZonedDateTime, List<Bucket>> _bucketsByExpiration = new TreeMap<>();
     private final PeriodicMetrics _periodicMetrics;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PeriodWorker.class);
+    private static final String IDLE_CHECK_TIMER = "PeriodicIdleCheckTimer";
     private static final Duration MINIMUM_ROTATION_CHECK_INTERVAL = Duration.ofMillis(100);
     private static final Duration MINIMUM_PERIOD_TIMEOUT = Duration.ofSeconds(1);
     private static final Duration MAXIMUM_PERIOD_TIMEOUT = Duration.ofMinutes(10);
     private static final String ROTATE_MESSAGE = "ROTATE_NOW";
+    private static final String IDLE_CHECK_MESSAGE = "CHECK_FOR_IDLE_NOW";
 }

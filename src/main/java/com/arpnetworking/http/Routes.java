@@ -59,6 +59,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import scala.compat.java8.FutureConverters;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.Objects;
@@ -251,8 +252,9 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     }
 
     private CompletionStage<HttpResponse> dispatchHttpRequest(final HttpRequest request, final String actorName) {
-        final CompletionStage<ActorRef> refFuture = _actorSystem.actorSelection(actorName)
-                .resolveOneCS(FiniteDuration.create(1, TimeUnit.SECONDS));
+        final CompletionStage<ActorRef> refFuture = FutureConverters.toJava(
+                _actorSystem.actorSelection(actorName)
+                        .resolveOne(FiniteDuration.create(1, TimeUnit.SECONDS)));
         return refFuture.thenCompose(
                 ref -> {
                     final CompletableFuture<HttpResponse> response = new CompletableFuture<>();

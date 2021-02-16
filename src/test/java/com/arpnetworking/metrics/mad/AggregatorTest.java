@@ -75,6 +75,7 @@ public class AggregatorTest {
                 .setTimerStatistics(Collections.singleton(MAX_STATISTIC))
                 .setGaugeStatistics(Collections.singleton(MAX_STATISTIC))
                 .setPeriods(Collections.singleton(Duration.ofSeconds(1)))
+                .setIdleTimeout(Duration.ofMinutes(60))
                 .build();
         _aggregator.launch();
     }

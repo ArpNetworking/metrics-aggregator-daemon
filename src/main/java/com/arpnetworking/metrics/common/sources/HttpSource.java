@@ -42,9 +42,14 @@ import akka.util.ByteString;
 import com.arpnetworking.http.RequestReply;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
+import com.arpnetworking.metrics.mad.model.Metric;
 import com.arpnetworking.metrics.mad.model.Record;
+import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.tsdcore.model.CalculatedValue;
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.google.common.collect.ImmutableMultimap;
 import net.sf.oval.constraint.NotNull;
 
@@ -74,8 +79,10 @@ public class HttpSource extends ActorSource {
     protected HttpSource(final Builder<?, ? extends HttpSource> builder) {
         super(builder);
         _parser = builder._parser;
+        _periodicMetrics = builder._periodicMetrics;
     }
 
+    private final PeriodicMetrics _periodicMetrics;
     private final Parser<List<Record>, com.arpnetworking.metrics.mad.model.HttpRequest> _parser;
 
     /**
@@ -98,6 +105,7 @@ public class HttpSource extends ActorSource {
                     .match(RequestReply.class, requestReply -> {
                         // TODO(barp): Fix the ugly HttpRequest cast here due to java vs scala dsl
                         akka.stream.javadsl.Source.single(requestReply.getRequest())
+                                .log("http source stream failure")
                                 .via(_processGraph)
                                 .toMat(_sink, Keep.right())
                                 .run(_materializer)
@@ -127,6 +135,8 @@ public class HttpSource extends ActorSource {
          * @param source The {@link HttpSource} to send notifications through.
          */
         /* package private */ Actor(final HttpSource source) {
+            _periodicMetrics = source._periodicMetrics;
+            _metricSafeName = source.getMetricSafeName();
             _parser = source._parser;
             _sink = Sink.foreach(source::notify);
             _materializer = ActorMaterializer.create(
@@ -193,14 +203,36 @@ public class HttpSource extends ActorSource {
 
         private List<Record> parseRecords(final com.arpnetworking.metrics.mad.model.HttpRequest request)
                 throws ParsingException {
-            return _parser.parse(request);
+            final List<Record> records = _parser.parse(request);
+            long samples = 0;
+            for (final Record record : records) {
+                for (final Metric metric : record.getMetrics().values()) {
+                    samples += metric.getValues().size();
+                    final List<CalculatedValue<?>> countStatistic =
+                            metric.getStatistics().get(STATISTIC_FACTORY.getStatistic("count"));
+                    if (countStatistic != null) {
+                        samples += countStatistic.stream()
+                                .map(s -> s.getValue().getValue())
+                                .reduce(Double::sum)
+                                .orElse(0.0d);
+                    }
+                }
+            }
+            _periodicMetrics.recordGauge(
+                    String.format("sources/http/%s/metric_samples", _metricSafeName),
+                    samples);
+
+            return records;
         }
 
+        private final PeriodicMetrics _periodicMetrics;
+        private final String _metricSafeName;
         private final Sink<Record, CompletionStage<Done>> _sink;
         private final Parser<List<Record>, com.arpnetworking.metrics.mad.model.HttpRequest> _parser;
         private final Materializer _materializer;
         private final Graph<FlowShape<HttpRequest, Record>, NotUsed> _processGraph;
 
+        private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
         private static final Logger BAD_REQUEST_LOGGER =
                 LoggerFactory.getRateLimitLogger(HttpSource.class, Duration.ofSeconds(30));
     }
@@ -235,7 +267,22 @@ public class HttpSource extends ActorSource {
             return self();
         }
 
+        /**
+         * Sets the periodic metrics instance.
+         *
+         * @param value The periodic metrics.
+         * @return This instance of {@link Builder}
+         */
+        public final B setPeriodicMetrics(final PeriodicMetrics value) {
+            _periodicMetrics = value;
+            return self();
+        }
+
         @NotNull
         private Parser<List<Record>, com.arpnetworking.metrics.mad.model.HttpRequest> _parser;
+
+        @NotNull
+        @JacksonInject
+        private PeriodicMetrics _periodicMetrics;
     }
 }
