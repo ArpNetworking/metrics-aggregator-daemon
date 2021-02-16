@@ -18,7 +18,6 @@ package com.arpnetworking.metrics.mad;
 import akka.actor.AbstractActor;
 import akka.actor.AbstractActorWithTimers;
 import akka.actor.ActorRef;
-import akka.actor.Cancellable;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.Record;
@@ -38,7 +37,6 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
-import javax.annotation.Nullable;
 
 /**
  * Actor that aggregates a particular slice of the data set over time and metric.
@@ -84,9 +82,8 @@ import javax.annotation.Nullable;
 
         timers().cancel(IDLE_CHECK_TIMER);
 
-        if (_nextScheduledRotationTask != null) {
-            final boolean cancelResult = _nextScheduledRotationTask.cancel();
-            _nextScheduledRotationTask = null;
+        if (timers().isTimerActive(ROTATE_TIMER_KEY)) {
+            timers().cancel(ROTATE_TIMER_KEY);
             _nextScheduledRotationTime = Optional.empty();
 
             // Force a rotation of ALL buckets using epoch zero
@@ -94,7 +91,6 @@ import javax.annotation.Nullable;
 
             LOGGER.debug()
                     .setMessage("Shutdown forced rotations")
-                    .addData("cancelResult", cancelResult)
                     .log();
         }
     }
@@ -134,9 +130,8 @@ import javax.annotation.Nullable;
     }
 
     private void scheduleRotation(final ZonedDateTime now) {
-        if (_nextScheduledRotationTask != null) {
-            _nextScheduledRotationTask.cancel();
-            _nextScheduledRotationTask = null;
+        if (timers().isTimerActive(ROTATE_TIMER_KEY)) {
+            timers().cancel(ROTATE_TIMER_KEY);
         }
 
         _nextScheduledRotationTime = getRotateAt();
@@ -154,12 +149,7 @@ import javax.annotation.Nullable;
                 timeToRotate = MINIMUM_ROTATION_CHECK_INTERVAL;
             }
 
-            _nextScheduledRotationTask = context().system().scheduler().scheduleOnce(
-                    timeToRotate,
-                    self(),
-                    ROTATE_MESSAGE,
-                    context().dispatcher(),
-                    self());
+            timers().startSingleTimer(ROTATE_TIMER_KEY, ROTATE_MESSAGE, timeToRotate);
         }
     }
 
@@ -302,7 +292,6 @@ import javax.annotation.Nullable;
     }
 
     private boolean _hasReceivedRecords;
-    @Nullable private Cancellable _nextScheduledRotationTask;
     private Optional<ZonedDateTime> _nextScheduledRotationTime;
 
     private final ActorRef _aggregator;
@@ -319,6 +308,7 @@ import javax.annotation.Nullable;
     private static final Duration MINIMUM_ROTATION_CHECK_INTERVAL = Duration.ofMillis(100);
     private static final Duration MINIMUM_PERIOD_TIMEOUT = Duration.ofSeconds(1);
     private static final Duration MAXIMUM_PERIOD_TIMEOUT = Duration.ofMinutes(10);
+    private static final String ROTATE_TIMER_KEY = "ROTATION_TIMER_KEY";
     private static final String ROTATE_MESSAGE = "ROTATE_NOW";
     private static final String IDLE_CHECK_MESSAGE = "CHECK_FOR_IDLE_NOW";
 }
