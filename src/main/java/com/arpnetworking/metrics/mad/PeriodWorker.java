@@ -68,6 +68,8 @@ import java.util.TreeMap;
 
     @Override
     public void preStart() {
+        super.preStart();
+
         _periodicMetrics.recordCounter("actors/period_worker/started", 1);
 
         timers().startPeriodicTimer(
@@ -93,6 +95,8 @@ import java.util.TreeMap;
                     .setMessage("Shutdown forced rotations")
                     .log();
         }
+
+        super.postStop();
     }
 
     @Override
