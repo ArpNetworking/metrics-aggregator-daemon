@@ -67,7 +67,7 @@ import java.util.TreeMap;
     }
 
     @Override
-    public void preStart() {
+    public void preStart() throws Exception {
         super.preStart();
 
         _periodicMetrics.recordCounter("actors/period_worker/started", 1);
@@ -79,7 +79,7 @@ import java.util.TreeMap;
     }
 
     @Override
-    public void postStop() {
+    public void postStop() throws Exception {
         _periodicMetrics.recordCounter("actors/period_worker/stopped", 1);
 
         timers().cancel(IDLE_CHECK_TIMER);
