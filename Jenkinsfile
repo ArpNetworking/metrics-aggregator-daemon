@@ -25,7 +25,7 @@ pipeline {
       when { buildingTag(); not { changeRequest() }  }
       steps {
         script {
-          target = "deploy -P release  --settings settings.xml"
+          target = "deploy -P release -P rpm --settings settings.xml"
         }
         sh 'gpg --batch --import arpnetworking.key'
       }
@@ -38,6 +38,16 @@ pipeline {
           withMaven {
             sh "./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true"
           }
+        }
+      }
+    }
+    stage('GitHub release') {
+      when { buildingTag(); not { changeRequest() }  }
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'brandonarp-github-token', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
+          sh "github-release release --user ArpNetworking --repo metrics-aggregator-daemon --tag ${TAG_NAME}"
+          sh "github-release upload --user ArpNetworking --repo metrics-aggregator-daemon --tag ${TAG_NAME} --name metrics-aggregator-daemon-${TAG_NAME}.tgz --file target/metrics-aggregator-daemon*.tgz"
+          sh "github-release upload --user ArpNetworking --repo metrics-aggregator-daemon --tag ${TAG_NAME} --name metrics-aggregator-daemon-${TAG_NAME}.rpm --file target/rpm/metrics-aggregator-daemon/RPMS/noarch/metrics-aggregator-daemon-*.rpm"
         }
       }
     }
