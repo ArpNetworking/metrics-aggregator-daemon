@@ -462,7 +462,8 @@ public final class Aggregator implements Observer, Launchable {
         }
 
         /**
-         * Set the idle timeout for workers. Cannot be null.
+         * Set the idle timeout for workers. Worker actors which do not receive
+         * a record within this time period are stopped. Cannot be null.
          *
          * @param value The idle timeout.
          * @return This {@link Builder} instance.

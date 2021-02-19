@@ -255,8 +255,9 @@ public final class PipelineConfiguration {
         }
 
         /**
-         * The aggregation worker timeout. Cannot be null. Default is five
-         * minutes.
+         * The aggregation worker timeout. Worker actors which do not receive
+         * a record within this time period are stopped. Cannot be null. Default
+         * is five minutes.
          *
          * @param value The idle timeout.
          * @return This instance of {@link Builder}.
