@@ -23,6 +23,7 @@ import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.http.RequestReply;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.test.TestBeanFactory;
 import com.google.common.base.Charsets;
@@ -58,6 +59,7 @@ public final class CollectdHttpSourceV1Test extends BaseActorSourceTest {
                 .setActorName("collectd")
                 .setName("collectd_source")
                 .setParser(_parser)
+                .setPeriodicMetrics(_periodicMetrics)
                 .build();
         _source.attach(_observer);
     }
@@ -129,5 +131,8 @@ public final class CollectdHttpSourceV1Test extends BaseActorSourceTest {
     private Observer _observer;
     @Mock
     private Parser<List<Record>, com.arpnetworking.metrics.mad.model.HttpRequest> _parser;
+    @Mock
+    private PeriodicMetrics _periodicMetrics;
+
     private CollectdHttpSourceV1 _source;
 }

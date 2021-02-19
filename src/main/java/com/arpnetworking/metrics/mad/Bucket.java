@@ -107,8 +107,6 @@ import java.util.function.BiFunction;
             return;
         }
 
-
-
         for (final Map.Entry<String, ? extends Metric> entry : record.getMetrics().entrySet()) {
             final String name = entry.getKey();
             final Metric metric = entry.getValue();

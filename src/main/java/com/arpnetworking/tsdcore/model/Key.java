@@ -18,12 +18,14 @@ package com.arpnetworking.tsdcore.model;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import java.io.Serializable;
+
 /**
  * Interface for aggregation context (e.g. slice of hyper-cube).
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
-public interface Key {
+public interface Key extends Serializable {
 
     /**
      * Return all the slice parameters.

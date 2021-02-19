@@ -68,6 +68,7 @@ public final class Pipeline implements Launchable {
                 .setActorSystem(_pipelineConfiguration.getActorSystem())
                 .setPeriodicMetrics(_pipelineConfiguration.getPeriodicMetrics())
                 .setPeriods(_pipelineConfiguration.getPeriods())
+                .setIdleTimeout(_pipelineConfiguration.getIdleTimeout())
                 .setTimerStatistics(_pipelineConfiguration.getTimerStatistics())
                 .setCounterStatistics(_pipelineConfiguration.getCounterStatistics())
                 .setGaugeStatistics(_pipelineConfiguration.getGaugeStatistics())

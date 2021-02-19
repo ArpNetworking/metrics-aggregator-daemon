@@ -73,12 +73,12 @@ public final class DefaultKey implements Key {
         }
 
         final DefaultKey otherKey = (DefaultKey) other;
-        return Objects.equals(getParameters(), otherKey.getParameters());
+        return Objects.equals(_dimensions, otherKey._dimensions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_dimensions);
+        return _hashCode;
     }
 
     @Override
@@ -95,7 +95,11 @@ public final class DefaultKey implements Key {
      */
     public DefaultKey(final ImmutableMap<String, String> dimensions) {
         _dimensions = dimensions;
+        _hashCode = _dimensions.hashCode();
     }
 
+    private final int _hashCode;
     private final ImmutableMap<String, String> _dimensions;
+
+    private static final long serialVersionUID = -6065569917813181990L;
 }

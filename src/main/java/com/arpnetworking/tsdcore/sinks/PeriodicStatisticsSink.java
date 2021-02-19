@@ -325,8 +325,16 @@ public final class PeriodicStatisticsSink extends BaseSink {
             final ImmutableMultimap<String, AggregatedData> data = periodicData.getData();
             _aggregatedData.addAndGet(data.size());
 
+            _age.accumulate(now - periodicData.getStart().plus(periodicData.getPeriod()).toInstant().toEpochMilli());
+            periodicData.getMinRequestTime().ifPresent(
+                    t -> _maxRequestAge.accumulate(now - t.toInstant().toEpochMilli()));
+
             for (final String metricName : data.keySet()) {
                 final AggregatedData firstDatum = data.get(metricName).iterator().next();
+
+                // This assumes that all AggregatedData instances have the
+                // population field set correctly (really they should).
+                _metricSamples.addAndGet(firstDatum.getPopulationSize());
 
                 // TODO(ville): These need to be converted to use set cardinality.
                 // As-is they are not at all useful across hosts or when tagged.
@@ -338,10 +346,6 @@ public final class PeriodicStatisticsSink extends BaseSink {
                 // population field set correctly (really they should).
                 _metricSamples.addAndGet(firstDatum.getPopulationSize());
             }
-
-            _age.accumulate(now - periodicData.getStart().plus(periodicData.getPeriod()).toInstant().toEpochMilli());
-            periodicData.getMinRequestTime().ifPresent(
-                    t -> _maxRequestAge.accumulate(now - t.toInstant().toEpochMilli()));
         }
 
         public boolean flushMetrics() {

@@ -15,8 +15,7 @@
  */
 package com.arpnetworking.tsdcore.sinks;
 
-import com.arpnetworking.metrics.Metrics;
-import com.arpnetworking.metrics.MetricsFactory;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.Unit;
@@ -35,12 +34,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
-
-
 
 /**
  * Tests for the {@link AggregationServerHttpSink}.
@@ -60,8 +55,7 @@ public class AggregationServerHttpSinkTest extends BaseActorTest {
                 .setName("aggregation_server_http_sink_test")
                 .setUri(URI.create("http://localhost:" + _wireMockServer.port() + PATH))
                 .setActorSystem(getSystem())
-                .setMetricsFactory(_mockMetricsFactory);
-        Mockito.doReturn(_mockMetrics).when(_mockMetricsFactory).create();
+                .setPeriodicMetrics(_mockPeriodicMetrics);
     }
 
     @After
@@ -122,24 +116,6 @@ public class AggregationServerHttpSinkTest extends BaseActorTest {
 
         // Assert that data was sent
         _wireMock.verifyThat(2, requestPattern);
-
-        // Verify that metrics has been recorded.
-        Mockito.verify(_mockMetricsFactory, Mockito.times(2)).create();
-        Mockito.verify(_mockMetrics, Mockito.times(2))
-                .incrementCounter("sinks/http_post/aggregation_server_http_sink_test/success", 1);
-        Mockito.verify(_mockMetrics, Mockito.times(2))
-                .incrementCounter("sinks/http_post/aggregation_server_http_sink_test/status/2xx", 1);
-        Mockito.verify(_mockMetrics, Mockito.times(2)).setTimer(
-                Mockito.matches("sinks/http_post/aggregation_server_http_sink_test/queue_time"),
-                Mockito.anyLong(),
-                Mockito.any(TimeUnit.class));
-        Mockito.verify(_mockMetrics, Mockito.times(2)).setTimer(
-                Mockito.matches("sinks/http_post/aggregation_server_http_sink_test/request_latency"),
-                Mockito.anyLong(),
-                Mockito.any(TimeUnit.class));
-        Mockito.verify(_mockMetrics).incrementCounter("sinks/http_post/aggregation_server_http_sink_test/samples_sent", 3);
-        Mockito.verify(_mockMetrics).incrementCounter("sinks/http_post/aggregation_server_http_sink_test/samples_sent", 5);
-        Mockito.verify(_mockMetrics, Mockito.times(2)).close();
     }
 
 
@@ -151,7 +127,5 @@ public class AggregationServerHttpSinkTest extends BaseActorTest {
     private static final String PATH = "/aggregation_server/post/path";
 
     @Mock
-    private MetricsFactory _mockMetricsFactory;
-    @Mock
-    private Metrics _mockMetrics;
+    private PeriodicMetrics _mockPeriodicMetrics;
 }
