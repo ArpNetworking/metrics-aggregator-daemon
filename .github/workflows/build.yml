@@ -27,6 +27,10 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('pom.xml') }}
           restore-keys: ${{ runner.os }}-m2-
+# The Maven fix involves replacing an artifact that is in the cache directory;
+# consequently the fix gets cached. The problem arises when we need to remove
+# the fix that we need to do so in a way that keeps the cache from regressing.
+# The easiest way is to change the cache key when deprecating the fix.
       - name: Fix Maven
         run: ./.github/fix-maven.sh
       - name: Build Only
