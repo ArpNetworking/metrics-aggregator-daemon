@@ -53,8 +53,8 @@ pipeline {
       steps {
         withCredentials([usernamePassword(credentialsId: 'brandonarp-github-token', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
           sh "github-release release --user ${org} --repo ${repo} --tag ${TAG_NAME}"
-          sh "github-release upload --user ${org} --repo ${repo} --tag ${TAG_NAME} --name ${TAG_NAME}.tgz --file target/metrics-aggregator-daemon*.tgz"
-          sh "github-release upload --user ${org} --repo ${repo} --tag ${TAG_NAME} --name ${TAG_NAME}.rpm --file target/rpm/metrics-aggregator-daemon/RPMS/noarch/metrics-aggregator-daemon-*.rpm"
+          sh "github-release upload --user ${org} --repo ${repo} --tag ${TAG_NAME} --name ${TAG_NAME}.tgz --file target/*.tgz"
+          sh "github-release upload --user ${org} --repo ${repo} --tag ${TAG_NAME} --name ${TAG_NAME}.rpm --file target/rpm/*/RPMS/*/*.rpm"
         }
       }
     }
