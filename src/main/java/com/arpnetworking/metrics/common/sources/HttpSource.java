@@ -57,6 +57,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 /**
@@ -144,6 +145,17 @@ public class HttpSource extends ActorSource {
                             .withSupervisionStrategy(Supervision.stoppingDecider()),
                     context());
 
+            _periodicMetrics.registerPolledMetric(m -> {
+                // TODO(vkoskela): There needs to be a way to deregister these callbacks
+                // This is not an immediate issue since new Aggregator instances are
+                // only created when pipelines are reloaded. To avoid recording values
+                // for dead pipelines this explicitly avoids recording zeroes.
+                final long samples = _receivedSamples.getAndSet(0);
+                if (samples > 0) {
+                    m.recordGauge(String.format("sources/http/%s/metric_samples", _metricSafeName), samples);
+                }
+            });
+
             _processGraph = GraphDSL.create(builder -> {
 
                 // Flows
@@ -218,19 +230,22 @@ public class HttpSource extends ActorSource {
                     }
                 }
             }
-            _periodicMetrics.recordGauge(
-                    String.format("sources/http/%s/metric_samples", _metricSafeName),
-                    samples);
+            _receivedSamples.addAndGet(samples);
 
             return records;
         }
 
+        // WARNING: Consider carefully the volume of samples recorded.
+        // PeriodicMetrics reduces the number of scopes creates, but each sample is
+        // still stored in-memory until it is flushed.
         private final PeriodicMetrics _periodicMetrics;
+
         private final String _metricSafeName;
         private final Sink<Record, CompletionStage<Done>> _sink;
         private final Parser<List<Record>, com.arpnetworking.metrics.mad.model.HttpRequest> _parser;
         private final Materializer _materializer;
         private final Graph<FlowShape<HttpRequest, Record>, NotUsed> _processGraph;
+        private final AtomicLong _receivedSamples = new AtomicLong(0);
 
         private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
         private static final Logger BAD_REQUEST_LOGGER =

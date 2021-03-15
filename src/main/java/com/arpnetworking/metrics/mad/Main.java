@@ -630,7 +630,7 @@ public final class Main implements Launchable {
                     .build();
             final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(
                     r -> new Thread(r, "PeriodicMetricsCloser"));
-            final long offsetMillis = 1250 - (System.currentTimeMillis() % 1000);;
+            final long offsetMillis = 1250 - (System.currentTimeMillis() % 1000);
             executor.scheduleAtFixedRate(periodicMetrics, offsetMillis, 1000, TimeUnit.MILLISECONDS);
 
             // Register to shutdown the executor when the Guice stack is shutdown.

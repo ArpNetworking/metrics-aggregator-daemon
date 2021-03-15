@@ -61,6 +61,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 /**
@@ -210,12 +211,27 @@ public final class Aggregator implements Observer, Launchable {
                                 return statistics.map(statisticImmutableSet -> computeDependentStatistics(statisticImmutableSet));
                            }
                         });
+
+        _periodicMetrics.registerPolledMetric(m -> {
+            // TODO(vkoskela): There needs to be a way to deregister these callbacks
+            // This is not an immediate issue since new Aggregator instances are
+            // only created when pipelines are reloaded. To avoid recording values
+            // for dead pipelines this explicitly avoids recording zeroes.
+            final long samples = _receivedSamples.getAndSet(0);
+            if (samples > 0) {
+                m.recordGauge("aggregator/samples", samples);
+            }
+        });
     }
 
     private ActorRef _actor;
 
-    private final ActorSystem _actorSystem;
+    // WARNING: Consider carefully the volume of samples recorded.
+    // PeriodicMetrics reduces the number of scopes creates, but each sample is
+    // still stored in-memory until it is flushed.
     private final PeriodicMetrics _periodicMetrics;
+
+    private final ActorSystem _actorSystem;
     private final ImmutableSet<Duration> _periods;
     private final Duration _idleTimeout;
     private final Sink _sink;
@@ -228,6 +244,7 @@ public final class Aggregator implements Observer, Launchable {
     private final ImmutableMap<Pattern, ImmutableSet<Statistic>> _statistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedSpecifiedStatistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedDependentStatistics;
+    private final AtomicLong _receivedSamples = new AtomicLong(0);
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Duration SHUTDOWN_TIMEOUT = Duration.ofSeconds(30);
@@ -294,7 +311,7 @@ public final class Aggregator implements Observer, Launchable {
                                         .orElse(0.0d);
                             }
                         }
-                        _aggregator._periodicMetrics.recordGauge("aggregator/samples", samples);
+                        _aggregator._receivedSamples.addAndGet(samples);
 
                         LOGGER.trace()
                                 .setMessage("Sending record to aggregation actor")
