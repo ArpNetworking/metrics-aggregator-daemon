@@ -120,79 +120,88 @@ public abstract class BaseTcpSource extends ActorSource {
         public Receive createReceive() {
             return receiveBuilder()
                     .matchEquals(IS_READY, message -> getSender().tell(_isReady, getSelf()))
-                    .matchEquals(UNBIND, unbindRequest -> {
-                        final ActorRef requester = getSender();
-                        if (_connectionActor != null) {
-                            LOGGER.debug()
-                                    .setMessage("Tcp server starting unbinding...")
-                                    .addData("requester", requester)
-                                    .addData("connectionActor", _connectionActor)
-                                    .addData("name", _sink.getName())
-                                    .log();
-                            PatternsCS.ask(
-                                    _connectionActor,
-                                    TcpMessage.unbind(),
-                                    UNBIND_TIMEOUT)
-                                    .whenComplete(
-                                            (response, throwable) -> {
-                                                final LogBuilder logBuilder;
-                                                if (throwable != null) {
-                                                    logBuilder = LOGGER.warn()
-                                                            .setThrowable(throwable);
-                                                } else {
-                                                    logBuilder = LOGGER.info();
-                                                }
-                                                logBuilder
-                                                        .setMessage("Tcp server completed unbinding")
-                                                        .addData("requester", requester)
-                                                        .addData("connectionActor", _connectionActor)
-                                                        .addData("name", _sink.getName())
-                                                        .addData("success", throwable == null)
-                                                        .log();
-
-                                                requester.tell(response, getSelf());
-                                            });
-                        } else {
-                            LOGGER.warn()
-                                    .setMessage("Tcp server cannot unbind; no connection")
-                                    .addData("sender", getSender())
-                                    .addData("name", _sink.getName())
-                                    .log();
-                            requester.tell(new Tcp.Unbound$(), getSelf());
-                        }
-                    })
-                    .match(Tcp.Bound.class, tcpBound -> {
-                        _connectionActor = getSender();
-                        LOGGER.info()
-                                .setMessage("Tcp server binding complete")
-                                .addData("name", _sink.getName())
-                                .addData("connectionActor", _connectionActor)
-                                .addData("address", tcpBound.localAddress().getAddress().getHostAddress())
-                                .addData("port", tcpBound.localAddress().getPort())
-                                .log();
-
-                        _isReady = true;
-                    })
-                    .match(Tcp.CommandFailed.class, failed -> {
-                        LOGGER.warn()
-                                .setMessage("Tcp server bad command")
-                                .addData("name", _sink.getName())
-                                .log();
-
-                        getContext().stop(getSelf());
-                    })
-                    .match(Tcp.Connected.class, tcpConnected -> {
-                        LOGGER.debug()
-                                .setMessage("Tcp connection established")
-                                .addData("name", _sink.getName())
-                                .addData("remoteAddress", tcpConnected.remoteAddress().getAddress().getHostAddress())
-                                .addData("remotePort", tcpConnected.remoteAddress().getPort())
-                                .log();
-
-                        final ActorRef handler = createHandler(_sink, tcpConnected);
-                        getSender().tell(TcpMessage.register(handler), getSelf());
-                    })
+                    .matchEquals(UNBIND, unbindRequest -> socketUnbind())
+                    .match(Tcp.Bound.class, this::socketBound)
+                    .match(Tcp.CommandFailed.class, this::commandFailed)
+                    .match(Tcp.Connected.class, this::connected)
                     .build();
+        }
+
+        private void socketUnbind() {
+            final ActorRef requester = getSender();
+            if (_connectionActor != null) {
+                LOGGER.debug()
+                        .setMessage("Tcp server starting unbinding...")
+                        .addData("requester", requester)
+                        .addData("connectionActor", _connectionActor)
+                        .addData("name", _sink.getName())
+                        .log();
+                PatternsCS.ask(
+                        _connectionActor,
+                        TcpMessage.unbind(),
+                        UNBIND_TIMEOUT)
+                        .whenComplete(
+                                (response, throwable) -> {
+                                    final LogBuilder logBuilder;
+                                    if (throwable != null) {
+                                        logBuilder = LOGGER.warn()
+                                                .setThrowable(throwable);
+                                    } else {
+                                        logBuilder = LOGGER.info();
+                                    }
+                                    logBuilder
+                                            .setMessage("Tcp server completed unbinding")
+                                            .addData("requester", requester)
+                                            .addData("connectionActor", _connectionActor)
+                                            .addData("name", _sink.getName())
+                                            .addData("success", throwable == null)
+                                            .log();
+
+                                    requester.tell(response, getSelf());
+                                });
+            } else {
+                LOGGER.warn()
+                        .setMessage("Tcp server cannot unbind; no connection")
+                        .addData("sender", getSender())
+                        .addData("name", _sink.getName())
+                        .log();
+                requester.tell(new Tcp.Unbound$(), getSelf());
+            }
+        }
+
+        private void socketBound(final Tcp.Bound tcpBound) {
+            _connectionActor = getSender();
+            LOGGER.info()
+                    .setMessage("Tcp server binding complete")
+                    .addData("name", _sink.getName())
+                    .addData("connectionActor", _connectionActor)
+                    .addData("address", tcpBound.localAddress().getAddress().getHostAddress())
+                    .addData("port", tcpBound.localAddress().getPort())
+                    .log();
+
+            _isReady = true;
+        }
+
+        private void commandFailed(final Tcp.CommandFailed failure) {
+            LOGGER.warn()
+                    .setMessage("Tcp server bad command")
+                    .addData("name", _sink.getName())
+                    .setThrowable(failure.cause().getOrElse(null))
+                    .log();
+
+            getContext().stop(getSelf());
+        }
+
+        private void connected(final Tcp.Connected tcpConnected) {
+            LOGGER.debug()
+                    .setMessage("Tcp connection established")
+                    .addData("name", _sink.getName())
+                    .addData("remoteAddress", tcpConnected.remoteAddress().getAddress().getHostAddress())
+                    .addData("remotePort", tcpConnected.remoteAddress().getPort())
+                    .log();
+
+            final ActorRef handler = createHandler(_sink, tcpConnected);
+            getSender().tell(TcpMessage.register(handler), getSelf());
         }
 
         /**

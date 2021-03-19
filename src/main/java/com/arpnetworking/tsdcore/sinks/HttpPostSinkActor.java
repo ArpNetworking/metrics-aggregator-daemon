@@ -138,27 +138,20 @@ public class HttpPostSinkActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(EmitAggregation.class, this::processEmitAggregation)
-                .match(PostSuccess.class, success -> {
-                   processSuccessRequest(success);
-                    dispatchPending();
-                })
-                .match(PostRejected.class, rejected -> {
-                    processRejectedRequest(rejected);
-                    dispatchPending();
-                })
-                .match(PostFailure.class, failure -> {
-                    processFailedRequest(failure);
-                    dispatchPending();
-                })
-                .match(WaitTimeExpired.class, message -> {
-                    LOGGER.debug()
-                            .setMessage("Received WaitTimeExpired message")
-                            .addContext("actor", self())
-                            .log();
-                    _waiting = false;
-                    dispatchPending();
-                })
+                .match(PostSuccess.class, this::processSuccessRequest)
+                .match(PostRejected.class, this::processRejectedRequest)
+                .match(PostFailure.class, this::processFailedRequest)
+                .match(WaitTimeExpired.class, this::waitTimeExpired)
                 .build();
+    }
+
+    private void waitTimeExpired(final WaitTimeExpired ignored) {
+        LOGGER.debug()
+                .setMessage("Received WaitTimeExpired message")
+                .addContext("actor", self())
+                .log();
+        _waiting = false;
+        dispatchPending();
     }
 
     private void processFailedRequest(final PostFailure failure) {
@@ -169,6 +162,7 @@ public class HttpPostSinkActor extends AbstractActor {
                 .addContext("actor", self())
                 .setThrowable(failure.getCause())
                 .log();
+        dispatchPending();
     }
 
     private void processSuccessRequest(final PostSuccess success) {
@@ -181,6 +175,7 @@ public class HttpPostSinkActor extends AbstractActor {
                 .addData("status", response.getStatusCode())
                 .addContext("actor", self())
                 .log();
+        dispatchPending();
     }
 
     private void processRejectedRequest(final PostRejected rejected) {
@@ -198,6 +193,7 @@ public class HttpPostSinkActor extends AbstractActor {
                 .addData("response", responseBody)
                 .addContext("actor", self())
                 .log();
+        dispatchPending();
     }
 
     private void processEmitAggregation(final EmitAggregation emitMessage) {

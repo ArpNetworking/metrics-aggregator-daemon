@@ -103,31 +103,33 @@ public class HttpSource extends ActorSource {
         @Override
         public Receive createReceive() {
             return receiveBuilder()
-                    .match(RequestReply.class, requestReply -> {
-                        // TODO(barp): Fix the ugly HttpRequest cast here due to java vs scala dsl
-                        akka.stream.javadsl.Source.single(requestReply.getRequest())
-                                .log("http source stream failure")
-                                .via(_processGraph)
-                                .toMat(_sink, Keep.right())
-                                .run(_materializer)
-                                .whenComplete((done, err) -> {
-                                    final CompletableFuture<HttpResponse> responseFuture = requestReply.getResponse();
-                                    if (err == null) {
-                                        responseFuture.complete(HttpResponse.create().withStatus(200));
-                                    } else {
-                                        BAD_REQUEST_LOGGER.warn()
-                                                .setMessage("Error handling http post")
-                                                .setThrowable(err)
-                                                .log();
-                                        if (err instanceof ParsingException) {
-                                            responseFuture.complete(HttpResponse.create().withStatus(400));
-                                        } else {
-                                            responseFuture.complete(HttpResponse.create().withStatus(500));
-                                        }
-                                    }
-                                });
-                    })
+                    .match(RequestReply.class, this::requestReply)
                     .build();
+        }
+
+        private void requestReply(final RequestReply requestReply) {
+            // TODO(barp): Fix the ugly HttpRequest cast here due to java vs scala dsl
+            akka.stream.javadsl.Source.single(requestReply.getRequest())
+                    .log("http source stream failure")
+                    .via(_processGraph)
+                    .toMat(_sink, Keep.right())
+                    .run(_materializer)
+                    .whenComplete((done, err) -> {
+                        final CompletableFuture<HttpResponse> responseFuture = requestReply.getResponse();
+                        if (err == null) {
+                            responseFuture.complete(HttpResponse.create().withStatus(200));
+                        } else {
+                            BAD_REQUEST_LOGGER.warn()
+                                    .setMessage("Error handling http post")
+                                    .setThrowable(err)
+                                    .log();
+                            if (err instanceof ParsingException) {
+                                responseFuture.complete(HttpResponse.create().withStatus(400));
+                            } else {
+                                responseFuture.complete(HttpResponse.create().withStatus(500));
+                            }
+                        }
+                    });
         }
 
         /**

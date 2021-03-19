@@ -110,32 +110,7 @@ public final class TcpLineSource extends BaseTcpSource {
         @Override
         public Receive createReceive() {
             return receiveBuilder()
-                    .match(Tcp.Received.class, message -> {
-                        final ByteString data = message.data();
-
-                        LOGGER.trace()
-                                .setMessage("Tcp data received")
-                                .addData("name", _sink.getName())
-                                .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
-                                .addData("remotePort", _remoteAddress.getPort())
-                                .addData("data", data)
-                                .log();
-
-                        try {
-                            processData(data);
-                            // CHECKSTYLE.OFF: IllegalCatch - Ensure all exceptions are logged (this is top level)
-                        } catch (final RuntimeException e) {
-                            // CHECKSTYLE.ON: IllegalCatch
-                            BAD_REQUEST_LOGGER.warn()
-                                    .setMessage("Error processing data")
-                                    .addData("name", _sink.getName())
-                                    .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
-                                    .addData("remotePort", _remoteAddress.getPort())
-                                    .addData("data", data)
-                                    .setThrowable(e)
-                                    .log();
-                        }
-                    })
+                    .match(Tcp.Received.class, this::tcpReceived)
                     .match(Tcp.ConnectionClosed.class, message -> {
                         getContext().stop(getSelf());
                         LOGGER.debug()
@@ -146,6 +121,33 @@ public final class TcpLineSource extends BaseTcpSource {
                                 .log();
                     })
                     .build();
+        }
+
+        private void tcpReceived(final Tcp.Received message) {
+            final ByteString data = message.data();
+
+            LOGGER.trace()
+                    .setMessage("Tcp data received")
+                    .addData("name", _sink.getName())
+                    .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
+                    .addData("remotePort", _remoteAddress.getPort())
+                    .addData("data", data)
+                    .log();
+
+            try {
+                processData(data);
+                // CHECKSTYLE.OFF: IllegalCatch - Ensure all exceptions are logged (this is top level)
+            } catch (final RuntimeException e) {
+                // CHECKSTYLE.ON: IllegalCatch
+                BAD_REQUEST_LOGGER.warn()
+                        .setMessage("Error processing data")
+                        .addData("name", _sink.getName())
+                        .addData("remoteAddress", _remoteAddress.getAddress().getHostAddress())
+                        .addData("remotePort", _remoteAddress.getPort())
+                        .addData("data", data)
+                        .setThrowable(e)
+                        .log();
+            }
         }
 
         private void processData(final ByteString data) {
