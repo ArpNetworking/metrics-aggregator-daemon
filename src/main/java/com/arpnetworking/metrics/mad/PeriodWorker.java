@@ -51,7 +51,7 @@ import java.util.TreeMap;
      */
     PeriodWorker(
             final ActorRef aggregator,
-            final Key key,
+            //final Key key,
             final Duration period,
             final Duration idleTimeout,
             final Bucket.Builder bucketBuilder,

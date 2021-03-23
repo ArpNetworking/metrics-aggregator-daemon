@@ -417,7 +417,7 @@ public final class Aggregator implements Observer, Launchable {
                                 Props.create(
                                         PeriodWorker.class,
                                         this.self(),
-                                        key,
+                                        //key,
                                         period,
                                         _aggregator._idleTimeout,
                                         bucketBuilder,
