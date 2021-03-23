@@ -246,6 +246,7 @@ public final class Aggregator implements Observer, Launchable {
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedSpecifiedStatistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedDependentStatistics;
     private final AtomicLong _receivedSamples = new AtomicLong(0);
+    private final Map<Key, List<ActorRef>> _periodWorkerActors = Maps.newConcurrentMap();
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Duration SHUTDOWN_TIMEOUT = Duration.ofSeconds(30);
@@ -320,7 +321,7 @@ public final class Aggregator implements Observer, Launchable {
 
         private void shutdown() {
             final List<CompletableFuture<Object>> shutdownStages = new ArrayList<>();
-            for (final List<ActorRef> actorRefList : _periodWorkerActors.values()) {
+            for (final List<ActorRef> actorRefList : _aggregator._periodWorkerActors.values()) {
                 for (final ActorRef actorRef : actorRefList) {
                     shutdownStages.add(
                             Patterns.ask(
@@ -329,7 +330,7 @@ public final class Aggregator implements Observer, Launchable {
                                     SHUTDOWN_TIMEOUT).toCompletableFuture());
                 }
             }
-            _periodWorkerActors.clear();
+            _aggregator._periodWorkerActors.clear();
             try {
                 CompletableFutures.allOf(shutdownStages).get(
                         SHUTDOWN_TIMEOUT.toMillis(),
@@ -348,7 +349,7 @@ public final class Aggregator implements Observer, Launchable {
 
         private void idleWorker(final PeriodWorkerIdle idle) {
             final Key key = idle.getKey();
-            final List<ActorRef> workers = _periodWorkerActors.remove(key);
+            final List<ActorRef> workers = _aggregator._periodWorkerActors.remove(key);
             if (workers != null) {
                 LOGGER.debug()
                         .setMessage("Stopping idle period worker actors")
@@ -385,10 +386,10 @@ public final class Aggregator implements Observer, Launchable {
                     .addData("key", key)
                     .log();
 
-            List<ActorRef> periodWorkers = _periodWorkerActors.get(key);
+            List<ActorRef> periodWorkers = _aggregator._periodWorkerActors.get(key);
             if (periodWorkers == null) {
                 periodWorkers = createActors(key);
-                _periodWorkerActors.put(key, periodWorkers);
+                _aggregator._periodWorkerActors.put(key, periodWorkers);
             }
 
             for (final ActorRef periodWorkerActor : periodWorkers) {
@@ -440,7 +441,6 @@ public final class Aggregator implements Observer, Launchable {
         }
 
         private final Aggregator _aggregator;
-        private final Map<Key, List<ActorRef>> _periodWorkerActors = Maps.newHashMap();
     }
 
     /**
