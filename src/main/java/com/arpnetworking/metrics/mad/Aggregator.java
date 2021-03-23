@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -80,7 +81,8 @@ public final class Aggregator implements Observer, Launchable {
                 .setMessage("Launching aggregator")
                 .addData("aggregator", this)
                 .log();
-        _actor = _actorSystem.actorOf(Actor.props(this));
+        //_actor = _actorSystem.actorOf(Actor.props(this));
+        _actor = new Actor(this);
     }
 
     @Override
@@ -91,7 +93,9 @@ public final class Aggregator implements Observer, Launchable {
                 .log();
 
         if (_actor != null) {
-            try {
+            //try {
+                _actor.shutdown();
+                /*
                 if (!Patterns.gracefulStop(
                         _actor,
                         SHUTDOWN_TIMEOUT,
@@ -115,7 +119,7 @@ public final class Aggregator implements Observer, Launchable {
                         .addData("timeout", SHUTDOWN_TIMEOUT)
                         .setThrowable(e)
                         .log();
-            }
+            }*/
             _actor = null;
         }
     }
@@ -132,7 +136,8 @@ public final class Aggregator implements Observer, Launchable {
         }
 
         final Record record = (Record) event;
-        _actor.tell(record, ActorRef.noSender());
+        //_actor.tell(record, ActorRef.noSender());
+        _actor.record(record);
     }
 
     /**
@@ -225,7 +230,8 @@ public final class Aggregator implements Observer, Launchable {
         });
     }
 
-    private ActorRef _actor;
+    //private ActorRef _actor;
+    private Actor _actor;
 
     // WARNING: Consider carefully the volume of samples recorded.
     // PeriodicMetrics reduces the number of scopes creates, but each sample is
@@ -246,7 +252,7 @@ public final class Aggregator implements Observer, Launchable {
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedSpecifiedStatistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedDependentStatistics;
     private final AtomicLong _receivedSamples = new AtomicLong(0);
-    private final Map<Key, List<ActorRef>> _periodWorkerActors = Maps.newConcurrentMap();
+    private final ConcurrentMap<Key, List<ActorRef>> _periodWorkerActors = Maps.newConcurrentMap();
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Duration SHUTDOWN_TIMEOUT = Duration.ofSeconds(30);
@@ -284,14 +290,13 @@ public final class Aggregator implements Observer, Launchable {
     /**
      * Internal actor to process requests.
      */
-    /* package private */ static final class Actor extends AbstractActor {
+    /* package private */ static final class Actor { //extends AbstractActor {
         /**
          * Creates a {@link Props} for this actor.
          *
          * @return A new {@link Props}
          */
-        /* package private */
-        static Props props(final Aggregator aggregator) {
+        /*static Props props(final Aggregator aggregator) {
             return Props.create(Actor.class, aggregator);
         }
 
@@ -317,7 +322,7 @@ public final class Aggregator implements Observer, Launchable {
                     .match(PeriodWorkerIdle.class, this::idleWorker)
                     .match(ShutdownAggregator.class, ignored -> shutdown())
                     .build();
-        }
+        }*/
 
         private void shutdown() {
             final List<CompletableFuture<Object>> shutdownStages = new ArrayList<>();
@@ -347,6 +352,7 @@ public final class Aggregator implements Observer, Launchable {
             }
         }
 
+        /*
         private void idleWorker(final PeriodWorkerIdle idle) {
             final Key key = idle.getKey();
             final List<ActorRef> workers = _aggregator._periodWorkerActors.remove(key);
@@ -361,7 +367,7 @@ public final class Aggregator implements Observer, Launchable {
                     worker.tell(PoisonPill.getInstance(), self());
                 }
             }
-        }
+        }*/
 
         private void record(final Record record) {
             final Key key = new DefaultKey(record.getDimensions());
@@ -386,14 +392,15 @@ public final class Aggregator implements Observer, Launchable {
                     .addData("key", key)
                     .log();
 
-            List<ActorRef> periodWorkers = _aggregator._periodWorkerActors.get(key);
-            if (periodWorkers == null) {
+            final List<ActorRef> periodWorkers = _aggregator._periodWorkerActors.computeIfAbsent(key, this::createActors);
+            /*if (periodWorkers == null) {
                 periodWorkers = createActors(key);
                 _aggregator._periodWorkerActors.put(key, periodWorkers);
-            }
+            }*/
 
             for (final ActorRef periodWorkerActor : periodWorkers) {
-                periodWorkerActor.tell(record, self());
+                //periodWorkerActor.tell(record, self());
+                periodWorkerActor.tell(record, ActorRef.noSender());
             }
         }
 
@@ -416,7 +423,7 @@ public final class Aggregator implements Observer, Launchable {
                         _aggregator._actorSystem.actorOf(
                                 Props.create(
                                         PeriodWorker.class,
-                                        this.self(),
+                                        //this.self(),
                                         //key,
                                         period,
                                         _aggregator._idleTimeout,

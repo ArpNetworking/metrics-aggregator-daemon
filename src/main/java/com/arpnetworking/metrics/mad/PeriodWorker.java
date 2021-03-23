@@ -50,7 +50,7 @@ import java.util.TreeMap;
      * called directly, but instead you should use {@code Props}.
      */
     PeriodWorker(
-            final ActorRef aggregator,
+            //final ActorRef aggregator,
             //final Key key,
             final Duration period,
             final Duration idleTimeout,
