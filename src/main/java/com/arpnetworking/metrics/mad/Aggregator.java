@@ -75,12 +75,14 @@ public final class Aggregator implements Observer, Launchable {
 
     @Override
     public synchronized void launch() {
-        LOGGER.debug()
+        final int instances = 2 * Runtime.getRuntime().availableProcessors();
+        LOGGER.info()
                 .setMessage("Launching aggregator")
                 .addData("aggregator", this)
+                .addData("actors", instances)
                 .log();
-        for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); ++i) {
-            _actors.add(_actorSystem.actorOf(Actor.props(this)));
+        for (int i = 0; i < instances; ++i) {
+            _actors.add(_actorSystem.actorOf(Actor.props(this, i)));
         }
     }
 
@@ -94,7 +96,7 @@ public final class Aggregator implements Observer, Launchable {
         if (!_actors.isEmpty()) {
             try {
                 // Start aggregator shutdown
-                final List<CompletableFuture<Boolean>> aggregatorShutdown = shutdownActors(_actors);
+                final List<CompletableFuture<Boolean>> aggregatorShutdown = shutdownActors(_actors, SHUTDOWN_MESSAGE);
 
                 // Wait for shutdown
                 CompletableFutures.allOf(aggregatorShutdown).get(
@@ -203,14 +205,14 @@ public final class Aggregator implements Observer, Launchable {
         return periodWorkerList;
     }
 
-    private List<CompletableFuture<Boolean>> shutdownActors(final List<ActorRef> actors) {
+    private List<CompletableFuture<Boolean>> shutdownActors(final List<ActorRef> actors, final Object message) {
         final List<CompletableFuture<Boolean>> shutdownFutures = new ArrayList<>();
         for (final ActorRef actorRef : actors) {
             shutdownFutures.add(
                     Patterns.gracefulStop(
                             actorRef,
                             SHUTDOWN_TIMEOUT,
-                            PoisonPill.getInstance()).toCompletableFuture());
+                            message).toCompletableFuture());
         }
         return shutdownFutures;
     }
@@ -272,17 +274,6 @@ public final class Aggregator implements Observer, Launchable {
                                 return statistics.map(statisticImmutableSet -> computeDependentStatistics(statisticImmutableSet));
                            }
                         });
-
-        _periodicMetrics.registerPolledMetric(m -> {
-            // TODO(vkoskela): There needs to be a way to deregister these callbacks
-            // This is not an immediate issue since new Aggregator instances are
-            // only created when pipelines are reloaded. To avoid recording values
-            // for dead pipelines this explicitly avoids recording zeroes.
-            final long samples = _receivedSamples.getAndSet(0);
-            if (samples > 0) {
-                m.recordGauge("aggregator/samples", samples);
-            }
-        });
     }
 
     private final List<ActorRef> _actors = new ArrayList<>();
@@ -305,7 +296,6 @@ public final class Aggregator implements Observer, Launchable {
     private final ImmutableMap<Pattern, ImmutableSet<Statistic>> _statistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedSpecifiedStatistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedDependentStatistics;
-    private final AtomicLong _receivedSamples = new AtomicLong(0);
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Duration SHUTDOWN_TIMEOUT = Duration.ofSeconds(30);
@@ -336,8 +326,8 @@ public final class Aggregator implements Observer, Launchable {
          *
          * @return A new {@link Props}
          */
-        static Props props(final Aggregator aggregator) {
-            return Props.create(Actor.class, aggregator);
+        static Props props(final Aggregator aggregator, final int id) {
+            return Props.create(Actor.class, aggregator, id);
         }
 
         @Override
@@ -369,7 +359,7 @@ public final class Aggregator implements Observer, Launchable {
                 // Start period worker shutdown
                 final List<CompletableFuture<Boolean>> periodWorkerShutdown = new ArrayList<>();
                 for (final List<ActorRef> workers : _periodWorkerActors.values()) {
-                    periodWorkerShutdown.addAll(_aggregator.shutdownActors(workers));
+                    periodWorkerShutdown.addAll(_aggregator.shutdownActors(workers, PoisonPill.getInstance()));
                 }
 
                 // Wait for shutdown
@@ -435,7 +425,7 @@ public final class Aggregator implements Observer, Launchable {
                             .orElse(0.0d);
                 }
             }
-            _aggregator._receivedSamples.addAndGet(samples);
+            _receivedSamples.addAndGet(samples);
 
             LOGGER.trace()
                     .setMessage("Sending record to aggregation actor")
@@ -457,13 +447,26 @@ public final class Aggregator implements Observer, Launchable {
          * Constructor.
          *
          * @param aggregator The {@link Aggregator} to implement.
+         * @param id The identifier of the aggregator actor instance.
          */
-        /* package private */ Actor(final Aggregator aggregator) {
+        /* package private */ Actor(final Aggregator aggregator, final int id) {
             _aggregator = aggregator;
+
+            _aggregator._periodicMetrics.registerPolledMetric(m -> {
+                // TODO(vkoskela): There needs to be a way to deregister these callbacks
+                // This is not an immediate issue since new Aggregator instances are
+                // only created when pipelines are reloaded. To avoid recording values
+                // for dead pipelines this explicitly avoids recording zeroes.
+                final long samples = _receivedSamples.getAndSet(0);
+                if (samples > 0) {
+                    m.recordGauge("aggregator/samples/" + id, samples);
+                }
+            });
         }
 
         private final Aggregator _aggregator;
         private final Map<Key, List<ActorRef>> _periodWorkerActors = Maps.newHashMap();
+        private final AtomicLong _receivedSamples = new AtomicLong(0);
     }
 
     /**
