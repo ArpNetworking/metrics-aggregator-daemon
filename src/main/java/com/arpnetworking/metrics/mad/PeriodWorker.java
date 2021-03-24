@@ -50,13 +50,13 @@ import java.util.TreeMap;
      * called directly, but instead you should use {@code Props}.
      */
     PeriodWorker(
-            //final ActorRef aggregator,
+            final ActorRef aggregator,
             final Key key,
             final Duration period,
             final Duration idleTimeout,
             final Bucket.Builder bucketBuilder,
             final PeriodicMetrics periodicMetrics) {
-        //_aggregator = aggregator;
+        _aggregator = aggregator;
         _key = key;
         _period = period;
         _idleTimeout = idleTimeout;
@@ -128,7 +128,7 @@ import java.util.TreeMap;
         // after the current rotation but before data for the next rotation
         // arrives, therefore not ensuring that the minimum time has elapsed.
         if (!_nextScheduledRotationTime.isPresent() && !_hasReceivedRecords) {
-            //_aggregator.tell(new Aggregator.PeriodWorkerIdle(_key), self());
+            _aggregator.tell(new Aggregator.PeriodWorkerIdle(_key), self());
         }
         _hasReceivedRecords = false;
     }
@@ -298,7 +298,7 @@ import java.util.TreeMap;
     private boolean _hasReceivedRecords;
     private Optional<ZonedDateTime> _nextScheduledRotationTime;
 
-    //private final ActorRef _aggregator;
+    private final ActorRef _aggregator;
     private final Key _key;
     private final Duration _period;
     private final Duration _idleTimeout;

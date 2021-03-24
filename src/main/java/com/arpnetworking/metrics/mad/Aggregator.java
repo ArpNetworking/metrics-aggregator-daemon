@@ -20,7 +20,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.japi.pf.FI;
 import akka.pattern.Patterns;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.java.util.concurrent.CompletableFutures;
@@ -63,6 +62,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
@@ -81,8 +81,9 @@ public final class Aggregator implements Observer, Launchable {
                 .setMessage("Launching aggregator")
                 .addData("aggregator", this)
                 .log();
-        //_actor = _actorSystem.actorOf(Actor.props(this));
-        _actor = new Actor(this);
+        for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); ++i) {
+            _actors.add(_actorSystem.actorOf(Actor.props(this)));
+        }
     }
 
     @Override
@@ -92,36 +93,62 @@ public final class Aggregator implements Observer, Launchable {
                 .addData("aggregator", this)
                 .log();
 
-        if (_actor != null) {
-            //try {
-                _actor.shutdown();
-                /*
-                if (!Patterns.gracefulStop(
-                        _actor,
-                        SHUTDOWN_TIMEOUT,
-                        ShutdownAggregator.getInstance()).toCompletableFuture().get(
+        if (!_actors.isEmpty()) {
+            try {
+                // Start aggregator and period worker shutdown
+                final List<CompletableFuture<Boolean>> aggregatorShutdown = shutdownActors(_actors);
+                final List<CompletableFuture<Boolean>> periodWorkerShutdown = new ArrayList<>();
+                for (final List<ActorRef> workers : _periodWorkerActors.values()) {
+                    periodWorkerShutdown.addAll(shutdownActors(workers));
+                }
+
+                // Wait for shutdown
+                final List<CompletableFuture<Boolean>> allShutdown = new ArrayList<>();
+                allShutdown.addAll(aggregatorShutdown);
+                allShutdown.addAll(periodWorkerShutdown);
+                CompletableFutures.allOf(allShutdown).get(
                         SHUTDOWN_TIMEOUT.toMillis(),
-                        TimeUnit.MILLISECONDS)) {
-                    LOGGER.warn()
-                            .setMessage("Failed stopping aggregator actor")
-                            .addData("actor", _actor)
+                        TimeUnit.MILLISECONDS);
+
+                // Report any failures
+                final boolean aggregatorSuccess = aggregatorShutdown.stream()
+                        .map(f -> f.getNow(false))
+                        .reduce(Boolean::logicalAnd)
+                        .orElse(true);
+                if (!aggregatorSuccess) {
+                    LOGGER.error()
+                            .setMessage("Failed stopping one or more aggregator actors")
+                            .log();
+                }
+                final boolean periodWorkerSuccess = periodWorkerShutdown.stream()
+                        .map(f -> f.getNow(false))
+                        .reduce(Boolean::logicalAnd)
+                        .orElse(true);
+                if (!periodWorkerSuccess) {
+                    LOGGER.error()
+                            .setMessage("Failed stopping one or more period worker actors")
                             .log();
                 }
             } catch (final InterruptedException e) {
                 LOGGER.warn()
-                        .setMessage("Interrupted stopping aggregator actor")
-                        .addData("actor", _actor)
+                        .setMessage("Interrupted stopping aggregator and period worker actors")
+                        .addData("aggregatorActors", _actors)
+                        .addData("periodWorkerActors", _periodWorkerActors.values())
                         .log();
             } catch (final TimeoutException | ExecutionException e) {
                 LOGGER.error()
-                        .setMessage("Aggregator actor stop timed out or failed")
-                        .addData("actor", _actor)
+                        .setMessage("Aggregator and period worker actors stop timed out or failed")
+                        .addData("aggregatorActors", _actors)
+                        .addData("periodWorkerActors", _periodWorkerActors.values())
                         .addData("timeout", SHUTDOWN_TIMEOUT)
                         .setThrowable(e)
                         .log();
-            }*/
-            _actor = null;
+            }
         }
+
+        // Clear state
+        _actors.clear();
+        _periodWorkerActors.clear();
     }
 
     @Override
@@ -135,9 +162,17 @@ public final class Aggregator implements Observer, Launchable {
             return;
         }
 
+        // TODO(ville): Distribute based on the hash of the record key
+        // This allows the period worker map to be moved into each aggregator
+        // actor, which causes are global shutdown to become chained again.
+        // Theoretically, this should allow for greater throughput since there
+        // is no contention over the map. However, it's likely minor since it
+        // only happens on period worker creation. This will ensure a strict
+        // ordering to idle timeout and record which is not achieved with the
+        // random distribution (since actors execute concurrently).
         final Record record = (Record) event;
-        //_actor.tell(record, ActorRef.noSender());
-        _actor.record(record);
+        final int nextActor = _nextActor.getAndUpdate(i -> (i + 1) % _actors.size());
+        _actors.get(nextActor).tell(record, ActorRef.noSender());
     }
 
     /**
@@ -158,6 +193,52 @@ public final class Aggregator implements Observer, Launchable {
     @Override
     public String toString() {
         return toLogValue().toString();
+    }
+
+    private List<ActorRef> createActors(final Key key, final ActorRef aggregatorActor) {
+        final List<ActorRef> periodWorkerList = Lists.newArrayListWithExpectedSize(_periods.size());
+        for (final Duration period : _periods) {
+            final Bucket.Builder bucketBuilder = new Bucket.Builder()
+                    .setKey(key)
+                    .setSpecifiedCounterStatistics(_specifiedCounterStatistics)
+                    .setSpecifiedGaugeStatistics(_specifiedGaugeStatistics)
+                    .setSpecifiedTimerStatistics(_specifiedTimerStatistics)
+                    .setDependentCounterStatistics(_dependentCounterStatistics)
+                    .setDependentGaugeStatistics(_dependentGaugeStatistics)
+                    .setDependentTimerStatistics(_dependentTimerStatistics)
+                    .setSpecifiedStatistics(_cachedSpecifiedStatistics)
+                    .setDependentStatistics(_cachedDependentStatistics)
+                    .setPeriod(period)
+                    .setSink(_sink);
+            periodWorkerList.add(
+                    _actorSystem.actorOf(
+                            Props.create(
+                                    PeriodWorker.class,
+                                    aggregatorActor,
+                                    key,
+                                    period,
+                                    _idleTimeout,
+                                    bucketBuilder,
+                                    _periodicMetrics)));
+        }
+        LOGGER.debug()
+                .setMessage("Created period worker actors")
+                .addData("key", key)
+                .addData("periodWorkersSize", periodWorkerList.size())
+                .log();
+        return periodWorkerList;
+    }
+
+    private List<CompletableFuture<Boolean>> shutdownActors(final List<ActorRef> actors) {
+        final List<CompletableFuture<Boolean>> shutdownFutures = new ArrayList<>();
+        for (final ActorRef actorRef : actors) {
+            shutdownFutures.add(
+                    Patterns.gracefulStop(
+                            actorRef,
+                            SHUTDOWN_TIMEOUT,
+                            PoisonPill.getInstance()).toCompletableFuture());
+        }
+        return shutdownFutures;
     }
 
     private ImmutableSet<Statistic> computeDependentStatistics(final ImmutableSet<Statistic> statistics) {
@@ -230,8 +311,9 @@ public final class Aggregator implements Observer, Launchable {
         });
     }
 
-    //private ActorRef _actor;
-    private Actor _actor;
+    private final List<ActorRef> _actors = new ArrayList<>();
+    private final AtomicInteger _nextActor = new AtomicInteger(0);
+    private final ConcurrentMap<Key, List<ActorRef>> _periodWorkerActors = Maps.newConcurrentMap();
 
     // WARNING: Consider carefully the volume of samples recorded.
     // PeriodicMetrics reduces the number of scopes creates, but each sample is
@@ -252,25 +334,10 @@ public final class Aggregator implements Observer, Launchable {
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedSpecifiedStatistics;
     private final LoadingCache<String, Optional<ImmutableSet<Statistic>>> _cachedDependentStatistics;
     private final AtomicLong _receivedSamples = new AtomicLong(0);
-    private final ConcurrentMap<Key, List<ActorRef>> _periodWorkerActors = Maps.newConcurrentMap();
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Duration SHUTDOWN_TIMEOUT = Duration.ofSeconds(30);
     private static final Logger LOGGER = LoggerFactory.getLogger(Aggregator.class);
-
-    private static final class ShutdownAggregator implements Serializable {
-        /**
-         * Gets the singleton instance.
-         *
-         * @return singleton instance
-         */
-        public static ShutdownAggregator getInstance() {
-            return INSTANCE;
-        }
-
-        private static final ShutdownAggregator INSTANCE = new ShutdownAggregator();
-        private static final long serialVersionUID = 1L;
-    }
 
     static final class PeriodWorkerIdle implements Serializable {
 
@@ -290,13 +357,13 @@ public final class Aggregator implements Observer, Launchable {
     /**
      * Internal actor to process requests.
      */
-    /* package private */ static final class Actor { //extends AbstractActor {
+    /* package private */ static final class Actor extends AbstractActor {
         /**
          * Creates a {@link Props} for this actor.
          *
          * @return A new {@link Props}
          */
-        /*static Props props(final Aggregator aggregator) {
+        static Props props(final Aggregator aggregator) {
             return Props.create(Actor.class, aggregator);
         }
 
@@ -320,39 +387,9 @@ public final class Aggregator implements Observer, Launchable {
             return receiveBuilder()
                     .match(Record.class, this::record)
                     .match(PeriodWorkerIdle.class, this::idleWorker)
-                    .match(ShutdownAggregator.class, ignored -> shutdown())
                     .build();
-        }*/
-
-        private void shutdown() {
-            final List<CompletableFuture<Object>> shutdownStages = new ArrayList<>();
-            for (final List<ActorRef> actorRefList : _aggregator._periodWorkerActors.values()) {
-                for (final ActorRef actorRef : actorRefList) {
-                    shutdownStages.add(
-                            Patterns.ask(
-                                    actorRef,
-                                    PoisonPill.getInstance(),
-                                    SHUTDOWN_TIMEOUT).toCompletableFuture());
-                }
-            }
-            _aggregator._periodWorkerActors.clear();
-            try {
-                CompletableFutures.allOf(shutdownStages).get(
-                        SHUTDOWN_TIMEOUT.toMillis(),
-                        TimeUnit.MILLISECONDS);
-            } catch (final InterruptedException e) {
-                LOGGER.warn()
-                        .setMessage("Interrupted waiting for actors to shutdown")
-                        .log();
-            } catch (final TimeoutException | ExecutionException e) {
-                LOGGER.error()
-                        .setMessage("Waiting for actors to shutdown timed out or failed")
-                        .setThrowable(e)
-                        .log();
-            }
         }
 
-        /*
         private void idleWorker(final PeriodWorkerIdle idle) {
             final Key key = idle.getKey();
             final List<ActorRef> workers = _aggregator._periodWorkerActors.remove(key);
@@ -367,7 +404,7 @@ public final class Aggregator implements Observer, Launchable {
                     worker.tell(PoisonPill.getInstance(), self());
                 }
             }
-        }*/
+        }
 
         private void record(final Record record) {
             final Key key = new DefaultKey(record.getDimensions());
@@ -392,50 +429,12 @@ public final class Aggregator implements Observer, Launchable {
                     .addData("key", key)
                     .log();
 
-            final List<ActorRef> periodWorkers = _aggregator._periodWorkerActors.computeIfAbsent(key, this::createActors);
-            /*if (periodWorkers == null) {
-                periodWorkers = createActors(key);
-                _aggregator._periodWorkerActors.put(key, periodWorkers);
-            }*/
-
+            final List<ActorRef> periodWorkers = _aggregator._periodWorkerActors.computeIfAbsent(
+                    key,
+                    k -> _aggregator.createActors(k, this.self()));
             for (final ActorRef periodWorkerActor : periodWorkers) {
-                //periodWorkerActor.tell(record, self());
-                periodWorkerActor.tell(record, ActorRef.noSender());
+                periodWorkerActor.tell(record, self());
             }
-        }
-
-        private List<ActorRef> createActors(final Key key) {
-            final List<ActorRef> periodWorkerList = Lists.newArrayListWithExpectedSize(_aggregator._periods.size());
-            for (final Duration period : _aggregator._periods) {
-                final Bucket.Builder bucketBuilder = new Bucket.Builder()
-                        .setKey(key)
-                        .setSpecifiedCounterStatistics(_aggregator._specifiedCounterStatistics)
-                        .setSpecifiedGaugeStatistics(_aggregator._specifiedGaugeStatistics)
-                        .setSpecifiedTimerStatistics(_aggregator._specifiedTimerStatistics)
-                        .setDependentCounterStatistics(_aggregator._dependentCounterStatistics)
-                        .setDependentGaugeStatistics(_aggregator._dependentGaugeStatistics)
-                        .setDependentTimerStatistics(_aggregator._dependentTimerStatistics)
-                        .setSpecifiedStatistics(_aggregator._cachedSpecifiedStatistics)
-                        .setDependentStatistics(_aggregator._cachedDependentStatistics)
-                        .setPeriod(period)
-                        .setSink(_aggregator._sink);
-                periodWorkerList.add(
-                        _aggregator._actorSystem.actorOf(
-                                Props.create(
-                                        PeriodWorker.class,
-                                        //this.self(),
-                                        key,
-                                        period,
-                                        _aggregator._idleTimeout,
-                                        bucketBuilder,
-                                        _aggregator._periodicMetrics)));
-            }
-            LOGGER.debug()
-                    .setMessage("Created period worker actors")
-                    .addData("key", key)
-                    .addData("periodWorkersSize", periodWorkerList.size())
-                    .log();
-            return periodWorkerList;
         }
 
         /**
