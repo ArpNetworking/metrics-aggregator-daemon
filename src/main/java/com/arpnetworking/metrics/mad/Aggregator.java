@@ -150,17 +150,7 @@ public final class Aggregator implements Observer, Launchable {
         // ^ This raises the bigger question of metric name as part of the key.
         // (at the moment it's not taking advantage of same key-space across metrics in bucket)
         final Record record = (Record) event;
-        if (R.nextInt() % 10000 == 0) {
-            final int hash = record.getAnnotations().hashCode();
-            final int size = _actors.size();
-            LOGGER.info()
-                    .addData("size", size)
-                    .addData("hash", hash)
-                    .addData("hashMask", hash & 0x7FFFFFFF)
-                    .addData("hashMaskMod", (hash & 0x7FFFFFFF) % size)
-                    .log();
-        }
-        final int actorIndex = (record.getAnnotations().hashCode() & 0x7FFFFFFF) % _actors.size();
+        final int actorIndex = (record.getDimensions().hashCode() & 0x7FFFFFFF) % _actors.size();
         _actors.get(actorIndex).tell(record, ActorRef.noSender());
     }
 
