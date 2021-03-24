@@ -25,7 +25,7 @@ import java.io.Serializable;
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
-public interface Key { // extends Serializable {
+public interface Key extends Serializable {
 
     /**
      * Return all the slice parameters.

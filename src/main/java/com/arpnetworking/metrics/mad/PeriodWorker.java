@@ -51,18 +51,18 @@ import java.util.TreeMap;
      */
     PeriodWorker(
             //final ActorRef aggregator,
-            //final Key key,
+            final Key key,
             final Duration period,
             final Duration idleTimeout,
             final Bucket.Builder bucketBuilder,
             final PeriodicMetrics periodicMetrics) {
         //_aggregator = aggregator;
-        //_key = key;
+        _key = key;
         _period = period;
-        //_idleTimeout = idleTimeout;
+        _idleTimeout = idleTimeout;
         _bucketBuilder = bucketBuilder;
         _periodicMetrics = periodicMetrics;
-        //_hasReceivedRecords = false;
+        _hasReceivedRecords = false;
         _nextScheduledRotationTime = Optional.empty();
     }
 
@@ -72,11 +72,10 @@ import java.util.TreeMap;
 
         _periodicMetrics.recordCounter("actors/period_worker/started", 1);
 
-        /*
         timers().startPeriodicTimer(
                 IDLE_CHECK_TIMER,
                 IDLE_CHECK_MESSAGE,
-                _idleTimeout);*/
+                _idleTimeout);
     }
 
     @Override
@@ -110,7 +109,7 @@ import java.util.TreeMap;
         return receiveBuilder()
                 .match(Record.class, this::processRecord)
                 .matchEquals(ROTATE_MESSAGE, m -> rotateAndSchedule())
-                //.matchEquals(IDLE_CHECK_MESSAGE, m -> checkForIdle())
+                .matchEquals(IDLE_CHECK_MESSAGE, m -> checkForIdle())
                 .build();
     }
 
@@ -120,7 +119,7 @@ import java.util.TreeMap;
         performRotation(now);
         scheduleRotation(now);
     }
-/*
+
     private void checkForIdle() {
         // The check for both no scheduled rotations and having received records
         // is necessary to ensure that the idle message is only sent after at
@@ -129,11 +128,11 @@ import java.util.TreeMap;
         // after the current rotation but before data for the next rotation
         // arrives, therefore not ensuring that the minimum time has elapsed.
         if (!_nextScheduledRotationTime.isPresent() && !_hasReceivedRecords) {
-            _aggregator.tell(new Aggregator.PeriodWorkerIdle(_key), self());
+            //_aggregator.tell(new Aggregator.PeriodWorkerIdle(_key), self());
         }
         _hasReceivedRecords = false;
     }
-*/
+
     private void scheduleRotation(final ZonedDateTime now) {
         if (timers().isTimerActive(ROTATE_TIMER_KEY)) {
             timers().cancel(ROTATE_TIMER_KEY);
@@ -178,7 +177,7 @@ import java.util.TreeMap;
 
     private void processRecord(final Record record) {
         // Mark the actor as having received records
-        //_hasReceivedRecords = true;
+        _hasReceivedRecords = true;
 
         // Find an existing bucket for the record
         final Duration timeout = getPeriodTimeout(_period);
@@ -296,13 +295,13 @@ import java.util.TreeMap;
         return dateTime2;
     }
 
-    //private boolean _hasReceivedRecords;
+    private boolean _hasReceivedRecords;
     private Optional<ZonedDateTime> _nextScheduledRotationTime;
 
     //private final ActorRef _aggregator;
-    //private final Key _key;
+    private final Key _key;
     private final Duration _period;
-    //private final Duration _idleTimeout;
+    private final Duration _idleTimeout;
     private final Bucket.Builder _bucketBuilder;
     private final NavigableMap<ZonedDateTime, Bucket> _bucketsByStart = new TreeMap<>();
     private final NavigableMap<ZonedDateTime, List<Bucket>> _bucketsByExpiration = new TreeMap<>();
