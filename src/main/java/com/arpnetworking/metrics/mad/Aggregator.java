@@ -83,7 +83,7 @@ public final class Aggregator implements Observer, Launchable {
                 .addData("actors", instances)
                 .log();
         for (int i = 0; i < instances; ++i) {
-            _actors.add(_actorSystem.actorOf(Actor.props(this, i)));
+            _actors.add(_actorSystem.actorOf(Actor.props(this)));
         }
     }
 
@@ -277,6 +277,17 @@ public final class Aggregator implements Observer, Launchable {
                                 return statistics.map(statisticImmutableSet -> computeDependentStatistics(statisticImmutableSet));
                            }
                         });
+
+        _periodicMetrics.registerPolledMetric(m -> {
+            // TODO(vkoskela): There needs to be a way to deregister these callbacks
+            // This is not an immediate issue since new Aggregator instances are
+            // only created when pipelines are reloaded. To avoid recording values
+            // for dead pipelines this explicitly avoids recording zeroes.
+            final long samples = _receivedSamples.getAndSet(0);
+            if (samples > 0) {
+                m.recordGauge("aggregator/samples", samples);
+            }
+        });
     }
 
     private final List<ActorRef> _actors = new ArrayList<>();
@@ -285,6 +296,7 @@ public final class Aggregator implements Observer, Launchable {
     // PeriodicMetrics reduces the number of scopes creates, but each sample is
     // still stored in-memory until it is flushed.
     private final PeriodicMetrics _periodicMetrics;
+    private final AtomicLong _receivedSamples = new AtomicLong(0);
 
     private final ActorSystem _actorSystem;
     private final ImmutableSet<Duration> _periods;
@@ -329,8 +341,8 @@ public final class Aggregator implements Observer, Launchable {
          *
          * @return A new {@link Props}
          */
-        static Props props(final Aggregator aggregator, final int id) {
-            return Props.create(Actor.class, aggregator, id);
+        static Props props(final Aggregator aggregator) {
+            return Props.create(Actor.class, aggregator);
         }
 
         @Override
@@ -428,7 +440,7 @@ public final class Aggregator implements Observer, Launchable {
                             .orElse(0.0d);
                 }
             }
-            _receivedSamples.addAndGet(samples);
+            _aggregator._receivedSamples.addAndGet(samples);
 
             LOGGER.trace()
                     .setMessage("Sending record to aggregation actor")
@@ -450,26 +462,13 @@ public final class Aggregator implements Observer, Launchable {
          * Constructor.
          *
          * @param aggregator The {@link Aggregator} to implement.
-         * @param id The identifier of the aggregator actor instance.
          */
-        /* package private */ Actor(final Aggregator aggregator, final int id) {
+        /* package private */ Actor(final Aggregator aggregator) {
             _aggregator = aggregator;
-
-            _aggregator._periodicMetrics.registerPolledMetric(m -> {
-                // TODO(vkoskela): There needs to be a way to deregister these callbacks
-                // This is not an immediate issue since new Aggregator instances are
-                // only created when pipelines are reloaded. To avoid recording values
-                // for dead pipelines this explicitly avoids recording zeroes.
-                final long samples = _receivedSamples.getAndSet(0);
-                if (samples > 0) {
-                    m.recordGauge("aggregator/samples/" + id, samples);
-                }
-            });
         }
 
         private final Aggregator _aggregator;
         private final Map<Key, List<ActorRef>> _periodWorkerActors = Maps.newHashMap();
-        private final AtomicLong _receivedSamples = new AtomicLong(0);
     }
 
     /**
