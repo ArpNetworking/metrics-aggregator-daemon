@@ -58,11 +58,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
@@ -95,51 +93,33 @@ public final class Aggregator implements Observer, Launchable {
 
         if (!_actors.isEmpty()) {
             try {
-                // Start aggregator and period worker shutdown
+                // Start aggregator shutdown
                 final List<CompletableFuture<Boolean>> aggregatorShutdown = shutdownActors(_actors);
-                final List<CompletableFuture<Boolean>> periodWorkerShutdown = new ArrayList<>();
-                for (final List<ActorRef> workers : _periodWorkerActors.values()) {
-                    periodWorkerShutdown.addAll(shutdownActors(workers));
-                }
 
                 // Wait for shutdown
-                final List<CompletableFuture<Boolean>> allShutdown = new ArrayList<>();
-                allShutdown.addAll(aggregatorShutdown);
-                allShutdown.addAll(periodWorkerShutdown);
-                CompletableFutures.allOf(allShutdown).get(
+                CompletableFutures.allOf(aggregatorShutdown).get(
                         SHUTDOWN_TIMEOUT.toMillis(),
                         TimeUnit.MILLISECONDS);
 
                 // Report any failures
-                final boolean aggregatorSuccess = aggregatorShutdown.stream()
+                final boolean success = aggregatorShutdown.stream()
                         .map(f -> f.getNow(false))
                         .reduce(Boolean::logicalAnd)
                         .orElse(true);
-                if (!aggregatorSuccess) {
+                if (!success) {
                     LOGGER.error()
                             .setMessage("Failed stopping one or more aggregator actors")
                             .log();
                 }
-                final boolean periodWorkerSuccess = periodWorkerShutdown.stream()
-                        .map(f -> f.getNow(false))
-                        .reduce(Boolean::logicalAnd)
-                        .orElse(true);
-                if (!periodWorkerSuccess) {
-                    LOGGER.error()
-                            .setMessage("Failed stopping one or more period worker actors")
-                            .log();
-                }
             } catch (final InterruptedException e) {
                 LOGGER.warn()
-                        .setMessage("Interrupted stopping aggregator and period worker actors")
+                        .setMessage("Interrupted stopping aggregator actors")
                         .addData("aggregatorActors", _actors)
-                        .addData("periodWorkerActors", _periodWorkerActors.values())
                         .log();
             } catch (final TimeoutException | ExecutionException e) {
                 LOGGER.error()
-                        .setMessage("Aggregator and period worker actors stop timed out or failed")
+                        .setMessage("Aggregator actors stop timed out or failed")
                         .addData("aggregatorActors", _actors)
-                        .addData("periodWorkerActors", _periodWorkerActors.values())
                         .addData("timeout", SHUTDOWN_TIMEOUT)
                         .setThrowable(e)
                         .log();
@@ -148,7 +128,6 @@ public final class Aggregator implements Observer, Launchable {
 
         // Clear state
         _actors.clear();
-        _periodWorkerActors.clear();
     }
 
     @Override
@@ -162,17 +141,12 @@ public final class Aggregator implements Observer, Launchable {
             return;
         }
 
-        // TODO(ville): Distribute based on the hash of the record key
-        // This allows the period worker map to be moved into each aggregator
-        // actor, which causes are global shutdown to become chained again.
-        // Theoretically, this should allow for greater throughput since there
-        // is no contention over the map. However, it's likely minor since it
-        // only happens on period worker creation. This will ensure a strict
-        // ordering to idle timeout and record which is not achieved with the
-        // random distribution (since actors execute concurrently).
+        // TODO(ville): Should the record contain a key instead of just annotations?
+        // ^ This raises the bigger question of metric name as part of the key.
+        // (at the moment it's not taking advantage of same key-space across metrics in bucket)
         final Record record = (Record) event;
-        final int nextActor = _nextActor.getAndUpdate(i -> (i + 1) % _actors.size());
-        _actors.get(nextActor).tell(record, ActorRef.noSender());
+        final int actorIndex = (record.getAnnotations().hashCode() & 0x7FFFFFFF) % _actors.size();
+        _actors.get(actorIndex).tell(record, ActorRef.noSender());
     }
 
     /**
@@ -312,8 +286,6 @@ public final class Aggregator implements Observer, Launchable {
     }
 
     private final List<ActorRef> _actors = new ArrayList<>();
-    private final AtomicInteger _nextActor = new AtomicInteger(0);
-    private final ConcurrentMap<Key, List<ActorRef>> _periodWorkerActors = Maps.newConcurrentMap();
 
     // WARNING: Consider carefully the volume of samples recorded.
     // PeriodicMetrics reduces the number of scopes creates, but each sample is
@@ -337,6 +309,7 @@ public final class Aggregator implements Observer, Launchable {
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Duration SHUTDOWN_TIMEOUT = Duration.ofSeconds(30);
+    private static final String SHUTDOWN_MESSAGE = "shutdown";
     private static final Logger LOGGER = LoggerFactory.getLogger(Aggregator.class);
 
     static final class PeriodWorkerIdle implements Serializable {
@@ -387,12 +360,53 @@ public final class Aggregator implements Observer, Launchable {
             return receiveBuilder()
                     .match(Record.class, this::record)
                     .match(PeriodWorkerIdle.class, this::idleWorker)
+                    .matchEquals(SHUTDOWN_MESSAGE, ignored -> this.shutdown())
                     .build();
+        }
+
+        private void shutdown() {
+            try {
+                // Start period worker shutdown
+                final List<CompletableFuture<Boolean>> periodWorkerShutdown = new ArrayList<>();
+                for (final List<ActorRef> workers : _periodWorkerActors.values()) {
+                    periodWorkerShutdown.addAll(_aggregator.shutdownActors(workers));
+                }
+
+                // Wait for shutdown
+                CompletableFutures.allOf(periodWorkerShutdown).get(
+                        SHUTDOWN_TIMEOUT.toMillis(),
+                        TimeUnit.MILLISECONDS);
+
+                // Report any failures
+                final boolean success = periodWorkerShutdown.stream()
+                        .map(f -> f.getNow(false))
+                        .reduce(Boolean::logicalAnd)
+                        .orElse(true);
+                if (!success) {
+                    LOGGER.error()
+                            .setMessage("Failed stopping one or more period worker actors")
+                            .addData("aggregatorActor", this.self())
+                            .log();
+                }
+            } catch (final InterruptedException e) {
+                LOGGER.warn()
+                        .setMessage("Interrupted stopping period worker actors")
+                        .addData("aggregatorActor", this.self())
+                        .log();
+            } catch (final TimeoutException | ExecutionException e) {
+                LOGGER.error()
+                        .setMessage("Period worker actors stop timed out or failed")
+                        .addData("aggregatorActor", this.self())
+                        .addData("timeout", SHUTDOWN_TIMEOUT)
+                        .setThrowable(e)
+                        .log();
+            }
+            _periodWorkerActors.clear();
         }
 
         private void idleWorker(final PeriodWorkerIdle idle) {
             final Key key = idle.getKey();
-            final List<ActorRef> workers = _aggregator._periodWorkerActors.remove(key);
+            final List<ActorRef> workers = _periodWorkerActors.remove(key);
             if (workers != null) {
                 LOGGER.debug()
                         .setMessage("Stopping idle period worker actors")
@@ -429,9 +443,11 @@ public final class Aggregator implements Observer, Launchable {
                     .addData("key", key)
                     .log();
 
-            final List<ActorRef> periodWorkers = _aggregator._periodWorkerActors.computeIfAbsent(
-                    key,
-                    k -> _aggregator.createActors(k, this.self()));
+            List<ActorRef> periodWorkers = _periodWorkerActors.get(key);
+            if (periodWorkers == null) {
+                periodWorkers = _aggregator.createActors(key, this.self());
+                _periodWorkerActors.put(key, periodWorkers);
+            }
             for (final ActorRef periodWorkerActor : periodWorkers) {
                 periodWorkerActor.tell(record, self());
             }
@@ -447,6 +463,7 @@ public final class Aggregator implements Observer, Launchable {
         }
 
         private final Aggregator _aggregator;
+        private final Map<Key, List<ActorRef>> _periodWorkerActors = Maps.newHashMap();
     }
 
     /**
