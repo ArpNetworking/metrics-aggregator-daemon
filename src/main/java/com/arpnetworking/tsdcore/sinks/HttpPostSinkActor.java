@@ -100,6 +100,10 @@ public class HttpPostSinkActor extends AbstractActor {
         } else {
             _spreadingDelayMillis = new Random().nextInt((int) spreadPeriod.toMillis());
         }
+        LOGGER.info()
+                .setMessage("Http post sink actor spread period")
+                .addData("spreadPeriodMillis", _spreadingDelayMillis)
+                .log();
         _periodicMetrics = periodicMetrics;
         _evictedRequestsName = "sinks/http_post/" + sink.getMetricSafeName() + "/evicted_requests";
         _requestLatencyName = "sinks/http_post/" + sink.getMetricSafeName() + "/request_latency";
@@ -227,22 +231,28 @@ public class HttpPostSinkActor extends AbstractActor {
                         .log();
             }
 
-            // If we don't currently have anything in-flight, we'll need to wait the spreading duration.
-            // If we're already waiting, these requests will be sent after the waiting is over, no need to do anything else.
-            if (pendingWasEmpty && !_waiting && _spreadingDelayMillis > 0) {
-                _waiting = true;
-                LOGGER.debug()
-                        .setMessage("Scheduling http requests for later transmission")
-                        .addData("delayMs", _spreadingDelayMillis)
-                        .addContext("actor", self())
-                        .log();
-                context().system().scheduler().scheduleOnce(
-                        FiniteDuration.apply(_spreadingDelayMillis, TimeUnit.MILLISECONDS),
-                        self(),
-                        new WaitTimeExpired(),
-                        context().dispatcher(),
-                        self());
+            if (_spreadingDelayMillis > 0) {
+                // If we don't currently have anything in-flight, we'll need to wait the spreading duration.
+                if (!_waiting && pendingWasEmpty) {
+                    _waiting = true;
+                    LOGGER.debug()
+                            .setMessage("Scheduling http requests for later transmission")
+                            .addData("delayMs", _spreadingDelayMillis)
+                            .addContext("actor", self())
+                            .log();
+                    context().system().scheduler().scheduleOnce(
+                            FiniteDuration.apply(_spreadingDelayMillis, TimeUnit.MILLISECONDS),
+                            self(),
+                            WaitTimeExpired.getInstance(),
+                            context().dispatcher(),
+                            self());
+                } else if (!_waiting) {
+                   // If we have something in-flight continue to send without waiting
+                   dispatchPending();
+                }
+                // Otherwise we're already waiting, these requests will be sent after the waiting is over, no need to do anything else.
             } else {
+                // Spreading is disable, just keep dispatching the work
                 dispatchPending();
             }
         }
@@ -333,7 +343,7 @@ public class HttpPostSinkActor extends AbstractActor {
     private final String _samplesDroppedName;
     private final String _samplesSentName;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSinkActor.class);
     private static final Logger POST_ERROR_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSink.class, Duration.ofSeconds(30));
     private static final Logger EVICTED_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSink.class, Duration.ofSeconds(30));
     private static final com.google.common.collect.ImmutableList<Integer> STATUS_CLASSES = ImmutableList.of(2, 3, 4, 5);
@@ -419,7 +429,15 @@ public class HttpPostSinkActor extends AbstractActor {
     /**
      * Message class to indicate that we are now able to send data.
      */
-    private static final class WaitTimeExpired { }
+    private static final class WaitTimeExpired { 
+        private static final WaitTimeExpired INSTANCE = new WaitTimeExpired();
+
+        public static WaitTimeExpired getInstance() {
+            return INSTANCE;
+        }
+
+        private WaitTimeExpired() {}
+    }
 
     private static final class ResponseAsyncCompletionHandler extends AsyncCompletionHandler<Response> {
 
