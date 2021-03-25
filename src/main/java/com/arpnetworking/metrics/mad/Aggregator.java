@@ -148,7 +148,14 @@ public final class Aggregator implements Observer, Launchable {
 
         // TODO(ville): Should the record contain a key instead of just annotations?
         // ^ This raises the bigger question of metric name as part of the key.
-        // (at the moment it's not taking advantage of same key-space across metrics in bucket)
+        // (at the moment it's not and thus able to take advantage of same key-space across metrics in bucket)
+        //
+        // The hashing can be improved in a number of ways:
+        // * The hash code could use MD5 or Murmur to generate a better distribution.
+        // * The modulo itself introduces a small skew to certain actor partitions.
+        // * More fundamentally, the workload per partition varies and scale is subject
+        //   to the highest partition's workload. We may need to consider a different
+        //   model entirely.
         final Record record = (Record) event;
         final int actorIndex = (record.getDimensions().hashCode() & 0x7FFFFFFF) % _actors.size();
         _actors.get(actorIndex).tell(record, ActorRef.noSender());
@@ -390,18 +397,18 @@ public final class Aggregator implements Observer, Launchable {
                 if (!success) {
                     LOGGER.error()
                             .setMessage("Failed stopping one or more period worker actors")
-                            .addData("aggregatorActor", this.self())
+                            .addData("aggregatorActor", self())
                             .log();
                 }
             } catch (final InterruptedException e) {
                 LOGGER.warn()
                         .setMessage("Interrupted stopping period worker actors")
-                        .addData("aggregatorActor", this.self())
+                        .addData("aggregatorActor", self())
                         .log();
             } catch (final TimeoutException | ExecutionException e) {
                 LOGGER.error()
                         .setMessage("Period worker actors stop timed out or failed")
-                        .addData("aggregatorActor", this.self())
+                        .addData("aggregatorActor", self())
                         .addData("timeout", SHUTDOWN_TIMEOUT)
                         .setThrowable(e)
                         .log();
@@ -450,7 +457,7 @@ public final class Aggregator implements Observer, Launchable {
 
             List<ActorRef> periodWorkers = _periodWorkerActors.get(key);
             if (periodWorkers == null) {
-                periodWorkers = _aggregator.createActors(key, this.self());
+                periodWorkers = _aggregator.createActors(key, self());
                 _periodWorkerActors.put(key, periodWorkers);
             }
             for (final ActorRef periodWorkerActor : periodWorkers) {
