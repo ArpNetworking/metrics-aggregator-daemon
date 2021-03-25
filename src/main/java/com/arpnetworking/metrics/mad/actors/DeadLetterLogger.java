@@ -30,15 +30,17 @@ public class DeadLetterLogger  extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(DeadLetter.class, message -> {
-                    LOGGER.info()
-                            .setMessage("Encountered dead letter")
-                            .addData("recipient", message.recipient())
-                            .addData("sender", message.sender())
-                            .addData("message", message.message())
-                            .log();
-                })
+                .match(DeadLetter.class, this::log)
                 .build();
+    }
+
+    private void log(final DeadLetter message) {
+        LOGGER.info()
+                .setMessage("Encountered dead letter")
+                .addData("recipient", message.recipient())
+                .addData("sender", message.sender())
+                .addData("message", message.message())
+                .log();
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeadLetterLogger.class);

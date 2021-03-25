@@ -341,10 +341,6 @@ public final class PeriodicStatisticsSink extends BaseSink {
                 final MetricKey metricKey = new MetricKey(metricName, periodicData.getDimensions());
                 _uniqueMetrics.get().add(metricName);
                 _uniqueStatistics.get().add(metricKey);
-
-                // This assumes that all AggregatedData instances have the
-                // population field set correctly (really they should).
-                _metricSamples.addAndGet(firstDatum.getPopulationSize());
             }
         }
 

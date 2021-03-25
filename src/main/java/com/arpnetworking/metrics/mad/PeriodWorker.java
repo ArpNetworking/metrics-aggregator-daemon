@@ -305,6 +305,10 @@ import java.util.TreeMap;
     private final Bucket.Builder _bucketBuilder;
     private final NavigableMap<ZonedDateTime, Bucket> _bucketsByStart = new TreeMap<>();
     private final NavigableMap<ZonedDateTime, List<Bucket>> _bucketsByExpiration = new TreeMap<>();
+
+    // WARNING: Consider carefully the volume of samples recorded.
+    // PeriodicMetrics reduces the number of scopes creates, but each sample is
+    // still stored in-memory until it is flushed.
     private final PeriodicMetrics _periodicMetrics;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PeriodWorker.class);

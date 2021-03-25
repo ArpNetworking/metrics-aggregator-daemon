@@ -99,26 +99,7 @@ public final class StatsdSource extends ActorSource {
                                 .addData("socket", _socket)
                                 .log();
                     })
-                    .match(Udp.Received.class, updReceived -> {
-                        LOGGER.trace()
-                                .setMessage("Statsd received datagram")
-                                .addData("bytes", updReceived.data().size())
-                                .addData("socket", _socket)
-                                .log();
-
-                        try {
-                            // NOTE: The parsing occurs in the actor itself which can become a bottleneck
-                            // if there are more records to be parsed then a single thread can handle.
-                            final List<Record> records = PARSER.parse(updReceived.data().toByteBuffer());
-                            records.forEach(_sink::notify);
-                        } catch (final ParsingException e) {
-                            BAD_REQUEST_LOGGER.warn()
-                                    .setMessage("Error handling statsd datagram")
-                                    .addData("socket", _socket)
-                                    .setThrowable(e)
-                                    .log();
-                        }
-                    })
+                    .match(Udp.Received.class, this::updReceived)
                     .matchEquals(UdpMessage.unbind(), message -> {
                         LOGGER.debug()
                                 .setMessage("Statsd unbind")
@@ -134,6 +115,27 @@ public final class StatsdSource extends ActorSource {
                         getContext().stop(getSelf());
                     })
                     .build();
+        }
+
+        private void updReceived(final Udp.Received updReceived) {
+            LOGGER.trace()
+                    .setMessage("Statsd received datagram")
+                    .addData("bytes", updReceived.data().size())
+                    .addData("socket", _socket)
+                    .log();
+
+            try {
+                // NOTE: The parsing occurs in the actor itself which can become a bottleneck
+                // if there are more records to be parsed then a single thread can handle.
+                final List<Record> records = PARSER.parse(updReceived.data().toByteBuffer());
+                records.forEach(_sink::notify);
+            } catch (final ParsingException e) {
+                BAD_REQUEST_LOGGER.warn()
+                        .setMessage("Error handling statsd datagram")
+                        .addData("socket", _socket)
+                        .setThrowable(e)
+                        .log();
+            }
         }
 
         /**

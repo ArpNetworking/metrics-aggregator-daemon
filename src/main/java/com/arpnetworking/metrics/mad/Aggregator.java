@@ -56,11 +56,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 /**
@@ -74,11 +76,15 @@ public final class Aggregator implements Observer, Launchable {
 
     @Override
     public synchronized void launch() {
-        LOGGER.debug()
+        final int instances = 2 * Runtime.getRuntime().availableProcessors();
+        LOGGER.info()
                 .setMessage("Launching aggregator")
                 .addData("aggregator", this)
+                .addData("actors", instances)
                 .log();
-        _actor = _actorSystem.actorOf(Actor.props(this));
+        for (int i = 0; i < instances; ++i) {
+            _actors.add(_actorSystem.actorOf(Actor.props(this)));
+        }
     }
 
     @Override
@@ -88,35 +94,46 @@ public final class Aggregator implements Observer, Launchable {
                 .addData("aggregator", this)
                 .log();
 
-        if (_actor != null) {
+        if (!_actors.isEmpty()) {
             try {
-                if (!Patterns.gracefulStop(
-                        _actor,
-                        SHUTDOWN_TIMEOUT,
-                        ShutdownAggregator.getInstance()).toCompletableFuture().get(
+                // Start aggregator shutdown
+                final List<CompletableFuture<Boolean>> aggregatorShutdown = shutdownActors(_actors, SHUTDOWN_MESSAGE);
+
+                // Wait for shutdown
+                CompletableFutures.allOf(aggregatorShutdown).get(
                         SHUTDOWN_TIMEOUT.toMillis(),
-                        TimeUnit.MILLISECONDS)) {
-                    LOGGER.warn()
-                            .setMessage("Failed stopping aggregator actor")
-                            .addData("actor", _actor)
+                        TimeUnit.MILLISECONDS);
+
+                // Report any failures
+                final boolean success = aggregatorShutdown.stream()
+                        .map(f -> f.getNow(false))
+                        .reduce(Boolean::logicalAnd)
+                        .orElse(true);
+                if (!success) {
+                    LOGGER.error()
+                            .setMessage("Failed stopping one or more aggregator actors")
                             .log();
                 }
             } catch (final InterruptedException e) {
                 LOGGER.warn()
-                        .setMessage("Interrupted stopping aggregator actor")
-                        .addData("actor", _actor)
+                        .setMessage("Interrupted stopping aggregator actors")
+                        .addData("aggregatorActors", _actors)
                         .log();
             } catch (final TimeoutException | ExecutionException e) {
                 LOGGER.error()
-                        .setMessage("Aggregator actor stop timed out or failed")
-                        .addData("actor", _actor)
+                        .setMessage("Aggregator actors stop timed out or failed")
+                        .addData("aggregatorActors", _actors)
                         .addData("timeout", SHUTDOWN_TIMEOUT)
                         .setThrowable(e)
                         .log();
             }
-            _actor = null;
         }
+
+        // Clear state
+        _actors.clear();
     }
+
+    private static final Random R = new Random();
 
     @Override
     @SuppressFBWarnings("IS2_INCONSISTENT_SYNC")
@@ -129,8 +146,19 @@ public final class Aggregator implements Observer, Launchable {
             return;
         }
 
+        // TODO(ville): Should the record contain a key instead of just annotations?
+        // ^ This raises the bigger question of metric name as part of the key.
+        // (at the moment it's not and thus able to take advantage of same key-space across metrics in bucket)
+        //
+        // The hashing can be improved in a number of ways:
+        // * The hash code could use MD5 or Murmur to generate a better distribution.
+        // * The modulo itself introduces a small skew to certain actor partitions.
+        // * More fundamentally, the workload per partition varies and scale is subject
+        //   to the highest partition's workload. We may need to consider a different
+        //   model entirely.
         final Record record = (Record) event;
-        _actor.tell(record, ActorRef.noSender());
+        final int actorIndex = (record.getDimensions().hashCode() & 0x7FFFFFFF) % _actors.size();
+        _actors.get(actorIndex).tell(record, ActorRef.noSender());
     }
 
     /**
@@ -151,6 +179,52 @@ public final class Aggregator implements Observer, Launchable {
     @Override
     public String toString() {
         return toLogValue().toString();
+    }
+
+    private List<ActorRef> createActors(final Key key, final ActorRef aggregatorActor) {
+        final List<ActorRef> periodWorkerList = Lists.newArrayListWithExpectedSize(_periods.size());
+        for (final Duration period : _periods) {
+            final Bucket.Builder bucketBuilder = new Bucket.Builder()
+                    .setKey(key)
+                    .setSpecifiedCounterStatistics(_specifiedCounterStatistics)
+                    .setSpecifiedGaugeStatistics(_specifiedGaugeStatistics)
+                    .setSpecifiedTimerStatistics(_specifiedTimerStatistics)
+                    .setDependentCounterStatistics(_dependentCounterStatistics)
+                    .setDependentGaugeStatistics(_dependentGaugeStatistics)
+                    .setDependentTimerStatistics(_dependentTimerStatistics)
+                    .setSpecifiedStatistics(_cachedSpecifiedStatistics)
+                    .setDependentStatistics(_cachedDependentStatistics)
+                    .setPeriod(period)
+                    .setSink(_sink);
+            periodWorkerList.add(
+                    _actorSystem.actorOf(
+                            Props.create(
+                                    PeriodWorker.class,
+                                    aggregatorActor,
+                                    key,
+                                    period,
+                                    _idleTimeout,
+                                    bucketBuilder,
+                                    _periodicMetrics)));
+        }
+        LOGGER.debug()
+                .setMessage("Created period worker actors")
+                .addData("key", key)
+                .addData("periodWorkersSize", periodWorkerList.size())
+                .log();
+        return periodWorkerList;
+    }
+
+    private List<CompletableFuture<Boolean>> shutdownActors(final List<ActorRef> actors, final Object message) {
+        final List<CompletableFuture<Boolean>> shutdownFutures = new ArrayList<>();
+        for (final ActorRef actorRef : actors) {
+            shutdownFutures.add(
+                    Patterns.gracefulStop(
+                            actorRef,
+                            SHUTDOWN_TIMEOUT,
+                            message).toCompletableFuture());
+        }
+        return shutdownFutures;
     }
 
     private ImmutableSet<Statistic> computeDependentStatistics(final ImmutableSet<Statistic> statistics) {
@@ -210,12 +284,28 @@ public final class Aggregator implements Observer, Launchable {
                                 return statistics.map(statisticImmutableSet -> computeDependentStatistics(statisticImmutableSet));
                            }
                         });
+
+        _periodicMetrics.registerPolledMetric(m -> {
+            // TODO(vkoskela): There needs to be a way to deregister these callbacks
+            // This is not an immediate issue since new Aggregator instances are
+            // only created when pipelines are reloaded. To avoid recording values
+            // for dead pipelines this explicitly avoids recording zeroes.
+            final long samples = _receivedSamples.getAndSet(0);
+            if (samples > 0) {
+                m.recordGauge("aggregator/samples", samples);
+            }
+        });
     }
 
-    private ActorRef _actor;
+    private final List<ActorRef> _actors = new ArrayList<>();
+
+    // WARNING: Consider carefully the volume of samples recorded.
+    // PeriodicMetrics reduces the number of scopes creates, but each sample is
+    // still stored in-memory until it is flushed.
+    private final PeriodicMetrics _periodicMetrics;
+    private final AtomicLong _receivedSamples = new AtomicLong(0);
 
     private final ActorSystem _actorSystem;
-    private final PeriodicMetrics _periodicMetrics;
     private final ImmutableSet<Duration> _periods;
     private final Duration _idleTimeout;
     private final Sink _sink;
@@ -231,21 +321,8 @@ public final class Aggregator implements Observer, Launchable {
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Duration SHUTDOWN_TIMEOUT = Duration.ofSeconds(30);
+    private static final String SHUTDOWN_MESSAGE = "shutdown";
     private static final Logger LOGGER = LoggerFactory.getLogger(Aggregator.class);
-
-    private static final class ShutdownAggregator implements Serializable {
-        /**
-         * Gets the singleton instance.
-         *
-         * @return singleton instance
-         */
-        public static ShutdownAggregator getInstance() {
-            return INSTANCE;
-        }
-
-        private static final ShutdownAggregator INSTANCE = new ShutdownAggregator();
-        private static final long serialVersionUID = 1L;
-    }
 
     static final class PeriodWorkerIdle implements Serializable {
 
@@ -271,124 +348,121 @@ public final class Aggregator implements Observer, Launchable {
          *
          * @return A new {@link Props}
          */
-        /* package private */
         static Props props(final Aggregator aggregator) {
             return Props.create(Actor.class, aggregator);
         }
 
         @Override
+        public void preStart() {
+            _aggregator._periodicMetrics.recordCounter("actors/aggregator/started", 1);
+        }
+
+        @Override
+        public void postStop() {
+            _aggregator._periodicMetrics.recordCounter("actors/aggregator/stopped", 1);
+        }
+
+        @Override
+        public void preRestart(final Throwable reason, final Optional<Object> message) {
+            _aggregator._periodicMetrics.recordCounter("actors/aggregator/restarted", 1);
+        }
+
+        @Override
         public Receive createReceive() {
             return receiveBuilder()
-                    .match(Record.class, record -> {
-                        final Key key = new DefaultKey(record.getDimensions());
-
-                        long samples = 0;
-                        for (final Metric metric : record.getMetrics().values()) {
-                            samples += metric.getValues().size();
-                            final List<CalculatedValue<?>> countStatistic =
-                                    metric.getStatistics().get(STATISTIC_FACTORY.getStatistic("count"));
-                            if (countStatistic != null) {
-                                samples += countStatistic.stream()
-                                        .map(s -> s.getValue().getValue())
-                                        .reduce(Double::sum)
-                                        .orElse(0.0d);
-                            }
-                        }
-                        _aggregator._periodicMetrics.recordGauge("aggregator/samples", samples);
-
-                        LOGGER.trace()
-                                .setMessage("Sending record to aggregation actor")
-                                .addData("record", record)
-                                .addData("key", key)
-                                .log();
-
-                        List<ActorRef> periodWorkers = _periodWorkerActors.get(key);
-                        if (periodWorkers == null) {
-                            periodWorkers = createActors(key);
-                            _periodWorkerActors.put(key, periodWorkers);
-                        }
-
-                        for (final ActorRef periodWorkerActor : periodWorkers) {
-                            periodWorkerActor.tell(record, self());
-                        }
-                    })
-                    .match(PeriodWorkerIdle.class, idle -> {
-                        final Key key = idle.getKey();
-                        final List<ActorRef> workers = _periodWorkerActors.remove(key);
-                        if (workers != null) {
-                            LOGGER.debug()
-                                    .setMessage("Stopping idle period worker actors")
-                                    .addData("key", key)
-                                    .addData("worker_count", workers.size())
-                                    .log();
-
-                            for (final ActorRef worker : workers) {
-                                worker.tell(PoisonPill.getInstance(), self());
-                            }
-                        }
-                    })
-                    .match(ShutdownAggregator.class, ignored -> {
-                        final List<CompletableFuture<Object>> shutdownStages = new ArrayList<>();
-                        for (final List<ActorRef> actorRefList : _periodWorkerActors.values()) {
-                            for (final ActorRef actorRef : actorRefList) {
-                                shutdownStages.add(
-                                        Patterns.ask(
-                                                actorRef,
-                                                PoisonPill.getInstance(),
-                                                SHUTDOWN_TIMEOUT).toCompletableFuture());
-                            }
-                        }
-                        _periodWorkerActors.clear();
-                        try {
-                            CompletableFutures.allOf(shutdownStages).get(
-                                    SHUTDOWN_TIMEOUT.toMillis(),
-                                    TimeUnit.MILLISECONDS);
-                        } catch (final InterruptedException e) {
-                            LOGGER.warn()
-                                    .setMessage("Interrupted waiting for actors to shutdown")
-                                    .log();
-                        } catch (final TimeoutException | ExecutionException e) {
-                            LOGGER.error()
-                                    .setMessage("Waiting for actors to shutdown timed out or failed")
-                                    .setThrowable(e)
-                                    .log();
-                        }
-                    })
+                    .match(Record.class, this::record)
+                    .match(PeriodWorkerIdle.class, this::idleWorker)
+                    .matchEquals(SHUTDOWN_MESSAGE, ignored -> this.shutdown())
                     .build();
         }
 
-        private List<ActorRef> createActors(final Key key) {
-            final List<ActorRef> periodWorkerList = Lists.newArrayListWithExpectedSize(_aggregator._periods.size());
-            for (final Duration period : _aggregator._periods) {
-                final Bucket.Builder bucketBuilder = new Bucket.Builder()
-                        .setKey(key)
-                        .setSpecifiedCounterStatistics(_aggregator._specifiedCounterStatistics)
-                        .setSpecifiedGaugeStatistics(_aggregator._specifiedGaugeStatistics)
-                        .setSpecifiedTimerStatistics(_aggregator._specifiedTimerStatistics)
-                        .setDependentCounterStatistics(_aggregator._dependentCounterStatistics)
-                        .setDependentGaugeStatistics(_aggregator._dependentGaugeStatistics)
-                        .setDependentTimerStatistics(_aggregator._dependentTimerStatistics)
-                        .setSpecifiedStatistics(_aggregator._cachedSpecifiedStatistics)
-                        .setDependentStatistics(_aggregator._cachedDependentStatistics)
-                        .setPeriod(period)
-                        .setSink(_aggregator._sink);
-                periodWorkerList.add(
-                        _aggregator._actorSystem.actorOf(
-                                Props.create(
-                                        PeriodWorker.class,
-                                        this.self(),
-                                        key,
-                                        period,
-                                        _aggregator._idleTimeout,
-                                        bucketBuilder,
-                                        _aggregator._periodicMetrics)));
+        private void shutdown() {
+            try {
+                // Start period worker shutdown
+                final List<CompletableFuture<Boolean>> periodWorkerShutdown = new ArrayList<>();
+                for (final List<ActorRef> workers : _periodWorkerActors.values()) {
+                    periodWorkerShutdown.addAll(_aggregator.shutdownActors(workers, PoisonPill.getInstance()));
+                }
+
+                // Wait for shutdown
+                CompletableFutures.allOf(periodWorkerShutdown).get(
+                        SHUTDOWN_TIMEOUT.toMillis(),
+                        TimeUnit.MILLISECONDS);
+
+                // Report any failures
+                final boolean success = periodWorkerShutdown.stream()
+                        .map(f -> f.getNow(false))
+                        .reduce(Boolean::logicalAnd)
+                        .orElse(true);
+                if (!success) {
+                    LOGGER.error()
+                            .setMessage("Failed stopping one or more period worker actors")
+                            .addData("aggregatorActor", self())
+                            .log();
+                }
+            } catch (final InterruptedException e) {
+                LOGGER.warn()
+                        .setMessage("Interrupted stopping period worker actors")
+                        .addData("aggregatorActor", self())
+                        .log();
+            } catch (final TimeoutException | ExecutionException e) {
+                LOGGER.error()
+                        .setMessage("Period worker actors stop timed out or failed")
+                        .addData("aggregatorActor", self())
+                        .addData("timeout", SHUTDOWN_TIMEOUT)
+                        .setThrowable(e)
+                        .log();
             }
-            LOGGER.debug()
-                    .setMessage("Created period worker actors")
+            _periodWorkerActors.clear();
+        }
+
+        private void idleWorker(final PeriodWorkerIdle idle) {
+            final Key key = idle.getKey();
+            final List<ActorRef> workers = _periodWorkerActors.remove(key);
+            if (workers != null) {
+                LOGGER.debug()
+                        .setMessage("Stopping idle period worker actors")
+                        .addData("key", key)
+                        .addData("worker_count", workers.size())
+                        .log();
+
+                for (final ActorRef worker : workers) {
+                    worker.tell(PoisonPill.getInstance(), self());
+                }
+            }
+        }
+
+        private void record(final Record record) {
+            final Key key = new DefaultKey(record.getDimensions());
+
+            long samples = 0;
+            for (final Metric metric : record.getMetrics().values()) {
+                samples += metric.getValues().size();
+                final List<CalculatedValue<?>> countStatistic =
+                        metric.getStatistics().get(STATISTIC_FACTORY.getStatistic("count"));
+                if (countStatistic != null) {
+                    samples += countStatistic.stream()
+                            .map(s -> s.getValue().getValue())
+                            .reduce(Double::sum)
+                            .orElse(0.0d);
+                }
+            }
+            _aggregator._receivedSamples.addAndGet(samples);
+
+            LOGGER.trace()
+                    .setMessage("Sending record to aggregation actor")
+                    .addData("record", record)
                     .addData("key", key)
-                    .addData("periodWorkersSize", periodWorkerList.size())
                     .log();
-            return periodWorkerList;
+
+            List<ActorRef> periodWorkers = _periodWorkerActors.get(key);
+            if (periodWorkers == null) {
+                periodWorkers = _aggregator.createActors(key, self());
+                _periodWorkerActors.put(key, periodWorkers);
+            }
+            for (final ActorRef periodWorkerActor : periodWorkers) {
+                periodWorkerActor.tell(record, self());
+            }
         }
 
         /**
