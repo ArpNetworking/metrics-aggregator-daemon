@@ -100,10 +100,6 @@ public class HttpPostSinkActor extends AbstractActor {
         } else {
             _spreadingDelayMillis = new Random().nextInt((int) spreadPeriod.toMillis());
         }
-        LOGGER.info()
-                .setMessage("Http post sink actor spread period")
-                .addData("spreadPeriodMillis", _spreadingDelayMillis)
-                .log();
         _periodicMetrics = periodicMetrics;
         _evictedRequestsName = "sinks/http_post/" + sink.getMetricSafeName() + "/evicted_requests";
         _requestLatencyName = "sinks/http_post/" + sink.getMetricSafeName() + "/request_latency";
@@ -112,6 +108,39 @@ public class HttpPostSinkActor extends AbstractActor {
         _responseStatusName = "sinks/http_post/" + sink.getMetricSafeName() + "/status";
         _samplesDroppedName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_dropped";
         _samplesSentName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_sent";
+    }
+
+    @Override
+    public void preStart() throws Exception {
+        super.preStart();
+
+        LOGGER.info()
+                .setMessage("Starting http post sink actor")
+                .addData("actor", this)
+                .addData("actorRef", self())
+                .log();
+
+        _periodicMetrics.recordCounter("actors/http_post_sink/started", 1);
+    }
+
+    @Override
+    public void postStop() throws Exception {
+        super.postStop();
+
+        LOGGER.info()
+                .setMessage("Shutdown sink actor")
+                .addData("actorRef", self())
+                .addData("recordsWritten", _postRequests)
+                .log();
+
+        _periodicMetrics.recordCounter("actors/http_post_sink/stopped", 1);
+    }
+
+    @Override
+    public void preRestart(final Throwable reason, final Optional<Object> message) throws Exception {
+        super.preRestart(reason, message);
+
+        _periodicMetrics.recordCounter("actors/http_post_sink/restarted", 1);
     }
 
     /**
@@ -252,7 +281,7 @@ public class HttpPostSinkActor extends AbstractActor {
                 }
                 // Otherwise we're already waiting, these requests will be sent after the waiting is over, no need to do anything else.
             } else {
-                // Spreading is disable, just keep dispatching the work
+                // Spreading is disabled, just keep dispatching the work
                 dispatchPending();
             }
         }
@@ -314,16 +343,6 @@ public class HttpPostSinkActor extends AbstractActor {
         PatternsCS.pipe(responsePromise, context().dispatcher()).to(self());
     }
 
-    @Override
-    public void postStop() throws Exception {
-        super.postStop();
-        LOGGER.info()
-                .setMessage("Shutdown sink actor")
-                .addData("sink", _sink)
-                .addData("recordsWritten", _postRequests)
-                .log();
-    }
-
     private int _inflightRequestsCount = 0;
     private long _postRequests = 0;
     private boolean _waiting = false;
@@ -344,8 +363,8 @@ public class HttpPostSinkActor extends AbstractActor {
     private final String _samplesSentName;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSinkActor.class);
-    private static final Logger POST_ERROR_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSink.class, Duration.ofSeconds(30));
-    private static final Logger EVICTED_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSink.class, Duration.ofSeconds(30));
+    private static final Logger POST_ERROR_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSinkActor.class, Duration.ofSeconds(30));
+    private static final Logger EVICTED_LOGGER = LoggerFactory.getRateLimitLogger(HttpPostSinkActor.class, Duration.ofSeconds(30));
     private static final com.google.common.collect.ImmutableList<Integer> STATUS_CLASSES = ImmutableList.of(2, 3, 4, 5);
 
     /**
