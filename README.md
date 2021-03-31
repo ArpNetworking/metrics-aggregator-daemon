@@ -5,9 +5,9 @@ Metrics Aggregator Daemon
     <img src="https://img.shields.io/hexpm/l/plug.svg"
          alt="License: Apache 2">
 </a>
-<a href="https://travis-ci.com/ArpNetworking/metrics-aggregator-daemon">
-    <img src="https://travis-ci.com/ArpNetworking/metrics-aggregator-daemon.svg?branch=master"
-         alt="Travis Build">
+<a href='https://build.arpnetworking.com/job/ArpNetworking/job/metrics-aggregator-daemon/job/master/'>
+    <img src='https://build.arpnetworking.com/job/ArpNetworking/job/metrics-aggregator-daemon/job/master/badge/icon'
+         alt="Jenkins Build">
 </a>
 <a href="http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.arpnetworking.metrics%22%20a%3A%22metrics-aggregator-daemon%22">
     <img src="https://img.shields.io/maven-central/v/com.arpnetworking.metrics/metrics-aggregator-daemon.svg"
