@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.http;
 
-import akka.NotUsed;
 import akka.actor.ActorNotFound;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -34,7 +33,6 @@ import akka.japi.JavaPartialFunction;
 import akka.japi.function.Function;
 import akka.pattern.Patterns;
 import akka.stream.OverflowStrategy;
-import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import akka.util.ByteString;
@@ -69,6 +67,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 
 /**
  * Http server routes.
@@ -99,20 +98,6 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
         _healthCheckPath = healthCheckPath;
         _statusPath = statusPath;
         _supplementalRoutes = supplementalRoutes;
-    }
-
-    /**
-     * Creates a {@link Flow} based on executing the routes asynchronously.
-     *
-     * @return a new {@link Flow}
-     */
-    public Flow<HttpRequest, HttpResponse, NotUsed> flow() {
-        return Flow.<HttpRequest>create()
-                .mapAsync(1, this)
-                .recoverWithRetries(
-                        0,
-                        Exception.class,
-                        () -> Source.single(HttpResponse.create().withStatus(StatusCodes.INTERNAL_SERVER_ERROR)));
     }
 
     @Override
@@ -288,11 +273,12 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
             final ActorRef connection = _actorSystem.actorOf(Connection.props(_metrics, messageProcessorsFactory));
             final Sink<Message, ?> inChannel = Sink.actorRef(connection, PoisonPill.getInstance());
             final Source<Message, ActorRef> outChannel = Source.<Message>actorRef(TELEMETRY_BUFFER_SIZE, OverflowStrategy.dropBuffer())
-                    .<ActorRef>mapMaterializedValue(channel -> {
+                    .mapMaterializedValue(channel -> {
                         _actorSystem.actorSelection("/user/telemetry").resolveOne(Timeout.apply(1, TimeUnit.SECONDS)).foreach(
                                 new JavaPartialFunction<ActorRef, Object>() {
                                     @Override
-                                    public Object apply(final ActorRef telemetry, final boolean isCheck) throws Exception {
+                                    @Nullable
+                                    public Object apply(final ActorRef telemetry, final boolean isCheck) {
                                         final Connect connectMessage = new Connect(telemetry, connection, channel);
                                         connection.tell(connectMessage, ActorRef.noSender());
                                         telemetry.tell(connectMessage, ActorRef.noSender());
