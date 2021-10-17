@@ -62,7 +62,7 @@ public final class AggregationMessage {
             b.appendByte((byte) 0x05);
             b.appendByte((byte) 0x02);
         } else {
-            throw new IllegalArgumentException(String.format("Unsupported message; message=%s", _message));
+            throw new IllegalArgumentException(String.format("Unsupported message; message=%s", _message.getClass().getName()));
         }
         b.appendBytes(_message.toByteArray());
         b.setInt(0, b.length());

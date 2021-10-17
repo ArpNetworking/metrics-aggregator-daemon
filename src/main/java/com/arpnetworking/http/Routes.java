@@ -32,7 +32,7 @@ import akka.http.javadsl.model.headers.CacheDirectives;
 import akka.http.javadsl.model.ws.Message;
 import akka.japi.JavaPartialFunction;
 import akka.japi.function.Function;
-import akka.pattern.PatternsCS;
+import akka.pattern.Patterns;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Sink;
@@ -62,6 +62,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import scala.compat.java8.FutureConverters;
 import scala.concurrent.duration.FiniteDuration;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -77,7 +78,8 @@ import java.util.stream.StreamSupport;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
-public final class Routes implements Function<HttpRequest, CompletionStage<HttpResponse>> {
+public final class Routes implements Function<HttpRequest, CompletionStage<HttpResponse>>,
+        akka.japi.Function<HttpRequest, CompletionStage<HttpResponse>> {
 
     /**
      * Public constructor.
@@ -289,7 +291,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
             final Sink<Message, ?> inChannel = Sink.actorRef(connection, PoisonPill.getInstance());
             final Source<Message, ActorRef> outChannel = Source.<Message>actorRef(TELEMETRY_BUFFER_SIZE, OverflowStrategy.dropBuffer())
                     .<ActorRef>mapMaterializedValue(channel -> {
-                        _actorSystem.actorSelection("/user/telemetry").resolveOne(Timeout.apply(1, TimeUnit.SECONDS)).onSuccess(
+                        _actorSystem.actorSelection("/user/telemetry").resolveOne(Timeout.apply(1, TimeUnit.SECONDS)).foreach(
                                 new JavaPartialFunction<ActorRef, Object>() {
                                     @Override
                                     public Object apply(final ActorRef telemetry, final boolean isCheck) throws Exception {
@@ -314,10 +316,10 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
 
     @SuppressWarnings("unchecked")
     private <T> CompletionStage<T> ask(final String actorPath, final Object request, final T defaultValue) {
-        return (CompletionStage<T>) PatternsCS.ask(
+        return (CompletionStage<T>) Patterns.ask(
                         _actorSystem.actorSelection(actorPath),
                         request,
-                        Timeout.apply(1, TimeUnit.SECONDS))
+                        Duration.ofSeconds(1))
                 .exceptionally(throwable -> defaultValue);
     }
 
