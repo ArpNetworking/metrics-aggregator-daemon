@@ -18,15 +18,15 @@
 FROM openjdk:8-jre-buster
 
 ENV SCALA_VERSION 2.13
-ENV KAFKA_VERSION 2.7.0
+ENV KAFKA_VERSION 2.7.1
 ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
 
 # Install Kafka, Zookeeper and other needed things
 RUN apt-get -o Acquire::Check-Valid-Until=false update && \
     DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Check-Valid-Until=false install -y zookeeper wget supervisor dnsutils && \
     rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
-RUN wget -q "http://apache.mirrors.spacedump.net/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" -O "/tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" && \
+    apt-get clean && \
+    wget -q "http://apache.mirrors.spacedump.net/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" -O "/tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" && \
     tar xfz "/tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" -C /opt && \
     rm "/tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz"
 
