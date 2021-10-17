@@ -86,6 +86,14 @@ public final class AggregatorConfiguration {
         return _httpPort;
     }
 
+    public String getHttpsHost() {
+        return _httpsHost;
+    }
+
+    public int getHttpsPort() {
+        return _httpsPort;
+    }
+
     public String getHttpHealthCheckPath() {
         return _httpHealthCheckPath;
     }
@@ -120,6 +128,8 @@ public final class AggregatorConfiguration {
                 .add("PipelinesDirectory", _pipelinesDirectory)
                 .add("HttpHost", _httpHost)
                 .add("HttpPort", _httpPort)
+                .add("HttpsHost", _httpsHost)
+                .add("HttpsPort", _httpsPort)
                 .add("HttpHealthCheckPath", _httpHealthCheckPath)
                 .add("HttpStatusPath", _httpStatusPath)
                 .add("SupplementalHttpRoutesClass", _supplementalHttpRoutesClass)
@@ -137,6 +147,8 @@ public final class AggregatorConfiguration {
         _pipelinesDirectory = builder._pipelinesDirectory;
         _httpHost = builder._httpHost;
         _httpPort = builder._httpPort;
+        _httpsHost = builder._httpsHost;
+        _httpsPort = builder._httpsPort;
         _httpHealthCheckPath = builder._httpHealthCheckPath;
         _httpStatusPath = builder._httpStatusPath;
         _supplementalHttpRoutesClass = Optional.ofNullable(builder._supplementalHttpRoutesClass);
@@ -157,9 +169,11 @@ public final class AggregatorConfiguration {
     private final File _logDirectory;
     private final File _pipelinesDirectory;
     private final String _httpHost;
+    private final String _httpsHost;
     private final String _httpHealthCheckPath;
     private final String _httpStatusPath;
     private final int _httpPort;
+    private final int _httpsPort;
     private final Optional<Class<? extends SupplementalRoutes>> _supplementalHttpRoutesClass;
     private final boolean _logDeadLetters;
     private final Map<String, ?> _akkaConfiguration;
@@ -293,6 +307,17 @@ public final class AggregatorConfiguration {
         }
 
         /**
+         * The https host address to bind to. Cannot be null or empty.
+         *
+         * @param value The host address to bind to.
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setHttpsHost(final String value) {
+            _httpsHost = value;
+            return this;
+        }
+
+        /**
          * The http health check path. Cannot be null or empty. Optional. Default is "/ping".
          *
          * @param value The health check path.
@@ -323,6 +348,18 @@ public final class AggregatorConfiguration {
          */
         public Builder setHttpPort(final Integer value) {
             _httpPort = value;
+            return this;
+        }
+
+        /**
+         * The https port to listen on. Cannot be null, must be between 1 and
+         * 65535 (inclusive).
+         *
+         * @param value The port to listen on.
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setHttpsPort(final Integer value) {
+            _httpsPort = value;
             return this;
         }
 
@@ -395,6 +432,12 @@ public final class AggregatorConfiguration {
         @NotNull
         @Range(min = 1, max = 65535)
         private Integer _httpPort;
+        @NotNull
+        @NotEmpty
+        private String _httpsHost;
+        @NotNull
+        @Range(min = 1, max = 65535)
+        private Integer _httpsPort;
         @NotNull
         @NotEmpty
         private String _httpHealthCheckPath = "/ping";

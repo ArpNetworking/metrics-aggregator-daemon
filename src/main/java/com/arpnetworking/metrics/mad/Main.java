@@ -21,7 +21,9 @@ import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatcher;
+import akka.http.javadsl.ConnectionContext;
 import akka.http.javadsl.Http;
+import akka.http.javadsl.HttpsConnectionContext;
 import akka.stream.Materializer;
 import ch.qos.logback.classic.LoggerContext;
 import com.arpnetworking.commons.builder.Builder;
@@ -67,7 +69,10 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
+import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -81,6 +86,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Class containing entry point for Metrics Data Aggregator (MAD).
@@ -248,7 +256,38 @@ public final class Main implements Launchable {
                 supplementalHttpRoutes.build());
         final Http http = Http.get(actorSystem);
 
-        http.newServerAt(_configuration.getHttpHost(), _configuration.getHttpPort()).bind(routes);
+        http.newServerAt(_configuration.getHttpHost(), _configuration.getHttpPort()).withMaterializer(materializer).bind(routes);
+        HttpsConnectionContext httpsContext = createHttpsContext(actorSystem);
+        http.newServerAt(_configuration.getHttpsHost(), _configuration.getHttpsPort()).withMaterializer(materializer).enableHttps(httpsContext).bind(routes);
+    }
+
+    private HttpsConnectionContext createHttpsContext(ActorSystem system) {
+        try {
+            // initialise the keystore
+            // !!! never put passwords into code !!!
+            final char[] password = new char[]{'a', 'b', 'c', 'd', 'e', 'f'};
+
+            final KeyStore ks = KeyStore.getInstance("PKCS12");
+            final InputStream keystore = Main.class.getClassLoader().getResourceAsStream("httpsDemoKeys/keys/server.p12");
+            if (keystore == null) {
+                throw new RuntimeException("Keystore required!");
+            }
+            ks.load(keystore, password);
+
+            final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+            keyManagerFactory.init(ks, password);
+
+            final TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+            tmf.init(ks);
+
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(keyManagerFactory.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+
+            return ConnectionContext.httpsServer(sslContext);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings("deprecation")
