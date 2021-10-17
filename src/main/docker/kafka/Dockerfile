@@ -25,8 +25,8 @@ ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
 RUN apt-get -o Acquire::Check-Valid-Until=false update && \
     DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Check-Valid-Until=false install -y zookeeper wget supervisor dnsutils && \
     rm -rf /var/lib/apt/lists/* && \
-    apt-get clean && \
-    wget -q "http://apache.mirrors.spacedump.net/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" -O "/tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" && \
+    apt-get clean
+RUN wget -q "http://apache.mirrors.spacedump.net/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" -O "/tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" && \
     tar xfz "/tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" -C /opt && \
     rm "/tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz"
 
