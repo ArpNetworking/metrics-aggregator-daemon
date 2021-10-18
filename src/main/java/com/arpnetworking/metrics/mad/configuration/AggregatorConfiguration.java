@@ -102,7 +102,7 @@ public final class AggregatorConfiguration {
         return _httpsCertificatePath;
     }
 
-    public boolean enableHttps() {
+    public boolean getEnableHttps() {
         return _enableHttps;
     }
 

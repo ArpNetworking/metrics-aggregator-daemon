@@ -64,22 +64,12 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Encoding;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.util.PrivateKeyFactory;
-import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
-import org.bouncycastle.jcajce.provider.asymmetric.X509;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemObjectParser;
-import org.bouncycastle.util.io.pem.PemReader;
 import scala.concurrent.Await;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
@@ -88,17 +78,22 @@ import scala.concurrent.duration.Duration;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.InputStream;
+import java.io.IOException;
 import java.net.URI;
-import java.security.KeyFactory;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -115,7 +110,6 @@ import javax.annotation.Nullable;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import java.security.cert.X509Certificate;
 
 /**
  * Class containing entry point for Metrics Data Aggregator (MAD).
@@ -284,44 +278,55 @@ public final class Main implements Launchable {
         final Http http = Http.get(actorSystem);
 
         http.newServerAt(_configuration.getHttpHost(), _configuration.getHttpPort()).withMaterializer(materializer).bind(routes);
-        if (_configuration.enableHttps()) {
+        if (_configuration.getEnableHttps()) {
             Security.addProvider(new BouncyCastleProvider());
-            HttpsConnectionContext httpsContext = createHttpsContext(actorSystem);
-            http.newServerAt(_configuration.getHttpsHost(), _configuration.getHttpsPort()).withMaterializer(materializer).enableHttps(httpsContext).bind(routes);
+            final HttpsConnectionContext httpsContext = createHttpsContext();
+            http.newServerAt(_configuration.getHttpsHost(), _configuration.getHttpsPort())
+                    .withMaterializer(materializer).enableHttps(httpsContext)
+                    .bind(routes);
         }
     }
 
-    private HttpsConnectionContext createHttpsContext(ActorSystem system) {
-        try (final PEMParser keyReader = new PEMParser(new BufferedReader(new FileReader(_configuration.getHttpsKeyPath())));
-                final PEMParser certReader = new PEMParser(new BufferedReader(new FileReader(_configuration.getHttpsCertificatePath())))) {
-            // initialise the keystore
-            // !!! never put passwords into code !!!
-
+    private HttpsConnectionContext createHttpsContext() {
+        final PrivateKey privateKey;
+        try (PEMParser keyReader = new PEMParser(new BufferedReader(new FileReader(_configuration.getHttpsKeyPath())))) {
             final Object keyObject = keyReader.readObject();
 
+            if (keyObject instanceof PrivateKeyInfo) {
+                final PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) keyObject;
+                privateKey = new JcaPEMKeyConverter().getPrivateKey(privateKeyInfo);
+            } else {
+                throw new RuntimeException(
+                        String.format("Invalid private key format, expected PEM private key, got %s", keyObject.getClass().getName()));
+            }
+        } catch (final FileNotFoundException e) {
+            throw new RuntimeException(String.format("Could not find https key file: %s", _configuration.getHttpsKeyPath()), e);
+        } catch (final IOException e) {
+            throw new RuntimeException(String.format("Error reading https key file: %s", _configuration.getHttpsKeyPath()), e);
+        }
 
+        final X509Certificate cert;
+        try (PEMParser certReader = new PEMParser(new BufferedReader(new FileReader(_configuration.getHttpsCertificatePath())))) {
             final PemObject certObject = certReader.readPemObject();
             final CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            final X509Certificate cert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(certObject.getContent()));
+            cert = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certObject.getContent()));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(
+                    String.format("Could not find https certificate file: %s", _configuration.getHttpsCertificatePath()), e);
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    String.format("Error reading https certificate file: %s", _configuration.getHttpsCertificatePath()), e);
+        } catch (CertificateException e) {
+            throw new RuntimeException("Error building X509 certificate", e);
+        }
 
-            String foo = keyObject.getClass().getName();
-
+        try {
             final KeyStore ks = KeyStore.getInstance("JKS");
-
             ks.load(null, null);
-            if (keyObject instanceof PrivateKeyInfo) {
-                final PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo)keyObject;
-                final ASN1Encodable asn1Encodable = privateKeyInfo.parsePrivateKey();
-                final ASN1Primitive asn1Primitive = asn1Encodable.toASN1Primitive();
-                final PrivateKey pkey = new JcaPEMKeyConverter().getPrivateKey(privateKeyInfo);
-                ks.setKeyEntry("key", pkey, new char[0], new Certificate[]{cert});
-            } else {
-                throw new RuntimeException("Invalid private key format");
-            }
             ks.setCertificateEntry("cert", cert);
 
+            ks.setKeyEntry("key", privateKey, new char[0], new Certificate[]{cert});
             final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-//            keyManagerFactory.init(ks, password);
             keyManagerFactory.init(ks, new char[0]);
 
             final TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
@@ -331,9 +336,9 @@ public final class Main implements Launchable {
             sslContext.init(keyManagerFactory.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
 
             return ConnectionContext.httpsServer(sslContext);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (UnrecoverableKeyException | KeyManagementException | NoSuchAlgorithmException | IOException |
+                KeyStoreException | CertificateException e) {
+            throw new RuntimeException("Could not create SSLContext for https configuration", e);
         }
     }
 
