@@ -68,7 +68,7 @@ public class Telemetry extends AbstractActor {
     public Telemetry(final MetricsFactory metricsFactory) {
         _metricsFactory = metricsFactory;
         _metrics = metricsFactory.create();
-        _instrument = context().system().scheduler().schedule(
+        _instrument = context().system().scheduler().scheduleAtFixedRate(
                 new FiniteDuration(0, TimeUnit.SECONDS), // Initial delay
                 new FiniteDuration(500, TimeUnit.MILLISECONDS), // Interval
                 getSelf(),

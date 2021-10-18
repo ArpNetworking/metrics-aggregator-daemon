@@ -72,7 +72,7 @@ import java.util.TreeMap;
 
         _periodicMetrics.recordCounter("actors/period_worker/started", 1);
 
-        timers().startPeriodicTimer(
+        timers().startTimerAtFixedRate(
                 IDLE_CHECK_TIMER,
                 IDLE_CHECK_MESSAGE,
                 _idleTimeout);

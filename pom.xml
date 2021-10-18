@@ -71,7 +71,7 @@
 
   <properties>
     <!--Dependency versions-->
-    <akka.version>2.5.32</akka.version>
+    <akka.version>2.6.9</akka.version>
     <akka.http.version>10.2.6</akka.http.version>
     <apache.httpclient.version>4.5.6</apache.httpclient.version>
     <apache.httpcore.version>4.4.10</apache.httpcore.version>

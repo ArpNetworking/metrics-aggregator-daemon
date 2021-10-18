@@ -22,7 +22,6 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatcher;
 import akka.http.javadsl.Http;
-import akka.stream.ActorMaterializer;
 import akka.stream.Materializer;
 import ch.qos.logback.classic.LoggerContext;
 import com.arpnetworking.commons.builder.Builder;
@@ -48,7 +47,6 @@ import com.arpnetworking.metrics.mad.configuration.PipelineConfiguration;
 import com.arpnetworking.metrics.proxy.actors.Telemetry;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.arpnetworking.utility.AkkaForkJoinPoolAdapter;
 import com.arpnetworking.utility.Configurator;
 import com.arpnetworking.utility.Launchable;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -241,7 +239,7 @@ public final class Main implements Launchable {
                 clazz -> supplementalHttpRoutes.add(injector.getInstance(clazz)));
 
         // Create and bind Http server
-        final Materializer materializer = ActorMaterializer.create(actorSystem);
+        final Materializer materializer = Materializer.createMaterializer(actorSystem);
         final Routes routes = new Routes(
                 actorSystem,
                 injector.getInstance(PeriodicMetrics.class),
@@ -416,11 +414,7 @@ public final class Main implements Launchable {
             final Map<String, ExecutorService> executorServices,
             final String name,
             final ExecutorService executorService) {
-        if (executorService instanceof akka.dispatch.forkjoin.ForkJoinPool) {
-            final akka.dispatch.forkjoin.ForkJoinPool akkaForkJoinPool =
-                    (akka.dispatch.forkjoin.ForkJoinPool) executorService;
-            executorServices.put(name, new AkkaForkJoinPoolAdapter(akkaForkJoinPool));
-        } else if (executorService instanceof java.util.concurrent.ForkJoinPool
+        if (executorService instanceof java.util.concurrent.ForkJoinPool
                 || executorService instanceof java.util.concurrent.ThreadPoolExecutor) {
             executorServices.put(name, executorService);
         } else {

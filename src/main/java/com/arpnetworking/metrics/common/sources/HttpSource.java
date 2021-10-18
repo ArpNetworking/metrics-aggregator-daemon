@@ -24,8 +24,7 @@ import akka.http.javadsl.model.HttpRequest;
 import akka.http.javadsl.model.HttpResponse;
 import akka.http.javadsl.model.RequestEntity;
 import akka.japi.Pair;
-import akka.stream.ActorMaterializer;
-import akka.stream.ActorMaterializerSettings;
+import akka.stream.ActorAttributes;
 import akka.stream.FanInShape2;
 import akka.stream.FlowShape;
 import akka.stream.Graph;
@@ -113,6 +112,7 @@ public class HttpSource extends ActorSource {
                     .log("http source stream failure")
                     .via(_processGraph)
                     .toMat(_sink, Keep.right())
+                    .withAttributes(ActorAttributes.withSupervisionStrategy(Supervision.getStoppingDecider()))
                     .run(_materializer)
                     .whenComplete((done, err) -> {
                         final CompletableFuture<HttpResponse> responseFuture = requestReply.getResponse();
@@ -142,10 +142,7 @@ public class HttpSource extends ActorSource {
             _metricSafeName = source.getMetricSafeName();
             _parser = source._parser;
             _sink = Sink.foreach(source::notify);
-            _materializer = ActorMaterializer.create(
-                    ActorMaterializerSettings.create(context().system())
-                            .withSupervisionStrategy(Supervision.stoppingDecider()),
-                    context());
+            _materializer = Materializer.createMaterializer(context());
 
             _periodicMetrics.registerPolledMetric(m -> {
                 // TODO(vkoskela): There needs to be a way to deregister these callbacks

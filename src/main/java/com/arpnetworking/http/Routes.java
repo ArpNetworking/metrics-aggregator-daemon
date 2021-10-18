@@ -19,6 +19,8 @@ import akka.actor.ActorNotFound;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
+import akka.actor.Status.Failure;
+import akka.actor.Status.Success;
 import akka.http.javadsl.model.ContentType;
 import akka.http.javadsl.model.ContentTypes;
 import akka.http.javadsl.model.HttpHeader;
@@ -32,6 +34,7 @@ import akka.http.javadsl.model.ws.Message;
 import akka.japi.JavaPartialFunction;
 import akka.japi.function.Function;
 import akka.pattern.Patterns;
+import akka.stream.CompletionStrategy;
 import akka.stream.OverflowStrategy;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
@@ -81,10 +84,10 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     /**
      * Public constructor.
      *
-     * @param actorSystem Instance of {@link ActorSystem}.
-     * @param metrics Instance of {@link PeriodicMetrics}.
-     * @param healthCheckPath The path for the health check.
-     * @param statusPath The path for the status.
+     * @param actorSystem        Instance of {@link ActorSystem}.
+     * @param metrics            Instance of {@link PeriodicMetrics}.
+     * @param healthCheckPath    The path for the health check.
+     * @param statusPath         The path for the status.
      * @param supplementalRoutes List of supplemental routes in priority order.
      */
     public Routes(
@@ -241,11 +244,11 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                 _actorSystem.actorSelection(actorName)
                         .resolveOne(Duration.ofSeconds(1));
         return refFuture.thenCompose(
-                ref -> {
-                    final CompletableFuture<HttpResponse> response = new CompletableFuture<>();
-                    ref.tell(new RequestReply(request, response), ActorRef.noSender());
-                    return response;
-                })
+                        ref -> {
+                            final CompletableFuture<HttpResponse> response = new CompletableFuture<>();
+                            ref.tell(new RequestReply(request, response), ActorRef.noSender());
+                            return response;
+                        })
                 // We return 404 here since actor startup is controlled by config and
                 // the actors may not be running.
                 .exceptionally(err -> {
@@ -272,7 +275,11 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
 
             final ActorRef connection = _actorSystem.actorOf(Connection.props(_metrics, messageProcessorsFactory));
             final Sink<Message, ?> inChannel = Sink.actorRef(connection, PoisonPill.getInstance());
-            final Source<Message, ActorRef> outChannel = Source.<Message>actorRef(TELEMETRY_BUFFER_SIZE, OverflowStrategy.dropBuffer())
+            final Source<Message, ActorRef> outChannel = Source.<Message>actorRef(
+                            m -> m instanceof Success ? Optional.of(CompletionStrategy.draining()) : Optional.empty(),
+                            m -> m instanceof Failure ? Optional.of(((Failure) m).cause()) : Optional.empty(),
+                            TELEMETRY_BUFFER_SIZE,
+                            OverflowStrategy.dropBuffer())
                     .mapMaterializedValue(channel -> {
                         _actorSystem.actorSelection("/user/telemetry").resolveOne(Timeout.apply(1, TimeUnit.SECONDS)).foreach(
                                 new JavaPartialFunction<ActorRef, Object>() {
