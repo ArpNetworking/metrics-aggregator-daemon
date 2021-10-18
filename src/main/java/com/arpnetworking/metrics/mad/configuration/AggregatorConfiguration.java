@@ -94,6 +94,18 @@ public final class AggregatorConfiguration {
         return _httpsPort;
     }
 
+    public String getHttpsKeyPath() {
+        return _httpsKeyPath;
+    }
+
+    public String getHttpsCertificatePath() {
+        return _httpsCertificatePath;
+    }
+
+    public boolean enableHttps() {
+        return _enableHttps;
+    }
+
     public String getHttpHealthCheckPath() {
         return _httpHealthCheckPath;
     }
@@ -130,6 +142,9 @@ public final class AggregatorConfiguration {
                 .add("HttpPort", _httpPort)
                 .add("HttpsHost", _httpsHost)
                 .add("HttpsPort", _httpsPort)
+                .add("HttpsKeyPath", _httpsKeyPath)
+                .add("HttpsCertificatePath", _httpsCertificatePath)
+                .add("EnableHttps", _enableHttps)
                 .add("HttpHealthCheckPath", _httpHealthCheckPath)
                 .add("HttpStatusPath", _httpStatusPath)
                 .add("SupplementalHttpRoutesClass", _supplementalHttpRoutesClass)
@@ -149,6 +164,9 @@ public final class AggregatorConfiguration {
         _httpPort = builder._httpPort;
         _httpsHost = builder._httpsHost;
         _httpsPort = builder._httpsPort;
+        _httpsKeyPath = builder._httpsKeyPath;
+        _httpsCertificatePath = builder._httpsCertificatePath;
+        _enableHttps = builder._enableHttps;
         _httpHealthCheckPath = builder._httpHealthCheckPath;
         _httpStatusPath = builder._httpStatusPath;
         _supplementalHttpRoutesClass = Optional.ofNullable(builder._supplementalHttpRoutesClass);
@@ -176,6 +194,9 @@ public final class AggregatorConfiguration {
     private final int _httpsPort;
     private final Optional<Class<? extends SupplementalRoutes>> _supplementalHttpRoutesClass;
     private final boolean _logDeadLetters;
+    private final boolean _enableHttps;
+    private final String _httpsKeyPath;
+    private final String _httpsCertificatePath;
     private final Map<String, ?> _akkaConfiguration;
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
@@ -340,6 +361,28 @@ public final class AggregatorConfiguration {
         }
 
         /**
+         * The location of the https key file. Cannot be null or empty. Optional. Default is "/opt/mad/tls/key.pem".
+         *
+         * @param value The path to the https key file
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setHttpsKeyPath(final String value) {
+            _httpsKeyPath = value;
+            return this;
+        }
+
+        /**
+         * The location of the https certificate file. Cannot be null or empty. Optional. Default is "/opt/mad/tls/cert.pem".
+         *
+         * @param value The path to the https cert file
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setHttpsCertificatePath(final String value) {
+            _httpsCertificatePath = value;
+            return this;
+        }
+
+        /**
          * The http port to listen on. Cannot be null, must be between 1 and
          * 65535 (inclusive).
          *
@@ -360,6 +403,17 @@ public final class AggregatorConfiguration {
          */
         public Builder setHttpsPort(final Integer value) {
             _httpsPort = value;
+            return this;
+        }
+
+        /**
+         * Whether to start the https server. Value cannot be null. Defaults to {@code false}
+         *
+         * @param value {@code True} if the https server should be enabled
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setEnableHttps(final Boolean value) {
+            _enableHttps = value;
             return this;
         }
 
@@ -438,6 +492,14 @@ public final class AggregatorConfiguration {
         @NotNull
         @Range(min = 1, max = 65535)
         private Integer _httpsPort;
+        @NotNull
+        @NotEmpty
+        private String _httpsKeyPath = "/opt/mad/tls/key.pem";
+        @NotNull
+        @NotEmpty
+        private String _httpsCertificatePath = "/opt/mad/tls/cert.pem";
+        @NotNull
+        private Boolean _enableHttps = false;
         @NotNull
         @NotEmpty
         private String _httpHealthCheckPath = "/ping";

@@ -63,16 +63,42 @@ import com.google.inject.Provides;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
+import org.bouncycastle.jcajce.provider.asymmetric.X509;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemObjectParser;
+import org.bouncycastle.util.io.pem.PemReader;
 import scala.concurrent.Await;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.net.URI;
+import java.security.KeyFactory;
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.Security;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -89,6 +115,7 @@ import javax.annotation.Nullable;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+import java.security.cert.X509Certificate;
 
 /**
  * Class containing entry point for Metrics Data Aggregator (MAD).
@@ -257,30 +284,50 @@ public final class Main implements Launchable {
         final Http http = Http.get(actorSystem);
 
         http.newServerAt(_configuration.getHttpHost(), _configuration.getHttpPort()).withMaterializer(materializer).bind(routes);
-        HttpsConnectionContext httpsContext = createHttpsContext(actorSystem);
-        http.newServerAt(_configuration.getHttpsHost(), _configuration.getHttpsPort()).withMaterializer(materializer).enableHttps(httpsContext).bind(routes);
+        if (_configuration.enableHttps()) {
+            Security.addProvider(new BouncyCastleProvider());
+            HttpsConnectionContext httpsContext = createHttpsContext(actorSystem);
+            http.newServerAt(_configuration.getHttpsHost(), _configuration.getHttpsPort()).withMaterializer(materializer).enableHttps(httpsContext).bind(routes);
+        }
     }
 
     private HttpsConnectionContext createHttpsContext(ActorSystem system) {
-        try {
+        try (final PEMParser keyReader = new PEMParser(new BufferedReader(new FileReader(_configuration.getHttpsKeyPath())));
+                final PEMParser certReader = new PEMParser(new BufferedReader(new FileReader(_configuration.getHttpsCertificatePath())))) {
             // initialise the keystore
             // !!! never put passwords into code !!!
-            final char[] password = new char[]{'a', 'b', 'c', 'd', 'e', 'f'};
 
-            final KeyStore ks = KeyStore.getInstance("PKCS12");
-            final InputStream keystore = Main.class.getClassLoader().getResourceAsStream("httpsDemoKeys/keys/server.p12");
-            if (keystore == null) {
-                throw new RuntimeException("Keystore required!");
+            final Object keyObject = keyReader.readObject();
+
+
+            final PemObject certObject = certReader.readPemObject();
+            final CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            final X509Certificate cert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(certObject.getContent()));
+
+            String foo = keyObject.getClass().getName();
+
+            final KeyStore ks = KeyStore.getInstance("JKS");
+
+            ks.load(null, null);
+            if (keyObject instanceof PrivateKeyInfo) {
+                final PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo)keyObject;
+                final ASN1Encodable asn1Encodable = privateKeyInfo.parsePrivateKey();
+                final ASN1Primitive asn1Primitive = asn1Encodable.toASN1Primitive();
+                final PrivateKey pkey = new JcaPEMKeyConverter().getPrivateKey(privateKeyInfo);
+                ks.setKeyEntry("key", pkey, new char[0], new Certificate[]{cert});
+            } else {
+                throw new RuntimeException("Invalid private key format");
             }
-            ks.load(keystore, password);
+            ks.setCertificateEntry("cert", cert);
 
             final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-            keyManagerFactory.init(ks, password);
+//            keyManagerFactory.init(ks, password);
+            keyManagerFactory.init(ks, new char[0]);
 
             final TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
             tmf.init(ks);
 
-            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            final SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
             sslContext.init(keyManagerFactory.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
 
             return ConnectionContext.httpsServer(sslContext);

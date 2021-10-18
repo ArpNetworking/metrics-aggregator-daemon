@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:8u212-jre-alpine
+FROM openjdk:8u302-jre-slim
 
 MAINTAINER arpnetworking
 
@@ -30,12 +30,13 @@ ENV MAD_CONFIG="/opt/mad/config/config.conf"
 ENV JAVA_OPTS=""
 
 # Build
-RUN apk add --no-cache su-exec openssl && \
+RUN apt update && \
+    apt install -y gosu openssl && \
     mkdir -p /opt/mad/lib/ext && \
     mkdir -p /opt/mad/logs && \
     mkdir -p /opt/mad/config/pipelines && \
     mkdir -p /opt/mad/tls && \
-    openssl req -x509 -newkey rsa:4096 -keyout /opt/mad/tls/key.pem -out /opt/mad/tls/cert.pem -days 365 -nodes -subj '/CN=localhost'
+    openssl req -x509 -newkey rsa:4096 -keyout /opt/mad/tls/key.pem -out /opt/mad/tls/cert.pem -days 3650 -nodes -addext "subjectAltName = DNS:localhost" -subj '/CN=localhost'
 ADD deps /opt/mad/lib/
 ADD bin /opt/mad/bin/
 ADD config /opt/mad/config/
