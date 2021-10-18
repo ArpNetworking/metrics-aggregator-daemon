@@ -63,8 +63,6 @@ import com.google.inject.Provides;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
@@ -310,13 +308,13 @@ public final class Main implements Launchable {
             final PemObject certObject = certReader.readPemObject();
             final CertificateFactory cf = CertificateFactory.getInstance("X.509");
             cert = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certObject.getContent()));
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new RuntimeException(
                     String.format("Could not find https certificate file: %s", _configuration.getHttpsCertificatePath()), e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(
                     String.format("Error reading https certificate file: %s", _configuration.getHttpsCertificatePath()), e);
-        } catch (CertificateException e) {
+        } catch (final CertificateException e) {
             throw new RuntimeException("Error building X509 certificate", e);
         }
 
@@ -336,8 +334,8 @@ public final class Main implements Launchable {
             sslContext.init(keyManagerFactory.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
 
             return ConnectionContext.httpsServer(sslContext);
-        } catch (UnrecoverableKeyException | KeyManagementException | NoSuchAlgorithmException | IOException |
-                KeyStoreException | CertificateException e) {
+        } catch (final UnrecoverableKeyException | KeyManagementException | NoSuchAlgorithmException | IOException
+                | KeyStoreException | CertificateException e) {
             throw new RuntimeException("Could not create SSLContext for https configuration", e);
         }
     }
