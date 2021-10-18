@@ -21,7 +21,9 @@ import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatcher;
+import akka.http.javadsl.ConnectionContext;
 import akka.http.javadsl.Http;
+import akka.http.javadsl.HttpsConnectionContext;
 import akka.stream.Materializer;
 import ch.qos.logback.classic.LoggerContext;
 import com.arpnetworking.commons.builder.Builder;
@@ -51,6 +53,7 @@ import com.arpnetworking.utility.Configurator;
 import com.arpnetworking.utility.Launchable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -61,13 +64,35 @@ import com.google.inject.Provides;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.util.io.pem.PemObject;
 import scala.concurrent.Await;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -81,6 +106,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Class containing entry point for Metrics Data Aggregator (MAD).
@@ -248,7 +276,73 @@ public final class Main implements Launchable {
                 supplementalHttpRoutes.build());
         final Http http = Http.get(actorSystem);
 
-        http.newServerAt(_configuration.getHttpHost(), _configuration.getHttpPort()).bind(routes);
+        http.newServerAt(_configuration.getHttpHost(), _configuration.getHttpPort()).withMaterializer(materializer).bind(routes);
+        if (_configuration.getEnableHttps()) {
+            Security.addProvider(new BouncyCastleProvider());
+            final HttpsConnectionContext httpsContext = createHttpsContext();
+            http.newServerAt(_configuration.getHttpsHost(), _configuration.getHttpsPort())
+                    .withMaterializer(materializer).enableHttps(httpsContext)
+                    .bind(routes);
+        }
+    }
+
+    private HttpsConnectionContext createHttpsContext() {
+        final PrivateKey privateKey;
+        try (PEMParser keyReader = new PEMParser(
+                new InputStreamReader(
+                        new FileInputStream(_configuration.getHttpsKeyPath()), Charsets.UTF_8))) {
+            final Object keyObject = keyReader.readObject();
+
+            if (keyObject instanceof PrivateKeyInfo) {
+                final PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) keyObject;
+                privateKey = new JcaPEMKeyConverter().getPrivateKey(privateKeyInfo);
+            } else {
+                throw new RuntimeException(
+                        String.format("Invalid private key format, expected PEM private key, got %s", keyObject.getClass().getName()));
+            }
+        } catch (final FileNotFoundException e) {
+            throw new RuntimeException(String.format("Could not find https key file: %s", _configuration.getHttpsKeyPath()), e);
+        } catch (final IOException e) {
+            throw new RuntimeException(String.format("Error reading https key file: %s", _configuration.getHttpsKeyPath()), e);
+        }
+
+        final X509Certificate cert;
+        try (PEMParser certReader = new PEMParser(
+                new InputStreamReader(
+                        new FileInputStream(_configuration.getHttpsCertificatePath()), Charsets.UTF_8))) {
+            final PemObject certObject = certReader.readPemObject();
+            final CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            cert = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certObject.getContent()));
+        } catch (final FileNotFoundException e) {
+            throw new RuntimeException(
+                    String.format("Could not find https certificate file: %s", _configuration.getHttpsCertificatePath()), e);
+        } catch (final IOException e) {
+            throw new RuntimeException(
+                    String.format("Error reading https certificate file: %s", _configuration.getHttpsCertificatePath()), e);
+        } catch (final CertificateException e) {
+            throw new RuntimeException("Error building X509 certificate", e);
+        }
+
+        try {
+            final KeyStore ks = KeyStore.getInstance("JKS");
+            ks.load(null, null);
+            ks.setCertificateEntry("cert", cert);
+
+            ks.setKeyEntry("key", privateKey, new char[0], new Certificate[]{cert});
+            final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+            keyManagerFactory.init(ks, new char[0]);
+
+            final TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+            tmf.init(ks);
+
+            final SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
+            sslContext.init(keyManagerFactory.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+
+            return ConnectionContext.httpsServer(sslContext);
+        } catch (final UnrecoverableKeyException | KeyManagementException | NoSuchAlgorithmException | IOException
+                | KeyStoreException | CertificateException e) {
+            throw new RuntimeException("Could not create SSLContext for https configuration", e);
+        }
     }
 
     @SuppressWarnings("deprecation")

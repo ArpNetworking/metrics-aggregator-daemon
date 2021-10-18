@@ -78,6 +78,7 @@
     <arpnetworking.commons.version>1.19.0</arpnetworking.commons.version>
     <aspectjrt.version>1.9.2</aspectjrt.version>
     <asynchttpclient.version>2.6.0</asynchttpclient.version>
+    <bouncy.castle.version>1.69</bouncy.castle.version>
     <cglib.version>3.3.0</cglib.version>
     <client.protocol.version>0.12.0</client.protocol.version>
     <fastutil.version>8.2.2</fastutil.version>
@@ -87,6 +88,7 @@
     <javassist.version>3.24.1-GA</javassist.version>
     <javassist.maven.core.version>0.2.2</javassist.maven.core.version>
     <jsr305.version>3.0.2</jsr305.version>
+    <kafka.client.version>2.2.1</kafka.client.version>
     <logback.version>1.2.3</logback.version>
     <logback.steno.version>1.18.2</logback.steno.version>
     <log4j.over.slf4j.version>1.7.25</log4j.over.slf4j.version>
@@ -458,6 +460,7 @@
                 <ports>
                   <port>+mad.ip:${debugJavaPort}:${debugJavaPort}</port>
                   <port>+mad.ip:7090:7090</port>
+                  <port>+mad.ip:7091:7091</port>
                   <port>+mad.ip:8125:8125/udp</port>
                 </ports>
                 <env>
@@ -920,7 +923,17 @@
     <dependency>
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka-clients</artifactId>
-      <version>2.2.1</version>
+      <version>${kafka.client.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+      <version>${bouncy.castle.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk15on</artifactId>
+      <version>${bouncy.castle.version}</version>
     </dependency>
   </dependencies>
 
