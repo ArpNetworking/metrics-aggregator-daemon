@@ -20,8 +20,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.io.Tcp;
 import akka.io.TcpMessage;
-import akka.pattern.PatternsCS;
-import akka.util.Timeout;
+import akka.pattern.Patterns;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
@@ -31,6 +30,7 @@ import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -61,11 +61,11 @@ public abstract class BaseTcpSource extends ActorSource {
     public void stop() {
         final ActorRef tcpManager = Tcp.get(getActorSystem()).manager();
         try {
-            PatternsCS.ask(
+            Patterns.ask(
                     getActor(),
                     BaseTcpListenerActor.UNBIND,
                     UNBIND_TIMEOUT).toCompletableFuture().get(
-                            UNBIND_TIMEOUT.duration().toMillis(),
+                            UNBIND_TIMEOUT.toMillis(),
                             TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             LOGGER.warn()
@@ -88,7 +88,7 @@ public abstract class BaseTcpSource extends ActorSource {
     private final int _port;
     private final int _acceptQueue;
 
-    private static final Timeout UNBIND_TIMEOUT = Timeout.apply(1, TimeUnit.SECONDS);
+    private static final Duration UNBIND_TIMEOUT = Duration.ofSeconds(1);
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseTcpSource.class);
 
     /**
@@ -136,7 +136,7 @@ public abstract class BaseTcpSource extends ActorSource {
                         .addData("connectionActor", _connectionActor)
                         .addData("name", _sink.getName())
                         .log();
-                PatternsCS.ask(
+                Patterns.ask(
                         _connectionActor,
                         TcpMessage.unbind(),
                         UNBIND_TIMEOUT)
@@ -165,7 +165,7 @@ public abstract class BaseTcpSource extends ActorSource {
                         .addData("sender", getSender())
                         .addData("name", _sink.getName())
                         .log();
-                requester.tell(new Tcp.Unbound$(), getSelf());
+                requester.tell(Tcp.Unbound$.MODULE$, getSelf());
             }
         }
 

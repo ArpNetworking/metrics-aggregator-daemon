@@ -19,14 +19,14 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.pattern.PatternsCS;
+import akka.pattern.Patterns;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
-import scala.concurrent.duration.FiniteDuration;
 
+import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -49,7 +49,7 @@ public abstract class ActorSource extends BaseSource {
     public void stop() {
         if (_actor != null) {
             try {
-                PatternsCS.gracefulStop(
+                Patterns.gracefulStop(
                         _actor,
                         SHUTDOWN_TIMEOUT,
                         PoisonPill.getInstance()).toCompletableFuture().get(
@@ -117,7 +117,7 @@ public abstract class ActorSource extends BaseSource {
     private final String _actorName;
     private final ActorSystem _actorSystem;
 
-    private static final FiniteDuration SHUTDOWN_TIMEOUT = FiniteDuration.apply(1, TimeUnit.SECONDS);
+    private static final Duration SHUTDOWN_TIMEOUT = Duration.ofSeconds(1);
     private static final Logger LOGGER = LoggerFactory.getLogger(ActorSource.class);
 
     /**

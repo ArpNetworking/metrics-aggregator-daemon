@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>2.0.10</version>
+    <version>2.0.11</version>
     <relativePath />
   </parent>
 
@@ -71,8 +71,8 @@
 
   <properties>
     <!--Dependency versions-->
-    <akka.version>2.5.32</akka.version>
-    <akka.http.version>10.1.5</akka.http.version>
+    <akka.version>2.6.9</akka.version>
+    <akka.http.version>10.2.6</akka.http.version>
     <apache.httpclient.version>4.5.6</apache.httpclient.version>
     <apache.httpcore.version>4.4.10</apache.httpcore.version>
     <arpnetworking.commons.version>1.19.0</arpnetworking.commons.version>
@@ -90,17 +90,16 @@
     <logback.version>1.2.3</logback.version>
     <logback.steno.version>1.18.2</logback.steno.version>
     <log4j.over.slf4j.version>1.7.25</log4j.over.slf4j.version>
-    <metrics.aggregator.protocol.prometheus.version>1.0.0</metrics.aggregator.protocol.prometheus.version>
+    <metrics.aggregator.protocol.prometheus.version>1.0.1</metrics.aggregator.protocol.prometheus.version>
     <metrics.aggregator.protocol.version>1.0.10</metrics.aggregator.protocol.version>
     <metrics.client.version>0.11.3</metrics.client.version>
     <metrics.client.http.version>0.11.2</metrics.client.http.version>
     <metrics.client.incubator.version>0.11.2</metrics.client.incubator.version>
     <metrics.jvm.extra.version>0.11.2</metrics.jvm.extra.version>
     <oval.version>1.90</oval.version>
-    <protobuf.version>3.8.0</protobuf.version>
-    <scala.version>2.11</scala.version>
-    <scala.java8.compat.version>0.7.0</scala.java8.compat.version>
-    <scala.library.version>2.11.12</scala.library.version>
+    <protobuf.version>3.10.0</protobuf.version>
+    <scala.version>2.13</scala.version>
+    <scala.library.version>2.13.6</scala.library.version>
     <slf4j.version>1.7.25</slf4j.version>
     <snappy.version>1.1.7.2</snappy.version>
     <spotbugs.annotations.version>3.1.12</spotbugs.annotations.version>
@@ -758,11 +757,6 @@
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
       <version>${scala.library.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.scala-lang.modules</groupId>
-      <artifactId>scala-java8-compat_${scala.version}</artifactId>
-      <version>${scala.java8.compat.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>

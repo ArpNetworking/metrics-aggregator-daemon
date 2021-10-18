@@ -15,11 +15,12 @@
  */
 package com.arpnetworking.http;
 
-import akka.NotUsed;
 import akka.actor.ActorNotFound;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
+import akka.actor.Status.Failure;
+import akka.actor.Status.Success;
 import akka.http.javadsl.model.ContentType;
 import akka.http.javadsl.model.ContentTypes;
 import akka.http.javadsl.model.HttpHeader;
@@ -32,9 +33,9 @@ import akka.http.javadsl.model.headers.CacheDirectives;
 import akka.http.javadsl.model.ws.Message;
 import akka.japi.JavaPartialFunction;
 import akka.japi.function.Function;
-import akka.pattern.PatternsCS;
+import akka.pattern.Patterns;
+import akka.stream.CompletionStrategy;
 import akka.stream.OverflowStrategy;
-import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import akka.util.ByteString;
@@ -59,9 +60,8 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import scala.compat.java8.FutureConverters;
-import scala.concurrent.duration.FiniteDuration;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,6 +70,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 
 /**
  * Http server routes.
@@ -77,15 +78,16 @@ import java.util.stream.StreamSupport;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
-public final class Routes implements Function<HttpRequest, CompletionStage<HttpResponse>> {
+public final class Routes implements Function<HttpRequest, CompletionStage<HttpResponse>>,
+        akka.japi.Function<HttpRequest, CompletionStage<HttpResponse>> {
 
     /**
      * Public constructor.
      *
-     * @param actorSystem Instance of {@link ActorSystem}.
-     * @param metrics Instance of {@link PeriodicMetrics}.
-     * @param healthCheckPath The path for the health check.
-     * @param statusPath The path for the status.
+     * @param actorSystem        Instance of {@link ActorSystem}.
+     * @param metrics            Instance of {@link PeriodicMetrics}.
+     * @param healthCheckPath    The path for the health check.
+     * @param statusPath         The path for the status.
      * @param supplementalRoutes List of supplemental routes in priority order.
      */
     public Routes(
@@ -99,20 +101,6 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
         _healthCheckPath = healthCheckPath;
         _statusPath = statusPath;
         _supplementalRoutes = supplementalRoutes;
-    }
-
-    /**
-     * Creates a {@link Flow} based on executing the routes asynchronously.
-     *
-     * @return a new {@link Flow}
-     */
-    public Flow<HttpRequest, HttpResponse, NotUsed> flow() {
-        return Flow.<HttpRequest>create()
-                .mapAsync(1, this)
-                .recoverWithRetries(
-                        0,
-                        Exception.class,
-                        () -> Source.single(HttpResponse.create().withStatus(StatusCodes.INTERNAL_SERVER_ERROR)));
     }
 
     @Override
@@ -252,15 +240,15 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     }
 
     private CompletionStage<HttpResponse> dispatchHttpRequest(final HttpRequest request, final String actorName) {
-        final CompletionStage<ActorRef> refFuture = FutureConverters.toJava(
+        final CompletionStage<ActorRef> refFuture =
                 _actorSystem.actorSelection(actorName)
-                        .resolveOne(FiniteDuration.create(1, TimeUnit.SECONDS)));
+                        .resolveOne(Duration.ofSeconds(1));
         return refFuture.thenCompose(
-                ref -> {
-                    final CompletableFuture<HttpResponse> response = new CompletableFuture<>();
-                    ref.tell(new RequestReply(request, response), ActorRef.noSender());
-                    return response;
-                })
+                        ref -> {
+                            final CompletableFuture<HttpResponse> response = new CompletableFuture<>();
+                            ref.tell(new RequestReply(request, response), ActorRef.noSender());
+                            return response;
+                        })
                 // We return 404 here since actor startup is controlled by config and
                 // the actors may not be running.
                 .exceptionally(err -> {
@@ -287,12 +275,17 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
 
             final ActorRef connection = _actorSystem.actorOf(Connection.props(_metrics, messageProcessorsFactory));
             final Sink<Message, ?> inChannel = Sink.actorRef(connection, PoisonPill.getInstance());
-            final Source<Message, ActorRef> outChannel = Source.<Message>actorRef(TELEMETRY_BUFFER_SIZE, OverflowStrategy.dropBuffer())
-                    .<ActorRef>mapMaterializedValue(channel -> {
-                        _actorSystem.actorSelection("/user/telemetry").resolveOne(Timeout.apply(1, TimeUnit.SECONDS)).onSuccess(
+            final Source<Message, ActorRef> outChannel = Source.<Message>actorRef(
+                            m -> m instanceof Success ? Optional.of(CompletionStrategy.draining()) : Optional.empty(),
+                            m -> m instanceof Failure ? Optional.of(((Failure) m).cause()) : Optional.empty(),
+                            TELEMETRY_BUFFER_SIZE,
+                            OverflowStrategy.dropBuffer())
+                    .mapMaterializedValue(channel -> {
+                        _actorSystem.actorSelection("/user/telemetry").resolveOne(Timeout.apply(1, TimeUnit.SECONDS)).foreach(
                                 new JavaPartialFunction<ActorRef, Object>() {
                                     @Override
-                                    public Object apply(final ActorRef telemetry, final boolean isCheck) throws Exception {
+                                    @Nullable
+                                    public Object apply(final ActorRef telemetry, final boolean isCheck) {
                                         final Connect connectMessage = new Connect(telemetry, connection, channel);
                                         connection.tell(connectMessage, ActorRef.noSender());
                                         telemetry.tell(connectMessage, ActorRef.noSender());
@@ -314,10 +307,10 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
 
     @SuppressWarnings("unchecked")
     private <T> CompletionStage<T> ask(final String actorPath, final Object request, final T defaultValue) {
-        return (CompletionStage<T>) PatternsCS.ask(
+        return (CompletionStage<T>) Patterns.ask(
                         _actorSystem.actorSelection(actorPath),
                         request,
-                        Timeout.apply(1, TimeUnit.SECONDS))
+                        Duration.ofSeconds(1))
                 .exceptionally(throwable -> defaultValue);
     }
 

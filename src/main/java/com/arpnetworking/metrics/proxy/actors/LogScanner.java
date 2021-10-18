@@ -63,7 +63,7 @@ public final class LogScanner extends AbstractActor {
 
         _nonExistingLogs.addAll(_logs);
 
-        context().system().scheduler().schedule(
+        context().system().scheduler().scheduleAtFixedRate(
                 FiniteDuration.Zero(),
                 FiniteDuration.apply(10, TimeUnit.SECONDS),
                 self(),

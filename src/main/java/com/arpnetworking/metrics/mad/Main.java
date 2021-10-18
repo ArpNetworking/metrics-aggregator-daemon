@@ -21,14 +21,8 @@ import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatcher;
-import akka.http.javadsl.ConnectHttp;
 import akka.http.javadsl.Http;
-import akka.http.javadsl.IncomingConnection;
-import akka.http.javadsl.ServerBinding;
-import akka.stream.ActorMaterializer;
 import akka.stream.Materializer;
-import akka.stream.javadsl.Sink;
-import akka.stream.javadsl.Source;
 import ch.qos.logback.classic.LoggerContext;
 import com.arpnetworking.commons.builder.Builder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
@@ -53,10 +47,8 @@ import com.arpnetworking.metrics.mad.configuration.PipelineConfiguration;
 import com.arpnetworking.metrics.proxy.actors.Telemetry;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.arpnetworking.utility.AkkaForkJoinPoolAdapter;
 import com.arpnetworking.utility.Configurator;
 import com.arpnetworking.utility.Launchable;
-import com.arpnetworking.utility.ScalaForkJoinPoolAdapter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -83,7 +75,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -248,7 +239,7 @@ public final class Main implements Launchable {
                 clazz -> supplementalHttpRoutes.add(injector.getInstance(clazz)));
 
         // Create and bind Http server
-        final Materializer materializer = ActorMaterializer.create(actorSystem);
+        final Materializer materializer = Materializer.createMaterializer(actorSystem);
         final Routes routes = new Routes(
                 actorSystem,
                 injector.getInstance(PeriodicMetrics.class),
@@ -256,14 +247,8 @@ public final class Main implements Launchable {
                 _configuration.getHttpStatusPath(),
                 supplementalHttpRoutes.build());
         final Http http = Http.get(actorSystem);
-        final Source<IncomingConnection, CompletionStage<ServerBinding>> binding = http.bind(
-                ConnectHttp.toHost(
-                        _configuration.getHttpHost(),
-                        _configuration.getHttpPort()));
-        binding.to(
-                Sink.foreach(
-                        connection -> connection.handleWith(routes.flow(), materializer)))
-                .run(materializer);
+
+        http.newServerAt(_configuration.getHttpHost(), _configuration.getHttpPort()).bind(routes);
     }
 
     @SuppressWarnings("deprecation")
@@ -429,15 +414,7 @@ public final class Main implements Launchable {
             final Map<String, ExecutorService> executorServices,
             final String name,
             final ExecutorService executorService) {
-        if (executorService instanceof scala.concurrent.forkjoin.ForkJoinPool) {
-            final scala.concurrent.forkjoin.ForkJoinPool scalaForkJoinPool =
-                    (scala.concurrent.forkjoin.ForkJoinPool) executorService;
-            executorServices.put(name, new ScalaForkJoinPoolAdapter(scalaForkJoinPool));
-        } else if (executorService instanceof akka.dispatch.forkjoin.ForkJoinPool) {
-            final akka.dispatch.forkjoin.ForkJoinPool akkaForkJoinPool =
-                    (akka.dispatch.forkjoin.ForkJoinPool) executorService;
-            executorServices.put(name, new AkkaForkJoinPoolAdapter(akkaForkJoinPool));
-        } else if (executorService instanceof java.util.concurrent.ForkJoinPool
+        if (executorService instanceof java.util.concurrent.ForkJoinPool
                 || executorService instanceof java.util.concurrent.ThreadPoolExecutor) {
             executorServices.put(name, executorService);
         } else {

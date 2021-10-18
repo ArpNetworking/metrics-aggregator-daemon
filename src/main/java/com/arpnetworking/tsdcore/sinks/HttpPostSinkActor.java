@@ -17,7 +17,7 @@ package com.arpnetworking.tsdcore.sinks;
 
 import akka.actor.AbstractActor;
 import akka.actor.Props;
-import akka.pattern.PatternsCS;
+import akka.pattern.Patterns;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
@@ -340,7 +340,7 @@ public class HttpPostSinkActor extends AbstractActor {
                     _periodicMetrics.recordCounter(_requestSuccessName, (returnValue instanceof PostSuccess) ? 1 : 0);
                     return returnValue;
                 });
-        PatternsCS.pipe(responsePromise, context().dispatcher()).to(self());
+        Patterns.pipe(responsePromise, context().dispatcher()).to(self());
     }
 
     private int _inflightRequestsCount = 0;
