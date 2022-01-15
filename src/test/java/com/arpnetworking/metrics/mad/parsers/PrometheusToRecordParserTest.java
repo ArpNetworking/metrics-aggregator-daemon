@@ -160,7 +160,7 @@ public final class PrometheusToRecordParserTest {
     public void testLive1() throws ParsingException, IOException {
         final List<Record> records = parseRecords("PrometheusParserTest/testLivePrometheus1");
 
-        Assert.assertEquals(0, records.size());
+        Assert.assertEquals(500, records.size());
     }
 
     private static void testUnitParsing(final String prometheusUnit, final Unit expected) {
@@ -199,9 +199,9 @@ public final class PrometheusToRecordParserTest {
     }
 
     private static PrometheusToRecordParser createParser() {
-        return new PrometheusToRecordParser(true);
+        return new PrometheusToRecordParser(true, false);
     }
     private static PrometheusToRecordParser createParserWithoutInterpreter() {
-        return new PrometheusToRecordParser(false);
+        return new PrometheusToRecordParser(false, false);
     }
 }
