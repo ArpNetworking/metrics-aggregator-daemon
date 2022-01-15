@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:8u302-jre-slim
+FROM openjdk:8u302-jre
 
 MAINTAINER arpnetworking
 

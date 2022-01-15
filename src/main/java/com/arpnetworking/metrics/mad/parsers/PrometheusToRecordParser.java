@@ -40,6 +40,8 @@ import net.sf.oval.exception.ConstraintsViolatedException;
 import org.xerial.snappy.Snappy;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -47,6 +49,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Parses the Prometheus protobuf binary protocol into records.
@@ -111,7 +114,12 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
         final List<Record> records = Lists.newArrayList();
         final byte[] uncompressed;
         try {
-            uncompressed = Snappy.uncompress(data.getBody().toArray());
+            final byte[] input = data.getBody().toArray();
+            int outputFile = _outputFileNumber.incrementAndGet();
+            if (outputFile < 10) {
+                Files.write(Paths.get("prometheus_debug_" + outputFile), input);
+            }
+            uncompressed = Snappy.uncompress(input);
         } catch (final IOException e) {
             throw new ParsingException("Failed to decompress snappy stream", data.getBody().toArray(), e);
         }
@@ -185,6 +193,7 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
     }
 
     private final boolean _interpretUnits;
+    private final AtomicInteger _outputFileNumber = new AtomicInteger(0);
 
     private static final ImmutableMap<String, Unit> UNIT_MAP = ImmutableMap.of(
             createUnitMapKey("seconds"), Unit.SECOND,

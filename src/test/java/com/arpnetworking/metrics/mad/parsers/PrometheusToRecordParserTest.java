@@ -156,6 +156,13 @@ public final class PrometheusToRecordParserTest {
         testUnitParsing("bits", Unit.BIT);
     }
 
+    @Test
+    public void testLive1() throws ParsingException, IOException {
+        final List<Record> records = parseRecords("PrometheusParserTest/testLivePrometheus1");
+
+        Assert.assertEquals(0, records.size());
+    }
+
     private static void testUnitParsing(final String prometheusUnit, final Unit expected) {
         assertUnitNewName(prometheusUnit, prometheusUnit, expected);
         assertUnitNewName("foo_" + prometheusUnit, prometheusUnit, expected);
