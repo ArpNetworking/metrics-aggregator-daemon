@@ -62,6 +62,7 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
      * public constructor.
      *
      * @param interpretUnits specifies whether or not to interpret units.
+     * @param outputDebugInfo specifies whether or not to output debug files.
      */
     public PrometheusToRecordParser(final boolean interpretUnits, final boolean outputDebugInfo) {
         _interpretUnits = interpretUnits;
@@ -117,7 +118,7 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
         try {
             final byte[] input = data.getBody().toArray();
             if (_outputDebugInfo) {
-                int outputFile = _outputFileNumber.incrementAndGet();
+                final int outputFile = _outputFileNumber.incrementAndGet();
                 if (outputFile < 10) {
                     Files.write(Paths.get("prometheus_debug_" + outputFile), input);
                 }
