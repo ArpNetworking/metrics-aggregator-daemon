@@ -62,9 +62,11 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
      * public constructor.
      *
      * @param interpretUnits specifies whether or not to interpret units.
+     * @param outputDebugInfo specifies whether or not to output debug files.
      */
-    public PrometheusToRecordParser(final boolean interpretUnits) {
+    public PrometheusToRecordParser(final boolean interpretUnits, final boolean outputDebugInfo) {
         _interpretUnits = interpretUnits;
+        _outputDebugInfo = outputDebugInfo;
     }
 
     /*
@@ -115,9 +117,11 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
         final byte[] uncompressed;
         try {
             final byte[] input = data.getBody().toArray();
-            int outputFile = _outputFileNumber.incrementAndGet();
-            if (outputFile < 10) {
-                Files.write(Paths.get("prometheus_debug_" + outputFile), input);
+            if (_outputDebugInfo) {
+                final int outputFile = _outputFileNumber.incrementAndGet();
+                if (outputFile < 10) {
+                    Files.write(Paths.get("prometheus_debug_" + outputFile), input);
+                }
             }
             uncompressed = Snappy.uncompress(input);
         } catch (final IOException e) {
@@ -194,6 +198,7 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
 
     private final boolean _interpretUnits;
     private final AtomicInteger _outputFileNumber = new AtomicInteger(0);
+    private final boolean _outputDebugInfo;
 
     private static final ImmutableMap<String, Unit> UNIT_MAP = ImmutableMap.of(
             createUnitMapKey("seconds"), Unit.SECOND,

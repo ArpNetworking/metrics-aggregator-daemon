@@ -42,7 +42,7 @@ public final class PrometheusHttpSource extends HttpSource{
         public Builder() {
             super(PrometheusHttpSource::new);
             setActorName(ACTOR_NAME);
-            setParser(new PrometheusToRecordParser(_interpretUnits));
+            setParser(new PrometheusToRecordParser(_interpretUnits, _outputDebugFiles));
         }
 
         /**
@@ -56,12 +56,24 @@ public final class PrometheusHttpSource extends HttpSource{
             return this;
         }
 
+        /**
+         * Whether to output debug files with the raw prometheus data. Cannot be null.
+         *
+         * @param value the value
+         * @return this {@link Builder}
+         */
+        public Builder setOutputDebugFiles(final Boolean value) {
+            _outputDebugFiles = value;
+            return this;
+        }
+
         @Override
         protected Builder self() {
             return this;
         }
 
         private Boolean _interpretUnits = false;
+        private Boolean _outputDebugFiles = false;
     }
 
 }
