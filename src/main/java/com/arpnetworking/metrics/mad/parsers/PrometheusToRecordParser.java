@@ -178,7 +178,6 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
                 p -> p
                         .setType(MetricType.GAUGE)
                         .setValues(ImmutableList.of(createQuantity(sample, unit)))
-                        .build()
         );
         return ImmutableMap.of(name, metric);
     }
