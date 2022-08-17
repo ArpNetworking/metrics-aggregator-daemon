@@ -134,6 +134,7 @@ public class CollectdJsonToRecordParserTest {
         return new CollectdJsonToRecordParser().parse(new HttpRequest(headers, body));
     }
 
+    // CHECKSTYLE.OFF: MethodLengthCheck - This is a long test, many assertions
     @Test
     public void testParseNullValues() throws ParsingException, IOException {
         final List<Record> records = parseFile("CollectdJsonParserTest/testParseNullValues.json", DEFAULT_HEADERS);
@@ -264,4 +265,5 @@ public class CollectdJsonToRecordParserTest {
                                 .setValue(2.0)
                                 .build()));
     }
+    // CHECKSTYLE:ON MethodLength
 }
