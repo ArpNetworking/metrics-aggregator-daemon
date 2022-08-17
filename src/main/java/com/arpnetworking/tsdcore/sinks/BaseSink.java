@@ -31,7 +31,7 @@ import java.util.function.Function;
  */
 public abstract class BaseSink implements Sink {
 
-    public String getName() {
+    public final String getName() {
         return _name;
     }
 

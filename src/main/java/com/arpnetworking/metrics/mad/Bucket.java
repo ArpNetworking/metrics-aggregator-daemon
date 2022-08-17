@@ -314,7 +314,10 @@ import java.util.function.BiFunction;
                     for (final Quantity quantity : metric.getValues()) {
                         accumulator.accumulate(quantity);
                     }
-                    for (final CalculatedValue<?> value : metric.getStatistics().getOrDefault(statistic, ImmutableList.of())) {
+                    final ImmutableList<CalculatedValue<?>> statisticValue = metric.getStatistics()
+                            .getOrDefault(statistic, ImmutableList.of());
+                    assert statisticValue != null;
+                    for (final CalculatedValue<?> value : statisticValue) {
                         accumulator.accumulateAny(value);
                     }
                 }

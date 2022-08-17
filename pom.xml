@@ -75,7 +75,7 @@
     <akka.http.version>10.2.9</akka.http.version>
     <apache.httpclient.version>4.5.13</apache.httpclient.version>
     <apache.httpcore.version>4.4.15</apache.httpcore.version>
-    <arpnetworking.commons.version>2.0.4-SNAPSHOT</arpnetworking.commons.version>
+    <arpnetworking.commons.version>2.0.4</arpnetworking.commons.version>
     <aspectjrt.version>1.9.9.1</aspectjrt.version>
     <asynchttpclient.version>2.12.3</asynchttpclient.version>
     <bouncy.castle.version>1.70</bouncy.castle.version>
@@ -128,6 +128,9 @@
     <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
     <maven.properties.plugin.version>1.0.0</maven.properties.plugin.version>
     <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
+
+    <!-- Spotbugs -->
+    <spotbugs.exclude>${project.basedir}/spotbugs.exclude.xml</spotbugs.exclude>
 
     <!-- Code Coverage -->
     <jacoco.check.line.coverage>0.50</jacoco.check.line.coverage>

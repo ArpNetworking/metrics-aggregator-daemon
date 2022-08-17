@@ -22,13 +22,14 @@ import com.arpnetworking.metrics.impl.ApacheHttpSink;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link Main} class.
@@ -48,8 +49,8 @@ public final class MainTest {
         final List<Sink> sinks = Main.createSinks(ImmutableList.of(apacheSinkNode, testSinkNode));
 
         assertEquals(2, sinks.size());
-        assertTrue(sinks.get(0) instanceof ApacheHttpSink);
-        assertTrue(sinks.get(1) instanceof TestSink);
+        MatcherAssert.assertThat(sinks.get(0), Matchers.instanceOf(ApacheHttpSink.class));
+        MatcherAssert.assertThat(sinks.get(1), Matchers.instanceOf(TestSink.class));
     }
 
     @Test
@@ -60,7 +61,7 @@ public final class MainTest {
         final List<Sink> sinks = Main.createSinks(ImmutableList.of(testSinkNode));
 
         assertEquals(1, sinks.size());
-        assertTrue(sinks.get(0) instanceof TestSink);
+        MatcherAssert.assertThat(sinks.get(0), Matchers.instanceOf(TestSink.class));
 
         final TestSink testSink = (TestSink) sinks.get(0);
         assertEquals("bar", testSink.getFoo());

@@ -30,6 +30,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -60,7 +61,7 @@ public class JsonToRecordParserV2fTest {
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
         MatcherAssert.assertThat(variables, Matchers.hasKey("t1"));
-        final Metric t1 = variables.get("t1");
+        final Metric t1 = Objects.requireNonNull(variables.get("t1"));
         Assert.assertEquals(4, t1.getValues().size());
         assertValue(t1.getValues().get(0), 1d, Unit.SECOND);
         assertValue(t1.getValues().get(1), 0.002d, Unit.SECOND);
@@ -68,21 +69,21 @@ public class JsonToRecordParserV2fTest {
         assertValue(t1.getValues().get(3), 4d, Unit.SECOND);
 
         MatcherAssert.assertThat(variables, Matchers.hasKey("t2"));
-        final Metric t2 = variables.get("t2");
+        final Metric t2 = Objects.requireNonNull(variables.get("t2"));
         Assert.assertEquals(3, t2.getValues().size());
         assertValue(t2.getValues().get(0), 5d);
         assertValue(t2.getValues().get(1), 6d);
         assertValue(t2.getValues().get(2), 4d);
 
         MatcherAssert.assertThat(variables, Matchers.hasKey("g1"));
-        final Metric g1 = variables.get("g1");
+        final Metric g1 = Objects.requireNonNull(variables.get("g1"));
         Assert.assertEquals(3, g1.getValues().size());
         assertValue(g1.getValues().get(0), 1.2E9d, Unit.BYTE);
         assertValue(g1.getValues().get(1), 1.1d);
         assertValue(g1.getValues().get(2), 0.8d, Unit.SECOND);
 
         MatcherAssert.assertThat(variables, Matchers.hasKey("c1"));
-        final Metric c1 = variables.get("c1");
+        final Metric c1 = Objects.requireNonNull(variables.get("c1"));
         Assert.assertEquals(1, c1.getValues().size());
         assertValue(c1.getValues().get(0), 1d);
     }
@@ -172,15 +173,15 @@ public class JsonToRecordParserV2fTest {
         Assert.assertEquals(3, variables.size());
 
         MatcherAssert.assertThat(variables, Matchers.hasKey("t1"));
-        final Metric t1 = variables.get("t1");
+        final Metric t1 = Objects.requireNonNull(variables.get("t1"));
         Assert.assertTrue(t1.getValues().isEmpty());
 
         MatcherAssert.assertThat(variables, Matchers.hasKey("g1"));
-        final Metric g1 = variables.get("g1");
+        final Metric g1 = Objects.requireNonNull(variables.get("g1"));
         Assert.assertTrue(g1.getValues().isEmpty());
 
         MatcherAssert.assertThat(variables, Matchers.hasKey("c1"));
-        final Metric c1 = variables.get("c1");
+        final Metric c1 = Objects.requireNonNull(variables.get("c1"));
         Assert.assertTrue(c1.getValues().isEmpty());
     }
 
@@ -359,20 +360,20 @@ public class JsonToRecordParserV2fTest {
         Assert.assertEquals(3, variables.size());
 
         MatcherAssert.assertThat(variables, Matchers.hasKey("t1"));
-        final Metric t1 = variables.get("t1");
+        final Metric t1 = Objects.requireNonNull(variables.get("t1"));
         Assert.assertTrue(t1.getValues().isEmpty());
 
         MatcherAssert.assertThat(variables, Matchers.hasKey("g1"));
-        final Metric g1 = variables.get("g1");
+        final Metric g1 = Objects.requireNonNull(variables.get("g1"));
         Assert.assertTrue(g1.getValues().isEmpty());
 
         MatcherAssert.assertThat(variables, Matchers.hasKey("c1"));
-        final Metric c1 = variables.get("c1");
+        final Metric c1 = Objects.requireNonNull(variables.get("c1"));
         Assert.assertTrue(c1.getValues().isEmpty());
     }
 
     private static void assertValue(final Quantity quantity, final double value) {
-        assertValue(quantity, value, Optional.<Unit>empty());
+        assertValue(quantity, value, Optional.empty());
     }
 
     private static void assertValue(final Quantity quantity, final double value, final Unit unit) {

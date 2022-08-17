@@ -22,6 +22,7 @@ import com.arpnetworking.metrics.mad.model.Unit;
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.google.common.collect.ImmutableMap;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -171,6 +172,7 @@ public final class HistogramStatisticTest {
     }
 
     @Test
+    @SuppressFBWarnings(value = "FL_FLOATS_AS_LOOP_COUNTERS", justification = "Tests the floating point values")
     public void packAndUnpack() {
         final int precision = 7;
         final HistogramStatistic.Histogram histogram = new HistogramStatistic.Histogram(precision);

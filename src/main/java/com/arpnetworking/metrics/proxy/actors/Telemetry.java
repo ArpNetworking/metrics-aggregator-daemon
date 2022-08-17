@@ -43,6 +43,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.nio.file.Path;
@@ -65,6 +66,8 @@ public class Telemetry extends AbstractActor {
      * @param metricsFactory Instance of {@link MetricsFactory}.
      */
     @Inject
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
+            justification = "getSelf() and getContext() are safe to call in the constructor.")
     public Telemetry(final MetricsFactory metricsFactory) {
         _metricsFactory = metricsFactory;
         _metrics = metricsFactory.create();
