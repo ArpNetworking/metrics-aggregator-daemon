@@ -1,0 +1,290 @@
+[
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "tcpconns",
+    "plugin_instance": "all",
+    "type": "tcp_connections",
+    "type_instance": "CLOSING"
+  },
+  {
+    "values": [
+      3019
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "conntrack",
+    "plugin_instance": "",
+    "type": "conntrack",
+    "type_instance": ""
+  },
+  {
+    "values": [
+      131072
+    ],
+    "dstypes": [
+      "gauge"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "conntrack",
+    "plugin_instance": "",
+    "type": "conntrack",
+    "type_instance": "max"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "RtoMin"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "RtoMax"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "MaxConn"
+  },
+  {
+    "values": [
+      29
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "ActiveOpens"
+  },
+  {
+    "values": [
+      2
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "PassiveOpens"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "AttemptFails"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "EstabResets"
+  },
+  {
+    "values": [
+      null
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "CurrEstab"
+  },
+  {
+    "values": [
+      464
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "InSegs"
+  },
+  {
+    "values": [
+      462
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "OutSegs"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "RetransSegs"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "InErrs"
+  },
+  {
+    "values": [
+      2
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1660695891.300,
+    "interval": 10.000,
+    "host": "ip-10-1-19-254.us-east-2.compute.internal",
+    "plugin": "protocols",
+    "plugin_instance": "Tcp",
+    "type": "protocol_counter",
+    "type_instance": "OutRsts"
+  }
+]

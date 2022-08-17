@@ -29,6 +29,7 @@ import com.arpnetworking.tsdcore.model.Key;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.io.Resources;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -102,30 +103,6 @@ public class CollectdJsonToRecordParserTest {
                         new DefaultQuantity.Builder()
                                 .setValue(0.0)
                                 .build()));
-        verifyMetric(records,
-                ZonedDateTime.parse("2016-03-31T23:14:46.741Z"),
-                "vmem/vmpage_number/file_pages",
-                MetricType.GAUGE,
-                Collections.singletonList(
-                        new DefaultQuantity.Builder()
-                                .setValue(944937.0)
-                                .build()));
-        verifyMetric(records,
-                ZonedDateTime.parse("2016-03-31T23:14:46.741Z"),
-                "vmem/vmpage_number/dirty",
-                MetricType.GAUGE,
-                Collections.singletonList(
-                        new DefaultQuantity.Builder()
-                                .setValue(6463.0)
-                                .build()));
-        verifyMetric(records,
-                ZonedDateTime.parse("2016-03-31T23:14:46.741Z"),
-                "vmem/vmpage_number/writeback",
-                MetricType.GAUGE,
-                Collections.singletonList(
-                        new DefaultQuantity.Builder()
-                                .setValue(0.0)
-                                .build()));
     }
 
     @Test(expected = ParsingException.class)
@@ -142,7 +119,7 @@ public class CollectdJsonToRecordParserTest {
         final Record record = records.remove(0);
         Assert.assertEquals(timestamp, record.getTime().withZoneSameInstant(ZoneOffset.UTC));
         final Map<String, ? extends Metric> metrics = record.getMetrics();
-        Assert.assertTrue(metrics.containsKey(name));
+        Assert.assertThat(metrics, Matchers.hasKey(name));
         final Metric metric = metrics.get(name);
         Assert.assertEquals(type, metric.getType());
         for (int i = 0; i < metric.getValues().size(); i++) {
@@ -156,4 +133,137 @@ public class CollectdJsonToRecordParserTest {
                 ByteString.fromArray(Resources.toByteArray(Resources.getResource(CollectdJsonToRecordParser.class, fileName)));
         return new CollectdJsonToRecordParser().parse(new HttpRequest(headers, body));
     }
+
+    // CHECKSTYLE.OFF: MethodLengthCheck - This is a long test, many assertions
+    @Test
+    public void testParseNullValues() throws ParsingException, IOException {
+        final List<Record> records = parseFile("CollectdJsonParserTest/testParseNullValues.json", DEFAULT_HEADERS);
+
+        Assert.assertEquals(15, records.size());
+        final Record record = records.get(0);
+        Assert.assertEquals("ip-10-1-19-254.us-east-2.compute.internal", record.getAnnotations().get(Key.HOST_DIMENSION_KEY));
+        Assert.assertEquals("MyService", record.getAnnotations().get(Key.SERVICE_DIMENSION_KEY));
+        Assert.assertEquals("MyCluster", record.getAnnotations().get(Key.CLUSTER_DIMENSION_KEY));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "tcpconns/all/tcp_connections/CLOSING",
+                MetricType.GAUGE,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(0.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "conntrack/conntrack",
+                MetricType.GAUGE,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(3019.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "conntrack/conntrack/max",
+                MetricType.GAUGE,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(131072.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/RtoMin",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(0.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/RtoMax",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(0.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/MaxConn",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(0.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/ActiveOpens",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(29.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/PassiveOpens",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(2.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/AttemptFails",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(0.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/EstabResets",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(0.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/InSegs",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(464.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/OutSegs",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(462.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/RetransSegs",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(0.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/InErrs",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(0.0)
+                                .build()));
+        verifyMetric(records,
+                ZonedDateTime.parse("2022-08-17T00:24:51.300Z"),
+                "protocols/Tcp/protocol_counter/OutRsts",
+                MetricType.COUNTER,
+                Collections.singletonList(
+                        new DefaultQuantity.Builder()
+                                .setValue(2.0)
+                                .build()));
+    }
+    // CHECKSTYLE:ON MethodLength
 }
