@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -65,7 +66,7 @@ public class AggregatorTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        _mocks = MockitoAnnotations.openMocks(this);
         _actorSystem = ActorSystem.create();
        _aggregator = new Aggregator.Builder()
                 .setActorSystem(_actorSystem)
@@ -82,6 +83,7 @@ public class AggregatorTest {
 
     @After
     public void tearDown() throws Exception {
+        _mocks.close();
         _aggregator.shutdown();
         Await.result(_actorSystem.terminate(), scala.concurrent.duration.Duration.create(10, TimeUnit.SECONDS));
     }
@@ -126,7 +128,7 @@ public class AggregatorTest {
                 .setPopulationSize(1L)
                 .setValue(new DefaultQuantity.Builder().setValue(1d).build());
         Assert.assertEquals(2, data.size());
-        Assert.assertThat(
+        MatcherAssert.assertThat(
                 data.get("MyMetric"),
                 Matchers.containsInAnyOrder(
                         builder
@@ -197,7 +199,7 @@ public class AggregatorTest {
                 .setIsSpecified(false)
                 .setPopulationSize(1L)
                 .setValue(new DefaultQuantity.Builder().setValue(1d).build());
-        Assert.assertThat(
+        MatcherAssert.assertThat(
                 unifiedData,
                 Matchers.containsInAnyOrder(
                         builder
@@ -278,7 +280,7 @@ public class AggregatorTest {
                 .setIsSpecified(false)
                 .setPopulationSize(1L)
                 .setValue(new DefaultQuantity.Builder().setValue(1d).build());
-        Assert.assertThat(
+        MatcherAssert.assertThat(
                 unifiedData,
                 Matchers.containsInAnyOrder(
                         builder
@@ -358,7 +360,7 @@ public class AggregatorTest {
                 .setIsSpecified(false)
                 .setPopulationSize(1L)
                 .setValue(new DefaultQuantity.Builder().setValue(1d).build());
-        Assert.assertThat(
+        MatcherAssert.assertThat(
                 unifiedData,
                 Matchers.containsInAnyOrder(
                         builder
@@ -409,6 +411,7 @@ public class AggregatorTest {
     private Sink _sink;
     @Mock
     private PeriodicMetrics _periodicMetrics;
+    private AutoCloseable _mocks;
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final Statistic MAX_STATISTIC = STATISTIC_FACTORY.getStatistic("max");

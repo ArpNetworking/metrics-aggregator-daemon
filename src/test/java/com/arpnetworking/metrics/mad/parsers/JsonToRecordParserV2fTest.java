@@ -22,6 +22,7 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.model.Unit;
 import com.arpnetworking.tsdcore.model.Key;
 import com.google.common.io.Resources;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -58,7 +59,7 @@ public class JsonToRecordParserV2fTest {
         Assert.assertEquals(ZonedDateTime.parse("2014-03-24T12:15:41.010Z"), record.getTime());
 
         final Map<String, ? extends Metric> variables = record.getMetrics();
-        Assert.assertThat(variables, Matchers.hasKey("t1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("t1"));
         final Metric t1 = variables.get("t1");
         Assert.assertEquals(4, t1.getValues().size());
         assertValue(t1.getValues().get(0), 1d, Unit.SECOND);
@@ -66,21 +67,21 @@ public class JsonToRecordParserV2fTest {
         assertValue(t1.getValues().get(2), 0d, Unit.SECOND);
         assertValue(t1.getValues().get(3), 4d, Unit.SECOND);
 
-        Assert.assertThat(variables, Matchers.hasKey("t2"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("t2"));
         final Metric t2 = variables.get("t2");
         Assert.assertEquals(3, t2.getValues().size());
         assertValue(t2.getValues().get(0), 5d);
         assertValue(t2.getValues().get(1), 6d);
         assertValue(t2.getValues().get(2), 4d);
 
-        Assert.assertThat(variables, Matchers.hasKey("g1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("g1"));
         final Metric g1 = variables.get("g1");
         Assert.assertEquals(3, g1.getValues().size());
         assertValue(g1.getValues().get(0), 1.2E9d, Unit.BYTE);
         assertValue(g1.getValues().get(1), 1.1d);
         assertValue(g1.getValues().get(2), 0.8d, Unit.SECOND);
 
-        Assert.assertThat(variables, Matchers.hasKey("c1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("c1"));
         final Metric c1 = variables.get("c1");
         Assert.assertEquals(1, c1.getValues().size());
         assertValue(c1.getValues().get(0), 1d);
@@ -170,15 +171,15 @@ public class JsonToRecordParserV2fTest {
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertEquals(3, variables.size());
 
-        Assert.assertThat(variables, Matchers.hasKey("t1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("t1"));
         final Metric t1 = variables.get("t1");
         Assert.assertTrue(t1.getValues().isEmpty());
 
-        Assert.assertThat(variables, Matchers.hasKey("g1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("g1"));
         final Metric g1 = variables.get("g1");
         Assert.assertTrue(g1.getValues().isEmpty());
 
-        Assert.assertThat(variables, Matchers.hasKey("c1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("c1"));
         final Metric c1 = variables.get("c1");
         Assert.assertTrue(c1.getValues().isEmpty());
     }
@@ -357,15 +358,15 @@ public class JsonToRecordParserV2fTest {
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertEquals(3, variables.size());
 
-        Assert.assertThat(variables, Matchers.hasKey("t1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("t1"));
         final Metric t1 = variables.get("t1");
         Assert.assertTrue(t1.getValues().isEmpty());
 
-        Assert.assertThat(variables, Matchers.hasKey("g1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("g1"));
         final Metric g1 = variables.get("g1");
         Assert.assertTrue(g1.getValues().isEmpty());
 
-        Assert.assertThat(variables, Matchers.hasKey("c1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("c1"));
         final Metric c1 = variables.get("c1");
         Assert.assertTrue(c1.getValues().isEmpty());
     }

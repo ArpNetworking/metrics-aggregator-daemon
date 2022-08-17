@@ -412,8 +412,8 @@ public class FileSourceTest {
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         copyRotate(file);
         truncate(file);
-        Mockito.verifyZeroInteractions(_parser);
-        Mockito.verifyZeroInteractions(_observer);
+        Mockito.verifyNoInteractions(_parser);
+        Mockito.verifyNoInteractions(_observer);
         Thread.sleep(3 * sleepInterval);
 
         Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(Charsets.UTF_8));

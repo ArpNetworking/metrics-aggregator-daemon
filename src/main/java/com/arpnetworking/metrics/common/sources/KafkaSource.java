@@ -28,14 +28,17 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.google.common.base.Stopwatch;
+import net.sf.oval.Validator;
 import net.sf.oval.constraint.CheckWith;
 import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
+import net.sf.oval.context.OValContext;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.KafkaException;
 
+import java.io.Serial;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -425,10 +428,15 @@ public final class KafkaSource<V> extends BaseSource {
 
         private static class PositiveDuration implements CheckWithCheck.SimpleCheck {
             @Override
-            public boolean isSatisfied(final Object validatedObject, final Object value) {
-                return (value instanceof Duration) && !((Duration) value).isNegative();
+            public boolean isSatisfied(
+                    final Object validatedObject,
+                    final Object value,
+                    final OValContext context,
+                    final Validator validator) {
+                return value instanceof Duration && !((Duration) value).isNegative();
             }
 
+            @Serial
             private static final long serialVersionUID = 1L;
         }
     }

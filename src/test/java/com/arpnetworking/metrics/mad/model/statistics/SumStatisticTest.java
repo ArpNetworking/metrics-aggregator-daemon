@@ -17,6 +17,7 @@ package com.arpnetworking.metrics.mad.model.statistics;
 
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,7 +34,7 @@ public class SumStatisticTest {
     @Test
     public void testGetName() {
         final Statistic stat = SUM_STATISTIC;
-        Assert.assertThat(stat.getName(), Matchers.equalTo("sum"));
+        MatcherAssert.assertThat(stat.getName(), Matchers.equalTo("sum"));
     }
 
     @Test

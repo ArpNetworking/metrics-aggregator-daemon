@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import net.sf.oval.exception.ConstraintsViolatedException;
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -48,12 +49,17 @@ public class PeriodicStatisticsSinkTest {
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        _mocks = MockitoAnnotations.openMocks(this);
         Mockito.doReturn(_mockMetrics).when(_mockMetricsFactory).create();
         _statisticsSinkBuilder = new PeriodicStatisticsSink.Builder()
                 .setName("periodic_statistics_sink_test")
                 .setMetricsFactory(_mockMetricsFactory)
                 .setIntervalInMilliseconds(60L);
+    }
+
+    @After
+    public void after() throws Exception {
+        _mocks.close();
     }
 
     @Test(expected = ConstraintsViolatedException.class)
@@ -398,6 +404,7 @@ public class PeriodicStatisticsSinkTest {
     private ArgumentCaptor<Runnable> _runnableCaptor;
 
     private PeriodicStatisticsSink.Builder _statisticsSinkBuilder;
+    private AutoCloseable _mocks;
 
     private static final String COUNTER_NAME = "sinks/periodic_statistics/periodic_statistics_sink_test/aggregated_data";
 }

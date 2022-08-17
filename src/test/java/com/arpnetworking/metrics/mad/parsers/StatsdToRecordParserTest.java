@@ -26,6 +26,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,9 +39,10 @@ import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
+import java.util.random.RandomGenerator;
 
 /**
  * Tests for the statsd parser.
@@ -51,7 +53,12 @@ public final class StatsdToRecordParserTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        _mocks = MockitoAnnotations.openMocks(this);
+    }
+
+    @After
+    public void after() throws Exception {
+        _mocks.close();
     }
 
     @Test
@@ -272,9 +279,10 @@ public final class StatsdToRecordParserTest {
     }
 
     @Mock
-    private Random _random;
+    private RandomGenerator _random;
+    private AutoCloseable _mocks;
 
-    private final ZonedDateTime _now = ZonedDateTime.now(ZoneOffset.UTC);
+    private final ZonedDateTime _now = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MILLIS);
     private final Parser<List<Record>, ByteBuffer> _parser =
             new StatsdToRecordParser(
                     Clock.fixed(

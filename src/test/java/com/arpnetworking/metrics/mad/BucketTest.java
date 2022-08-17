@@ -37,7 +37,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,7 +63,7 @@ public class BucketTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        _mocks = MockitoAnnotations.openMocks(this);
         _bucket = new Bucket.Builder()
                 .setKey(new DefaultKey(
                         ImmutableMap.of(
@@ -82,6 +84,11 @@ public class BucketTest {
                 .build();
     }
 
+    @After
+    public void after() throws Exception {
+        _mocks.close();
+    }
+
     @Test
     public void testCounter() {
         addData("MyCounter", MetricType.COUNTER, ONE, 10);
@@ -95,7 +102,7 @@ public class BucketTest {
         final ImmutableMultimap<String, AggregatedData> data = dataCaptor.getValue().getData();
         Assert.assertEquals(2, data.size());
 
-        Assert.assertThat(
+        MatcherAssert.assertThat(
                 data.get("MyCounter"),
                 Matchers.containsInAnyOrder(
                         new AggregatedData.Builder()
@@ -232,7 +239,7 @@ public class BucketTest {
         final ImmutableMultimap<String, AggregatedData> data = dataCaptor.getValue().getData();
         Assert.assertEquals(3, data.size());
 
-        Assert.assertThat(
+        MatcherAssert.assertThat(
                 data.get("MyGauge"),
                 Matchers.containsInAnyOrder(
                         new AggregatedData.Builder()
@@ -268,7 +275,7 @@ public class BucketTest {
         final ImmutableMultimap<String, AggregatedData> data = dataCaptor.getValue().getData();
         Assert.assertEquals(2, data.size());
 
-        Assert.assertThat(
+        MatcherAssert.assertThat(
                 data.get("MyTimer"),
                 Matchers.containsInAnyOrder(
                         new AggregatedData.Builder()
@@ -319,7 +326,7 @@ public class BucketTest {
         final ImmutableMultimap<String, AggregatedData> data = dataCaptor.getValue().getData();
         Assert.assertEquals(5, data.size());
 
-        Assert.assertThat(
+        MatcherAssert.assertThat(
                 data.get("testCalculatedValues/MyMetric"),
                 Matchers.containsInAnyOrder(
                         new AggregatedData.Builder()
@@ -428,6 +435,7 @@ public class BucketTest {
 
     @Mock
     private Sink _sink;
+    private AutoCloseable _mocks;
 
     private static final ZonedDateTime START = ZonedDateTime.parse("2015-02-05T00:00:00Z");
     private static final Optional<ZonedDateTime> LOWTIME = Optional.of(START.plusMinutes(27));

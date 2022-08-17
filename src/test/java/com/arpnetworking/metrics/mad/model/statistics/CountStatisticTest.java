@@ -18,6 +18,7 @@ package com.arpnetworking.metrics.mad.model.statistics;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.google.common.collect.Iterables;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,7 +35,7 @@ public class CountStatisticTest {
     @Test
     public void testGetName() {
         final Statistic stat = COUNT_STATISTIC;
-        Assert.assertThat(stat.getName(), Matchers.equalTo("count"));
+        MatcherAssert.assertThat(stat.getName(), Matchers.equalTo("count"));
     }
 
     @Test

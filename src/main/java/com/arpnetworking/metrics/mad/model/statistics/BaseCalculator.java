@@ -36,7 +36,7 @@ public abstract class BaseCalculator<T> implements Calculator<T> {
 
     @Override
     public boolean equals(final Object o) {
-        return this == o || (o != null && getClass().equals(o.getClass()));
+        return this == o || o != null && getClass().equals(o.getClass());
     }
 
     /**

@@ -20,6 +20,7 @@ import com.arpnetworking.tsdcore.model.DefaultKey;
 import com.arpnetworking.tsdcore.model.Key;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.google.common.collect.ImmutableMap;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -38,7 +39,12 @@ import java.util.Collections;
 public class TimeThresholdSinkTest {
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        _mocks = MockitoAnnotations.openMocks(this);
+    }
+
+    @After
+    public void after() throws Exception {
+        _mocks.close();
     }
 
     @Test
@@ -109,4 +115,5 @@ public class TimeThresholdSinkTest {
 
     @Mock
     private Sink _sink;
+    private AutoCloseable _mocks;
 }

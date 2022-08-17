@@ -17,6 +17,7 @@ package com.arpnetworking.tsdcore.sinks;
 
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.PeriodicData;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -35,7 +36,12 @@ public class PeriodFilteringSinkTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        _mocks = MockitoAnnotations.openMocks(this);
+    }
+
+    @After
+    public void after() throws Exception {
+        _mocks.close();
     }
 
     @Test
@@ -63,7 +69,7 @@ public class PeriodFilteringSinkTest {
                 .setPeriod(Duration.ofMinutes(5))
                 .build();
         periodFilteringSink.recordAggregateData(periodicDataIn);
-        Mockito.verifyZeroInteractions(_sink);
+        Mockito.verifyNoInteractions(_sink);
     }
 
     @Test
@@ -77,7 +83,7 @@ public class PeriodFilteringSinkTest {
                 .setPeriod(Duration.ofMinutes(1))
                 .build();
         periodFilteringSink.recordAggregateData(periodicDataExcluded);
-        Mockito.verifyZeroInteractions(_sink);
+        Mockito.verifyNoInteractions(_sink);
     }
 
     @Test
@@ -105,7 +111,7 @@ public class PeriodFilteringSinkTest {
                 .setPeriod(Duration.ofMinutes(10))
                 .build();
         periodFilteringSink.recordAggregateData(periodicDataExcluded);
-        Mockito.verifyZeroInteractions(_sink);
+        Mockito.verifyNoInteractions(_sink);
     }
 
     @Test
@@ -172,4 +178,5 @@ public class PeriodFilteringSinkTest {
 
     @Mock
     private Sink _sink;
+    private AutoCloseable _mocks;
 }

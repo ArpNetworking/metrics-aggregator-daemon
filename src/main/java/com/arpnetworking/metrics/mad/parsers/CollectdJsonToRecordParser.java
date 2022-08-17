@@ -30,7 +30,7 @@ import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.Key;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
@@ -41,12 +41,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import net.sf.oval.Validator;
 import net.sf.oval.constraint.CheckWith;
 import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.NotNull;
+import net.sf.oval.context.OValContext;
 import net.sf.oval.exception.ConstraintsViolatedException;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -210,7 +213,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
     private static final String TAG_PREFIX = "x-tag-";
 
     static {
-        OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
+        OBJECT_MAPPER.configure(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS.mappedFeature(), true);
         OBJECT_MAPPER.registerModule(new AfterburnerModule());
     }
 
@@ -433,7 +436,11 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
 
             private static class ValueArraysValid implements CheckWithCheck.SimpleCheck {
                 @Override
-                public boolean isSatisfied(final Object validatedObject, final Object value) {
+                public boolean isSatisfied(
+                        final Object validatedObject,
+                        final Object value,
+                        final OValContext context,
+                        final Validator validator) {
                     if (validatedObject instanceof Builder) {
                         final Builder builder = (Builder) validatedObject;
                         if (builder._values == null && builder._dsNames == null && builder._dsTypes == null) {
@@ -446,6 +453,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                     return false;
                 }
 
+                @Serial
                 private static final long serialVersionUID = 1L;
             }
         }

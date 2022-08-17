@@ -18,7 +18,9 @@ package com.arpnetworking.metrics.mad.model.statistics;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.google.common.collect.ImmutableMap;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,20 +38,25 @@ public class MeanStatisticTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        _mocks = MockitoAnnotations.openMocks(this);
+    }
+
+    @After
+    public void after() throws Exception {
+        _mocks.close();
     }
 
     @Test
     public void testGetName() {
         final Statistic stat = MEAN_STATISTIC;
-        Assert.assertThat(stat.getName(), Matchers.equalTo("mean"));
+        MatcherAssert.assertThat(stat.getName(), Matchers.equalTo("mean"));
     }
 
     @Test
     public void testEquality() {
-        Assert.assertFalse(MEAN_STATISTIC.equals(null));
-        Assert.assertFalse(MEAN_STATISTIC.equals("ABC"));
-        Assert.assertTrue(MEAN_STATISTIC.equals(MEAN_STATISTIC));
+        Assert.assertNotEquals(null, MEAN_STATISTIC);
+        Assert.assertNotEquals("ABC", MEAN_STATISTIC);
+        Assert.assertEquals(MEAN_STATISTIC, MEAN_STATISTIC);
     }
 
     @Test
@@ -81,6 +88,7 @@ public class MeanStatisticTest {
     private Calculator<Void> _sumCalculator;
     @Mock(name = "CountCalculator")
     private Calculator<Void> _countCalculator;
+    private AutoCloseable _mocks;
 
     private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
     private static final MeanStatistic MEAN_STATISTIC = (MeanStatistic) STATISTIC_FACTORY.getStatistic("mean");

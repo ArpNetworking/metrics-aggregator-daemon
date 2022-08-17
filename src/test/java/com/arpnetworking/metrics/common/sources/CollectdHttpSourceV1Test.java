@@ -28,6 +28,7 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.test.TestBeanFactory;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +55,7 @@ public final class CollectdHttpSourceV1Test extends BaseActorSourceTest {
     @Before
     public void setUp() {
         super.setUp();
-        MockitoAnnotations.initMocks(this);
+        _mocks = MockitoAnnotations.openMocks(this);
         _source = new CollectdHttpSourceV1.Builder()
                 .setActorName("collectd")
                 .setName("collectd_source")
@@ -62,6 +63,11 @@ public final class CollectdHttpSourceV1Test extends BaseActorSourceTest {
                 .setPeriodicMetrics(_periodicMetrics)
                 .build();
         _source.attach(_observer);
+    }
+
+    @After
+    public void after() throws Exception {
+        _mocks.close();
     }
 
     @Test
@@ -135,4 +141,5 @@ public final class CollectdHttpSourceV1Test extends BaseActorSourceTest {
     private PeriodicMetrics _periodicMetrics;
 
     private CollectdHttpSourceV1 _source;
+    private AutoCloseable _mocks;
 }

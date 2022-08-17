@@ -57,11 +57,12 @@ public final class StatsdSourceTest {
     @Before
     public void setUp() {
         _actorSystem =  ActorSystem.create();
-        MockitoAnnotations.initMocks(this);
+        _mocks = MockitoAnnotations.openMocks(this);
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
+        _mocks.close();
         TestKit.shutdownActorSystem(_actorSystem);
     }
 
@@ -124,4 +125,6 @@ public final class StatsdSourceTest {
         Assert.assertEquals(expected.getDimensions(), actual.getDimensions());
         Assert.assertEquals(expected.getMetrics(), actual.getMetrics());
     }
+
+    private AutoCloseable _mocks;
 }

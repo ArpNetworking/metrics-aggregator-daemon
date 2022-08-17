@@ -39,15 +39,15 @@ public class BaseSourceTest {
         final Observer observer2 = Mockito.mock(Observer.class, "observer2");
 
         source.publicNotify(event);
-        Mockito.verifyZeroInteractions(observer1);
-        Mockito.verifyZeroInteractions(observer2);
+        Mockito.verifyNoInteractions(observer1);
+        Mockito.verifyNoInteractions(observer2);
         Mockito.reset(observer1);
         Mockito.reset(observer2);
 
         source.attach(observer1);
         source.publicNotify(event);
         Mockito.verify(observer1).notify(source, event);
-        Mockito.verifyZeroInteractions(observer2);
+        Mockito.verifyNoInteractions(observer2);
         Mockito.reset(observer1);
         Mockito.reset(observer2);
 
@@ -61,7 +61,7 @@ public class BaseSourceTest {
         source.detach(observer2);
         source.publicNotify(event);
         Mockito.verify(observer1).notify(source, event);
-        Mockito.verifyZeroInteractions(observer2);
+        Mockito.verifyNoInteractions(observer2);
         Mockito.reset(observer1);
         Mockito.reset(observer2);
     }
