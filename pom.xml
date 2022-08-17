@@ -73,7 +73,7 @@
     <!--Dependency versions-->
     <akka.version>2.6.9</akka.version>
     <akka.http.version>10.2.6</akka.http.version>
-    <apache.httpclient.version>4.5.6</apache.httpclient.version>
+    <apache.httpclient.version>4.5.13</apache.httpclient.version>
     <apache.httpcore.version>4.4.10</apache.httpcore.version>
     <arpnetworking.commons.version>1.19.0</arpnetworking.commons.version>
     <aspectjrt.version>1.9.2</aspectjrt.version>
