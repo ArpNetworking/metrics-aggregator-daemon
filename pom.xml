@@ -82,7 +82,7 @@
     <cglib.version>3.3.0</cglib.version>
     <client.protocol.version>0.12.0</client.protocol.version>
     <fastutil.version>8.2.2</fastutil.version>
-    <guava.version>25.1-jre</guava.version>
+    <guava.version>29.0-jre</guava.version>
     <guice.version>4.2.2</guice.version>
     <jackson.version>2.9.8</jackson.version>
     <javassist.version>3.24.1-GA</javassist.version>
