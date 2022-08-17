@@ -100,6 +100,10 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
                 final List<Double> values = record.getValues();
 
                 if (values != null && dsTypes != null && dsNames != null) {
+                    if (values.size() == 1 && values.get(0) == null) {
+                        // Ignore null values
+                        continue;
+                    }
                     final Iterator<Double> valuesIterator = values.iterator();
                     final Iterator<String> typesIterator = dsTypes.iterator();
                     final Iterator<String> namesIterator = dsNames.iterator();
@@ -350,7 +354,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
              * @param value Value
              * @return This builder
              */
-            public Builder setValues(@Nullable final ImmutableList<Double> value) {
+            public Builder setValues(@Nullable final List<Double> value) {
                 _values = value;
                 return this;
             }
@@ -421,7 +425,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             private String _typeInstance;
             @Nullable
             @CheckWith(value = ValueArraysValid.class, message = "values, dstypes, and dsnames must have the same number of entries")
-            private ImmutableList<Double> _values = ImmutableList.of();
+            private List<Double> _values = ImmutableList.of();
             @Nullable
             private ImmutableList<String> _dsTypes = ImmutableList.of();
             @Nullable
