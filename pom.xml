@@ -75,7 +75,7 @@
     <akka.http.version>10.2.9</akka.http.version>
     <apache.httpclient.version>4.5.13</apache.httpclient.version>
     <apache.httpcore.version>4.4.15</apache.httpcore.version>
-    <arpnetworking.commons.version>2.0.4</arpnetworking.commons.version>
+    <arpnetworking.commons.version>2.0.5</arpnetworking.commons.version>
     <aspectjrt.version>1.9.9.1</aspectjrt.version>
     <asynchttpclient.version>2.12.3</asynchttpclient.version>
     <bouncy.castle.version>1.70</bouncy.castle.version>
@@ -85,7 +85,7 @@
     <guice.version>5.1.0</guice.version>
     <jackson.version>2.13.3</jackson.version>
     <javassist.version>3.29.1-GA</javassist.version>
-    <javassist.maven.core.version>0.2.5</javassist.maven.core.version>
+    <javassist.maven.core.version>0.2.6</javassist.maven.core.version>
     <jsr305.version>3.0.2</jsr305.version>
     <kafka.client.version>3.2.1</kafka.client.version>
     <logback.version>1.2.11</logback.version>
@@ -93,7 +93,7 @@
     <log4j.over.slf4j.version>1.7.36</log4j.over.slf4j.version>
     <metrics.aggregator.protocol.prometheus.version>1.0.1</metrics.aggregator.protocol.prometheus.version>
     <metrics.aggregator.protocol.version>1.0.10</metrics.aggregator.protocol.version>
-    <metrics.client.version>0.12.0</metrics.client.version>
+    <metrics.client.version>0.12.1</metrics.client.version>
     <metrics.client.http.version>0.11.2</metrics.client.http.version>
     <metrics.client.incubator.version>0.12.0</metrics.client.incubator.version>
     <metrics.jvm.extra.version>0.11.2</metrics.jvm.extra.version>
