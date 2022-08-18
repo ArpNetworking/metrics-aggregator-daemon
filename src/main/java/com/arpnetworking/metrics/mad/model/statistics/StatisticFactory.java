@@ -45,7 +45,8 @@ public class StatisticFactory {
     public Statistic getStatistic(final String name) {
         final Optional<Statistic> statistic = tryGetStatistic(name);
         if (!statistic.isPresent()) {
-            throw new IllegalArgumentException(String.format("Invalid statistic name; name=%s", name));
+            throw new IllegalArgumentException(
+                    String.format("Invalid statistic name; name=%s; available_statistics=%s", name, STATISTICS_BY_NAME_AND_ALIAS));
         }
         return statistic.get();
     }
@@ -87,27 +88,16 @@ public class StatisticFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(StatisticFactory.class);
 
     static {
-        LOGGER.warn()
-                .setMessage("Registering statistics begin")
-                .log();
         // NOTE: Do not put log messages in static blocks since they can lock the logger thread!
         final ConcurrentMap<String, Statistic> statisticByNameAndAlias = Maps.newConcurrentMap();
         try {
             final ImmutableSet<ClassPath.ClassInfo> statisticClasses = ClassPath.from(StatisticFactory.class.getClassLoader())
                     .getTopLevelClasses("com.arpnetworking.metrics.mad.model.statistics");
-            LOGGER.warn()
-                    .setMessage("Registering statistics")
-                    .addData("count", statisticClasses.size())
-                    .log();
             for (final ClassPath.ClassInfo statisticClassInfo : statisticClasses) {
                 final Class<?> statisticClass = statisticClassInfo.load();
                 if (!statisticClass.isInterface() && !Modifier.isAbstract(statisticClass.getModifiers())
                         && Statistic.class.isAssignableFrom(statisticClass)) {
                     try {
-                        LOGGER.warn()
-                                .setMessage("Registering statistic class")
-                                .addData("class", statisticClass.getName())
-                                .log();
                         // The constructor type is implied by the assignability
                         // of the statisticClass to the Statistic interface
                         @SuppressWarnings("unchecked")
@@ -117,10 +107,6 @@ public class StatisticFactory {
                             constructor.setAccessible(true);
                         }
                         checkedPut(statisticByNameAndAlias, constructor.newInstance());
-                        LOGGER.warn()
-                                .setMessage("Statistic registered")
-                                .addData("class", statisticClass.getName())
-                                .log();
                     } catch (final InvocationTargetException | NoSuchMethodException
                             | InstantiationException | IllegalAccessException e) {
                         LOGGER.warn()
