@@ -45,7 +45,8 @@ public class StatisticFactory {
     public Statistic getStatistic(final String name) {
         final Optional<Statistic> statistic = tryGetStatistic(name);
         if (!statistic.isPresent()) {
-            throw new IllegalArgumentException(String.format("Invalid statistic name; name=%s", name));
+            throw new IllegalArgumentException(
+                    String.format("Invalid statistic name; name=%s; available_statistics=%s", name, STATISTICS_BY_NAME_AND_ALIAS));
         }
         return statistic.get();
     }
@@ -102,7 +103,7 @@ public class StatisticFactory {
                         @SuppressWarnings("unchecked")
                         final Constructor<? extends Statistic> constructor =
                                 (Constructor<? extends Statistic>) statisticClass.getDeclaredConstructor();
-                        if (!constructor.isAccessible()) {
+                        if (!constructor.canAccess(null)) {
                             constructor.setAccessible(true);
                         }
                         checkedPut(statisticByNameAndAlias, constructor.newInstance());

@@ -178,7 +178,7 @@ public final class PrometheusToRecordParserTest {
         final PrometheusToRecordParser parser = createParser();
         final String newName
                 = Arrays.stream(fullName.split("_"))
-                .filter(x->!prometheusUnit.equals(x))
+                .filter(x -> !prometheusUnit.equals(x))
                 .collect(Collectors.joining("_"));
         final PrometheusToRecordParser.ParseResult expectedResult
                 = new PrometheusToRecordParser.ParseResult(newName, Optional.of(expectedUnit));

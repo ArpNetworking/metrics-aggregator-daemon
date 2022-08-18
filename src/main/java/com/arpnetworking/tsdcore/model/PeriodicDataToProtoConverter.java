@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +73,7 @@ public final class PeriodicDataToProtoConverter {
                 .setMetric(metricName)
                 .setPeriod(periodicData.getPeriod().toString())
                 .setPeriodStart(periodicData.getStart().toString())
-                .setClientMinimumRequestTime(periodicData.getMinRequestTime().map(t -> t.toString()).orElse(""))
+                .setClientMinimumRequestTime(periodicData.getMinRequestTime().map(ZonedDateTime::toString).orElse(""))
                 .putAllDimensions(periodicData.getDimensions().getParameters())
                 .setCluster(periodicData.getDimensions().getCluster())
                 .setService(periodicData.getDimensions().getService());
@@ -113,9 +114,11 @@ public final class PeriodicDataToProtoConverter {
 
         final long populationSize;
         if (populationSizes.containsKey(HISTOGRAM_STATISTIC)) {
-            populationSize = populationSizes.get(HISTOGRAM_STATISTIC);
+            final Long boxed = populationSizes.get(HISTOGRAM_STATISTIC);
+            populationSize = boxed == null ? 0 : boxed;
         } else {
-            populationSize = populationSizes.getOrDefault(COUNT_STATISTIC, 1L);
+            final Long boxed = populationSizes.getOrDefault(COUNT_STATISTIC, 1L);
+            populationSize = boxed == null ? 1 : boxed;
         }
 
         return new ConvertedDatum(builder.build(), populationSize);

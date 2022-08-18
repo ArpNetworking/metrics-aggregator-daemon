@@ -38,7 +38,7 @@ public abstract class BaseActorTest {
      */
     @Before
     public void startup() {
-        MockitoAnnotations.initMocks(this);
+        _mocks = MockitoAnnotations.openMocks(this);
         _system = ActorSystem.create();
     }
 
@@ -47,6 +47,7 @@ public abstract class BaseActorTest {
      */
     @After
     public void shutdown() throws Exception {
+        _mocks.close();
         final Future<Terminated> terminate = _system.terminate();
         Await.result(terminate, Duration.apply(30, TimeUnit.SECONDS));
     }
@@ -56,4 +57,5 @@ public abstract class BaseActorTest {
     }
 
     private ActorSystem _system;
+    private AutoCloseable _mocks;
 }

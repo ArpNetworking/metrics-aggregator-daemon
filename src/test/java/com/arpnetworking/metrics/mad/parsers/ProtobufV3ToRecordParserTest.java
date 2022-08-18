@@ -30,6 +30,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -123,7 +125,7 @@ public final class ProtobufV3ToRecordParserTest {
         calculatedValue = Iterables.getOnlyElement(
                 histogram.getStatistics().get(STATISTIC_FACTORY.getStatistic("histogram")));
         Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), calculatedValue.getValue());
-        Assert.assertTrue(calculatedValue.getData() instanceof HistogramStatistic.HistogramSupportingData);
+        MatcherAssert.assertThat(calculatedValue.getData(), Matchers.instanceOf(HistogramStatistic.HistogramSupportingData.class));
         supportingData = (HistogramStatistic.HistogramSupportingData) calculatedValue.getData();
         histogramSnapshot = supportingData.getHistogramSnapshot();
         Assert.assertFalse(supportingData.getUnit().isPresent());
@@ -166,7 +168,7 @@ public final class ProtobufV3ToRecordParserTest {
         // Histogram
         calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("histogram")).get(0);
         Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), calculatedValue.getValue());
-        Assert.assertTrue(calculatedValue.getData() instanceof HistogramStatistic.HistogramSupportingData);
+        MatcherAssert.assertThat(calculatedValue.getData(), Matchers.instanceOf(HistogramStatistic.HistogramSupportingData.class));
         supportingData = (HistogramStatistic.HistogramSupportingData) calculatedValue.getData();
         histogramSnapshot = supportingData.getHistogramSnapshot();
         Assert.assertFalse(supportingData.getUnit().isPresent());
@@ -195,7 +197,7 @@ public final class ProtobufV3ToRecordParserTest {
         // Histogram
         calculatedValue = combined.getStatistics().get(STATISTIC_FACTORY.getStatistic("histogram")).get(1);
         Assert.assertEquals(new DefaultQuantity.Builder().setValue(1.0).build(), calculatedValue.getValue());
-        Assert.assertTrue(calculatedValue.getData() instanceof HistogramStatistic.HistogramSupportingData);
+        MatcherAssert.assertThat(calculatedValue.getData(), Matchers.instanceOf(HistogramStatistic.HistogramSupportingData.class));
         supportingData = (HistogramStatistic.HistogramSupportingData) calculatedValue.getData();
         histogramSnapshot = supportingData.getHistogramSnapshot();
         Assert.assertFalse(supportingData.getUnit().isPresent());

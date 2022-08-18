@@ -40,8 +40,8 @@ import com.arpnetworking.metrics.mad.model.json.Version2g.CompositeUnit;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.Key;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -697,7 +697,7 @@ public final class JsonToRecordParser implements Parser<Record, byte[]> {
                 EnumerationDeserializer.newInstance(
                         CompositeUnit.Scale.class,
                         EnumerationDeserializerStrategyUsingToUpperCase.newInstance()));
-        OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
+        OBJECT_MAPPER.configure(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS.mappedFeature(), true);
         OBJECT_MAPPER.registerModule(queryLogParserModule);
         OBJECT_MAPPER.registerModule(new AfterburnerModule());
 

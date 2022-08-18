@@ -15,6 +15,7 @@
  */
 package com.arpnetworking.tsdcore.model;
 
+import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.Unit;
@@ -40,8 +41,8 @@ public class PeriodicDataToProtoConverterTest {
 
     @Test
     public void conversionTest() {
-        final PeriodicData data = new PeriodicData.Builder()
-                .setDimensions(
+        final PeriodicData data = ThreadLocalBuilder.build(PeriodicData.Builder.class, builder ->
+                builder.setDimensions(
                         new DefaultKey(
                                 ImmutableMap.of(
                                         Key.HOST_DIMENSION_KEY, "host-test",
@@ -54,8 +55,7 @@ public class PeriodicDataToProtoConverterTest {
                         .setPopulationSize((long) 1337).build()))
                 .setPeriod(Duration.ofMinutes(5))
                 .setStart(ZonedDateTime.parse("2020-06-04T16:04:38.424-07:00[America/Los_Angeles]"))
-                .setMinRequestTime(ZonedDateTime.parse("2019-01-03T05:06:07.890-07:00[America/Los_Angeles]"))
-                .build();
+                .setMinRequestTime(ZonedDateTime.parse("2019-01-03T05:06:07.890-08:00[America/Los_Angeles]")));
 
         final List<PeriodicDataToProtoConverter.ConvertedDatum> converted = PeriodicDataToProtoConverter.convert(data);
 
@@ -73,16 +73,16 @@ public class PeriodicDataToProtoConverterTest {
                 + "  user_specified: true\n"
                 + "}\n"
                 + "dimensions {\n"
+                + "  key: \"cluster\"\n"
+                + "  value: \"cluster-test\"\n"
+                + "}\n"
+                + "dimensions {\n"
                 + "  key: \"host\"\n"
                 + "  value: \"host-test\"\n"
                 + "}\n"
                 + "dimensions {\n"
                 + "  key: \"service\"\n"
                 + "  value: \"service-test\"\n"
-                + "}\n"
-                + "dimensions {\n"
-                + "  key: \"cluster\"\n"
-                + "  value: \"cluster-test\"\n"
                 + "}\n"
                 + "client_minimum_request_time: \"2019-01-03T05:06:07.890-08:00[America/Los_Angeles]\"\n",
 

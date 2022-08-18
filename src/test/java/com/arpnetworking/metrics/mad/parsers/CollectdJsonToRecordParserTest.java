@@ -29,6 +29,7 @@ import com.arpnetworking.tsdcore.model.Key;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.io.Resources;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -119,7 +120,7 @@ public class CollectdJsonToRecordParserTest {
         final Record record = records.remove(0);
         Assert.assertEquals(timestamp, record.getTime().withZoneSameInstant(ZoneOffset.UTC));
         final Map<String, ? extends Metric> metrics = record.getMetrics();
-        Assert.assertThat(metrics, Matchers.hasKey(name));
+        MatcherAssert.assertThat(metrics, Matchers.hasKey(name));
         final Metric metric = metrics.get(name);
         Assert.assertEquals(type, metric.getType());
         for (int i = 0; i < metric.getValues().size(); i++) {

@@ -41,6 +41,7 @@ import org.vertx.java.core.net.NetSocket;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -168,7 +169,7 @@ public abstract class VertxSink extends BaseSink {
      *
      * @return The {@link Vertx} instance.
      */
-    protected Vertx getVertx() {
+    protected final Vertx getVertx() {
         return _vertx;
     }
 
@@ -267,6 +268,9 @@ public abstract class VertxSink extends BaseSink {
             while (socket != null && !done) {
                 if (_pendingData.size() > 0 && flushedBytes < MAX_FLUSH_BYTES) {
                     final Buffer buffer = _pendingData.poll();
+                    if (buffer == null) {
+                        continue;
+                    }
                     flushedBytes += flushBuffer(buffer, socket);
                 } else {
                     done = true;
@@ -377,7 +381,7 @@ public abstract class VertxSink extends BaseSink {
     private final AtomicBoolean _connecting = new AtomicBoolean(false);
     private ZonedDateTime _lastNotConnectedNotify = null;
     private volatile long _lastConnectionAttempt = 0;
-    private volatile int _connectionAttempt = 1;
+    private AtomicInteger _connectionAttempt = new AtomicInteger(1);
     private final int _exponentialBackoffBase;
 
     private int _currentReconnectWait = 3000;
@@ -401,7 +405,7 @@ public abstract class VertxSink extends BaseSink {
                 final NetSocket socket = event.result();
                 socket.exceptionHandler(createSocketExceptionHandler());
                 socket.endHandler(createSocketCloseHandler(socket));
-                _connectionAttempt = 1;
+                _connectionAttempt.set(1);
 
                 onConnect(socket);
 
@@ -415,11 +419,11 @@ public abstract class VertxSink extends BaseSink {
                         .addData("port", _serverPort)
                         .setThrowable(event.cause())
                         .log();
-                _connectionAttempt++;
+                _connectionAttempt.incrementAndGet();
                 //Calculate the next reconnect delay.  Exponential backoff formula.
 
                 _currentReconnectWait = (((int) (Math.random()  //randomize
-                        * Math.pow(1.3, Math.min(_connectionAttempt, 20)))) //1.3^x where x = min(attempt, 20)
+                        * Math.pow(1.3, Math.min(_connectionAttempt.get(), 20)))) //1.3^x where x = min(attempt, 20)
                         +  1) //make sure we don't wait 0
                         *  _exponentialBackoffBase; //the milliseconds base
                 LOGGER.info()

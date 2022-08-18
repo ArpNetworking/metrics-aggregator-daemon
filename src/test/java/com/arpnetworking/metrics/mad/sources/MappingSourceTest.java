@@ -93,7 +93,7 @@ public class MappingSourceTest {
                 mappingSource,
                 Collections.<Pattern, List<String>>emptyMap())
                 .notify(OBSERVABLE, "Not a Record");
-        Mockito.verifyZeroInteractions(_mockSource);
+        Mockito.verifyNoInteractions(_mockSource);
     }
 
     @Test(expected = IllegalArgumentException.class)

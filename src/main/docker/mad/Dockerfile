@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:8u302-jre
+FROM openjdk:17-slim-bullseye
 
 MAINTAINER arpnetworking
 
@@ -60,12 +60,7 @@ CMD [ \
     "${LOGBACK_CONFIG}", \
     "-XX:+HeapDumpOnOutOfMemoryError", \
     "-XX:HeapDumpPath=/opt/mad/logs/mad.oom.hprof", \
-    "-XX:+PrintGCDetails", \
-    "-XX:+PrintGCDateStamps", \
-    "-Xloggc:/opt/mad/logs/mad.gc.log", \
-    "-XX:NumberOfGCLogFiles=2", \
-    "-XX:GCLogFileSize=50M", \
-    "-XX:+UseGCLogFileRotation", \
+    "-Xlog:gc*:file=/opt/mad/logs/mad.gc.log:time,level,tags:filecount=2,filesize=50M", \
     "-Xms${JVM_XMS}", \
     "-Xmx${JVM_XMX}", \
     "-XX:+UseStringDeduplication", \

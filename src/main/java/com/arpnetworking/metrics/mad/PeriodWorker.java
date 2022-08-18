@@ -207,11 +207,9 @@ import java.util.TreeMap;
 
             // Index the bucket by its expiration date; the expiration date is always in the future
             _bucketsByExpiration.compute(expiration, (dateTime, buckets) -> {
-                if (buckets == null) {
-                    buckets = Lists.newArrayList();
-                }
-                buckets.add(newBucket);
-                return buckets;
+                final List<Bucket> computedBucket = buckets == null ? Lists.newArrayList() : buckets;
+                computedBucket.add(newBucket);
+                return computedBucket;
             });
 
             // Ensure rotation is scheduled (now that we have data)

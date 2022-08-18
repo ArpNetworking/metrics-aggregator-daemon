@@ -24,6 +24,7 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.tsdcore.model.Key;
 import com.google.common.base.Strings;
 import com.google.common.io.Resources;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Assert;
@@ -108,8 +109,8 @@ public class JsonToRecordParserV2cTest {
         Assert.assertEquals("MyCluster", record.getDimensions().get(Key.CLUSTER_DIMENSION_KEY));
 
         Assert.assertEquals(2, record.getAnnotations().size());
-        Assert.assertThat(record.getAnnotations(), IsMapContaining.hasEntry("method", "POST"));
-        Assert.assertThat(record.getAnnotations(), IsMapContaining.hasEntry("request_id", "c5251254-8f7c-4c21-95da-270eb66e100b"));
+        MatcherAssert.assertThat(record.getAnnotations(), IsMapContaining.hasEntry("method", "POST"));
+        MatcherAssert.assertThat(record.getAnnotations(), IsMapContaining.hasEntry("request_id", "c5251254-8f7c-4c21-95da-270eb66e100b"));
     }
 
     @Test
@@ -315,15 +316,15 @@ public class JsonToRecordParserV2cTest {
         final Map<String, ? extends Metric> variables = record.getMetrics();
         Assert.assertEquals(3, variables.size());
 
-        Assert.assertThat(variables, Matchers.hasKey("t1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("t1"));
         final Metric t1 = variables.get("t1");
         Assert.assertTrue(t1.getValues().isEmpty());
 
-        Assert.assertThat(variables, Matchers.hasKey("g1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("g1"));
         final Metric g1 = variables.get("g1");
         Assert.assertTrue(g1.getValues().isEmpty());
 
-        Assert.assertThat(variables, Matchers.hasKey("c1"));
+        MatcherAssert.assertThat(variables, Matchers.hasKey("c1"));
         final Metric c1 = variables.get("c1");
         Assert.assertTrue(c1.getValues().isEmpty());
     }

@@ -28,6 +28,7 @@
     <logger name="io.inscopemetrics" level="DEBUG" />
     <logger name="com.arpnetworking" level="DEBUG" />
     <logger name="com.arpnetworking.metrics.apachehttpsinkextra.shaded" level="INFO" />
+    <logger name="org.apache.kafka" level="WARN" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

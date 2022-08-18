@@ -45,10 +45,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
+import java.util.random.RandomGenerator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -235,13 +235,13 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
 
     /* package private */ StatsdToRecordParser(
             final Clock clock,
-            final Supplier<Random> randomSupplier) {
+            final Supplier<RandomGenerator> randomSupplier) {
         _clock = clock;
         _randomSupplier = randomSupplier;
     }
 
     private final Clock _clock;
-    private final Supplier<Random> _randomSupplier;
+    private final Supplier<RandomGenerator> _randomSupplier;
 
     private static final ImmutableSet<StatsdType> SAMPLED_STATSD_TYPES = ImmutableSet.of(
             StatsdType.COUNTER,

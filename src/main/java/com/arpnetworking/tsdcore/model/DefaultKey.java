@@ -38,17 +38,23 @@ public final class DefaultKey implements Key {
 
     @Override
     public String getCluster() {
-        return _dimensions.get(CLUSTER_DIMENSION_KEY);
+        final String value = _dimensions.get(CLUSTER_DIMENSION_KEY);
+        assert value != null;
+        return value;
     }
 
     @Override
     public String getService() {
-        return _dimensions.get(SERVICE_DIMENSION_KEY);
+        final String value = _dimensions.get(SERVICE_DIMENSION_KEY);
+        assert value != null;
+        return value;
     }
 
     @Override
     public String getHost() {
-        return _dimensions.get(HOST_DIMENSION_KEY);
+        final String value = _dimensions.get(HOST_DIMENSION_KEY);
+        assert value != null;
+        return value;
     }
 
     @Override

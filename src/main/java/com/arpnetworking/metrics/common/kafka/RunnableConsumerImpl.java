@@ -18,13 +18,16 @@ package com.arpnetworking.metrics.common.kafka;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import net.sf.oval.Validator;
 import net.sf.oval.constraint.CheckWith;
 import net.sf.oval.constraint.CheckWithCheck;
 import net.sf.oval.constraint.NotNull;
+import net.sf.oval.context.OValContext;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
+import java.io.Serial;
 import java.time.Duration;
 
 /**
@@ -150,10 +153,15 @@ public class RunnableConsumerImpl<V> implements RunnableConsumer {
 
         private static class PositiveDuration implements CheckWithCheck.SimpleCheck {
             @Override
-            public boolean isSatisfied(final Object validatedObject, final Object value) {
-                return (value instanceof Duration) && !((Duration) value).isNegative();
+            public boolean isSatisfied(
+                    final Object validatedObject,
+                    final Object value,
+                    final OValContext context,
+                    final Validator validator) {
+                return value instanceof Duration && !((Duration) value).isNegative();
             }
 
+            @Serial
             private static final long serialVersionUID = 1L;
         }
     }
