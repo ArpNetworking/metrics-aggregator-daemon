@@ -382,11 +382,16 @@ public final class Main implements Launchable {
             monitoringSinksBuilder.addAll(createSinks(_configuration.getMonitoringSinks()));
         }
 
-        final MetricsFactory metricsFactory = new TsdMetricsFactory.Builder()
+        final TsdMetricsFactory.Builder metricsFactoryBuilder = new TsdMetricsFactory.Builder()
                 .setClusterName(_configuration.getMonitoringCluster())
                 .setServiceName(_configuration.getMonitoringService())
-                .setSinks(monitoringSinksBuilder.build())
-                .build();
+                .setSinks(monitoringSinksBuilder.build());
+
+        if (_configuration.getMonitoringHost().isPresent()) {
+            metricsFactoryBuilder.setHostName(_configuration.getMonitoringHost().get());
+        }
+
+        final MetricsFactory metricsFactory = metricsFactoryBuilder.build();
 
         final AppShutdown shutdown = new AppShutdown();
         _guiceAppShutdown = shutdown;

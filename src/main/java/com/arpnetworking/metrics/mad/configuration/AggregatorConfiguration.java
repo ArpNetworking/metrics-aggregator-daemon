@@ -52,6 +52,10 @@ public final class AggregatorConfiguration {
         return _monitoringService;
     }
 
+    public Optional<String> getMonitoringHost() {
+        return _monitoringHost;
+    }
+
     public ImmutableList<JsonNode> getMonitoringSinks() {
         return _monitoringSinks;
     }
@@ -132,6 +136,7 @@ public final class AggregatorConfiguration {
                 .add("id", Integer.toHexString(System.identityHashCode(this)))
                 .add("MonitoringCluster", _monitoringCluster)
                 .add("MonitoringService", _monitoringService)
+                .add("MonitoringHost", _monitoringHost)
                 .add("MonitoringSinks", _monitoringSinks)
                 .add("MetricsClientHost", _metricsClientHost)
                 .add("MetricsClientPort", _metricsClientPort)
@@ -172,6 +177,7 @@ public final class AggregatorConfiguration {
         _supplementalHttpRoutesClass = Optional.ofNullable(builder._supplementalHttpRoutesClass);
         _logDeadLetters = builder._logDeadLetters;
         _akkaConfiguration = builder._akkaConfiguration;
+        _monitoringHost = Optional.ofNullable(builder._monitoringHost);
 
         // Deprecated legacy settings
         _metricsClientHost = Optional.ofNullable(builder._metricsClientHost);
@@ -180,6 +186,7 @@ public final class AggregatorConfiguration {
 
     private final String _monitoringCluster;
     private final String _monitoringService;
+    private final Optional<String> _monitoringHost;
     private final ImmutableList<JsonNode> _monitoringSinks;
     private final Optional<String> _metricsClientHost;
     private final Optional<Integer> _metricsClientPort;
@@ -429,6 +436,17 @@ public final class AggregatorConfiguration {
         }
 
         /**
+         * The host to use as value for the host tag. Optional. Defaults to looking up the hostname.
+         *
+         * @param value The host to use as value for the host tag.
+         * @return This instance of {@link Builder}.
+         */
+        public Builder setMonitoringHost(final String value) {
+            _monitoringHost = value;
+            return this;
+        }
+
+        /**
          * Whether to install the {@link com.arpnetworking.metrics.mad.actors.DeadLetterLogger}
          * to log all dead letter senders, recipients and messages. It differs
          * from the built-in Akka logging in that it actually logs the message
@@ -465,6 +483,9 @@ public final class AggregatorConfiguration {
         @NotNull
         @NotEmpty
         private String _monitoringService = "mad";
+        @Nullable
+        @NotEmpty
+        private String _monitoringHost;
         // TODO(ville): Apply the default here once we migrate off JsonNode.
         @NotNull
         private ImmutableList<JsonNode> _monitoringSinks;
