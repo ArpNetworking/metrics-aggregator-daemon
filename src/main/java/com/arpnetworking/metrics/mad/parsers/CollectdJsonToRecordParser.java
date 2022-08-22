@@ -89,41 +89,11 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             final List<CollectdRecord> records = OBJECT_MAPPER.readValue(request.getBody().toArray(), COLLECTD_RECORD_LIST);
             final List<Record> parsedRecords = Lists.newArrayList();
             for (final CollectdRecord record : records) {
-                final Multimap<String, Metric> metrics = HashMultimap.create();
 
                 metricTags.put(Key.HOST_DIMENSION_KEY, record.getHost());
-
-                final String plugin = record.getPlugin();
-                final String pluginInstance = record.getPluginInstance();
-                final String type = record.getType();
-                final String typeInstance = record.getTypeInstance();
-
-                final List<String> dsTypes = record.getDsTypes();
-                final List<String> dsNames = record.getDsNames();
-                final List<Double> values = record.getValues();
-
-                if (values != null && dsTypes != null && dsNames != null) {
-                    if (values.size() == 1 && values.get(0) == null) {
-                        // Ignore null values
-                        continue;
-                    }
-                    final Iterator<Double> valuesIterator = values.iterator();
-                    final Iterator<String> typesIterator = dsTypes.iterator();
-                    final Iterator<String> namesIterator = dsNames.iterator();
-
-                    while (valuesIterator.hasNext() && typesIterator.hasNext() && namesIterator.hasNext()) {
-                        final String metricName = computeMetricName(plugin, pluginInstance, type, typeInstance, namesIterator.next());
-                        final MetricType metricType = mapDsType(typesIterator.next());
-                        // TODO(ville): Support units and normalize
-                        final Metric metric = ThreadLocalBuilder.build(
-                                DefaultMetric.Builder.class,
-                                b1 -> b1.setType(metricType)
-                                        .setValues(ImmutableList.of(
-                                                ThreadLocalBuilder.build(
-                                                        DefaultQuantity.Builder.class,
-                                                        b2 -> b2.setValue(valuesIterator.next())))));
-                        metrics.put(metricName, metric);
-                    }
+                final Multimap<String, Metric> metrics = buildMetrics(record);
+                if (metrics.isEmpty()) {
+                    continue;
                 }
                 final Map<String, Metric> collectedMetrics = metrics.asMap()
                         .entrySet()
@@ -145,6 +115,44 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
         } catch (final IOException | ConstraintsViolatedException ex) {
             throw new ParsingException("Error parsing collectd json", request.getBody().toArray(), ex);
         }
+    }
+
+    private Multimap<String, Metric> buildMetrics(final CollectdRecord record) {
+        final Multimap<String, Metric> metrics = HashMultimap.create();
+        final List<String> dsTypes = record.getDsTypes();
+        final List<String> dsNames = record.getDsNames();
+        final List<Double> values = record.getValues();
+        final String plugin = record.getPlugin();
+        final String pluginInstance = record.getPluginInstance();
+        final String type = record.getType();
+        final String typeInstance = record.getTypeInstance();
+
+        if (values != null && dsTypes != null && dsNames != null) {
+            final Iterator<Double> valuesIterator = values.iterator();
+            final Iterator<String> typesIterator = dsTypes.iterator();
+            final Iterator<String> namesIterator = dsNames.iterator();
+
+            while (valuesIterator.hasNext() && typesIterator.hasNext() && namesIterator.hasNext()) {
+                final String metricName = computeMetricName(plugin, pluginInstance, type, typeInstance, namesIterator.next());
+                final MetricType metricType = mapDsType(typesIterator.next());
+                final Double val = valuesIterator.next();
+                if (val == null) {
+                    continue;
+                }
+                // TODO(ville): Support units and normalize
+                final Metric metric = ThreadLocalBuilder.build(
+                        DefaultMetric.Builder.class,
+                        b1 -> b1.setType(metricType)
+                                .setValues(ImmutableList.of(
+                                        ThreadLocalBuilder.build(
+                                                DefaultQuantity.Builder.class,
+                                                b2 -> {
+                                                    b2.setValue(val);
+                                                }))));
+                metrics.put(metricName, metric);
+            }
+        }
+        return metrics;
     }
 
     private String computeMetricName(
