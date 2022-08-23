@@ -218,6 +218,7 @@ public class HttpSource extends ActorSource {
 
         private List<Record> parseRecords(final com.arpnetworking.metrics.mad.model.HttpRequest request)
                 throws ParsingException {
+            _receivedRequests.incrementAndGet();
             final List<Record> records = _parser.parse(request);
             long samples = 0;
             for (final Record record : records) {
