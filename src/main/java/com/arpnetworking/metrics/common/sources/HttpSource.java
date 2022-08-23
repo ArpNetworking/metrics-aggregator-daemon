@@ -150,8 +150,12 @@ public class HttpSource extends ActorSource {
                 // only created when pipelines are reloaded. To avoid recording values
                 // for dead pipelines this explicitly avoids recording zeroes.
                 final long samples = _receivedSamples.getAndSet(0);
+                final long requests = _receivedRequests.getAndSet(0);
                 if (samples > 0) {
-                    m.recordGauge(String.format("sources/http/%s/metric_samples", _metricSafeName), samples);
+                    m.recordCounter(String.format("sources/http/%s/metric_samples", _metricSafeName), samples);
+                }
+                if (requests > 0) {
+                    m.recordCounter(String.format("sources/http/%s/requests", _metricSafeName), requests);
                 }
             });
 
@@ -245,6 +249,7 @@ public class HttpSource extends ActorSource {
         private final Materializer _materializer;
         private final Graph<FlowShape<HttpRequest, Record>, NotUsed> _processGraph;
         private final AtomicLong _receivedSamples = new AtomicLong(0);
+        private final AtomicLong _receivedRequests = new AtomicLong(0);
 
         private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
         private static final Logger BAD_REQUEST_LOGGER =
