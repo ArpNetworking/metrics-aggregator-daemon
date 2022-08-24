@@ -20,9 +20,11 @@ import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.pattern.Patterns;
+import akka.routing.RoundRobinPool;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.annotation.JacksonInject;
+import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 
@@ -41,7 +43,7 @@ public abstract class ActorSource extends BaseSource {
     @Override
     public void start() {
         if (_actor == null) {
-            _actor = _actorSystem.actorOf(createProps(), _actorName);
+            _actor = _actorSystem.actorOf(new RoundRobinPool(_poolSize).props(createProps()), _actorName);
         }
     }
 
@@ -110,12 +112,14 @@ public abstract class ActorSource extends BaseSource {
         super(builder);
         _actorName = builder._actorName;
         _actorSystem = builder._actorSystem;
+        _poolSize = builder._poolSize;
     }
 
     private ActorRef _actor = null;
 
     private final String _actorName;
     private final ActorSystem _actorSystem;
+    private final int _poolSize;
 
     private static final Duration SHUTDOWN_TIMEOUT = Duration.ofSeconds(1);
     private static final Logger LOGGER = LoggerFactory.getLogger(ActorSource.class);
@@ -159,9 +163,22 @@ public abstract class ActorSource extends BaseSource {
             return self();
         }
 
+        /**
+         * Sets the actor pool size.
+         * @param value Number of actors in the pool
+         * @return This instance of {@link Builder}
+         */
+        public final B setPoolSize(final Integer value) {
+            _poolSize = value;
+            return self();
+        }
+
         @NotNull
         @NotEmpty
         private String _actorName;
+        @NotNull
+        @Min(1)
+        private Integer _poolSize = 1;
         @JacksonInject
         private ActorSystem _actorSystem;
     }
