@@ -106,6 +106,8 @@ public class HttpPostSinkActor extends AbstractActor {
         _evictedRequestsName = "sinks/http_post/" + sink.getMetricSafeName() + "/evicted_requests";
         _requestLatencyName = "sinks/http_post/" + sink.getMetricSafeName() + "/request_latency";
         _inQueueLatencyName = "sinks/http_post/" + sink.getMetricSafeName() + "/queue_time";
+        _pendingRequestsQueueSizeName = "sinks/http_post/" + sink.getMetricSafeName() + "/queue_size";
+        _inflightRequestsCountName = "sinks/http_post/" + sink.getMetricSafeName() + "/inflight_count";
         _requestSuccessName = "sinks/http_post/" + sink.getMetricSafeName() + "/success";
         _responseStatusName = "sinks/http_post/" + sink.getMetricSafeName() + "/status";
         _samplesDroppedName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_dropped";
@@ -240,6 +242,7 @@ public class HttpPostSinkActor extends AbstractActor {
                 .addData("dataSize", periodicData.getData().size())
                 .addContext("actor", self())
                 .log();
+        _periodicMetrics.recordGauge(_inflightRequestsCountName, _inflightRequestsCount);
 
         if (!periodicData.getData().isEmpty()) {
             final Collection<RequestEntry.Builder> requestEntryBuilders = _sink.createRequests(_client, periodicData);
@@ -261,6 +264,8 @@ public class HttpPostSinkActor extends AbstractActor {
                         .addContext("actor", self())
                         .log();
             }
+
+            _periodicMetrics.recordGauge(_pendingRequestsQueueSizeName, _pendingRequests.size());
 
             if (_spreadingDelayMillis > 0) {
                 // If we don't currently have anything in-flight, we'll need to wait the spreading duration.
@@ -362,6 +367,8 @@ public class HttpPostSinkActor extends AbstractActor {
     private final String _evictedRequestsName;
     private final String _requestLatencyName;
     private final String _inQueueLatencyName;
+    private final String _pendingRequestsQueueSizeName;
+    private final String _inflightRequestsCountName;
     private final String _requestSuccessName;
     private final String _responseStatusName;
     private final String _samplesDroppedName;
