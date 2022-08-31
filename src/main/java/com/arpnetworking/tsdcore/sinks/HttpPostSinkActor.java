@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.tsdcore.sinks;
 
-import akka.actor.AbstractActor;
+import akka.actor.AbstractActorWithTimers;
 import akka.actor.Props;
 import akka.pattern.Patterns;
 import com.arpnetworking.logback.annotations.LogValue;
@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
-public class HttpPostSinkActor extends AbstractActor {
+public class HttpPostSinkActor extends AbstractActorWithTimers {
     /**
      * Factory method to create a Props.
      *
@@ -112,6 +112,7 @@ public class HttpPostSinkActor extends AbstractActor {
         _responseStatusName = "sinks/http_post/" + sink.getMetricSafeName() + "/status";
         _samplesDroppedName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_dropped";
         _samplesSentName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_sent";
+        timers().startTimerAtFixedRate("metrics", SampleMetrics.INSTANCE, Duration.ofSeconds(1), Duration.ofSeconds(1));
     }
 
     @Override
@@ -179,7 +180,17 @@ public class HttpPostSinkActor extends AbstractActor {
                 .match(PostRejected.class, this::processRejectedRequest)
                 .match(PostFailure.class, this::processFailedRequest)
                 .match(WaitTimeExpired.class, this::waitTimeExpired)
+                .match(SampleMetrics.class, this::sampleMetrics)
                 .build();
+    }
+
+    private void sampleMetrics(final SampleMetrics ignored) {
+        _periodicMetrics.recordGauge(_inflightRequestsCountName, _inflightRequestsCount);
+        _periodicMetrics.recordGauge(_pendingRequestsQueueSizeName, _pendingRequests.size());
+        _periodicMetrics.recordCounter(_samplesSentName, 0);
+        _periodicMetrics.recordCounter(_evictedRequestsName, 0);
+        _periodicMetrics.recordCounter(_requestSuccessName, 0);
+        _periodicMetrics.recordCounter(_samplesDroppedName, 0);
     }
 
     private void waitTimeExpired(final WaitTimeExpired ignored) {
@@ -488,5 +499,10 @@ public class HttpPostSinkActor extends AbstractActor {
         }
 
         private final CompletableFuture<Response> _promise;
+    }
+
+    private static final class SampleMetrics {
+        private SampleMetrics() { }
+        private static final SampleMetrics INSTANCE = new SampleMetrics();
     }
 }
