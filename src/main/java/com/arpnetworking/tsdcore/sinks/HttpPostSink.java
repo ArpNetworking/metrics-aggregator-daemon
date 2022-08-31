@@ -195,7 +195,8 @@ public abstract class HttpPostSink extends BaseSink {
 
     static {
         final DefaultAsyncHttpClientConfig.Builder clientConfigBuilder = new DefaultAsyncHttpClientConfig.Builder();
-        clientConfigBuilder.setThreadPoolName("HttpPostSinkWorker");
+        clientConfigBuilder.setThreadPoolName("HttpPostSinkWorker")
+                .setConnectionTtl(300000);
         final AsyncHttpClientConfig clientConfig = clientConfigBuilder.build();
         CLIENT = new DefaultAsyncHttpClient(clientConfig);
     }
