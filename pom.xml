@@ -100,7 +100,7 @@
     <oval.version>3.2.1</oval.version>
     <protobuf.version>3.21.5</protobuf.version>
     <scala.version>2.13</scala.version>
-    <scala.library.version>2.13.8</scala.library.version>
+    <scala.library.version>2.13.9</scala.library.version>
     <slf4j.version>1.7.36</slf4j.version>
     <snappy.version>1.1.8.4</snappy.version>
     <spotbugs.annotations.version>4.7.1</spotbugs.annotations.version>
