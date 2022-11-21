@@ -114,19 +114,7 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
     @Override
     public List<Record> parse(final HttpRequest data) throws ParsingException {
         final List<Record> records = Lists.newArrayList();
-        final byte[] uncompressed;
-        try {
-            final byte[] input = data.getBody().toArray();
-            if (_outputDebugInfo) {
-                final int outputFile = _outputFileNumber.incrementAndGet();
-                if (outputFile < 10) {
-                    Files.write(Paths.get("prometheus_debug_" + outputFile), input);
-                }
-            }
-            uncompressed = Snappy.uncompress(input);
-        } catch (final IOException e) {
-            throw new ParsingException("Failed to decompress snappy stream", data.getBody().toArray(), e);
-        }
+        final byte[] uncompressed = decompress(data);
         try {
             final Remote.WriteRequest writeRequest = Remote.WriteRequest.parseFrom(uncompressed);
             for (final TimeSeries timeSeries : writeRequest.getTimeseriesList()) {
@@ -177,6 +165,23 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
             throw new ParsingException("Could not build record", data.getBody().toArray(), e);
         }
         return records;
+    }
+
+    private byte[] decompress(HttpRequest data) throws ParsingException {
+        final byte[] uncompressed;
+        try {
+            final byte[] input = data.getBody().toArray();
+            if (_outputDebugInfo) {
+                final int outputFile = _outputFileNumber.incrementAndGet();
+                if (outputFile < 10) {
+                    Files.write(Paths.get("prometheus_debug_" + outputFile), input);
+                }
+            }
+            uncompressed = Snappy.uncompress(input);
+        } catch (final IOException e) {
+            throw new ParsingException("Failed to decompress snappy stream", data.getBody().toArray(), e);
+        }
+        return uncompressed;
     }
 
     private ImmutableMap<String, ? extends Metric> createMetric(final String name, final Types.Sample sample, final Optional<Unit> unit) {
