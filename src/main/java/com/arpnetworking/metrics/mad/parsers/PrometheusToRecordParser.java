@@ -130,15 +130,22 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
         try {
             final Remote.WriteRequest writeRequest = Remote.WriteRequest.parseFrom(uncompressed);
             for (final TimeSeries timeSeries : writeRequest.getTimeseriesList()) {
+                boolean skipSeries = false;
                 Optional<String> nameOpt = Optional.empty();
                 final ImmutableMap.Builder<String, String> dimensionsBuilder = ImmutableMap.builder();
                 for (final Types.Label label : timeSeries.getLabelsList()) {
                     if ("__name__".equals(label.getName())) {
                         final String value = label.getValue();
                         nameOpt = Optional.ofNullable(value);
+                    } else if ("le".equals(label.getName())) {
+                        skipSeries = true;
                     } else {
                         dimensionsBuilder.put(label.getName(), label.getValue());
                     }
+                }
+
+                if (skipSeries) {
+                    continue;
                 }
                 final ParseResult result = parseNameAndUnit(nameOpt.orElse("").trim());
                 final String metricName = result.getName();
