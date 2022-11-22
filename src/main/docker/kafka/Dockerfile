@@ -22,7 +22,9 @@ ENV KAFKA_VERSION 2.7.1
 ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
 
 # Install Kafka, Zookeeper and other needed things
-RUN apt-get -o Acquire::Check-Valid-Until=false update && \
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get clean && \
+    apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Check-Valid-Until=false install -y zookeeper wget supervisor dnsutils && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean && \
