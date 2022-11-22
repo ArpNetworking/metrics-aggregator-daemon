@@ -167,7 +167,7 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
         return records;
     }
 
-    private byte[] decompress(HttpRequest data) throws ParsingException {
+    private byte[] decompress(final HttpRequest data) throws ParsingException {
         final byte[] uncompressed;
         try {
             final byte[] input = data.getBody().toArray();
