@@ -30,7 +30,7 @@ ENV MAD_CONFIG="/opt/mad/config/config.conf"
 ENV JAVA_OPTS=""
 
 # Build
-RUN pt update && \
+RUN apt update && \
     apt install -y gosu openssl && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean && \
