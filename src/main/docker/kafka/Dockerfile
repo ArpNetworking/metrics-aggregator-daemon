@@ -15,7 +15,7 @@
 # Original: https://github.com/spotify/docker-kafka
 
 # Kafka and Zookeeper
-FROM openjdk:8-jre-buster
+FROM openjdk:17-slim-bullseye
 
 ENV SCALA_VERSION 2.13
 ENV KAFKA_VERSION 2.7.1

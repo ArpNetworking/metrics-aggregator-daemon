@@ -32,6 +32,8 @@ ENV JAVA_OPTS=""
 # Build
 RUN apt update && \
     apt install -y gosu openssl && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean && \
     mkdir -p /opt/mad/lib/ext && \
     mkdir -p /opt/mad/logs && \
     mkdir -p /opt/mad/config/pipelines && \

@@ -114,31 +114,26 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
     @Override
     public List<Record> parse(final HttpRequest data) throws ParsingException {
         final List<Record> records = Lists.newArrayList();
-        final byte[] uncompressed;
-        try {
-            final byte[] input = data.getBody().toArray();
-            if (_outputDebugInfo) {
-                final int outputFile = _outputFileNumber.incrementAndGet();
-                if (outputFile < 10) {
-                    Files.write(Paths.get("prometheus_debug_" + outputFile), input);
-                }
-            }
-            uncompressed = Snappy.uncompress(input);
-        } catch (final IOException e) {
-            throw new ParsingException("Failed to decompress snappy stream", data.getBody().toArray(), e);
-        }
+        final byte[] uncompressed = decompress(data);
         try {
             final Remote.WriteRequest writeRequest = Remote.WriteRequest.parseFrom(uncompressed);
             for (final TimeSeries timeSeries : writeRequest.getTimeseriesList()) {
+                boolean skipSeries = false;
                 Optional<String> nameOpt = Optional.empty();
                 final ImmutableMap.Builder<String, String> dimensionsBuilder = ImmutableMap.builder();
                 for (final Types.Label label : timeSeries.getLabelsList()) {
                     if ("__name__".equals(label.getName())) {
                         final String value = label.getValue();
                         nameOpt = Optional.ofNullable(value);
+                    } else if ("le".equals(label.getName())) {
+                        skipSeries = true;
                     } else {
                         dimensionsBuilder.put(label.getName(), label.getValue());
                     }
+                }
+
+                if (skipSeries) {
+                    continue;
                 }
                 final ParseResult result = parseNameAndUnit(nameOpt.orElse("").trim());
                 final String metricName = result.getName();
@@ -170,6 +165,23 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
             throw new ParsingException("Could not build record", data.getBody().toArray(), e);
         }
         return records;
+    }
+
+    private byte[] decompress(final HttpRequest data) throws ParsingException {
+        final byte[] uncompressed;
+        try {
+            final byte[] input = data.getBody().toArray();
+            if (_outputDebugInfo) {
+                final int outputFile = _outputFileNumber.incrementAndGet();
+                if (outputFile < 10) {
+                    Files.write(Paths.get("prometheus_debug_" + outputFile), input);
+                }
+            }
+            uncompressed = Snappy.uncompress(input);
+        } catch (final IOException e) {
+            throw new ParsingException("Failed to decompress snappy stream", data.getBody().toArray(), e);
+        }
+        return uncompressed;
     }
 
     private ImmutableMap<String, ? extends Metric> createMetric(final String name, final Types.Sample sample, final Optional<Unit> unit) {
