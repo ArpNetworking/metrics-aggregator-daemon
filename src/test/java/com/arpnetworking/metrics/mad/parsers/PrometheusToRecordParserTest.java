@@ -132,7 +132,7 @@ public final class PrometheusToRecordParserTest {
     }
     private void testUnitParserNoUnitHelper(final String name) {
         final PrometheusToRecordParser.ParseResult expectedResult
-                = new PrometheusToRecordParser.ParseResult(name, Optional.empty());
+                = new PrometheusToRecordParser.ParseResult(name, Optional.empty(), Optional.empty());
         Assert.assertEquals(expectedResult, createParser().parseNameAndUnit(name));
     }
 
@@ -181,7 +181,7 @@ public final class PrometheusToRecordParserTest {
                 .filter(x -> !prometheusUnit.equals(x))
                 .collect(Collectors.joining("_"));
         final PrometheusToRecordParser.ParseResult expectedResult
-                = new PrometheusToRecordParser.ParseResult(newName, Optional.of(expectedUnit));
+                = new PrometheusToRecordParser.ParseResult(newName, Optional.empty(), Optional.of(expectedUnit));
         Assert.assertEquals(expectedResult, parser.parseNameAndUnit(fullName));
     }
 
