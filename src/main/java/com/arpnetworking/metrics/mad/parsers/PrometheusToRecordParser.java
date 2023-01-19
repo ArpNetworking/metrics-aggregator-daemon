@@ -142,6 +142,9 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
                 }
                 final ImmutableMap<String, String> immutableDimensions = dimensionsBuilder.build();
                 for (final Types.Sample sample : timeSeries.getSamplesList()) {
+                    if (!Double.isFinite(sample.getValue())) {
+                        continue;
+                    }
                     final Record record = ThreadLocalBuilder.build(
                             DefaultRecord.Builder.class,
                             b -> b.setId(UUID.randomUUID().toString())
