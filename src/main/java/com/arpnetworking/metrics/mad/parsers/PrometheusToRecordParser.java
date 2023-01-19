@@ -79,22 +79,24 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
      */
     ParseResult parseNameAndUnit(final String name) {
         if (!_interpretUnits) {
-            return new ParseResult(name, Optional.empty());
+            return new ParseResult(name, Optional.empty(), Optional.empty());
         }
         final StringBuilder builder = new StringBuilder();
+        Optional<String> aggregationKey = Optional.empty();
         for (int i = name.length() - 1; i >= 0; i--) {
             final char ch = name.charAt(i);
             if (ch == '_') {
                 final String key = builder.toString();
                 if (PROMETHEUS_AGGREGATION_KEYS.contains(key)) {
+                    aggregationKey = Optional.of(builder.toString());
                     builder.setLength(0); //reset builder
                 } else {
                     final Unit value = UNIT_MAP.get(key);
                     if (value != null) {
                         final String newName = name.substring(0, i).concat(name.substring(i + 1 + key.length()));
-                        return new ParseResult(newName, Optional.of(value));
+                        return new ParseResult(newName, aggregationKey, Optional.of(value));
                     } else {
-                        return new ParseResult(name, Optional.empty());
+                        return new ParseResult(name, aggregationKey, Optional.empty());
                     }
                 }
             } else {
@@ -105,9 +107,9 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
         final Unit value = UNIT_MAP.get(possibleUnit);
         if (value != null) {
             final String newName = name.substring(Math.min(possibleUnit.length() + 1, name.length()));
-            return new ParseResult(newName, Optional.of(value));
+            return new ParseResult(newName, aggregationKey, Optional.of(value));
         } else {
-            return new ParseResult(name, Optional.empty());
+            return new ParseResult(name, aggregationKey, Optional.empty());
         }
     }
 
@@ -131,11 +133,14 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
                         dimensionsBuilder.put(label.getName(), label.getValue());
                     }
                 }
-
                 if (skipSeries) {
                     continue;
                 }
                 final ParseResult result = parseNameAndUnit(nameOpt.orElse("").trim());
+                // We don't currently support aggregate metrics from prometheus
+                if (result.getAggregationKey().isPresent()) {
+                    continue;
+                }
                 final String metricName = result.getName();
                 if (metricName.isEmpty()) {
                     throw new ParsingException("Found a metric with an empty name", data.getBody().toArray());
@@ -240,6 +245,7 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
             }
             final ParseResult that = (ParseResult) o;
             return _unit.equals(that._unit)
+                    && _aggregationKey.equals(that._aggregationKey)
                     && _name.equals(that._name);
         }
 
@@ -248,12 +254,13 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
             return MoreObjects.toStringHelper(this)
                     .add("unit", _unit)
                     .add("name", _name)
+                    .add("aggregationKey", _aggregationKey)
                     .toString();
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(_unit, _name);
+            return Objects.hash(_unit, _name, _aggregationKey);
         }
 
         public Optional<Unit> getUnit() {
@@ -264,12 +271,18 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
             return _name;
         }
 
-        ParseResult(final String name, final Optional<Unit> unit) {
+        public Optional<String> getAggregationKey() {
+            return _aggregationKey;
+        }
+
+        ParseResult(final String name, final Optional<String> aggregationKey, final Optional<Unit> unit) {
             _unit = unit;
             _name = name;
+            _aggregationKey = aggregationKey;
         }
 
         private final String _name;
+        private final Optional<String> _aggregationKey;
         private final Optional<Unit> _unit;
     }
 }
