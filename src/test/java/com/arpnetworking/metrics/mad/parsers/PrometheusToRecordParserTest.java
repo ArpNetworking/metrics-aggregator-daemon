@@ -18,12 +18,8 @@ package com.arpnetworking.metrics.mad.parsers;
 import akka.util.ByteString;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
-import com.arpnetworking.metrics.mad.model.HttpRequest;
-import com.arpnetworking.metrics.mad.model.Metric;
-import com.arpnetworking.metrics.mad.model.MetricType;
-import com.arpnetworking.metrics.mad.model.Quantity;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.arpnetworking.metrics.mad.model.Unit;
+import com.arpnetworking.metrics.mad.model.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.io.Resources;
@@ -36,10 +32,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Tests for the prometheus parser.
@@ -187,7 +181,8 @@ public final class PrometheusToRecordParserTest {
             @Nullable  final String expectedAggregation) {
         final PrometheusToRecordParser parser = createParser();
         final PrometheusToRecordParser.ParseResult expectedResult
-                = new PrometheusToRecordParser.ParseResult(fullName, Optional.ofNullable(expectedAggregation), Optional.ofNullable(expectedUnit));
+                = new PrometheusToRecordParser.ParseResult(
+                        fullName, Optional.ofNullable(expectedAggregation), Optional.ofNullable(expectedUnit));
         Assert.assertEquals(expectedResult, parser.parseNameAndUnit(fullName));
     }
 
