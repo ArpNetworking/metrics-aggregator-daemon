@@ -61,8 +61,8 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
     /**
      * public constructor.
      *
-     * @param interpretUnits specifies whether or not to interpret units.
-     * @param outputDebugInfo specifies whether or not to output debug files.
+     * @param interpretUnits specifies whether to interpret units.
+     * @param outputDebugInfo specifies whether to output debug files.
      */
     public PrometheusToRecordParser(final boolean interpretUnits, final boolean outputDebugInfo) {
         _interpretUnits = interpretUnits;
@@ -78,37 +78,29 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
      * For more information see: https://prometheus.io/docs/practices/naming/
      */
     ParseResult parseNameAndUnit(final String name) {
-        if (!_interpretUnits) {
-            return new ParseResult(name, Optional.empty());
-        }
-        final StringBuilder builder = new StringBuilder();
-        for (int i = name.length() - 1; i >= 0; i--) {
-            final char ch = name.charAt(i);
-            if (ch == '_') {
-                final String key = builder.toString();
-                if (PROMETHEUS_AGGREGATION_KEYS.contains(key)) {
-                    builder.setLength(0); //reset builder
-                } else {
-                    final Unit value = UNIT_MAP.get(key);
-                    if (value != null) {
-                        final String newName = name.substring(0, i).concat(name.substring(i + 1 + key.length()));
-                        return new ParseResult(newName, Optional.of(value));
-                    } else {
-                        return new ParseResult(name, Optional.empty());
-                    }
-                }
-            } else {
-                builder.append(ch);
+        Optional<String> aggregationKey = Optional.empty();
+        final int lastUnderscore = name.lastIndexOf('_');
+        if (lastUnderscore >= 0) {
+            final String lastSuffix = name.substring(lastUnderscore + 1);
+            if (PROMETHEUS_AGGREGATION_KEYS.contains(lastSuffix)) {
+                aggregationKey = Optional.of(lastSuffix);
             }
         }
-        final String possibleUnit = builder.toString();
-        final Unit value = UNIT_MAP.get(possibleUnit);
-        if (value != null) {
-            final String newName = name.substring(Math.min(possibleUnit.length() + 1, name.length()));
-            return new ParseResult(newName, Optional.of(value));
-        } else {
-            return new ParseResult(name, Optional.empty());
+        if (!_interpretUnits) {
+            return new ParseResult(name, aggregationKey, Optional.empty());
         }
+
+        final int unitIndexEnd = aggregationKey.isPresent() ? lastUnderscore - 1 : name.length() - 1;
+        final int prevUnderscore = name.lastIndexOf('_', unitIndexEnd);
+        final int unitStart;
+        if (prevUnderscore >= 0) {
+            unitStart = prevUnderscore + 1;
+        } else {
+            unitStart = 0;
+        }
+        final String unitString = name.substring(unitStart, unitIndexEnd + 1);
+        final Optional<Unit> unit = Optional.ofNullable(UNIT_MAP.get(unitString));
+        return new ParseResult(name, aggregationKey, unit);
     }
 
     @Override
@@ -131,17 +123,23 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
                         dimensionsBuilder.put(label.getName(), label.getValue());
                     }
                 }
-
                 if (skipSeries) {
                     continue;
                 }
                 final ParseResult result = parseNameAndUnit(nameOpt.orElse("").trim());
+                // We don't currently support aggregate metrics from prometheus
+                if (result.getAggregationKey().isPresent()) {
+                    continue;
+                }
                 final String metricName = result.getName();
                 if (metricName.isEmpty()) {
                     throw new ParsingException("Found a metric with an empty name", data.getBody().toArray());
                 }
                 final ImmutableMap<String, String> immutableDimensions = dimensionsBuilder.build();
                 for (final Types.Sample sample : timeSeries.getSamplesList()) {
+                    if (!Double.isFinite(sample.getValue())) {
+                        continue;
+                    }
                     final Record record = ThreadLocalBuilder.build(
                             DefaultRecord.Builder.class,
                             b -> b.setId(UUID.randomUUID().toString())
@@ -203,26 +201,22 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
         );
     }
 
-    private static String createUnitMapKey(final String name) {
-        return new StringBuilder(name).reverse().toString();
-    }
-
     private final boolean _interpretUnits;
     private final AtomicInteger _outputFileNumber = new AtomicInteger(0);
     private final boolean _outputDebugInfo;
 
     private static final ImmutableMap<String, Unit> UNIT_MAP = ImmutableMap.of(
-            createUnitMapKey("seconds"), Unit.SECOND,
-            createUnitMapKey("celcius"), Unit.CELCIUS,
-            createUnitMapKey("bytes"), Unit.BYTE,
-            createUnitMapKey("bits"), Unit.BIT
+            "seconds", Unit.SECOND,
+            "celcius", Unit.CELCIUS,
+            "bytes", Unit.BYTE,
+            "bits", Unit.BIT
     );
     private static final ImmutableSet<String> PROMETHEUS_AGGREGATION_KEYS = ImmutableSet.of(
-            createUnitMapKey("total"),
-            createUnitMapKey("bucket"),
-            createUnitMapKey("sum"),
-            createUnitMapKey("avg"),
-            createUnitMapKey("count")
+            "total",
+            "bucket",
+            "sum",
+            "avg",
+            "count"
     );
 
     static final class ParseResult {
@@ -237,6 +231,7 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
             }
             final ParseResult that = (ParseResult) o;
             return _unit.equals(that._unit)
+                    && _aggregationKey.equals(that._aggregationKey)
                     && _name.equals(that._name);
         }
 
@@ -245,12 +240,13 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
             return MoreObjects.toStringHelper(this)
                     .add("unit", _unit)
                     .add("name", _name)
+                    .add("aggregationKey", _aggregationKey)
                     .toString();
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(_unit, _name);
+            return Objects.hash(_unit, _name, _aggregationKey);
         }
 
         public Optional<Unit> getUnit() {
@@ -261,12 +257,18 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
             return _name;
         }
 
-        ParseResult(final String name, final Optional<Unit> unit) {
+        public Optional<String> getAggregationKey() {
+            return _aggregationKey;
+        }
+
+        ParseResult(final String name, final Optional<String> aggregationKey, final Optional<Unit> unit) {
             _unit = unit;
             _name = name;
+            _aggregationKey = aggregationKey;
         }
 
         private final String _name;
+        private final Optional<String> _aggregationKey;
         private final Optional<Unit> _unit;
     }
 }
