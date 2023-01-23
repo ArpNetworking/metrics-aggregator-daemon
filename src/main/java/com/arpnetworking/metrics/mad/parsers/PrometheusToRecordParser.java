@@ -61,8 +61,8 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
     /**
      * public constructor.
      *
-     * @param interpretUnits specifies whether or not to interpret units.
-     * @param outputDebugInfo specifies whether or not to output debug files.
+     * @param interpretUnits specifies whether to interpret units.
+     * @param outputDebugInfo specifies whether to output debug files.
      */
     public PrometheusToRecordParser(final boolean interpretUnits, final boolean outputDebugInfo) {
         _interpretUnits = interpretUnits;
@@ -78,39 +78,30 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
      * For more information see: https://prometheus.io/docs/practices/naming/
      */
     ParseResult parseNameAndUnit(final String name) {
-        if (!_interpretUnits) {
-            return new ParseResult(name, Optional.empty(), Optional.empty());
-        }
         final StringBuilder builder = new StringBuilder();
         Optional<String> aggregationKey = Optional.empty();
-        for (int i = name.length() - 1; i >= 0; i--) {
-            final char ch = name.charAt(i);
-            if (ch == '_') {
-                final String key = builder.toString();
-                if (PROMETHEUS_AGGREGATION_KEYS.contains(key)) {
-                    aggregationKey = Optional.of(builder.toString());
-                    builder.setLength(0); //reset builder
-                } else {
-                    final Unit value = UNIT_MAP.get(key);
-                    if (value != null) {
-                        final String newName = name.substring(0, i).concat(name.substring(i + 1 + key.length()));
-                        return new ParseResult(newName, aggregationKey, Optional.of(value));
-                    } else {
-                        return new ParseResult(name, aggregationKey, Optional.empty());
-                    }
-                }
-            } else {
-                builder.append(ch);
+        final int lastUnderscore = name.lastIndexOf('_');
+        if (lastUnderscore >= 0) {
+            final String lastSuffix = name.substring(lastUnderscore + 1);
+            if (PROMETHEUS_AGGREGATION_KEYS.contains(lastSuffix)) {
+                aggregationKey = Optional.of(lastSuffix);
             }
         }
-        final String possibleUnit = builder.toString();
-        final Unit value = UNIT_MAP.get(possibleUnit);
-        if (value != null) {
-            final String newName = name.substring(Math.min(possibleUnit.length() + 1, name.length()));
-            return new ParseResult(newName, aggregationKey, Optional.of(value));
-        } else {
+        if (!_interpretUnits) {
             return new ParseResult(name, aggregationKey, Optional.empty());
         }
+
+        final int unitIndexEnd = aggregationKey.isPresent() ? lastUnderscore - 1 : name.length() - 1;
+        final int prevUnderscore = name.lastIndexOf('_', unitIndexEnd);
+        final int unitStart;
+        if (prevUnderscore >= 0) {
+            unitStart = prevUnderscore + 1;
+        } else {
+            unitStart = 0;
+        }
+        final String unitString = name.substring(unitStart, unitIndexEnd + 1);
+        final Optional<Unit> unit = Optional.ofNullable(UNIT_MAP.get(unitString));
+        return new ParseResult(name, aggregationKey, unit);
     }
 
     @Override
@@ -220,17 +211,17 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
     private final boolean _outputDebugInfo;
 
     private static final ImmutableMap<String, Unit> UNIT_MAP = ImmutableMap.of(
-            createUnitMapKey("seconds"), Unit.SECOND,
-            createUnitMapKey("celcius"), Unit.CELCIUS,
-            createUnitMapKey("bytes"), Unit.BYTE,
-            createUnitMapKey("bits"), Unit.BIT
+            "seconds", Unit.SECOND,
+            "celcius", Unit.CELCIUS,
+            "bytes", Unit.BYTE,
+            "bits", Unit.BIT
     );
     private static final ImmutableSet<String> PROMETHEUS_AGGREGATION_KEYS = ImmutableSet.of(
-            createUnitMapKey("total"),
-            createUnitMapKey("bucket"),
-            createUnitMapKey("sum"),
-            createUnitMapKey("avg"),
-            createUnitMapKey("count")
+            "total",
+            "bucket",
+            "sum",
+            "avg",
+            "count"
     );
 
     static final class ParseResult {
