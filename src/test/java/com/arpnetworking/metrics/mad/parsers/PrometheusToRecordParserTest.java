@@ -31,13 +31,13 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Tests for the prometheus parser.
