@@ -78,7 +78,6 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
      * For more information see: https://prometheus.io/docs/practices/naming/
      */
     ParseResult parseNameAndUnit(final String name) {
-        final StringBuilder builder = new StringBuilder();
         Optional<String> aggregationKey = Optional.empty();
         final int lastUnderscore = name.lastIndexOf('_');
         if (lastUnderscore >= 0) {
@@ -200,10 +199,6 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
                         .setValue(sample.getValue())
                         .setUnit(unit.orElse(null))
         );
-    }
-
-    private static String createUnitMapKey(final String name) {
-        return new StringBuilder(name).reverse().toString();
     }
 
     private final boolean _interpretUnits;
