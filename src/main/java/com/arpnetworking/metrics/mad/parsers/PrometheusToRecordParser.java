@@ -45,10 +45,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -63,10 +60,12 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
      *
      * @param interpretUnits specifies whether to interpret units.
      * @param outputDebugInfo specifies whether to output debug files.
+     * @param reservedNameWhitelist specifies the whitelist set for reserved names (names with aggregation keys).
      */
-    public PrometheusToRecordParser(final boolean interpretUnits, final boolean outputDebugInfo) {
+    public PrometheusToRecordParser(final boolean interpretUnits, final boolean outputDebugInfo, final HashSet<String> reservedNameWhitelist) {
         _interpretUnits = interpretUnits;
         _outputDebugInfo = outputDebugInfo;
+        _reservedNameWhitelist = reservedNameWhitelist;
     }
 
     /*
@@ -128,7 +127,7 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
                 }
                 final ParseResult result = parseNameAndUnit(nameOpt.orElse("").trim());
                 // We don't currently support aggregate metrics from prometheus
-                if (result.getAggregationKey().isPresent()) {
+                if (result.getAggregationKey().isPresent() && !_reservedNameWhitelist.contains(result.getName())) {
                     continue;
                 }
                 final String metricName = result.getName();
@@ -204,6 +203,7 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
     private final boolean _interpretUnits;
     private final AtomicInteger _outputFileNumber = new AtomicInteger(0);
     private final boolean _outputDebugInfo;
+    private final HashSet<String> _reservedNameWhitelist;
 
     private static final ImmutableMap<String, Unit> UNIT_MAP = ImmutableMap.of(
             "seconds", Unit.SECOND,

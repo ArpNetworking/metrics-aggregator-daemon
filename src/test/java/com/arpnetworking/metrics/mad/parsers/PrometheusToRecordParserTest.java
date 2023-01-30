@@ -26,6 +26,7 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.model.Unit;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -35,6 +36,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -166,6 +168,15 @@ public final class PrometheusToRecordParserTest {
         Assert.assertEquals(294, records.size());
     }
 
+    @Test
+    public void testLive1Whitelist() throws ParsingException, IOException {
+        HashSet<String> whitelist = Sets.newHashSet("container_network_transmit_packets_total");
+        PrometheusToRecordParser parser = new PrometheusToRecordParser(true, false, whitelist);
+        final List<Record> records = parseRecords("PrometheusParserTest/testLivePrometheus1", parser);
+
+        Assert.assertEquals(500, records.size());
+    }
+
     private static void testUnitParsing(final String prometheusUnit, final Unit expected) {
         assertUnitNewName(prometheusUnit, expected, null);
         assertUnitNewName("foo_" + prometheusUnit, expected, null);
@@ -204,9 +215,9 @@ public final class PrometheusToRecordParserTest {
     }
 
     private static PrometheusToRecordParser createParser() {
-        return new PrometheusToRecordParser(true, false);
+        return new PrometheusToRecordParser(true, false, new HashSet<>());
     }
     private static PrometheusToRecordParser createParserWithoutInterpreter() {
-        return new PrometheusToRecordParser(false, false);
+        return new PrometheusToRecordParser(false, false, new HashSet<>());
     }
 }
