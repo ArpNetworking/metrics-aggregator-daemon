@@ -16,6 +16,7 @@
 package com.arpnetworking.metrics.common.sources;
 
 import com.arpnetworking.metrics.mad.parsers.PrometheusToRecordParser;
+import net.sf.oval.constraint.NotNull;
 
 /**
  * Processes Prometheus messages, extracts data and emits metrics.
@@ -42,7 +43,6 @@ public final class PrometheusHttpSource extends HttpSource{
         public Builder() {
             super(PrometheusHttpSource::new);
             setActorName(ACTOR_NAME);
-            setParser(new PrometheusToRecordParser(_interpretUnits, _outputDebugFiles));
         }
 
         /**
@@ -72,8 +72,17 @@ public final class PrometheusHttpSource extends HttpSource{
             return this;
         }
 
+        @NotNull
         private Boolean _interpretUnits = false;
+
+        @NotNull
         private Boolean _outputDebugFiles = false;
+
+        @Override
+        public PrometheusHttpSource build() {
+            setParser(new PrometheusToRecordParser(_interpretUnits, _outputDebugFiles));
+            return super.build();
+        }
     }
 
 }
