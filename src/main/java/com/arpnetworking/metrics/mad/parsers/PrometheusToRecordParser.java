@@ -45,7 +45,11 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -62,7 +66,10 @@ public final class PrometheusToRecordParser implements Parser<List<Record>, Http
      * @param outputDebugInfo specifies whether to output debug files.
      * @param reservedNameWhitelist specifies the whitelist set for reserved names (names with aggregation keys).
      */
-    public PrometheusToRecordParser(final boolean interpretUnits, final boolean outputDebugInfo, final HashSet<String> reservedNameWhitelist) {
+    public PrometheusToRecordParser(
+            final boolean interpretUnits,
+            final boolean outputDebugInfo,
+            final HashSet<String> reservedNameWhitelist) {
         _interpretUnits = interpretUnits;
         _outputDebugInfo = outputDebugInfo;
         _reservedNameWhitelist = reservedNameWhitelist;

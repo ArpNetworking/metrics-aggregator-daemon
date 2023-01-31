@@ -170,8 +170,8 @@ public final class PrometheusToRecordParserTest {
 
     @Test
     public void testLive1Whitelist() throws ParsingException, IOException {
-        HashSet<String> whitelist = Sets.newHashSet("container_network_transmit_packets_total");
-        PrometheusToRecordParser parser = new PrometheusToRecordParser(true, false, whitelist);
+        final HashSet<String> whitelist = Sets.newHashSet("container_network_transmit_packets_total");
+        final PrometheusToRecordParser parser = new PrometheusToRecordParser(true, false, whitelist);
         final List<Record> records = parseRecords("PrometheusParserTest/testLivePrometheus1", parser);
 
         Assert.assertEquals(500, records.size());
@@ -215,9 +215,9 @@ public final class PrometheusToRecordParserTest {
     }
 
     private static PrometheusToRecordParser createParser() {
-        return new PrometheusToRecordParser(true, false, new HashSet<>());
+        return new PrometheusToRecordParser(true, false, Sets.newHashSet());
     }
     private static PrometheusToRecordParser createParserWithoutInterpreter() {
-        return new PrometheusToRecordParser(false, false, new HashSet<>());
+        return new PrometheusToRecordParser(false, false, Sets.newHashSet());
     }
 }
