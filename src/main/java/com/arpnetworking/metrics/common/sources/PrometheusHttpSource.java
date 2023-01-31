@@ -16,7 +16,10 @@
 package com.arpnetworking.metrics.common.sources;
 
 import com.arpnetworking.metrics.mad.parsers.PrometheusToRecordParser;
+import com.google.common.collect.Sets;
 import net.sf.oval.constraint.NotNull;
+
+import java.util.HashSet;
 
 /**
  * Processes Prometheus messages, extracts data and emits metrics.
@@ -67,6 +70,18 @@ public final class PrometheusHttpSource extends HttpSource{
             return this;
         }
 
+        /**
+         * Whitelist for reserved metrics names (names with aggregation keys). By default, we ignore metrics with
+         * aggregation keys unless specified here. Cannot be null.
+         *
+         * @param value the value
+         * @return this {@link Builder}
+         */
+        public Builder setReservedNameWhitelist(final HashSet<String> value) {
+            _reservedNameWhitelist = value;
+            return this;
+        }
+
         @Override
         protected Builder self() {
             return this;
@@ -78,9 +93,12 @@ public final class PrometheusHttpSource extends HttpSource{
         @NotNull
         private Boolean _outputDebugFiles = false;
 
+        @NotNull
+        private HashSet<String> _reservedNameWhitelist = Sets.newHashSet();
+
         @Override
         public PrometheusHttpSource build() {
-            setParser(new PrometheusToRecordParser(_interpretUnits, _outputDebugFiles));
+            setParser(new PrometheusToRecordParser(_interpretUnits, _outputDebugFiles, _reservedNameWhitelist));
             return super.build();
         }
     }
