@@ -53,6 +53,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -80,6 +81,7 @@ public class KafkaSourceIT {
     private static final Duration POLL_DURATION = Duration.ofSeconds(1);
     private static final int TIMEOUT = 10000;
     private static final int NUM_RECORDS = 500;
+    private static final AtomicInteger RECORD_ID = new AtomicInteger(0);
 
     private Map<String, Object> _consumerProps;
     private KafkaConsumer<Integer, String> _consumer;
@@ -268,7 +270,8 @@ public class KafkaSourceIT {
     private static List<ProducerRecord<Integer, String>> createProducerRecords(final String topic, final int num) {
         final List<ProducerRecord<Integer, String>> records = new ArrayList<>();
         for (int i = 0; i < num; i++) {
-            records.add(new ProducerRecord<>(topic, i, "value" + i));
+            final int id = RECORD_ID.getAndIncrement();
+            records.add(new ProducerRecord<>(topic, id, "value" + id));
         }
         return records;
     }
