@@ -75,7 +75,7 @@
     <akka.http.version>10.2.9</akka.http.version>
     <apache.httpclient.version>4.5.13</apache.httpclient.version>
     <apache.httpcore.version>4.4.16</apache.httpcore.version>
-    <arpnetworking.commons.version>2.0.6</arpnetworking.commons.version>
+    <arpnetworking.commons.version>3.0.0</arpnetworking.commons.version>
     <aspectjrt.version>1.9.9.1</aspectjrt.version>
     <asynchttpclient.version>2.12.3</asynchttpclient.version>
     <bouncy.castle.version>1.70</bouncy.castle.version>
@@ -89,7 +89,7 @@
     <jsr305.version>3.0.2</jsr305.version>
     <kafka.client.version>3.2.1</kafka.client.version>
     <logback.version>1.4.5</logback.version>
-    <logback.steno.version>1.19.0</logback.steno.version>
+    <logback.steno.version>2.1.0</logback.steno.version>
     <log4j.over.slf4j.version>1.7.36</log4j.over.slf4j.version>
     <metrics.aggregator.protocol.prometheus.version>1.0.1</metrics.aggregator.protocol.prometheus.version>
     <metrics.aggregator.protocol.version>1.0.10</metrics.aggregator.protocol.version>
@@ -101,7 +101,7 @@
     <protobuf.version>3.21.12</protobuf.version>
     <scala.version>2.13</scala.version>
     <scala.library.version>2.13.10</scala.library.version>
-    <slf4j.version>1.7.36</slf4j.version>
+    <slf4j.version>2.0.7</slf4j.version>
     <snappy.version>1.1.9.1</snappy.version>
     <spotbugs.annotations.version>4.7.1</spotbugs.annotations.version>
     <typesafe.config.version>1.4.2</typesafe.config.version>

@@ -25,7 +25,7 @@ ENV MAD_UID=1000
 ENV MAD_GID=1000
 ENV JVM_XMS="64m"
 ENV JVM_XMX="1024m"
-ENV LOGBACK_CONFIG="-Dlogback.configurationFile=/opt/mad/config/logback.xml"
+ENV LOGBACK_CONFIG="-Dlogback.configurationFile=/opt/mad/config/logback-console.xml"
 ENV MAD_CONFIG="/opt/mad/config/config.conf"
 ENV JAVA_OPTS=""
 
