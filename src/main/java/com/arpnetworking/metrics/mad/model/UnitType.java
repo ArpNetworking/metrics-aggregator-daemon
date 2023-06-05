@@ -21,19 +21,28 @@ package com.arpnetworking.metrics.mad.model;
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
-/* package private */ enum UnitType {
+public enum UnitType {
+    /**
+     * Used in describing time durations.
+     */
     TIME {
         @Override
         public Unit getDefaultUnit() {
             return Unit.SECOND;
         }
     },
+    /**
+     * Used in describing data sizes.
+     */
     DATA_SIZE {
         @Override
         public Unit getDefaultUnit() {
             return Unit.BYTE;
         }
     },
+    /**
+     * Used in describing measurements of temperature.
+     */
     TEMPERATURE {
         @Override
         public Unit getDefaultUnit() {
@@ -41,5 +50,10 @@ package com.arpnetworking.metrics.mad.model;
         }
     };
 
+    /**
+     * Get the default unit for this unit type. Used in normalizing values.
+     *
+     * @return The default unit for a given domain.
+     */
     public abstract Unit getDefaultUnit();
 }
