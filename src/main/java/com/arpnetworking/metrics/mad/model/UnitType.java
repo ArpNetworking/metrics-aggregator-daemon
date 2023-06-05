@@ -21,7 +21,7 @@ package com.arpnetworking.metrics.mad.model;
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
-/* package private */ enum UnitType {
+public enum UnitType {
     TIME {
         @Override
         public Unit getDefaultUnit() {
