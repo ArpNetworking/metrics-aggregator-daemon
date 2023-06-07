@@ -19,7 +19,7 @@ import akka.util.ByteString;
 import akka.util.ByteStringBuilder;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.google.protobuf.GeneratedMessageV3;
-import org.vertx.java.core.buffer.Buffer;
+import io.vertx.core.buffer.Buffer;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
@@ -47,7 +47,7 @@ public final class AggregationMessage {
      * @return ${code Buffer} containing serialized message.
      */
     public Buffer serializeToBuffer() {
-        final Buffer b = new Buffer();
+        final Buffer b = Buffer.buffer();
         b.appendInt(0);
         if (_message instanceof Messages.HostIdentification) {
             b.appendByte((byte) 0x01);
