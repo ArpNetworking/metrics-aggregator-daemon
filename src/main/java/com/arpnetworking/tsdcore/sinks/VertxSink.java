@@ -22,21 +22,18 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.utility.DefaultHostNameResolver;
 import com.arpnetworking.utility.HostNameResolver;
 import com.google.common.collect.EvictingQueue;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.net.NetClient;
+import io.vertx.core.net.NetClientOptions;
+import io.vertx.core.net.NetSocket;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.AsyncResultHandler;
-import org.vertx.java.core.Context;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.VertxFactory;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.impl.DefaultContext;
-import org.vertx.java.core.impl.DefaultVertx;
-import org.vertx.java.core.net.NetClient;
-import org.vertx.java.core.net.NetSocket;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -342,26 +339,15 @@ public abstract class VertxSink extends BaseSink {
         _serverAddress = builder._serverAddress;
         _hostnameResolver = builder._hostnameResolver;
         _serverPort = builder._serverPort;
-        _vertx = VertxFactory.newVertx();
-        //Calling this just so the context gets created
-        if (_vertx instanceof DefaultVertx) {
-            final DefaultVertx vertx = (DefaultVertx) _vertx;
-            final DefaultContext context = vertx.getOrCreateContext();
-            vertx.setContext(context);
-            _context = context;
-        } else {
-            _context = null;
-            LOGGER.warn()
-                    .setMessage("Vertx instance not a DefaultVertx as expected. Threading may be incorrect.")
-                    .addData("sink", getName())
-                    .log();
-        }
+        _vertx = Vertx.vertx();
+        _context = _vertx.getOrCreateContext();
 
-        _client = _vertx.createNetClient()
-                .setReconnectAttempts(0)
-                .setConnectTimeout(5000)
-                .setTCPNoDelay(true)
-                .setTCPKeepAlive(true);
+        _client = _vertx.createNetClient(
+                new NetClientOptions()
+                        .setReconnectAttempts(0)
+                        .setConnectTimeout(5000)
+                        .setTcpNoDelay(true)
+                        .setTcpKeepAlive(true));
         _socket = new AtomicReference<>();
         _pendingData = EvictingQueue.create(builder._maxQueueSize);
         _exponentialBackoffBase = builder._exponentialBackoffBase;
@@ -390,7 +376,7 @@ public abstract class VertxSink extends BaseSink {
     private static final long MAX_FLUSH_BYTES = 2 ^ 20; // 1 Mebibyte
     private static final int NO_DATA_CONSUME_LOOP_INTERVAL = 100;
 
-    private class ConnectionHandler implements AsyncResultHandler<NetSocket> {
+    private class ConnectionHandler implements Handler<AsyncResult<NetSocket>> {
 
         @Override
         public void handle(final AsyncResult<NetSocket> event) {
