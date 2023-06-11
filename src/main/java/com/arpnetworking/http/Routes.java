@@ -107,15 +107,17 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     public CompletionStage<HttpResponse> apply(final HttpRequest request) {
         final Stopwatch requestTimer = Stopwatch.createStarted();
         final UUID requestId = UUID.randomUUID();
+        final CountingEntityWrapper entityWrapper = new CountingEntityWrapper((akka.http.scaladsl.model.RequestEntity) request.entity());
+        final HttpRequest wrappedRequest = request.withEntity(entityWrapper);
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace()
                     .setEvent("http.in.start")
                     .addContext("requestId", requestId)
-                    .addData("method", request.method().toString())
-                    .addData("url", request.getUri().toString())
+                    .addData("method", wrappedRequest.method().toString())
+                    .addData("url", wrappedRequest.getUri().toString())
                     .addData(
                             "headers",
-                            StreamSupport.stream(request.getHeaders().spliterator(), false)
+                            StreamSupport.stream(wrappedRequest.getHeaders().spliterator(), false)
                                     .map(h -> h.name() + "=" + h.value())
                                     .collect(Collectors.toList()))
                     .log();
@@ -123,11 +125,11 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
         // TODO(ville): Add a request UUID and include in MDC.
         LOGGER.trace()
                 .setEvent("http.in.start")
-                .addData("method", request.method())
-                .addData("url", request.getUri())
-                .addData("headers", request.getHeaders())
+                .addData("method", wrappedRequest.method())
+                .addData("url", wrappedRequest.getUri())
+                .addData("headers", wrappedRequest.getHeaders())
                 .log();
-        return process(request).whenComplete(
+        return process(wrappedRequest).whenComplete(
                 (response, failure) -> {
                     requestTimer.stop();
 
@@ -140,16 +142,16 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                     }
 
                     _metrics.recordTimer(
-                            createMetricName(request, responseStatus, REQUEST_METRIC),
+                            createMetricName(wrappedRequest, responseStatus, REQUEST_METRIC),
                             requestTimer.elapsed(TimeUnit.NANOSECONDS),
                             Optional.of(TimeUnit.NANOSECONDS));
                     _metrics.recordGauge(
-                            createMetricName(request, responseStatus, BODY_SIZE_METRIC),
-                            request.entity().getContentLengthOption().orElse(0L));
+                            createMetricName(wrappedRequest, responseStatus, BODY_SIZE_METRIC),
+                            entityWrapper.getBytesConsumed());
                     final int responseStatusClass = responseStatus / 100;
                     for (final int i : STATUS_CLASSES) {
                         _metrics.recordCounter(
-                                createMetricName(request, responseStatus, String.format("%s/%dxx", STATUS_METRIC, i)),
+                                createMetricName(wrappedRequest, responseStatus, String.format("%s/%dxx", STATUS_METRIC, i)),
                                 responseStatusClass == i ? 1 : 0);
                     }
 
@@ -160,11 +162,11 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                             log.setThrowable(failure);
                         }
                         if (!LOGGER.isTraceEnabled() && LOGGER.isInfoEnabled()) {
-                            log.addData("method", request.method().toString())
-                                    .addData("url", request.getUri().toString())
+                            log.addData("method", wrappedRequest.method().toString())
+                                    .addData("url", wrappedRequest.getUri().toString())
                                     .addData(
                                             "headers",
-                                            StreamSupport.stream(request.getHeaders().spliterator(), false)
+                                            StreamSupport.stream(wrappedRequest.getHeaders().spliterator(), false)
                                                     .map(h -> h.name() + "=" + h.value())
                                                     .collect(Collectors.toList()));
                         }
