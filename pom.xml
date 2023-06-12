@@ -126,7 +126,7 @@
     <javassist.maven.plugin.version>0.2.6</javassist.maven.plugin.version>
     <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
     <maven.properties.plugin.version>1.1.0</maven.properties.plugin.version>
-    <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
+    <rpm.maven.plugin.version>2.2.0</rpm.maven.plugin.version>
 
     <!-- Spotbugs -->
     <spotbugs.exclude>${project.basedir}/spotbugs.exclude.xml</spotbugs.exclude>
