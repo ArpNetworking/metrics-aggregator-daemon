@@ -141,10 +141,10 @@ import java.util.TreeMap;
         _nextScheduledRotationTime = getRotateAt();
 
         if (_nextScheduledRotationTime.isPresent()) {
-            // If we we don't need to wait then just set the scheduled delay to 0.
+            // If we don't need to wait then just set the scheduled delay to 0.
             // If we need to wait a really small amount of time, set the delay to a minimum to avoid sleep thrashing.
-            // Otherwise schedule the next rotation at the predicted time.
-            // Finally, if we wake-up and there's nothing to rotate we'll just re-apply these rules.
+            // Otherwise, schedule the next rotation at the predicted time.
+            // Finally, if we wake up and there's nothing to rotate we'll just re-apply these rules.
 
             Duration timeToRotate = Duration.between(now, _nextScheduledRotationTime.get());
             if (timeToRotate.isNegative()) {
