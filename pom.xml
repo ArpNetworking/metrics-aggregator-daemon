@@ -80,7 +80,7 @@
     <asynchttpclient.version>2.12.3</asynchttpclient.version>
     <bouncy.castle.version>1.70</bouncy.castle.version>
     <client.protocol.version>0.12.0</client.protocol.version>
-    <fastutil.version>8.5.11</fastutil.version>
+    <fastutil.version>8.5.12</fastutil.version>
     <guava.version>31.1-jre</guava.version>
     <guice.version>5.1.0</guice.version>
     <jackson.version>2.15.2</jackson.version>
@@ -105,7 +105,7 @@
     <snappy.version>1.1.9.1</snappy.version>
     <spotbugs.annotations.version>4.7.1</spotbugs.annotations.version>
     <typesafe.config.version>1.4.2</typesafe.config.version>
-    <vertx.core.version>4.4.2</vertx.core.version>
+    <vertx.core.version>4.4.3</vertx.core.version>
 
     <!--Test dependency versions-->
     <commons.math3.version>3.6.1</commons.math3.version>
@@ -123,10 +123,10 @@
     <aspectj.maven.plugin.version>1.14.0</aspectj.maven.plugin.version>
     <build.helper.plugin.version>3.4.0</build.helper.plugin.version>
     <docker.maven.plugin.version>0.40.3</docker.maven.plugin.version>
-    <javassist.maven.plugin.version>0.2.6</javassist.maven.plugin.version>
+    <javassist.maven.plugin.version>0.2.7</javassist.maven.plugin.version>
     <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
     <maven.properties.plugin.version>1.1.0</maven.properties.plugin.version>
-    <rpm.maven.plugin.version>2.1.5</rpm.maven.plugin.version>
+    <rpm.maven.plugin.version>2.2.0</rpm.maven.plugin.version>
 
     <!-- Spotbugs -->
     <spotbugs.exclude>${project.basedir}/spotbugs.exclude.xml</spotbugs.exclude>
