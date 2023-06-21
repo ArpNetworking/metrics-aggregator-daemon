@@ -39,10 +39,10 @@ RUN apt update && \
     mkdir -p /opt/mad/config/pipelines && \
     mkdir -p /opt/mad/tls && \
     openssl req -x509 -newkey rsa:4096 -keyout /opt/mad/tls/key.pem -out /opt/mad/tls/cert.pem -days 3650 -nodes -addext "subjectAltName = DNS:localhost" -subj '/CN=localhost'
-ADD deps /opt/mad/lib/
-ADD bin /opt/mad/bin/
-ADD config /opt/mad/config/
-ADD lib /opt/mad/lib/
+COPY --link deps /opt/mad/lib/
+COPY --link bin /opt/mad/bin/
+COPY --link config /opt/mad/config/
+COPY --link lib /opt/mad/lib/
 
 # Entry point
 ENTRYPOINT [ "/opt/mad/bin/docker-entrypoint.sh" ]

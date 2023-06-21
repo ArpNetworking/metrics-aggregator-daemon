@@ -106,6 +106,7 @@
     <spotbugs.annotations.version>4.7.1</spotbugs.annotations.version>
     <typesafe.config.version>1.4.2</typesafe.config.version>
     <vertx.core.version>4.4.3</vertx.core.version>
+    <docker.platforms>linux/amd64</docker.platforms>
 
     <!--Test dependency versions-->
     <commons.math3.version>3.6.1</commons.math3.version>
@@ -423,6 +424,15 @@
                 <tags>
                   <tag>${buildNumber}</tag>
                 </tags>
+                <buildx>
+                  <platforms>
+                    <platform>${docker.platforms}</platform>
+                  </platforms>
+                  <builderName>kafka</builderName>
+                </buildx>
+                <cacheFrom>
+                  <image>docker.arpnetworking.com/mad-kafka:cache-base</image>
+                </cacheFrom>
               </build>
               <run>
                 <network>
@@ -449,6 +459,15 @@
                 <tags>
                   <tag>${buildNumber}</tag>
                 </tags>
+                <buildx>
+                  <platforms>
+                    <platform>${docker.platforms}</platform>
+                  </platforms>
+                  <builderName>mad</builderName>
+                </buildx>
+                <cacheFrom>
+                  <image>docker.arpnetworking.com/mad:cache-base</image>
+                </cacheFrom>
               </build>
               <run>
                 <dependsOn>
