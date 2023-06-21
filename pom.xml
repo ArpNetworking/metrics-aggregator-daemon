@@ -428,7 +428,6 @@
                   <platforms>
                     <platform>${docker.platforms}</platform>
                   </platforms>
-                  <builderName>kafka</builderName>
                 </buildx>
                 <cacheFrom>
                   <image>docker.arpnetworking.com/mad-kafka:cache-base</image>
@@ -463,7 +462,6 @@
                   <platforms>
                     <platform>${docker.platforms}</platform>
                   </platforms>
-                  <builderName>mad</builderName>
                 </buildx>
                 <cacheFrom>
                   <image>docker.arpnetworking.com/mad:cache-base</image>
