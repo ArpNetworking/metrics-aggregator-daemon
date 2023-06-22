@@ -82,7 +82,7 @@
     <client.protocol.version>0.12.0</client.protocol.version>
     <fastutil.version>8.5.12</fastutil.version>
     <guava.version>32.0.1-jre</guava.version>
-    <guice.version>5.1.0</guice.version>
+    <guice.version>7.0.0</guice.version>
     <jackson.version>2.15.2</jackson.version>
     <javassist.version>3.29.2-GA</javassist.version>
     <javassist.maven.core.version>0.2.6</javassist.maven.core.version>
