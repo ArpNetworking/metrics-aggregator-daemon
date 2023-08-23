@@ -72,7 +72,7 @@
   <properties>
     <!--Dependency versions-->
     <akka.version>2.6.19</akka.version>
-    <akka.http.version>10.2.9</akka.http.version>
+    <akka.http.version>10.2.10</akka.http.version>
     <apache.httpclient.version>4.5.14</apache.httpclient.version>
     <apache.httpcore.version>4.4.16</apache.httpcore.version>
     <arpnetworking.commons.version>3.0.0</arpnetworking.commons.version>
@@ -81,16 +81,16 @@
     <bouncy.castle.version>1.70</bouncy.castle.version>
     <client.protocol.version>0.12.0</client.protocol.version>
     <fastutil.version>8.5.12</fastutil.version>
-    <guava.version>32.0.1-jre</guava.version>
-    <guice.version>5.1.0</guice.version>
+    <guava.version>32.1.2-jre</guava.version>
+    <guice.version>7.0.0</guice.version>
     <jackson.version>2.15.2</jackson.version>
     <javassist.version>3.29.2-GA</javassist.version>
-    <javassist.maven.core.version>0.2.6</javassist.maven.core.version>
+    <javassist.maven.core.version>0.2.7</javassist.maven.core.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <kafka.client.version>3.2.1</kafka.client.version>
+    <kafka.client.version>3.5.1</kafka.client.version>
     <logback.version>1.4.8</logback.version>
     <logback.steno.version>2.1.0</logback.steno.version>
-    <log4j.over.slf4j.version>1.7.36</log4j.over.slf4j.version>
+    <log4j.over.slf4j.version>2.0.7</log4j.over.slf4j.version>
     <metrics.aggregator.protocol.prometheus.version>1.0.1</metrics.aggregator.protocol.prometheus.version>
     <metrics.aggregator.protocol.version>1.0.10</metrics.aggregator.protocol.version>
     <metrics.client.version>0.12.1</metrics.client.version>
@@ -98,14 +98,14 @@
     <metrics.client.incubator.version>0.12.1</metrics.client.incubator.version>
     <metrics.jvm.extra.version>0.12.1</metrics.jvm.extra.version>
     <oval.version>3.2.1</oval.version>
-    <protobuf.version>3.21.12</protobuf.version>
+    <protobuf.version>3.24.1</protobuf.version>
     <scala.version>2.13</scala.version>
-    <scala.library.version>2.13.10</scala.library.version>
+    <scala.library.version>2.13.11</scala.library.version>
     <slf4j.version>2.0.7</slf4j.version>
-    <snappy.version>1.1.10.1</snappy.version>
-    <spotbugs.annotations.version>4.7.1</spotbugs.annotations.version>
+    <snappy.version>1.1.10.3</snappy.version>
+    <spotbugs.annotations.version>4.7.3</spotbugs.annotations.version>
     <typesafe.config.version>1.4.2</typesafe.config.version>
-    <vertx.core.version>4.4.3</vertx.core.version>
+    <vertx.core.version>4.4.4</vertx.core.version>
     <docker.platforms>linux/amd64</docker.platforms>
 
     <!--Test dependency versions-->
@@ -114,20 +114,20 @@
     <junit.benchmarks.version>0.7.2</junit.benchmarks.version>
     <junit.version>4.13.2</junit.version>
     <metrics.generator.version>1.4.0</metrics.generator.version>
-    <mockito.version>4.7.0</mockito.version>
+    <mockito.version>5.4.0</mockito.version>
     <performance.test.version>1.2.1</performance.test.version>
     <statsd.client.timgroup>3.1.0</statsd.client.timgroup>
     <wiremock.version>2.27.2</wiremock.version>
 
     <!-- Additional Plugins -->
-    <aspectjtools.maven.plugin>1.9.9.1</aspectjtools.maven.plugin>
+    <aspectjtools.maven.plugin>1.9.19</aspectjtools.maven.plugin>
     <aspectj.maven.plugin.version>1.14.0</aspectj.maven.plugin.version>
     <build.helper.plugin.version>3.4.0</build.helper.plugin.version>
-    <docker.maven.plugin.version>0.40.3</docker.maven.plugin.version>
+    <docker.maven.plugin.version>0.43.4</docker.maven.plugin.version>
     <javassist.maven.plugin.version>0.2.7</javassist.maven.plugin.version>
-    <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
-    <maven.properties.plugin.version>1.1.0</maven.properties.plugin.version>
-    <rpm.maven.plugin.version>2.2.0</rpm.maven.plugin.version>
+    <maven.assembly.plugin.version>3.6.0</maven.assembly.plugin.version>
+    <maven.properties.plugin.version>1.2.0</maven.properties.plugin.version>
+    <rpm.maven.plugin.version>2.3.0</rpm.maven.plugin.version>
 
     <!-- Spotbugs -->
     <spotbugs.exclude>${project.basedir}/spotbugs.exclude.xml</spotbugs.exclude>
