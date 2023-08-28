@@ -119,7 +119,7 @@
     <wiremock.version>2.27.2</wiremock.version>
 
     <!-- Additional Plugins -->
-    <aspectjtools.maven.plugin>1.9.19</aspectjtools.maven.plugin>
+    <aspectjtools.maven.plugin>1.9.20</aspectjtools.maven.plugin>
     <aspectj.maven.plugin.version>1.14.0</aspectj.maven.plugin.version>
     <build.helper.plugin.version>3.4.0</build.helper.plugin.version>
     <docker.maven.plugin.version>0.43.4</docker.maven.plugin.version>
