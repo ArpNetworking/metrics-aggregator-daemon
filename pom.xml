@@ -877,6 +877,12 @@
       <version>${akka.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.mercateo</groupId>
+      <artifactId>test-clock</artifactId>
+      <version>1.0.2</version>
+      <scope>test</scope>
+    </dependency>
     <!-- Test - Performance -->
     <dependency>
       <groupId>com.arpnetworking.metrics</groupId>
@@ -937,6 +943,11 @@
       <artifactId>bcpkix-jdk15on</artifactId>
       <version>${bouncy.castle.version}</version>
     </dependency>
+      <dependency>
+          <groupId>redis.clients</groupId>
+          <artifactId>jedis</artifactId>
+          <version>3.3.0</version>
+      </dependency>
   </dependencies>
 
   <profiles>
