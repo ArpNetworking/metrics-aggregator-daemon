@@ -22,6 +22,7 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.utility.DefaultHostNameResolver;
 import com.arpnetworking.utility.HostNameResolver;
 import com.google.common.collect.EvictingQueue;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
@@ -334,6 +335,7 @@ public abstract class VertxSink extends BaseSink {
      *
      * @param builder Instance of {@link Builder}.
      */
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW", "Fields are all final and therefore safe from partial initialization")
     protected VertxSink(final Builder<?, ?> builder) {
         super(builder);
         _serverAddress = builder._serverAddress;
