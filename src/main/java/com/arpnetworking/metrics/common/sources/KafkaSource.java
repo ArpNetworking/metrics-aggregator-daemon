@@ -177,7 +177,7 @@ public final class KafkaSource<V> extends BaseSource {
         _buffer = buffer;
     }
 
-    private class ParsingWorker implements Runnable {
+    private final class ParsingWorker implements Runnable {
         private volatile boolean _isRunning = true;
 
         @Override
@@ -219,7 +219,7 @@ public final class KafkaSource<V> extends BaseSource {
         }
     }
 
-    private class LogConsumerListener implements ConsumerListener<V> {
+    private final class LogConsumerListener implements ConsumerListener<V> {
 
         @Override
         public void handle(final ConsumerRecord<?, V> consumerRecord) {
@@ -426,7 +426,7 @@ public final class KafkaSource<V> extends BaseSource {
         @NotNull
         private PeriodicMetrics _periodicMetrics;
 
-        private static class PositiveDuration implements CheckWithCheck.SimpleCheck {
+        private static final class PositiveDuration implements CheckWithCheck.SimpleCheck {
             @Override
             public boolean isSatisfied(
                     final Object validatedObject,

@@ -442,7 +442,7 @@ public final class CollectdJsonToRecordParser implements Parser<List<Record>, Ht
             @Nullable
             private ImmutableList<String> _dsNames = ImmutableList.of();
 
-            private static class ValueArraysValid implements CheckWithCheck.SimpleCheck {
+            private static final class ValueArraysValid implements CheckWithCheck.SimpleCheck {
                 @Override
                 public boolean isSatisfied(
                         final Object validatedObject,
