@@ -89,7 +89,7 @@
     <jsr305.version>3.0.2</jsr305.version>
     <kafka.client.version>3.6.1</kafka.client.version>
     <logback.version>1.4.14</logback.version>
-    <logback.steno.version>2.1.0</logback.steno.version>
+    <logback.steno.version>2.1.1</logback.steno.version>
     <log4j.over.slf4j.version>2.0.11</log4j.over.slf4j.version>
     <metrics.aggregator.protocol.prometheus.version>1.0.1</metrics.aggregator.protocol.prometheus.version>
     <metrics.aggregator.protocol.version>1.0.10</metrics.aggregator.protocol.version>
