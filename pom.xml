@@ -512,6 +512,15 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <ignoredDependencies combine.children="append">
+            <ignoredDependency>io.netty:netty-common:jar:*</ignoredDependency>
+          </ignoredDependencies>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
