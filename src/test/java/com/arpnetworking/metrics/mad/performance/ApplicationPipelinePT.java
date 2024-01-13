@@ -49,7 +49,7 @@ import java.util.List;
  */
 @RunWith(Parameterized.class)
 @BenchmarkOptions(callgc = true, benchmarkRounds = 1, warmupRounds = 0)
-public class ApplicationPipelinePT extends FilePerfTestBase {
+public final class ApplicationPipelinePT extends FilePerfTestBase {
 
     public ApplicationPipelinePT(
             final String name,

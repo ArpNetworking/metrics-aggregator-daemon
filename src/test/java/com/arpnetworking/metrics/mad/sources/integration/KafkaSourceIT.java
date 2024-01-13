@@ -325,5 +325,5 @@ public class KafkaSourceIT {
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
-    private static class KafkaSourceStringType extends TypeReference<KafkaSource<String>> {}
+    private static final class KafkaSourceStringType extends TypeReference<KafkaSource<String>> {}
 }
