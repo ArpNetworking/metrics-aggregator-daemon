@@ -75,7 +75,7 @@
     <akka.http.version>10.2.10</akka.http.version>
     <apache.httpclient.version>4.5.14</apache.httpclient.version>
     <apache.httpcore.version>4.4.16</apache.httpcore.version>
-    <arpnetworking.commons.version>3.0.0</arpnetworking.commons.version>
+    <arpnetworking.commons.version>3.1.0</arpnetworking.commons.version>
     <aspectjrt.version>1.9.21</aspectjrt.version>
     <asynchttpclient.version>2.12.3</asynchttpclient.version>
     <bouncy.castle.version>1.70</bouncy.castle.version>
