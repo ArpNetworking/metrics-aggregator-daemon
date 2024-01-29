@@ -123,7 +123,7 @@
     <aspectj.maven.plugin.version>1.15.0</aspectj.maven.plugin.version>
     <build.helper.plugin.version>3.5.0</build.helper.plugin.version>
     <docker.maven.plugin.version>0.43.4</docker.maven.plugin.version>
-    <javassist.maven.plugin.version>0.2.7</javassist.maven.plugin.version>
+    <javassist.maven.plugin.version>0.2.8</javassist.maven.plugin.version>
     <maven.assembly.plugin.version>3.6.0</maven.assembly.plugin.version>
     <maven.properties.plugin.version>1.2.1</maven.properties.plugin.version>
     <rpm.maven.plugin.version>2.3.0</rpm.maven.plugin.version>
