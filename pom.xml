@@ -95,7 +95,7 @@
     <metrics.aggregator.protocol.version>1.0.10</metrics.aggregator.protocol.version>
     <metrics.client.version>0.12.1</metrics.client.version>
     <metrics.client.http.version>0.12.1</metrics.client.http.version>
-    <metrics.client.incubator.version>0.12.1</metrics.client.incubator.version>
+    <metrics.client.incubator.version>0.13.0</metrics.client.incubator.version>
     <metrics.jvm.extra.version>0.12.1</metrics.jvm.extra.version>
     <oval.version>3.2.1</oval.version>
     <protobuf.version>3.25.2</protobuf.version>
