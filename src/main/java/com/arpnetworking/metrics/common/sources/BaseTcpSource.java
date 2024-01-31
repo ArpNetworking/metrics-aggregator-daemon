@@ -15,12 +15,12 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.io.Tcp;
-import akka.io.TcpMessage;
-import akka.pattern.Patterns;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.io.Tcp;
+import org.apache.pekko.io.TcpMessage;
+import org.apache.pekko.pattern.Patterns;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;

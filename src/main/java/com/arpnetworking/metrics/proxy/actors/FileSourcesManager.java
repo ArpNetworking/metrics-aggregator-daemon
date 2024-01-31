@@ -16,8 +16,8 @@
 
 package com.arpnetworking.metrics.proxy.actors;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;

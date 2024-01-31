@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
-import akka.util.ByteString;
+import org.apache.pekko.util.ByteString;
 import com.arpnetworking.commons.test.BuildableTestHelper;
 import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;

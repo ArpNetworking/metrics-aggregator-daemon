@@ -15,12 +15,12 @@
  */
 package com.arpnetworking.metrics.proxy.actors;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.http.javadsl.model.ws.Message;
-import akka.http.javadsl.model.ws.TextMessage;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.http.javadsl.model.ws.Message;
+import org.apache.pekko.http.javadsl.model.ws.TextMessage;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
@@ -94,9 +94,9 @@ public class Connection extends AbstractActor {
                     _telemetry = connect.getTelemetry();
                     _channel = connect.getChannel();
                 })
-                .match(akka.actor.Status.Failure.class, message -> {
+                .match(org.apache.pekko.actor.Status.Failure.class, message -> {
                     // This message is sent by the incoming stream when there is a failure
-                    // in the stream (see akka.stream.javadsl.Sink.scala).
+                    // in the stream (see org.apache.pekko.stream.javadsl.Sink.scala).
                     LOGGER.info()
                             .setMessage("Closing stream")
                             .addData("actor", self())

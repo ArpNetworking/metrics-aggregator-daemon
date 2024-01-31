@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import akka.util.ByteString;
+import org.apache.pekko.util.ByteString;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.UnknownFieldSet;
@@ -72,13 +72,13 @@ public class AggregationMessageTest {
         Assert.assertNotNull(message);
         Assert.assertSame(protobufMessage, message.getMessage());
 
-        final ByteString akkaByteString = message.serializeToByteString();
-        final byte[] messageBuffer = akkaByteString.toArray();
+        final ByteString pekkoByteString = message.serializeToByteString();
+        final byte[] messageBuffer = pekkoByteString.toArray();
         final byte[] protobufBuffer = protobufMessage.toByteArray();
 
         // Assert length
         Assert.assertEquals(protobufBuffer.length + 5, messageBuffer.length);
-        Assert.assertEquals(protobufBuffer.length + 5, akkaByteString.iterator().getInt(ByteOrder.BIG_ENDIAN));
+        Assert.assertEquals(protobufBuffer.length + 5, pekkoByteString.iterator().getInt(ByteOrder.BIG_ENDIAN));
         Assert.assertEquals(protobufBuffer.length + 5, message.getLength());
 
         // Assert payload type
@@ -98,20 +98,20 @@ public class AggregationMessageTest {
     }
 
     @Test
-    public void testAkkaVsVertx() {
+    public void testPekkoVsVertx() {
         final GeneratedMessageV3 protobufMessage = Messages.HostIdentification.getDefaultInstance();
         final AggregationMessage message = AggregationMessage.create(protobufMessage);
         Assert.assertNotNull(message);
         Assert.assertSame(protobufMessage, message.getMessage());
 
-        final ByteString akkaByteString = message.serializeToByteString();
+        final ByteString pekkoByteString = message.serializeToByteString();
         final Buffer vertxBuffer = message.serializeToBuffer();
 
-        final byte[] akkaBytes = akkaByteString.toArray();
+        final byte[] pekkoBytes = pekkoByteString.toArray();
         final byte[] vertxBytes = vertxBuffer.getBytes();
 
         // Assert length
-        Assert.assertEquals(akkaBytes.length, vertxBytes.length);
-        Assert.assertArrayEquals(akkaBytes, vertxBytes);
+        Assert.assertEquals(pekkoBytes.length, vertxBytes.length);
+        Assert.assertArrayEquals(pekkoBytes, vertxBytes);
     }
 }

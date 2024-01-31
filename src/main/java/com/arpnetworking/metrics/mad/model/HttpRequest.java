@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.model;
 
-import akka.util.ByteString;
+import org.apache.pekko.util.ByteString;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 

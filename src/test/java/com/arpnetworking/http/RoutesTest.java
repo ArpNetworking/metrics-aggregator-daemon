@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.http;
 
-import akka.http.javadsl.model.HttpRequest;
+import org.apache.pekko.http.javadsl.model.HttpRequest;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.utility.BaseActorTest;
 import com.google.common.collect.ImmutableList;

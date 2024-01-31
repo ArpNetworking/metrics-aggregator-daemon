@@ -15,29 +15,29 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
-import akka.Done;
-import akka.NotUsed;
-import akka.actor.AbstractActor;
-import akka.actor.Props;
-import akka.http.javadsl.model.HttpHeader;
-import akka.http.javadsl.model.HttpRequest;
-import akka.http.javadsl.model.HttpResponse;
-import akka.http.javadsl.model.RequestEntity;
-import akka.japi.Pair;
-import akka.stream.ActorAttributes;
-import akka.stream.FanInShape2;
-import akka.stream.FlowShape;
-import akka.stream.Graph;
-import akka.stream.Materializer;
-import akka.stream.Supervision;
-import akka.stream.UniformFanOutShape;
-import akka.stream.javadsl.Broadcast;
-import akka.stream.javadsl.Flow;
-import akka.stream.javadsl.GraphDSL;
-import akka.stream.javadsl.Keep;
-import akka.stream.javadsl.Sink;
-import akka.stream.javadsl.Zip;
-import akka.util.ByteString;
+import org.apache.pekko.Done;
+import org.apache.pekko.NotUsed;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.http.javadsl.model.HttpHeader;
+import org.apache.pekko.http.javadsl.model.HttpRequest;
+import org.apache.pekko.http.javadsl.model.HttpResponse;
+import org.apache.pekko.http.javadsl.model.RequestEntity;
+import org.apache.pekko.japi.Pair;
+import org.apache.pekko.stream.ActorAttributes;
+import org.apache.pekko.stream.FanInShape2;
+import org.apache.pekko.stream.FlowShape;
+import org.apache.pekko.stream.Graph;
+import org.apache.pekko.stream.Materializer;
+import org.apache.pekko.stream.Supervision;
+import org.apache.pekko.stream.UniformFanOutShape;
+import org.apache.pekko.stream.javadsl.Broadcast;
+import org.apache.pekko.stream.javadsl.Flow;
+import org.apache.pekko.stream.javadsl.GraphDSL;
+import org.apache.pekko.stream.javadsl.Keep;
+import org.apache.pekko.stream.javadsl.Sink;
+import org.apache.pekko.stream.javadsl.Zip;
+import org.apache.pekko.util.ByteString;
 import com.arpnetworking.http.RequestReply;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
@@ -108,7 +108,7 @@ public class HttpSource extends ActorSource {
 
         private void requestReply(final RequestReply requestReply) {
             // TODO(barp): Fix the ugly HttpRequest cast here due to java vs scala dsl
-            akka.stream.javadsl.Source.single(requestReply.getRequest())
+            org.apache.pekko.stream.javadsl.Source.single(requestReply.getRequest())
                     .log("http source stream failure")
                     .via(_processGraph)
                     .toMat(_sink, Keep.right())

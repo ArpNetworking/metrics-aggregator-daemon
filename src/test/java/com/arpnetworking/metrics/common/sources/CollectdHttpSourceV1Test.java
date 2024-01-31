@@ -15,10 +15,10 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
-import akka.actor.ActorRef;
-import akka.http.javadsl.model.HttpRequest;
-import akka.http.javadsl.model.HttpResponse;
-import akka.http.javadsl.model.headers.RawHeader;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.http.javadsl.model.HttpRequest;
+import org.apache.pekko.http.javadsl.model.HttpResponse;
+import org.apache.pekko.http.javadsl.model.headers.RawHeader;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.http.RequestReply;
 import com.arpnetworking.metrics.common.parsers.Parser;

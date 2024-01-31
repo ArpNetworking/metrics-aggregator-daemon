@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad;
 
-import akka.actor.ActorSystem;
+import org.apache.pekko.actor.ActorSystem;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;

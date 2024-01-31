@@ -15,9 +15,9 @@
  */
 package com.arpnetworking.metrics.mad;
 
-import akka.actor.AbstractActor;
-import akka.actor.AbstractActorWithTimers;
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.AbstractActorWithTimers;
+import org.apache.pekko.actor.ActorRef;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.Record;

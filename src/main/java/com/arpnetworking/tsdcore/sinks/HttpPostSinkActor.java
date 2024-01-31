@@ -15,9 +15,9 @@
  */
 package com.arpnetworking.tsdcore.sinks;
 
-import akka.actor.AbstractActorWithTimers;
-import akka.actor.Props;
-import akka.pattern.Patterns;
+import org.apache.pekko.actor.AbstractActorWithTimers;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.pattern.Patterns;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.AggregatedData;

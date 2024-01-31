@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.configuration;
 
-import akka.actor.ActorSystem;
+import org.apache.pekko.actor.ActorSystem;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.Loggable;
@@ -188,9 +188,9 @@ public final class PipelineConfiguration {
         }
 
         /**
-         * The Akka {@link ActorSystem}. Cannot be null.
+         * The Pekko {@link ActorSystem}. Cannot be null.
          *
-         * @param value The Akka {@link ActorSystem}.
+         * @param value The Pekko {@link ActorSystem}.
          * @return This instance of {@link Builder}.
          */
         public Builder setActorSystem(final ActorSystem value) {

@@ -126,8 +126,8 @@ public final class AggregatorConfiguration {
         return _logDeadLetters;
     }
 
-    public Map<String, ?> getAkkaConfiguration() {
-        return Collections.unmodifiableMap(_akkaConfiguration);
+    public Map<String, ?> getPekkoConfiguration() {
+        return Collections.unmodifiableMap(_pekkoConfiguration);
     }
 
     @Override
@@ -154,7 +154,7 @@ public final class AggregatorConfiguration {
                 .add("HttpStatusPath", _httpStatusPath)
                 .add("SupplementalHttpRoutesClass", _supplementalHttpRoutesClass)
                 .add("LogDeadLetters", _logDeadLetters)
-                .add("AkkaConfiguration", _akkaConfiguration)
+                .add("PekkoConfiguration", _pekkoConfiguration)
                 .toString();
     }
 
@@ -176,7 +176,7 @@ public final class AggregatorConfiguration {
         _httpStatusPath = builder._httpStatusPath;
         _supplementalHttpRoutesClass = Optional.ofNullable(builder._supplementalHttpRoutesClass);
         _logDeadLetters = builder._logDeadLetters;
-        _akkaConfiguration = builder._akkaConfiguration;
+        _pekkoConfiguration = builder._pekkoConfiguration;
         _monitoringHost = Optional.ofNullable(builder._monitoringHost);
 
         // Deprecated legacy settings
@@ -204,7 +204,7 @@ public final class AggregatorConfiguration {
     private final boolean _enableHttps;
     private final String _httpsKeyPath;
     private final String _httpsCertificatePath;
-    private final Map<String, ?> _akkaConfiguration;
+    private final Map<String, ?> _pekkoConfiguration;
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
 
@@ -449,7 +449,7 @@ public final class AggregatorConfiguration {
         /**
          * Whether to install the {@link com.arpnetworking.metrics.mad.actors.DeadLetterLogger}
          * to log all dead letter senders, recipients and messages. It differs
-         * from the built-in Akka logging in that it actually logs the message
+         * from the built-in Pekko logging in that it actually logs the message
          * (as provided by {@code toString()}) instead of just the message type.
          *
          * @param value {@code True} if dead letter logging should be enabled
@@ -461,19 +461,19 @@ public final class AggregatorConfiguration {
         }
 
         /**
-         * Akka configuration. Cannot be null. By convention Akka configuration
-         * begins with a map containing a single key "akka" and a value of a
+         * Pekko configuration. Cannot be null. By convention Pekko configuration
+         * begins with a map containing a single key "pekko" and a value of a
          * nested map. For more information please see:
          *
-         * http://doc.akka.io/docs/akka/snapshot/general/configuration.html
+         * https://pekko.apache.org/docs/pekko/current/general/configuration.html
          *
-         * NOTE: No validation is performed on the Akka configuration itself.
+         * NOTE: No validation is performed on the Pekko configuration itself.
          *
-         * @param value The Akka configuration.
+         * @param value The Pekko configuration.
          * @return This instance of {@link Builder}.
          */
-        public Builder setAkkaConfiguration(final Map<String, ?> value) {
-            _akkaConfiguration = value;
+        public Builder setPekkoConfiguration(final Map<String, ?> value) {
+            _pekkoConfiguration = value;
             return this;
         }
 
@@ -531,6 +531,6 @@ public final class AggregatorConfiguration {
         @NotNull
         private Boolean _logDeadLetters = false;
         @NotNull
-        private Map<String, ?> _akkaConfiguration;
+        private Map<String, ?> _pekkoConfiguration;
     }
 }

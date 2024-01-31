@@ -15,9 +15,9 @@
  */
 package com.arpnetworking.tsdcore.sinks;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.steno.LogValueMapFactory;
 import com.arpnetworking.tsdcore.model.PeriodicData;

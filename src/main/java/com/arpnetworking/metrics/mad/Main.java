@@ -15,16 +15,16 @@
  */
 package com.arpnetworking.metrics.mad;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.DeadLetter;
-import akka.actor.Props;
-import akka.actor.Terminated;
-import akka.dispatch.Dispatcher;
-import akka.http.javadsl.ConnectionContext;
-import akka.http.javadsl.Http;
-import akka.http.javadsl.HttpsConnectionContext;
-import akka.stream.Materializer;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.DeadLetter;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.Terminated;
+import org.apache.pekko.dispatch.Dispatcher;
+import org.apache.pekko.http.javadsl.ConnectionContext;
+import org.apache.pekko.http.javadsl.Http;
+import org.apache.pekko.http.javadsl.HttpsConnectionContext;
+import org.apache.pekko.stream.Materializer;
 import ch.qos.logback.classic.LoggerContext;
 import com.arpnetworking.commons.builder.Builder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
@@ -192,7 +192,7 @@ public final class Main implements Launchable {
 
     @Override
     public synchronized void launch() {
-        _actorSystem = launchAkka();
+        _actorSystem = launchPekko();
         final Injector injector = launchGuice(_actorSystem);
         launchActors(injector);
         launchPipelines(injector);
@@ -205,7 +205,7 @@ public final class Main implements Launchable {
         shutdownPipelines();
         shutdownActors();
         shutdownGuice();
-        shutdownAkka();
+        shutdownPekko();
     }
 
     private void launchJvmMetricsCollector(final Injector injector) {
@@ -430,9 +430,9 @@ public final class Main implements Launchable {
         return sinks;
     }
 
-    private ActorSystem launchAkka() {
-        final Config akkaConfiguration = ConfigFactory.parseMap(_configuration.getAkkaConfiguration());
-        return ActorSystem.create("MAD", ConfigFactory.load(akkaConfiguration));
+    private ActorSystem launchPekko() {
+        final Config pekkoConfiguration = ConfigFactory.parseMap(_configuration.getPekkoConfiguration());
+        return ActorSystem.create("MAD", ConfigFactory.load(pekkoConfiguration));
     }
 
     private void shutdownJvmMetricsCollector() {
@@ -451,8 +451,8 @@ public final class Main implements Launchable {
         LOGGER.info().setMessage("Stopping actors").log();
     }
 
-    private void shutdownAkka() {
-        LOGGER.info().setMessage("Stopping akka").log();
+    private void shutdownPekko() {
+        LOGGER.info().setMessage("Stopping pekko").log();
 
         if (_actorSystem != null) {
             final Future<Terminated> terminate = _actorSystem.terminate();
@@ -484,7 +484,7 @@ public final class Main implements Launchable {
         // Add the default dispatcher
         addExecutorServiceFromExecutionContextExecutor(
                 executorServices,
-                "akka/default_dispatcher",
+                "pekko/default_dispatcher",
                 actorSystem.dispatcher());
 
         // TODO(ville): Support monitoring additional dispatchers via configuration.

@@ -15,12 +15,12 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.pattern.Patterns;
-import akka.routing.RoundRobinPool;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.routing.RoundRobinPool;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.fasterxml.jackson.annotation.JacksonInject;
@@ -88,9 +88,9 @@ public abstract class ActorSource extends BaseSource {
     }
 
     /**
-     * Return an {@link ActorRef} to this source's Akka actor.
+     * Return an {@link ActorRef} to this source's Pekko actor.
      *
-     * @return An {@link ActorRef} to this source's Akka actor.
+     * @return An {@link ActorRef} to this source's Pekko actor.
      */
     protected ActorRef getActor() {
         return _actor;

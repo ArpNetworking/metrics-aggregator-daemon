@@ -15,8 +15,8 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import akka.util.ByteString;
-import akka.util.ByteStringBuilder;
+import org.apache.pekko.util.ByteString;
+import org.apache.pekko.util.ByteStringBuilder;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.google.protobuf.GeneratedMessageV3;
 import io.vertx.core.buffer.Buffer;

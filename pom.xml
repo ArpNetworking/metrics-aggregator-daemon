@@ -71,8 +71,6 @@
 
   <properties>
     <!--Dependency versions-->
-    <akka.version>2.6.19</akka.version>
-    <akka.http.version>10.2.10</akka.http.version>
     <apache.httpclient.version>4.5.14</apache.httpclient.version>
     <apache.httpcore.version>4.4.16</apache.httpcore.version>
     <arpnetworking.commons.version>3.1.0</arpnetworking.commons.version>
@@ -98,6 +96,8 @@
     <metrics.client.incubator.version>0.13.0</metrics.client.incubator.version>
     <metrics.jvm.extra.version>0.13.0</metrics.jvm.extra.version>
     <oval.version>3.2.1</oval.version>
+    <pekko.version>1.0.2</pekko.version>
+    <pekko.http.version>1.0.0</pekko.http.version>
     <protobuf.version>3.25.2</protobuf.version>
     <scala.version>2.13</scala.version>
     <scala.library.version>2.13.12</scala.library.version>
@@ -548,9 +548,9 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-slf4j_${scala.version}</artifactId>
-      <version>${akka.version}</version>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-slf4j_${scala.version}</artifactId>
+      <version>${pekko.version}</version>
       <scope>runtime</scope>
     </dependency>
     <!-- Metrics -->
@@ -707,21 +707,21 @@
       <artifactId>jackson-module-afterburner</artifactId>
       <version>${jackson.version}</version>
     </dependency>
-    <!-- Akka -->
+    <!-- Pekko -->
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-actor_${scala.version}</artifactId>
-      <version>${akka.version}</version>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-actor_${scala.version}</artifactId>
+      <version>${pekko.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-http-core_${scala.version}</artifactId>
-      <version>${akka.http.version}</version>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-http-core_${scala.version}</artifactId>
+      <version>${pekko.http.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-stream_${scala.version}</artifactId>
-      <version>${akka.version}</version>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-stream_${scala.version}</artifactId>
+      <version>${pekko.version}</version>
     </dependency>
     <dependency>
       <groupId>com.typesafe</groupId>
@@ -881,9 +881,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-testkit_${scala.version}</artifactId>
-      <version>${akka.version}</version>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-testkit_${scala.version}</artifactId>
+      <version>${pekko.version}</version>
       <scope>test</scope>
     </dependency>
     <!-- Test - Performance -->

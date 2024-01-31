@@ -15,8 +15,8 @@
  */
 package com.arpnetworking.http;
 
-import akka.http.javadsl.model.HttpRequest;
-import akka.http.javadsl.model.HttpResponse;
+import org.apache.pekko.http.javadsl.model.HttpRequest;
+import org.apache.pekko.http.javadsl.model.HttpResponse;
 
 import java.util.concurrent.CompletableFuture;
 
