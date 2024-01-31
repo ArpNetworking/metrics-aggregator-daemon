@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.metrics.mad;
 
-import akka.actor.ActorSystem;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
@@ -36,6 +35,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
+import org.apache.pekko.actor.ActorSystem;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.After;

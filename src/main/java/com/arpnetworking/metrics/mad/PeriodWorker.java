@@ -15,9 +15,6 @@
  */
 package com.arpnetworking.metrics.mad;
 
-import akka.actor.AbstractActor;
-import akka.actor.AbstractActorWithTimers;
-import akka.actor.ActorRef;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.Record;
@@ -26,6 +23,9 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.Key;
 import com.google.common.collect.Lists;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.AbstractActorWithTimers;
+import org.apache.pekko.actor.ActorRef;
 
 import java.time.Duration;
 import java.time.Instant;

@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
-import akka.util.ByteString;
 import com.arpnetworking.commons.test.BuildableTestHelper;
 import com.arpnetworking.commons.test.ThreadLocalBuildableTestHelper;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
@@ -29,6 +28,7 @@ import com.arpnetworking.tsdcore.model.Key;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.io.Resources;
+import org.apache.pekko.util.ByteString;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Assert;

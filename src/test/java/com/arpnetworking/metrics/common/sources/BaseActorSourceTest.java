@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
-import akka.actor.ActorSystem;
+import org.apache.pekko.actor.ActorSystem;
 import org.junit.After;
 import org.junit.Before;
 import scala.concurrent.Await;

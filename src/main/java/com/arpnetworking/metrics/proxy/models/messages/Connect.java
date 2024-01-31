@@ -16,12 +16,12 @@
 
 package com.arpnetworking.metrics.proxy.models.messages;
 
-import akka.actor.ActorRef;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
+import org.apache.pekko.actor.ActorRef;
 
 /**
- * Akka message to hold new connection data.
+ * Pekko message to hold new connection data.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)

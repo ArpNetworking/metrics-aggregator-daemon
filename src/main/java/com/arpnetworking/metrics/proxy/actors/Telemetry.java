@@ -15,11 +15,6 @@
  */
 package com.arpnetworking.metrics.proxy.actors;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.Cancellable;
-import akka.actor.Terminated;
-import akka.dispatch.ExecutionContexts;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
@@ -44,6 +39,11 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Cancellable;
+import org.apache.pekko.actor.Terminated;
+import org.apache.pekko.dispatch.ExecutionContexts;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.nio.file.Path;

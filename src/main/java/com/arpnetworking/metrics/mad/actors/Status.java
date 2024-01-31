@@ -15,7 +15,7 @@
  */
 package com.arpnetworking.metrics.mad.actors;
 
-import akka.actor.AbstractActor;
+import org.apache.pekko.actor.AbstractActor;
 
 /**
  * Actor to determine the status of the system.

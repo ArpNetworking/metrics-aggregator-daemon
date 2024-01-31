@@ -15,12 +15,6 @@
  */
 package com.arpnetworking.metrics.mad;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.pattern.Patterns;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.java.util.concurrent.CompletableFutures;
 import com.arpnetworking.commons.observer.Observable;
@@ -48,6 +42,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.pattern.Patterns;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -492,9 +492,9 @@ public final class Aggregator implements Observer, Launchable {
         }
 
         /**
-         * Set the Akka {@link ActorSystem}. Cannot be null.
+         * Set the Pekko {@link ActorSystem}. Cannot be null.
          *
-         * @param value The Akka {@link ActorSystem}.
+         * @param value The Pekko {@link ActorSystem}.
          * @return This {@link Builder} instance.
          */
         public Builder setActorSystem(final ActorSystem value) {

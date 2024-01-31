@@ -15,9 +15,6 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.testkit.javadsl.TestKit;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
@@ -28,6 +25,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -78,7 +78,7 @@ public final class StatsdSourceTest {
         final Observer observer = Mockito.mock(Observer.class);
         statsdSource.attach(observer);
 
-        // CHECKSTYLE.OFF: AnonInnerLength - This is the Akka test pattern
+        // CHECKSTYLE.OFF: AnonInnerLength - This is the Pekko test pattern
         new TestKit(_actorSystem) {{
             // Deploy the statsd source actor
             final ActorRef statsdSourceActor = _actorSystem.actorOf(StatsdSource.Actor.props(statsdSource));
