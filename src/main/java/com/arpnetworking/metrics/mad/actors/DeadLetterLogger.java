@@ -15,10 +15,10 @@
  */
 package com.arpnetworking.metrics.mad.actors;
 
-import org.apache.pekko.actor.AbstractActor;
-import org.apache.pekko.actor.DeadLetter;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.DeadLetter;
 
 /**
  * Actor that logs dead letters.

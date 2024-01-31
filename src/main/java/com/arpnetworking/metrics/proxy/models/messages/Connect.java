@@ -16,9 +16,9 @@
 
 package com.arpnetworking.metrics.proxy.models.messages;
 
-import org.apache.pekko.actor.ActorRef;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
+import org.apache.pekko.actor.ActorRef;
 
 /**
  * Pekko message to hold new connection data.

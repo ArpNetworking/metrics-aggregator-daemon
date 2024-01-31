@@ -15,16 +15,6 @@
  */
 package com.arpnetworking.metrics.mad;
 
-import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSystem;
-import org.apache.pekko.actor.DeadLetter;
-import org.apache.pekko.actor.Props;
-import org.apache.pekko.actor.Terminated;
-import org.apache.pekko.dispatch.Dispatcher;
-import org.apache.pekko.http.javadsl.ConnectionContext;
-import org.apache.pekko.http.javadsl.Http;
-import org.apache.pekko.http.javadsl.HttpsConnectionContext;
-import org.apache.pekko.stream.Materializer;
 import ch.qos.logback.classic.LoggerContext;
 import com.arpnetworking.commons.builder.Builder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
@@ -64,6 +54,16 @@ import com.google.inject.Provides;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.DeadLetter;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.Terminated;
+import org.apache.pekko.dispatch.Dispatcher;
+import org.apache.pekko.http.javadsl.ConnectionContext;
+import org.apache.pekko.http.javadsl.Http;
+import org.apache.pekko.http.javadsl.HttpsConnectionContext;
+import org.apache.pekko.stream.Materializer;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;

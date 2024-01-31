@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.metrics.mad.configuration;
 
-import org.apache.pekko.actor.ActorSystem;
 import com.arpnetworking.commons.builder.OvalBuilder;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.Loggable;
@@ -41,6 +40,7 @@ import com.google.inject.Injector;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.pekko.actor.ActorSystem;
 
 import java.time.Duration;
 import java.util.Collections;

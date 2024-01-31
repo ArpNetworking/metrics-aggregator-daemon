@@ -15,6 +15,19 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
+import com.arpnetworking.http.RequestReply;
+import com.arpnetworking.metrics.common.parsers.Parser;
+import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
+import com.arpnetworking.metrics.mad.model.Metric;
+import com.arpnetworking.metrics.mad.model.Record;
+import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
+import com.arpnetworking.steno.Logger;
+import com.arpnetworking.steno.LoggerFactory;
+import com.arpnetworking.tsdcore.model.CalculatedValue;
+import com.fasterxml.jackson.annotation.JacksonInject;
+import com.google.common.collect.ImmutableMultimap;
+import net.sf.oval.constraint.NotNull;
 import org.apache.pekko.Done;
 import org.apache.pekko.NotUsed;
 import org.apache.pekko.actor.AbstractActor;
@@ -38,19 +51,6 @@ import org.apache.pekko.stream.javadsl.Keep;
 import org.apache.pekko.stream.javadsl.Sink;
 import org.apache.pekko.stream.javadsl.Zip;
 import org.apache.pekko.util.ByteString;
-import com.arpnetworking.http.RequestReply;
-import com.arpnetworking.metrics.common.parsers.Parser;
-import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
-import com.arpnetworking.metrics.incubator.PeriodicMetrics;
-import com.arpnetworking.metrics.mad.model.Metric;
-import com.arpnetworking.metrics.mad.model.Record;
-import com.arpnetworking.metrics.mad.model.statistics.StatisticFactory;
-import com.arpnetworking.steno.Logger;
-import com.arpnetworking.steno.LoggerFactory;
-import com.arpnetworking.tsdcore.model.CalculatedValue;
-import com.fasterxml.jackson.annotation.JacksonInject;
-import com.google.common.collect.ImmutableMultimap;
-import net.sf.oval.constraint.NotNull;
 
 import java.time.Duration;
 import java.util.List;

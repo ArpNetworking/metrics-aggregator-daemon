@@ -15,11 +15,11 @@
  */
 package com.arpnetworking.tsdcore.model;
 
-import org.apache.pekko.util.ByteString;
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.UnknownFieldSet;
 import io.vertx.core.buffer.Buffer;
+import org.apache.pekko.util.ByteString;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;

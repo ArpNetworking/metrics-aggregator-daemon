@@ -15,12 +15,6 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
-import org.apache.pekko.actor.AbstractActor;
-import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.Props;
-import org.apache.pekko.io.Tcp;
-import org.apache.pekko.io.TcpMessage;
-import org.apache.pekko.pattern.Patterns;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
@@ -28,6 +22,12 @@ import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.io.Tcp;
+import org.apache.pekko.io.TcpMessage;
+import org.apache.pekko.pattern.Patterns;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;

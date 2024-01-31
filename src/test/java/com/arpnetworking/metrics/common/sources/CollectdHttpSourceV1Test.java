@@ -15,10 +15,6 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
-import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.http.javadsl.model.HttpRequest;
-import org.apache.pekko.http.javadsl.model.HttpResponse;
-import org.apache.pekko.http.javadsl.model.headers.RawHeader;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.http.RequestReply;
 import com.arpnetworking.metrics.common.parsers.Parser;
@@ -28,6 +24,10 @@ import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.test.TestBeanFactory;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.http.javadsl.model.HttpRequest;
+import org.apache.pekko.http.javadsl.model.HttpResponse;
+import org.apache.pekko.http.javadsl.model.headers.RawHeader;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
