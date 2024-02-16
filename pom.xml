@@ -98,7 +98,7 @@
     <oval.version>3.2.1</oval.version>
     <pekko.version>1.0.2</pekko.version>
     <pekko.http.version>1.0.1</pekko.http.version>
-    <protobuf.version>3.25.2</protobuf.version>
+    <protobuf.version>3.25.3</protobuf.version>
     <scala.version>2.13</scala.version>
     <scala.library.version>2.13.12</scala.library.version>
     <slf4j.version>2.0.12</slf4j.version>
