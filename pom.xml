@@ -100,7 +100,7 @@
     <pekko.http.version>1.0.1</pekko.http.version>
     <protobuf.version>3.25.3</protobuf.version>
     <scala.version>2.13</scala.version>
-    <scala.library.version>2.13.12</scala.library.version>
+    <scala.library.version>2.13.13</scala.library.version>
     <slf4j.version>2.0.12</slf4j.version>
     <snappy.version>1.1.10.5</snappy.version>
     <spotbugs.annotations.version>4.8.3</spotbugs.annotations.version>
