@@ -76,7 +76,7 @@
     <arpnetworking.commons.version>3.1.1</arpnetworking.commons.version>
     <aspectjrt.version>1.9.22</aspectjrt.version>
     <asynchttpclient.version>2.12.3</asynchttpclient.version>
-    <bouncy.castle.version>1.70</bouncy.castle.version>
+    <bouncy.castle.version>1.77</bouncy.castle.version>
     <client.protocol.version>0.12.0</client.protocol.version>
     <fastutil.version>8.5.13</fastutil.version>
     <guava.version>33.0.0-jre</guava.version>
@@ -114,7 +114,7 @@
     <junit.version>4.13.2</junit.version>
     <metrics.generator.version>1.4.0</metrics.generator.version>
     <mockito.version>5.11.0</mockito.version>
-    <performance.test.version>1.2.1</performance.test.version>
+    <performance.test.version>1.2.2</performance.test.version>
     <statsd.client.timgroup>3.1.0</statsd.client.timgroup>
     <wiremock.version>2.27.2</wiremock.version>
 
@@ -911,6 +911,14 @@
           <groupId>com.google.code.findbugs</groupId>
           <artifactId>findbugs-annotations</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcpkix-jdk15on</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -938,12 +946,12 @@
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
+      <artifactId>bcprov-jdk18on</artifactId>
       <version>${bouncy.castle.version}</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
+      <artifactId>bcpkix-jdk18on</artifactId>
       <version>${bouncy.castle.version}</version>
     </dependency>
   </dependencies>
