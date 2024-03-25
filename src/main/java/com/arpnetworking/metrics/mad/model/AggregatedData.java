@@ -22,7 +22,6 @@ import com.arpnetworking.steno.LogValueMapFactory;
 import com.google.common.base.Objects;
 import net.sf.oval.constraint.NotNull;
 
-import java.io.Serializable;
 import javax.annotation.Nullable;
 
 /**
@@ -35,7 +34,7 @@ import javax.annotation.Nullable;
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
-public final class AggregatedData implements Serializable {
+public final class AggregatedData {
 
     public Statistic getStatistic() {
         return _statistic;
@@ -123,8 +122,6 @@ public final class AggregatedData implements Serializable {
     private final long _populationSize;
     private final boolean _isSpecified;
     private final Object _supportingData;
-
-    private static final long serialVersionUID = 9124136139360447095L;
 
     /**
      * {@link com.arpnetworking.commons.builder.Builder} implementation for

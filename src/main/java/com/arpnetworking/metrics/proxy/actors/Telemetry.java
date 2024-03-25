@@ -71,13 +71,6 @@ public class Telemetry extends AbstractActor {
     public Telemetry(final MetricsFactory metricsFactory) {
         _metricsFactory = metricsFactory;
         _metrics = metricsFactory.create();
-        _instrument = context().system().scheduler().scheduleAtFixedRate(
-                new FiniteDuration(0, TimeUnit.SECONDS), // Initial delay
-                new FiniteDuration(500, TimeUnit.MILLISECONDS), // Interval
-                getSelf(),
-                "instrument",
-                ExecutionContexts.global(),
-                getSelf());
     }
 
     @Override
@@ -102,6 +95,18 @@ public class Telemetry extends AbstractActor {
                     unhandled(message);
                 })
                 .build();
+    }
+
+    @Override
+    public void preStart() throws Exception {
+        super.preStart();
+        _instrument = context().system().scheduler().scheduleAtFixedRate(
+                new FiniteDuration(0, TimeUnit.SECONDS), // Initial delay
+                new FiniteDuration(500, TimeUnit.MILLISECONDS), // Interval
+                getSelf(),
+                "instrument",
+                ExecutionContexts.global(),
+                getSelf());
     }
 
     @Override
@@ -242,7 +247,7 @@ public class Telemetry extends AbstractActor {
     }
 
 
-    private final Cancellable _instrument;
+    private Cancellable _instrument;
     private final Set<Path> _logs = Sets.newTreeSet();
     private final MetricsFactory _metricsFactory;
     private final Set<ActorRef> _members = Sets.newHashSet();

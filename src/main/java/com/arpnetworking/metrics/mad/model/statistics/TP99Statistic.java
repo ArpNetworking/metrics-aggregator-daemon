@@ -28,6 +28,4 @@ public final class TP99Statistic extends TPStatistic {
     private TP99Statistic() {
         super(99d);
     }
-
-    private static final long serialVersionUID = 1L;
 }

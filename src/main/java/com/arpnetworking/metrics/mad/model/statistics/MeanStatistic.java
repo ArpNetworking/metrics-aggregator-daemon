@@ -58,7 +58,6 @@ public final class MeanStatistic extends BaseStatistic {
             Suppliers.memoize(() -> STATISTIC_FACTORY.getStatistic("count"));
     private static final Supplier<Set<Statistic>> DEPENDENCIES =
             Suppliers.memoize(() -> ImmutableSet.of(SUM_STATISTIC.get(), COUNT_STATISTIC.get()));
-    private static final long serialVersionUID = 2943082617025777130L;
 
     /**
      * Calculator computing the average.

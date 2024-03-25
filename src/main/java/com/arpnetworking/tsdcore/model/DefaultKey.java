@@ -106,6 +106,4 @@ public final class DefaultKey implements Key {
 
     private final int _hashCode;
     private final ImmutableMap<String, String> _dimensions;
-
-    private static final long serialVersionUID = -6065569917813181990L;
 }

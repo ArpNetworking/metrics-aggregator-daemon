@@ -338,6 +338,7 @@ public abstract class VertxSink extends BaseSink {
     @SuppressFBWarnings(
             value = "CT_CONSTRUCTOR_THROW",
             justification = "Fields are all final and therefore safe from partial initialization")
+    @SuppressWarnings("this-escape")
     protected VertxSink(final Builder<?, ?> builder) {
         super(builder);
         _serverAddress = builder._serverAddress;
