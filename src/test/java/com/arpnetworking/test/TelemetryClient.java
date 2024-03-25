@@ -253,7 +253,7 @@ public final class TelemetryClient {
                             .log();
                 }
             } else if (message.get("command") != null) {
-                if ("reportMetric".equals(message.get("command").asText("unknown"))) {
+                if ("reportMetric".equals(message.get("command").asText())) {
                     final JsonNode data = message.get("data");
                     final String key = createKey(
                             data.get("service").asText(),
