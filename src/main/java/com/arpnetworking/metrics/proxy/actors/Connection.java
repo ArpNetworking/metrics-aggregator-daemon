@@ -52,6 +52,7 @@ import java.util.Set;
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class Connection extends AbstractActor {
+
     /**
      * Public constructor.
      *
@@ -62,7 +63,7 @@ public class Connection extends AbstractActor {
             final PeriodicMetrics metrics,
             final MessageProcessorsFactory processorsFactory) {
         _metrics = metrics;
-        _messageProcessors = processorsFactory.create(this, metrics);
+        _processorsFactory = processorsFactory;
     }
 
     /**
@@ -79,6 +80,12 @@ public class Connection extends AbstractActor {
                 Connection.class,
                 metrics,
                 messageProcessorsFactory);
+    }
+
+    @Override
+    public void preStart() throws Exception {
+        super.preStart();
+        _messageProcessors = _processorsFactory.create(this, _metrics);
     }
 
     @Override
@@ -322,7 +329,8 @@ public class Connection extends AbstractActor {
     private ActorRef _channel;
 
     private final PeriodicMetrics _metrics;
-    private final List<MessagesProcessor> _messageProcessors;
+    private final MessageProcessorsFactory _processorsFactory;
+    private List<MessagesProcessor> _messageProcessors;
     private final Map<String, Map<String, Set<String>>> _subscriptions = Maps.newHashMap();
 
     private static final String METRICS_PREFIX = "actors/connection/";

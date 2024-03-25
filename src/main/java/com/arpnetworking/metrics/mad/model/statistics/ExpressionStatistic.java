@@ -46,6 +46,4 @@ public final class ExpressionStatistic extends BaseStatistic {
     }
 
     private ExpressionStatistic() { }
-
-    private static final long serialVersionUID = -9159667444288515901L;
 }

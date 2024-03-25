@@ -175,6 +175,13 @@ public abstract class HttpPostSink extends BaseSink {
         _acceptedStatusCodes = builder._acceptedStatusCodes;
         _aysncHttpClientUri = Uri.create(_uri.toString());
 
+    }
+
+    /**
+     * Starts the sink. Called by the builder after construction.
+     * @param builder The builder.
+     */
+    protected void start(final Builder<?, ?> builder) {
         _sinkActor = builder._actorSystem.actorOf(
                 HttpPostSinkActor.props(
                         CLIENT,
@@ -187,7 +194,7 @@ public abstract class HttpPostSink extends BaseSink {
 
     private final URI _uri;
     private final Uri _aysncHttpClientUri;
-    private final ActorRef _sinkActor;
+    private ActorRef _sinkActor;
     private final ImmutableSet<Integer> _acceptedStatusCodes;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
@@ -299,6 +306,13 @@ public abstract class HttpPostSink extends BaseSink {
          */
         protected Builder(final Function<B, S> targetConstructor) {
             super(targetConstructor);
+        }
+
+        @Override
+        public S build() {
+            final S result = super.build();
+            result.start(this);
+            return result;
         }
 
         @NotNull

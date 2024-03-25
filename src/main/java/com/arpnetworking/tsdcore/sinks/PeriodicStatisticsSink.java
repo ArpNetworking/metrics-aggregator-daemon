@@ -38,6 +38,7 @@ import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.context.OValContext;
 
+import java.io.Serial;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Deque;
@@ -545,6 +546,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
 
         private static final class CheckUniqueDimensionTargets implements CheckWithCheck.SimpleCheck {
 
+            @Serial
             private static final long serialVersionUID = -1484528750004342337L;
 
             @Override
@@ -624,6 +626,7 @@ public final class PeriodicStatisticsSink extends BaseSink {
 
         private static final class CheckDefaultDimensionTargets implements CheckWithCheck.SimpleCheck {
 
+            @Serial
             private static final long serialVersionUID = 5011108547193627318L;
 
             @Override

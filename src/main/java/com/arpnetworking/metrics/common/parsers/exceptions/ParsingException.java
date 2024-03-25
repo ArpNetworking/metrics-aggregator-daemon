@@ -18,6 +18,8 @@ package com.arpnetworking.metrics.common.parsers.exceptions;
 import com.arpnetworking.logback.annotations.Loggable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import java.io.Serial;
+
 /**
  * Exception thrown when a {@link com.arpnetworking.metrics.common.parsers.Parser} fails to parse the data.
  *
@@ -56,5 +58,6 @@ public class ParsingException extends Exception {
     // TODO(barp): change this into a List or similar structure to ensure no modifications
     private final byte[] _offendingData;
 
+    @Serial
     private static final long serialVersionUID = 1L;
 }

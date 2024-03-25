@@ -52,7 +52,6 @@ public final class MaxStatistic extends BaseStatistic {
     private MaxStatistic() { }
 
     private static final Set<String> ALIASES;
-    private static final long serialVersionUID = 4788356950823429496L;
 
     static {
         ALIASES = Sets.newHashSet();

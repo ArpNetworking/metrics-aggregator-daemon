@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.metrics.mad.model;
 
-import java.io.Serializable;
 import java.util.Optional;
 
 /**
@@ -23,7 +22,7 @@ import java.util.Optional;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
-public interface Quantity extends Comparable<Quantity>, Serializable {
+public interface Quantity extends Comparable<Quantity> {
 
     /**
      * Access the {@link Quantity} value.

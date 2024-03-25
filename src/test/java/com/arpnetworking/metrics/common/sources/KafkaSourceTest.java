@@ -40,6 +40,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
+import java.io.Serial;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -346,6 +347,7 @@ public class KafkaSourceTest {
 
     private static class FillingBlockingQueue extends ArrayBlockingQueue<String> {
         private AtomicBoolean _enabled = new AtomicBoolean(false);
+        @Serial
         private static final long serialVersionUID = 1L;
 
         FillingBlockingQueue(final int capacity) {

@@ -112,12 +112,12 @@ public class HttpPostSinkActor extends AbstractActorWithTimers {
         _responseStatusName = "sinks/http_post/" + sink.getMetricSafeName() + "/status";
         _samplesDroppedName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_dropped";
         _samplesSentName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_sent";
-        timers().startTimerAtFixedRate("metrics", SampleMetrics.INSTANCE, Duration.ofSeconds(1), Duration.ofSeconds(1));
     }
 
     @Override
     public void preStart() throws Exception {
         super.preStart();
+        timers().startTimerAtFixedRate("metrics", SampleMetrics.INSTANCE, Duration.ofSeconds(1), Duration.ofSeconds(1));
 
         LOGGER.info()
                 .setMessage("Starting http post sink actor")

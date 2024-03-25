@@ -50,8 +50,6 @@ public final class CountStatistic extends BaseStatistic {
 
     private CountStatistic() { }
 
-    private static final long serialVersionUID = 983762187313397225L;
-
     /**
      * Accumulator computing the count of values.
      *
@@ -81,7 +79,7 @@ public final class CountStatistic extends BaseStatistic {
 
         @Override
         public Accumulator<Void> accumulateAny(final CalculatedValue<?> calculatedValue) {
-            _count += calculatedValue.getValue().getValue();
+            _count += (long) calculatedValue.getValue().getValue();
             return this;
         }
 

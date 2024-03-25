@@ -61,6 +61,7 @@ import org.apache.pekko.stream.javadsl.Source;
 import org.apache.pekko.util.ByteString;
 import org.apache.pekko.util.Timeout;
 
+import java.io.Serial;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
@@ -337,13 +338,12 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
         return nameBuilder.toString();
     }
 
-    @SuppressFBWarnings("SE_BAD_FIELD")
-    private final ActorSystem _actorSystem;
-    @SuppressFBWarnings("SE_BAD_FIELD")
-    private final PeriodicMetrics _metrics;
+    @SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORED")
+    private final transient ActorSystem _actorSystem;
+    @SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORED")
+    private final transient PeriodicMetrics _metrics;
     private final String _healthCheckPath;
     private final String _statusPath;
-    @SuppressFBWarnings("SE_BAD_FIELD")
     private final ImmutableList<SupplementalRoutes> _supplementalRoutes;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Routes.class);
@@ -382,6 +382,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
 
     private static final ContentType JSON_CONTENT_TYPE = ContentTypes.APPLICATION_JSON;
 
+    @Serial
     private static final long serialVersionUID = 4336082511110058019L;
 
     static {

@@ -49,7 +49,6 @@ import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.pattern.Patterns;
 
-import java.io.Serializable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -324,7 +323,7 @@ public final class Aggregator implements Observer, Launchable {
     private static final String SHUTDOWN_MESSAGE = "shutdown";
     private static final Logger LOGGER = LoggerFactory.getLogger(Aggregator.class);
 
-    static final class PeriodWorkerIdle implements Serializable {
+    static final class PeriodWorkerIdle {
 
         PeriodWorkerIdle(final Key key) {
             _key = key;
@@ -335,8 +334,6 @@ public final class Aggregator implements Observer, Launchable {
         }
 
         private final Key _key;
-
-        private static final long serialVersionUID = 1L;
     }
 
     /**
