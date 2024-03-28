@@ -428,10 +428,10 @@
                   <platforms>
                     <platform>${docker.platforms}</platform>
                   </platforms>
+                  <cacheFrom>docker.arpnetworking.com/mad-kafka:cache-base</cacheFrom>
+                  <cacheTo>docker.arpnetworking.com/mad-kafka:cache-base</cacheTo>
                 </buildx>
-                <cacheFrom>
-                  <image>docker.arpnetworking.com/mad-kafka:cache-base</image>
-                </cacheFrom>
+
               </build>
               <run>
                 <network>
@@ -462,10 +462,9 @@
                   <platforms>
                     <platform>${docker.platforms}</platform>
                   </platforms>
+                  <cacheFrom>docker.arpnetworking.com/mad:cache-base</cacheFrom>
+                  <cacheTo>docker.arpnetworking.com/mad:cache-base</cacheTo>
                 </buildx>
-                <cacheFrom>
-                  <image>docker.arpnetworking.com/mad:cache-base</image>
-                </cacheFrom>
               </build>
               <run>
                 <dependsOn>
