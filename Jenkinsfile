@@ -5,6 +5,9 @@ pipeline {
       activeDeadlineSeconds 3600
     }
   }
+  options {
+    ansiColor('xterm')
+  }
   stages {
     stage('Init') {
       steps {
@@ -41,7 +44,7 @@ pipeline {
             usernamePassword(credentialsId: 'jenkins-ossrh', usernameVariable: 'OSSRH_USER', passwordVariable: 'OSSRH_PASS'),
             string(credentialsId: 'jenkins-gpg', variable: 'GPG_PASS')]) {
           withMaven {
-            sh "./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true"
+            sh "./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true"
           }
         }
       }
