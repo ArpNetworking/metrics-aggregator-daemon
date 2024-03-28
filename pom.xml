@@ -426,7 +426,7 @@
                   <tag>cache-base</tag>
                 </tags>
                 <cacheFrom>
-                  <image>docker.arpnetworking.com/mad-kafka:cache-base</image>
+                  <image>docker.arpnetworking.com/arpnetworking/mad/kafka:cache-base</image>
                 </cacheFrom>
 
               </build>
@@ -457,7 +457,7 @@
                   <tag>cache-base</tag>
                 </tags>
                 <cacheFrom>
-                  <image>docker.arpnetworking.com/mad:cache-base</image>
+                  <image>docker.arpnetworking.com/arpnetworking/mad:cache-base</image>
                 </cacheFrom>
               </build>
               <run>
