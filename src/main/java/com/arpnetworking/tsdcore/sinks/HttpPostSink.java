@@ -15,12 +15,6 @@
  */
 package com.arpnetworking.tsdcore.sinks;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
-import akka.http.javadsl.model.HttpMethods;
-import akka.http.javadsl.model.MediaTypes;
-import akka.http.javadsl.model.StatusCodes;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.steno.LogValueMapFactory;
@@ -33,6 +27,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.http.javadsl.model.HttpMethods;
+import org.apache.pekko.http.javadsl.model.MediaTypes;
+import org.apache.pekko.http.javadsl.model.StatusCodes;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.AsyncHttpClientConfig;
 import org.asynchttpclient.DefaultAsyncHttpClient;
@@ -175,6 +175,13 @@ public abstract class HttpPostSink extends BaseSink {
         _acceptedStatusCodes = builder._acceptedStatusCodes;
         _aysncHttpClientUri = Uri.create(_uri.toString());
 
+    }
+
+    /**
+     * Starts the sink. Called by the builder after construction.
+     * @param builder The builder.
+     */
+    protected void start(final Builder<?, ?> builder) {
         _sinkActor = builder._actorSystem.actorOf(
                 HttpPostSinkActor.props(
                         CLIENT,
@@ -187,7 +194,7 @@ public abstract class HttpPostSink extends BaseSink {
 
     private final URI _uri;
     private final Uri _aysncHttpClientUri;
-    private final ActorRef _sinkActor;
+    private ActorRef _sinkActor;
     private final ImmutableSet<Integer> _acceptedStatusCodes;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpPostSink.class);
@@ -299,6 +306,13 @@ public abstract class HttpPostSink extends BaseSink {
          */
         protected Builder(final Function<B, S> targetConstructor) {
             super(targetConstructor);
+        }
+
+        @Override
+        public S build() {
+            final S result = super.build();
+            result.start(this);
+            return result;
         }
 
         @NotNull

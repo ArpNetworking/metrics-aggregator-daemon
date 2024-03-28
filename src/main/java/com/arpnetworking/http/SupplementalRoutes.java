@@ -15,9 +15,9 @@
  */
 package com.arpnetworking.http;
 
-import akka.http.javadsl.model.HttpRequest;
-import akka.http.javadsl.model.HttpResponse;
-import akka.japi.function.Function;
+import org.apache.pekko.http.javadsl.model.HttpRequest;
+import org.apache.pekko.http.javadsl.model.HttpResponse;
+import org.apache.pekko.japi.function.Function;
 
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;

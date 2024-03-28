@@ -51,7 +51,6 @@ public final class MinStatistic extends BaseStatistic {
     private MinStatistic() { }
 
     private static final Set<String> ALIASES;
-    private static final long serialVersionUID = 107620025236661457L;
 
     static {
         ALIASES = Sets.newHashSet();

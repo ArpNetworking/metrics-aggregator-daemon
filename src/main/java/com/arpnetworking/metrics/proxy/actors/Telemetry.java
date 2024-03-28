@@ -15,11 +15,6 @@
  */
 package com.arpnetworking.metrics.proxy.actors;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.Cancellable;
-import akka.actor.Terminated;
-import akka.dispatch.ExecutionContexts;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.MetricsFactory;
@@ -44,6 +39,11 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Cancellable;
+import org.apache.pekko.actor.Terminated;
+import org.apache.pekko.dispatch.ExecutionContexts;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.nio.file.Path;
@@ -71,13 +71,6 @@ public class Telemetry extends AbstractActor {
     public Telemetry(final MetricsFactory metricsFactory) {
         _metricsFactory = metricsFactory;
         _metrics = metricsFactory.create();
-        _instrument = context().system().scheduler().scheduleAtFixedRate(
-                new FiniteDuration(0, TimeUnit.SECONDS), // Initial delay
-                new FiniteDuration(500, TimeUnit.MILLISECONDS), // Interval
-                getSelf(),
-                "instrument",
-                ExecutionContexts.global(),
-                getSelf());
     }
 
     @Override
@@ -102,6 +95,18 @@ public class Telemetry extends AbstractActor {
                     unhandled(message);
                 })
                 .build();
+    }
+
+    @Override
+    public void preStart() throws Exception {
+        super.preStart();
+        _instrument = context().system().scheduler().scheduleAtFixedRate(
+                new FiniteDuration(0, TimeUnit.SECONDS), // Initial delay
+                new FiniteDuration(500, TimeUnit.MILLISECONDS), // Interval
+                getSelf(),
+                "instrument",
+                ExecutionContexts.global(),
+                getSelf());
     }
 
     @Override
@@ -242,7 +247,7 @@ public class Telemetry extends AbstractActor {
     }
 
 
-    private final Cancellable _instrument;
+    private Cancellable _instrument;
     private final Set<Path> _logs = Sets.newTreeSet();
     private final MetricsFactory _metricsFactory;
     private final Set<ActorRef> _members = Sets.newHashSet();

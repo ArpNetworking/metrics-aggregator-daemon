@@ -16,8 +16,6 @@
 
 package com.arpnetworking.metrics.proxy.actors;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.proxy.models.messages.LogFileAppeared;
 import com.arpnetworking.metrics.proxy.models.messages.LogFileDisappeared;
@@ -27,6 +25,8 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.nio.file.Files;

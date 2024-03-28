@@ -15,31 +15,6 @@
  */
 package com.arpnetworking.http;
 
-import akka.actor.ActorNotFound;
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
-import akka.actor.Status.Failure;
-import akka.actor.Status.Success;
-import akka.http.javadsl.model.ContentType;
-import akka.http.javadsl.model.ContentTypes;
-import akka.http.javadsl.model.HttpHeader;
-import akka.http.javadsl.model.HttpMethods;
-import akka.http.javadsl.model.HttpRequest;
-import akka.http.javadsl.model.HttpResponse;
-import akka.http.javadsl.model.StatusCodes;
-import akka.http.javadsl.model.headers.CacheControl;
-import akka.http.javadsl.model.headers.CacheDirectives;
-import akka.http.javadsl.model.ws.Message;
-import akka.japi.JavaPartialFunction;
-import akka.japi.function.Function;
-import akka.pattern.Patterns;
-import akka.stream.CompletionStrategy;
-import akka.stream.OverflowStrategy;
-import akka.stream.javadsl.Sink;
-import akka.stream.javadsl.Source;
-import akka.util.ByteString;
-import akka.util.Timeout;
 import com.arpnetworking.metrics.common.sources.ClientHttpSourceV1;
 import com.arpnetworking.metrics.common.sources.ClientHttpSourceV2;
 import com.arpnetworking.metrics.common.sources.ClientHttpSourceV3;
@@ -60,7 +35,33 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.pekko.actor.ActorNotFound;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Status.Failure;
+import org.apache.pekko.actor.Status.Success;
+import org.apache.pekko.http.javadsl.model.ContentType;
+import org.apache.pekko.http.javadsl.model.ContentTypes;
+import org.apache.pekko.http.javadsl.model.HttpHeader;
+import org.apache.pekko.http.javadsl.model.HttpMethods;
+import org.apache.pekko.http.javadsl.model.HttpRequest;
+import org.apache.pekko.http.javadsl.model.HttpResponse;
+import org.apache.pekko.http.javadsl.model.StatusCodes;
+import org.apache.pekko.http.javadsl.model.headers.CacheControl;
+import org.apache.pekko.http.javadsl.model.headers.CacheDirectives;
+import org.apache.pekko.http.javadsl.model.ws.Message;
+import org.apache.pekko.japi.JavaPartialFunction;
+import org.apache.pekko.japi.function.Function;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.stream.CompletionStrategy;
+import org.apache.pekko.stream.OverflowStrategy;
+import org.apache.pekko.stream.javadsl.Sink;
+import org.apache.pekko.stream.javadsl.Source;
+import org.apache.pekko.util.ByteString;
+import org.apache.pekko.util.Timeout;
 
+import java.io.Serial;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
@@ -79,7 +80,7 @@ import javax.annotation.Nullable;
  */
 @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
 public final class Routes implements Function<HttpRequest, CompletionStage<HttpResponse>>,
-        akka.japi.Function<HttpRequest, CompletionStage<HttpResponse>> {
+        org.apache.pekko.japi.Function<HttpRequest, CompletionStage<HttpResponse>> {
 
     /**
      * Public constructor.
@@ -230,7 +231,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
                 if (supplmentalRouteFuture.isPresent()) {
                     return supplmentalRouteFuture.get();
                 }
-                // CHECKSTYLE.OFF: IllegalCatch - Akka's functional interface declares Exception thrown
+                // CHECKSTYLE.OFF: IllegalCatch - Pekko's functional interface declares Exception thrown
             } catch (final Exception e) {
                 // CHECKSTYLE.ON: IllegalCatch
                 LOGGER.warn()
@@ -275,9 +276,9 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
             final HttpRequest request,
             final MessageProcessorsFactory messageProcessorsFactory) {
         final Optional<HttpHeader> upgradeToWebSocketHeader = request.getHeader("UpgradeToWebSocket");
-        if (upgradeToWebSocketHeader.orElse(null) instanceof akka.http.impl.engine.ws.UpgradeToWebSocketLowLevel) {
-            final akka.http.impl.engine.ws.UpgradeToWebSocketLowLevel lowLevelUpgradeToWebSocketHeader =
-                    (akka.http.impl.engine.ws.UpgradeToWebSocketLowLevel) upgradeToWebSocketHeader.get();
+        if (upgradeToWebSocketHeader.orElse(null) instanceof org.apache.pekko.http.impl.engine.ws.UpgradeToWebSocketLowLevel) {
+            final org.apache.pekko.http.impl.engine.ws.UpgradeToWebSocketLowLevel lowLevelUpgradeToWebSocketHeader =
+                    (org.apache.pekko.http.impl.engine.ws.UpgradeToWebSocketLowLevel) upgradeToWebSocketHeader.get();
 
             final ActorRef connection = _actorSystem.actorOf(Connection.props(_metrics, messageProcessorsFactory));
             final Sink<Message, ?> inChannel = Sink.actorRef(connection, PoisonPill.getInstance());
@@ -337,13 +338,12 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
         return nameBuilder.toString();
     }
 
-    @SuppressFBWarnings("SE_BAD_FIELD")
-    private final ActorSystem _actorSystem;
-    @SuppressFBWarnings("SE_BAD_FIELD")
-    private final PeriodicMetrics _metrics;
+    @SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORED")
+    private final transient ActorSystem _actorSystem;
+    @SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORED")
+    private final transient PeriodicMetrics _metrics;
     private final String _healthCheckPath;
     private final String _statusPath;
-    @SuppressFBWarnings("SE_BAD_FIELD")
     private final ImmutableList<SupplementalRoutes> _supplementalRoutes;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Routes.class);
@@ -382,6 +382,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
 
     private static final ContentType JSON_CONTENT_TYPE = ContentTypes.APPLICATION_JSON;
 
+    @Serial
     private static final long serialVersionUID = 4336082511110058019L;
 
     static {

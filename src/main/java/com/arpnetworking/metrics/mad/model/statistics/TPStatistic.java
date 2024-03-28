@@ -89,7 +89,6 @@ public abstract class TPStatistic extends BaseStatistic implements OrderedStatis
             Suppliers.memoize(() -> STATISTIC_FACTORY.getStatistic("histogram"));
     private static final Supplier<Set<Statistic>> DEPENDENCIES =
             Suppliers.memoize(() -> ImmutableSet.of(HISTOGRAM_STATISTIC.get()));
-    private static final long serialVersionUID = 2002333257077042351L;
 
     /**
      * Calculator computing the percentile of values.

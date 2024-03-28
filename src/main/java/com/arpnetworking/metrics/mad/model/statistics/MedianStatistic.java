@@ -35,6 +35,4 @@ public final class MedianStatistic extends TPStatistic {
     private MedianStatistic() {
         super(50d);
     }
-
-    private static final long serialVersionUID = 1L;
 }

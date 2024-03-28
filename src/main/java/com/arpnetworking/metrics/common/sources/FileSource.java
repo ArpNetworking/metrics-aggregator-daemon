@@ -129,7 +129,7 @@ public final class FileSource<T> extends BaseSource {
     private static final Duration FILE_NOT_FOUND_WARNING_INTERVAL = Duration.ofMinutes(1);
     private static final NoPositionStore NO_POSITION_STORE = new NoPositionStore();
 
-    private class LogTailerListener implements TailerListener {
+    private final class LogTailerListener implements TailerListener {
 
         @Override
         public void initialize(final Tailer tailer) {

@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.metrics.mad.model.statistics;
 
-import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -23,7 +22,7 @@ import java.util.Set;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
-public interface Statistic extends Serializable {
+public interface Statistic {
 
     /**
      * Accessor for the name of the statistic.

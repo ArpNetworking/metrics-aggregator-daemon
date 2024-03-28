@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.metrics.mad.parsers;
 
-import akka.util.ByteString;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
@@ -26,6 +25,7 @@ import com.arpnetworking.metrics.mad.model.Unit;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.io.Resources;
+import org.apache.pekko.util.ByteString;
 import org.junit.Assert;
 import org.junit.Test;
 

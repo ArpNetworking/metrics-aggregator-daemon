@@ -15,8 +15,8 @@
  */
 package com.arpnetworking.utility;
 
-import akka.actor.ActorSystem;
-import akka.actor.Terminated;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Terminated;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.MockitoAnnotations;

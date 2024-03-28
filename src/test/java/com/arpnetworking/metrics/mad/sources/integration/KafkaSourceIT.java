@@ -281,10 +281,10 @@ public class KafkaSourceIT {
         producerProps = Maps.newHashMap();
         producerProps.put(ProducerConfig.ACKS_CONFIG, "all");
         producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
-        producerProps.put(ProducerConfig.CLIENT_ID_CONFIG, "producer0");
+        producerProps.put(ProducerConfig.CLIENT_ID_CONFIG, "producer_" + _topicName);
         producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KEY_SERIALIZER);
         producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, VALUE_SERIALIZER);
-        producerProps.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "transactional-id");
+        producerProps.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "transactional-id-" + _topicName);
 
         final KafkaProducer<Integer, String> producer = new KafkaProducer<>(producerProps);
         producer.initTransactions();
@@ -313,7 +313,7 @@ public class KafkaSourceIT {
         // Create consumer props
         _consumerProps = Maps.newHashMap();
         _consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
-        _consumerProps.put(ConsumerConfig.CLIENT_ID_CONFIG, "consumer0");
+        _consumerProps.put(ConsumerConfig.CLIENT_ID_CONFIG, "consumer_" + _topicName);
         _consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KEY_DESERIALIZER);
         _consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, VALUE_DESERIALIZER);
         _consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -325,5 +325,5 @@ public class KafkaSourceIT {
      *
      * @author Joey Jackson (jjackson at dropbox dot com)
      */
-    private static class KafkaSourceStringType extends TypeReference<KafkaSource<String>> {}
+    private static final class KafkaSourceStringType extends TypeReference<KafkaSource<String>> {}
 }

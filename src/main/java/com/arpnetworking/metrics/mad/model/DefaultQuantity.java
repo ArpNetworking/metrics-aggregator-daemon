@@ -18,7 +18,6 @@ package com.arpnetworking.metrics.mad.model;
 import com.arpnetworking.commons.builder.ThreadLocalBuilder;
 import com.arpnetworking.logback.annotations.Loggable;
 import com.google.common.base.MoreObjects;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
 
 import java.util.Objects;
@@ -152,11 +151,8 @@ public final class DefaultQuantity implements Quantity {
         _unit = unit;
     }
 
-    @SuppressFBWarnings("SE_BAD_FIELD")
     private final Optional<Unit> _unit;
     private final double _value;
-
-    private static final long serialVersionUID = -6339526234042605516L;
 
     /**
      * {@link com.arpnetworking.commons.builder.Builder} implementation for

@@ -15,11 +15,6 @@
  */
 package com.arpnetworking.metrics.common.sources;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.io.Udp;
-import akka.io.UdpMessage;
 import com.arpnetworking.metrics.common.parsers.Parser;
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.mad.model.Record;
@@ -29,6 +24,11 @@ import com.arpnetworking.steno.LoggerFactory;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.io.Udp;
+import org.apache.pekko.io.UdpMessage;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;

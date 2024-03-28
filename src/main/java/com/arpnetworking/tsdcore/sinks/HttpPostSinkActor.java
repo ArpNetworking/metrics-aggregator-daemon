@@ -15,9 +15,6 @@
  */
 package com.arpnetworking.tsdcore.sinks;
 
-import akka.actor.AbstractActorWithTimers;
-import akka.actor.Props;
-import akka.pattern.Patterns;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.AggregatedData;
@@ -31,6 +28,9 @@ import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.pekko.actor.AbstractActorWithTimers;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.pattern.Patterns;
 import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Request;
@@ -112,12 +112,12 @@ public class HttpPostSinkActor extends AbstractActorWithTimers {
         _responseStatusName = "sinks/http_post/" + sink.getMetricSafeName() + "/status";
         _samplesDroppedName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_dropped";
         _samplesSentName = "sinks/http_post/" + sink.getMetricSafeName() + "/samples_sent";
-        timers().startTimerAtFixedRate("metrics", SampleMetrics.INSTANCE, Duration.ofSeconds(1), Duration.ofSeconds(1));
     }
 
     @Override
     public void preStart() throws Exception {
         super.preStart();
+        timers().startTimerAtFixedRate("metrics", SampleMetrics.INSTANCE, Duration.ofSeconds(1), Duration.ofSeconds(1));
 
         LOGGER.info()
                 .setMessage("Starting http post sink actor")

@@ -15,9 +15,9 @@
  */
 package com.arpnetworking.metrics.mad.model;
 
-import akka.util.ByteString;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import org.apache.pekko.util.ByteString;
 
 /**
  * Represents a parsable HTTP request.

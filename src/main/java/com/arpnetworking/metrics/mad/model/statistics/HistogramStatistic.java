@@ -53,8 +53,6 @@ public final class HistogramStatistic extends BaseStatistic {
 
     private HistogramStatistic() { }
 
-    private static final long serialVersionUID = 7060886488604176233L;
-
     /**
      * Accumulator computing the histogram of values. There is a dependency on the
      * histogram accumulator from each percentile statistic's calculator.

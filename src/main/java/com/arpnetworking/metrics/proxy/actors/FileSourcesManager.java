@@ -16,8 +16,6 @@
 
 package com.arpnetworking.metrics.proxy.actors;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
 import com.arpnetworking.commons.observer.Observable;
 import com.arpnetworking.commons.observer.Observer;
 import com.arpnetworking.logback.annotations.LogValue;
@@ -34,6 +32,8 @@ import com.arpnetworking.steno.LoggerFactory;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
 
 import java.nio.file.Path;
 import java.time.Duration;

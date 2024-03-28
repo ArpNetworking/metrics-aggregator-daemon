@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.arpnetworking.build</groupId>
     <artifactId>arpnetworking-parent-pom</artifactId>
-    <version>3.0.10</version>
+    <version>3.3.2</version>
     <relativePath />
   </parent>
 
@@ -28,7 +28,7 @@
   <packaging>jar</packaging>
   <name>Metrics Aggregator Daemon</name>
   <description>Aggregates samples published by metrics client libraries and writes to destinations.</description>
-  <version>1.21.13-SNAPSHOT</version>
+  <version>1.22.1-SNAPSHOT</version>
 
   <licenses>
     <license>
@@ -71,41 +71,41 @@
 
   <properties>
     <!--Dependency versions-->
-    <akka.version>2.6.19</akka.version>
-    <akka.http.version>10.2.10</akka.http.version>
     <apache.httpclient.version>4.5.14</apache.httpclient.version>
     <apache.httpcore.version>4.4.16</apache.httpcore.version>
-    <arpnetworking.commons.version>3.0.0</arpnetworking.commons.version>
-    <aspectjrt.version>1.9.19</aspectjrt.version>
+    <arpnetworking.commons.version>3.1.1</arpnetworking.commons.version>
+    <aspectjrt.version>1.9.22</aspectjrt.version>
     <asynchttpclient.version>2.12.3</asynchttpclient.version>
-    <bouncy.castle.version>1.70</bouncy.castle.version>
+    <bouncy.castle.version>1.77</bouncy.castle.version>
     <client.protocol.version>0.12.0</client.protocol.version>
-    <fastutil.version>8.5.12</fastutil.version>
-    <guava.version>32.1.2-jre</guava.version>
+    <fastutil.version>8.5.13</fastutil.version>
+    <guava.version>33.1.0-jre</guava.version>
     <guice.version>7.0.0</guice.version>
-    <jackson.version>2.15.2</jackson.version>
-    <javassist.version>3.29.2-GA</javassist.version>
-    <javassist.maven.core.version>0.2.7</javassist.maven.core.version>
+    <jackson.version>2.17.0</jackson.version>
+    <javassist.version>3.30.2-GA</javassist.version>
+    <javassist.maven.core.version>0.2.8</javassist.maven.core.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <kafka.client.version>3.5.1</kafka.client.version>
-    <logback.version>1.4.8</logback.version>
-    <logback.steno.version>2.1.0</logback.steno.version>
-    <log4j.over.slf4j.version>2.0.7</log4j.over.slf4j.version>
-    <metrics.aggregator.protocol.prometheus.version>1.0.1</metrics.aggregator.protocol.prometheus.version>
-    <metrics.aggregator.protocol.version>1.0.10</metrics.aggregator.protocol.version>
-    <metrics.client.version>0.12.1</metrics.client.version>
-    <metrics.client.http.version>0.12.1</metrics.client.http.version>
-    <metrics.client.incubator.version>0.12.1</metrics.client.incubator.version>
-    <metrics.jvm.extra.version>0.12.1</metrics.jvm.extra.version>
+    <kafka.client.version>3.7.0</kafka.client.version>
+    <logback.version>1.5.3</logback.version>
+    <logback.steno.version>2.1.2</logback.steno.version>
+    <log4j.over.slf4j.version>2.0.12</log4j.over.slf4j.version>
+    <metrics.aggregator.protocol.prometheus.version>1.1.0</metrics.aggregator.protocol.prometheus.version>
+    <metrics.aggregator.protocol.version>1.1.0</metrics.aggregator.protocol.version>
+    <metrics.client.version>0.13.0</metrics.client.version>
+    <metrics.client.http.version>0.13.1</metrics.client.http.version>
+    <metrics.client.incubator.version>0.13.0</metrics.client.incubator.version>
+    <metrics.jvm.extra.version>0.13.1</metrics.jvm.extra.version>
     <oval.version>3.2.1</oval.version>
-    <protobuf.version>3.24.1</protobuf.version>
+    <pekko.version>1.0.2</pekko.version>
+    <pekko.http.version>1.0.1</pekko.http.version>
+    <protobuf.version>3.25.3</protobuf.version>
     <scala.version>2.13</scala.version>
-    <scala.library.version>2.13.11</scala.library.version>
-    <slf4j.version>2.0.7</slf4j.version>
-    <snappy.version>1.1.10.3</snappy.version>
-    <spotbugs.annotations.version>4.7.3</spotbugs.annotations.version>
-    <typesafe.config.version>1.4.2</typesafe.config.version>
-    <vertx.core.version>4.4.4</vertx.core.version>
+    <scala.library.version>2.13.13</scala.library.version>
+    <slf4j.version>2.0.12</slf4j.version>
+    <snappy.version>1.1.10.5</snappy.version>
+    <spotbugs.annotations.version>4.8.3</spotbugs.annotations.version>
+    <typesafe.config.version>1.4.3</typesafe.config.version>
+    <vertx.core.version>4.5.6</vertx.core.version>
     <docker.platforms>linux/amd64</docker.platforms>
 
     <!--Test dependency versions-->
@@ -114,19 +114,19 @@
     <junit.benchmarks.version>0.7.2</junit.benchmarks.version>
     <junit.version>4.13.2</junit.version>
     <metrics.generator.version>1.4.0</metrics.generator.version>
-    <mockito.version>5.4.0</mockito.version>
-    <performance.test.version>1.2.1</performance.test.version>
+    <mockito.version>5.11.0</mockito.version>
+    <performance.test.version>1.2.2</performance.test.version>
     <statsd.client.timgroup>3.1.0</statsd.client.timgroup>
     <wiremock.version>2.27.2</wiremock.version>
 
     <!-- Additional Plugins -->
-    <aspectjtools.maven.plugin>1.9.19</aspectjtools.maven.plugin>
-    <aspectj.maven.plugin.version>1.14.0</aspectj.maven.plugin.version>
-    <build.helper.plugin.version>3.4.0</build.helper.plugin.version>
-    <docker.maven.plugin.version>0.43.4</docker.maven.plugin.version>
-    <javassist.maven.plugin.version>0.2.7</javassist.maven.plugin.version>
-    <maven.assembly.plugin.version>3.6.0</maven.assembly.plugin.version>
-    <maven.properties.plugin.version>1.2.0</maven.properties.plugin.version>
+    <aspectjtools.maven.plugin>1.9.22</aspectjtools.maven.plugin>
+    <aspectj.maven.plugin.version>1.15.0</aspectj.maven.plugin.version>
+    <build.helper.plugin.version>3.5.0</build.helper.plugin.version>
+    <docker.maven.plugin.version>0.44.0</docker.maven.plugin.version>
+    <javassist.maven.plugin.version>0.2.8</javassist.maven.plugin.version>
+    <maven.assembly.plugin.version>3.7.1</maven.assembly.plugin.version>
+    <maven.properties.plugin.version>1.2.1</maven.properties.plugin.version>
     <rpm.maven.plugin.version>2.3.0</rpm.maven.plugin.version>
 
     <!-- Spotbugs -->
@@ -529,6 +529,15 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <ignoredDependencies combine.children="append">
+            <ignoredDependency>io.netty:netty-common:jar:*</ignoredDependency>
+          </ignoredDependencies>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -556,9 +565,9 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-slf4j_${scala.version}</artifactId>
-      <version>${akka.version}</version>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-slf4j_${scala.version}</artifactId>
+      <version>${pekko.version}</version>
       <scope>runtime</scope>
     </dependency>
     <!-- Metrics -->
@@ -715,21 +724,21 @@
       <artifactId>jackson-module-afterburner</artifactId>
       <version>${jackson.version}</version>
     </dependency>
-    <!-- Akka -->
+    <!-- Pekko -->
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-actor_${scala.version}</artifactId>
-      <version>${akka.version}</version>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-actor_${scala.version}</artifactId>
+      <version>${pekko.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-http-core_${scala.version}</artifactId>
-      <version>${akka.http.version}</version>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-http-core_${scala.version}</artifactId>
+      <version>${pekko.http.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-stream_${scala.version}</artifactId>
-      <version>${akka.version}</version>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-stream_${scala.version}</artifactId>
+      <version>${pekko.version}</version>
     </dependency>
     <dependency>
       <groupId>com.typesafe</groupId>
@@ -889,9 +898,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-testkit_${scala.version}</artifactId>
-      <version>${akka.version}</version>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-testkit_${scala.version}</artifactId>
+      <version>${pekko.version}</version>
       <scope>test</scope>
     </dependency>
     <!-- Test - Performance -->
@@ -918,6 +927,14 @@
         <exclusion>
           <groupId>com.google.code.findbugs</groupId>
           <artifactId>findbugs-annotations</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcpkix-jdk15on</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -946,12 +963,12 @@
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
+      <artifactId>bcprov-jdk18on</artifactId>
       <version>${bouncy.castle.version}</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
+      <artifactId>bcpkix-jdk18on</artifactId>
       <version>${bouncy.castle.version}</version>
     </dependency>
   </dependencies>

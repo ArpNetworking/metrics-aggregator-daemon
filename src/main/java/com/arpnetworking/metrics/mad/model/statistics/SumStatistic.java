@@ -44,8 +44,6 @@ public final class SumStatistic extends BaseStatistic {
 
     private SumStatistic() { }
 
-    private static final long serialVersionUID = -1534109546290882210L;
-
     /**
      * Accumulator computing the sum of values.
      *

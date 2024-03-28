@@ -81,7 +81,7 @@ The configuration specifies:
 * httpStatusPath - The path in the http server for the status.
 * jvmMetricsCollectionInterval - The JVM metrics collection interval in ISO-8601 period notation.
 * limiters - Configuration of zero or more limiters by name.
-* akkaConfiguration - Configuration of Akka.
+* pekkoConfiguration - Configuration of Pekko.
 
 For example:
 
@@ -95,14 +95,14 @@ For example:
     "httpHealthCheckPath": "/mad/healthcheck",
     "httpStatusPath": "/mad/status",
     "jvmMetricsCollectionInterval": "PT1.0S",
-    "akkaConfiguration": {
-        "akka": {
+    "pekkoConfiguration": {
+        "pekko": {
             "loggers": [
-                "akka.event.slf4j.Slf4jLogger"
+                "org.apache.pekko.event.slf4j.Slf4jLogger"
             ],
             "loglevel": "DEBUG",
             "stdout-loglevel": "DEBUG",
-            "logging-filter": "akka.event.slf4j.Slf4jLoggingFilter",
+            "logging-filter": "org.apache.pekko.event.slf4j.Slf4jLoggingFilter",
             "actor": {
                 "debug": {
                     "unhandled": "on"

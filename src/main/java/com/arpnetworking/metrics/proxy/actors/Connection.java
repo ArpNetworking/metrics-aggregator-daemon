@@ -15,12 +15,6 @@
  */
 package com.arpnetworking.metrics.proxy.actors;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.http.javadsl.model.ws.Message;
-import akka.http.javadsl.model.ws.TextMessage;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.logback.annotations.LogValue;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
@@ -41,6 +35,12 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.http.javadsl.model.ws.Message;
+import org.apache.pekko.http.javadsl.model.ws.TextMessage;
 
 import java.util.List;
 import java.util.Map;
@@ -52,6 +52,7 @@ import java.util.Set;
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class Connection extends AbstractActor {
+
     /**
      * Public constructor.
      *
@@ -62,7 +63,7 @@ public class Connection extends AbstractActor {
             final PeriodicMetrics metrics,
             final MessageProcessorsFactory processorsFactory) {
         _metrics = metrics;
-        _messageProcessors = processorsFactory.create(this, metrics);
+        _processorsFactory = processorsFactory;
     }
 
     /**
@@ -82,6 +83,12 @@ public class Connection extends AbstractActor {
     }
 
     @Override
+    public void preStart() throws Exception {
+        super.preStart();
+        _messageProcessors = _processorsFactory.create(this, _metrics);
+    }
+
+    @Override
     public Receive createReceive() {
         return receiveBuilder()
                 .match(Connect.class, connect -> {
@@ -94,9 +101,9 @@ public class Connection extends AbstractActor {
                     _telemetry = connect.getTelemetry();
                     _channel = connect.getChannel();
                 })
-                .match(akka.actor.Status.Failure.class, message -> {
+                .match(org.apache.pekko.actor.Status.Failure.class, message -> {
                     // This message is sent by the incoming stream when there is a failure
-                    // in the stream (see akka.stream.javadsl.Sink.scala).
+                    // in the stream (see org.apache.pekko.stream.javadsl.Sink.scala).
                     LOGGER.info()
                             .setMessage("Closing stream")
                             .addData("actor", self())
@@ -322,7 +329,8 @@ public class Connection extends AbstractActor {
     private ActorRef _channel;
 
     private final PeriodicMetrics _metrics;
-    private final List<MessagesProcessor> _messageProcessors;
+    private final MessageProcessorsFactory _processorsFactory;
+    private List<MessagesProcessor> _messageProcessors;
     private final Map<String, Map<String, Set<String>>> _subscriptions = Maps.newHashMap();
 
     private static final String METRICS_PREFIX = "actors/connection/";
