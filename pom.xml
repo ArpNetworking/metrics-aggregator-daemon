@@ -141,6 +141,7 @@
 
     <!-- Docker Overrides -->
     <skipDockerBuild>false</skipDockerBuild>
+    <docker.image.tag>${project.version}</docker.image.tag>
 
     <!-- Assembly Overrides -->
     <tgz.finalName>${project.build.finalName}</tgz.finalName>
@@ -407,7 +408,7 @@
               <goal>push</goal>
             </goals>
             <configuration>
-              <filter>arpnetworking/mad:${project.version}</filter>
+              <filter>arpnetworking/mad:${docker.image.tag}</filter>
             </configuration>
           </execution>
         </executions>
@@ -416,13 +417,18 @@
           <showLogs>true</showLogs>
           <images>
             <image>
-              <name>arpnetworking/mad/kafka:${project.version}</name>
+              <name>arpnetworking/mad/kafka:${docker.image.tag}</name>
               <alias>kafka</alias>
               <build>
                 <dockerFile>${project.basedir}/src/main/docker/kafka/Dockerfile</dockerFile>
                 <tags>
                   <tag>${buildNumber}</tag>
+                  <tag>cache-base</tag>
                 </tags>
+                <cacheFrom>
+                  <image>docker.arpnetworking.com/arpnetworking/mad/kafka:cache-base</image>
+                </cacheFrom>
+
               </build>
               <run>
                 <network>
@@ -442,13 +448,17 @@
               </run>
             </image>
             <image>
-              <name>arpnetworking/mad:${project.version}</name>
+              <name>arpnetworking/mad:${docker.image.tag}</name>
               <alias>mad</alias>
               <build>
                 <dockerFile>${project.build.directory}/docker-assembly/Dockerfile</dockerFile>
                 <tags>
                   <tag>${buildNumber}</tag>
+                  <tag>cache-base</tag>
                 </tags>
+                <cacheFrom>
+                  <image>docker.arpnetworking.com/arpnetworking/mad:cache-base</image>
+                </cacheFrom>
               </build>
               <run>
                 <dependsOn>

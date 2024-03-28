@@ -30,10 +30,10 @@ RUN apt-get -o Acquire::Check-Valid-Until=false update && \
     tar xfz "/tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" -C /opt && \
     rm "/tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz"
 
-ADD scripts/start-kafka.sh /usr/bin/start-kafka.sh
+COPY --link scripts/start-kafka.sh /usr/bin/start-kafka.sh
 
 # Supervisor config
-ADD supervisor/kafka.conf supervisor/zookeeper.conf /etc/supervisor/conf.d/
+COPY --link supervisor/kafka.conf supervisor/zookeeper.conf /etc/supervisor/conf.d/
 
 # 2181 is zookeeper, 9092 is kafka
 # EXPOSE 2181 9092
