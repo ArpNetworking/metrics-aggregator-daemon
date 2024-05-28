@@ -216,6 +216,16 @@ public class HttpSource extends ActorSource {
             return new com.arpnetworking.metrics.mad.model.HttpRequest(pair.second(), pair.first());
         }
 
+        @Override
+        public void postRestart(Throwable reason) throws Exception, Exception {
+            super.postRestart(reason);
+            RESTART_LOGGER.warn()
+                    .setMessage("Restarting HttpSource actor")
+                    .setThrowable(reason)
+                    .log();
+
+        }
+
         private List<Record> parseRecords(final com.arpnetworking.metrics.mad.model.HttpRequest request)
                 throws ParsingException {
             _receivedRequests.incrementAndGet();
@@ -254,6 +264,8 @@ public class HttpSource extends ActorSource {
 
         private static final StatisticFactory STATISTIC_FACTORY = new StatisticFactory();
         private static final Logger BAD_REQUEST_LOGGER =
+                LoggerFactory.getRateLimitLogger(HttpSource.class, Duration.ofSeconds(30));
+        private static final Logger RESTART_LOGGER =
                 LoggerFactory.getRateLimitLogger(HttpSource.class, Duration.ofSeconds(30));
     }
 
