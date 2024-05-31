@@ -172,7 +172,8 @@ public final class StatsdSource extends ActorSource {
                             samples += countStatistic.stream()
                                     .map(s -> s.getValue().getValue())
                                     .reduce(Double::sum)
-                                    .orElse(0.0d);
+                                    .map(Double::longValue)
+                                    .orElse(0L);
                         }
                     }
                 }
