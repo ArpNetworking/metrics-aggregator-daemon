@@ -16,6 +16,7 @@
 package com.arpnetworking.metrics.common.sources;
 
 import com.arpnetworking.commons.observer.Observer;
+import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.DefaultMetric;
 import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
@@ -34,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import scala.concurrent.duration.Duration;
@@ -71,6 +73,7 @@ public final class StatsdSourceTest {
     public void test() {
         final StatsdSource statsdSource = new StatsdSource.Builder()
                 .setActorSystem(_actorSystem)
+                .setPeriodicMetrics(_periodicMetrics)
                 .setActorName("StatsdSourceTest.testActor")
                 .setName("StatsdSourceTest.test")
                 .setPort(1234)
@@ -127,4 +130,6 @@ public final class StatsdSourceTest {
     }
 
     private AutoCloseable _mocks;
+    @Mock
+    private PeriodicMetrics _periodicMetrics;
 }
