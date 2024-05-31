@@ -107,12 +107,12 @@ public final class StatsdSource extends ActorSource {
                 // only created when pipelines are reloaded. To avoid recording values
                 // for dead pipelines this explicitly avoids recording zeroes.
                 final long samples = _receivedSamples.getAndSet(0);
-                final long requests = _receivedPackets.getAndSet(0);
+                final long packets = _receivedPackets.getAndSet(0);
                 if (samples > 0) {
-                    m.recordCounter(String.format("sources/http/%s/metric_samples", _metricSafeName), samples);
+                    m.recordCounter(String.format("sources/statsd/%s/metric_samples", _metricSafeName), samples);
                 }
-                if (requests > 0) {
-                    m.recordCounter(String.format("sources/http/%s/requests", _metricSafeName), requests);
+                if (packets > 0) {
+                    m.recordCounter(String.format("sources/statsd/%s/packets", _metricSafeName), packets);
                 }
             });
         }
