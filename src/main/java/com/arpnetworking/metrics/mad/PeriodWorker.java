@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.AbstractActorWithTimers;
 import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -44,10 +45,33 @@ import java.util.TreeMap;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 /* package private */ final class PeriodWorker extends AbstractActorWithTimers {
+    /**
+     * Public constructor. Use {@code props} to create instances.
+     *
+     * @param aggregator The {@code ActorRef} to the aggregator.
+     * @param key The key for the data slice.
+     * @param period The period for the data slice.
+     * @param idleTimeout The idle timeout for the data slice.
+     * @param bucketBuilder The {@code Bucket.Builder} to use to create buckets.
+     * @param periodicMetrics The {@code PeriodicMetrics} instance to record metrics.
+     */
+    public static Props props(
+            final ActorRef aggregator,
+            final Key key,
+            final Duration period,
+            final Duration idleTimeout,
+            final Bucket.Builder bucketBuilder,
+            final PeriodicMetrics periodicMetrics) {
+        return Props.create(
+                PeriodWorker.class,
+                () -> new PeriodWorker(aggregator, key, period, idleTimeout, bucketBuilder, periodicMetrics));
+
+
+    }
 
     /**
      * Public constructor. Since this is an {@code Actor} this method should not be
-     * called directly, but instead you should use {@code Props}.
+     * called directly, but instead you should use {@code PeriodWorker::props}.
      */
     PeriodWorker(
             final ActorRef aggregator,
@@ -102,6 +126,12 @@ import java.util.TreeMap;
     @Override
     public void preRestart(final Throwable reason, final Optional<Object> message) throws Exception {
         _periodicMetrics.recordCounter("actors/period_worker/restarted", 1);
+        LOGGER.error()
+                .setMessage("Restarting")
+                .addData("periodWorker", self())
+                .addData("reason", reason)
+                .addData("message", message)
+                .log();
     }
 
     @Override

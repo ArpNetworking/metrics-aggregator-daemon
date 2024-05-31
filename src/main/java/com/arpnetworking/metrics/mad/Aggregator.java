@@ -82,7 +82,7 @@ public final class Aggregator implements Observer, Launchable {
                 .addData("actors", instances)
                 .log();
         for (int i = 0; i < instances; ++i) {
-            _actors.add(_actorSystem.actorOf(Actor.props(this)));
+            _actors.add(_actorSystem.actorOf(Actor.props(this), "aggregator-" + i));
         }
     }
 
@@ -178,40 +178,6 @@ public final class Aggregator implements Observer, Launchable {
     @Override
     public String toString() {
         return toLogValue().toString();
-    }
-
-    private List<ActorRef> createActors(final Key key, final ActorRef aggregatorActor) {
-        final List<ActorRef> periodWorkerList = Lists.newArrayListWithExpectedSize(_periods.size());
-        for (final Duration period : _periods) {
-            final Bucket.Builder bucketBuilder = new Bucket.Builder()
-                    .setKey(key)
-                    .setSpecifiedCounterStatistics(_specifiedCounterStatistics)
-                    .setSpecifiedGaugeStatistics(_specifiedGaugeStatistics)
-                    .setSpecifiedTimerStatistics(_specifiedTimerStatistics)
-                    .setDependentCounterStatistics(_dependentCounterStatistics)
-                    .setDependentGaugeStatistics(_dependentGaugeStatistics)
-                    .setDependentTimerStatistics(_dependentTimerStatistics)
-                    .setSpecifiedStatistics(_cachedSpecifiedStatistics)
-                    .setDependentStatistics(_cachedDependentStatistics)
-                    .setPeriod(period)
-                    .setSink(_sink);
-            periodWorkerList.add(
-                    _actorSystem.actorOf(
-                            Props.create(
-                                    PeriodWorker.class,
-                                    aggregatorActor,
-                                    key,
-                                    period,
-                                    _idleTimeout,
-                                    bucketBuilder,
-                                    _periodicMetrics)));
-        }
-        LOGGER.debug()
-                .setMessage("Created period worker actors")
-                .addData("key", key)
-                .addData("periodWorkersSize", periodWorkerList.size())
-                .log();
-        return periodWorkerList;
     }
 
     private List<CompletableFuture<Boolean>> shutdownActors(final List<ActorRef> actors, final Object message) {
@@ -362,6 +328,12 @@ public final class Aggregator implements Observer, Launchable {
         @Override
         public void preRestart(final Throwable reason, final Optional<Object> message) {
             _aggregator._periodicMetrics.recordCounter("actors/aggregator/restarted", 1);
+            LOGGER.error()
+                    .setMessage("Aggregator actor restarting")
+                    .addData("aggregatorActor", self())
+                    .addData("reason", reason)
+                    .addData("message", message)
+                    .log();
         }
 
         @Override
@@ -454,12 +426,45 @@ public final class Aggregator implements Observer, Launchable {
 
             List<ActorRef> periodWorkers = _periodWorkerActors.get(key);
             if (periodWorkers == null) {
-                periodWorkers = _aggregator.createActors(key, self());
+                periodWorkers = createPeriodWorkerActors(key, _aggregator);
                 _periodWorkerActors.put(key, periodWorkers);
             }
             for (final ActorRef periodWorkerActor : periodWorkers) {
                 periodWorkerActor.tell(record, self());
             }
+        }
+
+        private List<ActorRef> createPeriodWorkerActors(final Key key, final Aggregator aggregator) {
+            final List<ActorRef> periodWorkerList = Lists.newArrayListWithExpectedSize(aggregator._periods.size());
+            for (final Duration period : aggregator._periods) {
+                final Bucket.Builder bucketBuilder = new Bucket.Builder()
+                        .setKey(key)
+                        .setSpecifiedCounterStatistics(aggregator._specifiedCounterStatistics)
+                        .setSpecifiedGaugeStatistics(aggregator._specifiedGaugeStatistics)
+                        .setSpecifiedTimerStatistics(aggregator._specifiedTimerStatistics)
+                        .setDependentCounterStatistics(aggregator._dependentCounterStatistics)
+                        .setDependentGaugeStatistics(aggregator._dependentGaugeStatistics)
+                        .setDependentTimerStatistics(aggregator._dependentTimerStatistics)
+                        .setSpecifiedStatistics(aggregator._cachedSpecifiedStatistics)
+                        .setDependentStatistics(aggregator._cachedDependentStatistics)
+                        .setPeriod(period)
+                        .setSink(aggregator._sink);
+                periodWorkerList.add(
+                        context().actorOf(
+                                PeriodWorker.props(
+                                        self(),
+                                        key,
+                                        period,
+                                        aggregator._idleTimeout,
+                                        bucketBuilder,
+                                        aggregator._periodicMetrics)));
+            }
+            LOGGER.debug()
+                    .setMessage("Created period worker actors")
+                    .addData("key", key)
+                    .addData("periodWorkersSize", periodWorkerList.size())
+                    .log();
+            return periodWorkerList;
         }
 
         /**
