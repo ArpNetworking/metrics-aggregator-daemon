@@ -231,13 +231,15 @@ public class HttpPostSinkActor extends AbstractActorWithTimers {
         _inflightRequestsCount--;
         final Response response = rejected.getResponse();
         final Optional<String> responseBody = Optional.ofNullable(response.getResponseBody());
+        final byte[] requestBodyBytes = rejected.getRequest().getByteData();
+        // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
+        final String requestBody = requestBodyBytes == null ? null : new String(requestBodyBytes, Charsets.UTF_8);
+        // CHECKSTYLE.ON: IllegalInstantiation
         LOGGER.warn()
                 .setMessage("Post rejected")
                 .addData("sink", _sink)
                 .addData("status", response.getStatusCode())
-                // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
-                .addData("request", new String(rejected.getRequest().getByteData(), Charsets.UTF_8))
-                // CHECKSTYLE.ON: IllegalInstantiation
+                .addData("request", requestBody)
                 .addData("response", responseBody)
                 .addContext("actor", self())
                 .log();
