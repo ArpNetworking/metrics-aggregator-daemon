@@ -75,7 +75,7 @@
     <apache.httpcore.version>4.4.16</apache.httpcore.version>
     <arpnetworking.commons.version>3.1.1</arpnetworking.commons.version>
     <aspectjrt.version>1.9.22.1</aspectjrt.version>
-    <asynchttpclient.version>2.12.3</asynchttpclient.version>
+    <asynchttpclient.version>3.0.0</asynchttpclient.version>
     <bouncy.castle.version>1.78.1</bouncy.castle.version>
     <client.protocol.version>0.12.0</client.protocol.version>
     <fastutil.version>8.5.14</fastutil.version>
