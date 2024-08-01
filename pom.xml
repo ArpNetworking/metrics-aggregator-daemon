@@ -109,7 +109,7 @@
 
     <!--Test dependency versions-->
     <commons.math3.version>3.6.1</commons.math3.version>
-    <hamcrest.version>2.2</hamcrest.version>
+    <hamcrest.version>3.0</hamcrest.version>
     <junit.benchmarks.version>0.7.2</junit.benchmarks.version>
     <junit.version>4.13.2</junit.version>
     <metrics.generator.version>1.4.0</metrics.generator.version>
