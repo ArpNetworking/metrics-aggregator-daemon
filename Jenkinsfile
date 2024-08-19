@@ -76,7 +76,7 @@ pipeline {
     always {
       recordIssues(
           enabledForFailure: true, aggregatingResults: true,
-          tools: [java(), checkStyle(reportEncoding: 'UTF-8'), spotBugs()])
+          tools: [java(), mavenConsole(), javaDoc(), checkStyle(reportEncoding: 'UTF-8'), spotBugs()])
     }
   }
 }
