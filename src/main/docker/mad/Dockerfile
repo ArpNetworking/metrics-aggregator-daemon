@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:17-slim-bullseye
+FROM eclipse-temurin:17-jre
 
 MAINTAINER arpnetworking
 
@@ -21,8 +21,8 @@ WORKDIR /opt/mad
 
 # Configuration
 ENV MAD_USER="mad"
-ENV MAD_UID=1000
-ENV MAD_GID=1000
+ENV MAD_UID=1001
+ENV MAD_GID=1001
 ENV JVM_XMS="64m"
 ENV JVM_XMX="1024m"
 ENV LOGBACK_CONFIG="-Dlogback.configurationFile=/opt/mad/config/logback-console.xml"
@@ -31,7 +31,7 @@ ENV JAVA_OPTS=""
 
 # Build
 RUN apt update && \
-    DEBIAN_FRONTEND=noninteractive apt install -y gosu openssl && \
+    DEBIAN_FRONTEND=noninteractive apt install -y gosu && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean && \
     mkdir -p /opt/mad/lib/ext && \
