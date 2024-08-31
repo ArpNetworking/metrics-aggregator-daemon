@@ -143,6 +143,9 @@ public final class PeriodicDataToProtoConverter {
             }
             builder.setUnit(unit);
 
+            // Need to add 1 since 0 is the default value and indicates no precision was set.
+            builder.setPrecision(histogram.getPrecision() + 1);
+
             for (final Map.Entry<Double, Long> entry : histogram.getValues()) {
                 builder.addEntriesBuilder()
                         .setBucket(entry.getKey())
