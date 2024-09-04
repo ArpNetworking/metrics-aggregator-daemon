@@ -96,7 +96,7 @@
     <metrics.client.incubator.version>0.13.0</metrics.client.incubator.version>
     <metrics.jvm.extra.version>0.13.1</metrics.jvm.extra.version>
     <oval.version>3.2.1</oval.version>
-    <pekko.version>1.0.3</pekko.version>
+    <pekko.version>1.1.0</pekko.version>
     <pekko.http.version>1.0.1</pekko.http.version>
     <protobuf.version>3.25.3</protobuf.version>
     <scala.version>2.13</scala.version>
