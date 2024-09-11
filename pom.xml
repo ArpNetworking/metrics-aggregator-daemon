@@ -102,7 +102,7 @@
     <scala.version>2.13</scala.version>
     <scala.library.version>2.13.14</scala.library.version>
     <slf4j.version>2.0.16</slf4j.version>
-    <snappy.version>1.1.10.6</snappy.version>
+    <snappy.version>1.1.10.7</snappy.version>
     <spotbugs.annotations.version>4.8.6</spotbugs.annotations.version>
     <typesafe.config.version>1.4.3</typesafe.config.version>
     <vertx.core.version>4.5.10</vertx.core.version>
