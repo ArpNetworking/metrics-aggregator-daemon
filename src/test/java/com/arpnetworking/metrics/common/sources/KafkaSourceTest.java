@@ -24,11 +24,12 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.test.CollectorPeriodicMetrics;
 import com.arpnetworking.test.StringToRecordParser;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.MockConsumer;
-import org.apache.kafka.clients.consumer.OffsetResetStrategy;
+import org.apache.kafka.clients.consumer.internals.AutoOffsetResetStrategy;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
 import org.junit.After;
@@ -327,7 +328,7 @@ public class KafkaSourceTest {
 
     private static MockConsumer<String, String> createMockConsumer(
             final ConsumerRecords<String, String> consumerRecords) {
-        final MockConsumer<String, String> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
+        final MockConsumer<String, String> consumer = new MockConsumer<>(AutoOffsetResetStrategy.StrategyType.EARLIEST.toString());
         consumer.assign(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
         consumer.updateBeginningOffsets(Collections.singletonMap(new TopicPartition(TOPIC, PARTITION), 0L));
         for (final ConsumerRecord<String, String> record : consumerRecords) {
@@ -342,7 +343,9 @@ public class KafkaSourceTest {
         for (final String value : EXPECTED) {
             records.add(new ConsumerRecord<>(TOPIC, PARTITION, offset++, "" + offset, value));
         }
-        return new ConsumerRecords<>(Collections.singletonMap(new TopicPartition(TOPIC, PARTITION), records));
+        return new ConsumerRecords<>(
+                Collections.singletonMap(new TopicPartition(TOPIC, PARTITION), records),
+                Maps.newHashMap());
     }
 
     private static class FillingBlockingQueue extends ArrayBlockingQueue<String> {
