@@ -30,7 +30,6 @@ import com.arpnetworking.metrics.proxy.models.protocol.v2.ProcessorsV2Factory;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
-import com.google.common.base.Charsets;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
@@ -62,6 +61,7 @@ import org.apache.pekko.util.ByteString;
 import org.apache.pekko.util.Timeout;
 
 import java.io.Serial;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
@@ -388,7 +388,7 @@ public final class Routes implements Function<HttpRequest, CompletionStage<HttpR
     static {
         String statusJson = "{}";
         try {
-            statusJson = Resources.toString(Resources.getResource("status.json"), Charsets.UTF_8);
+            statusJson = Resources.toString(Resources.getResource("status.json"), StandardCharsets.UTF_8);
             // CHECKSTYLE.OFF: IllegalCatch - Prevent program shutdown
         } catch (final Exception e) {
             // CHECKSTYLE.ON: IllegalCatch

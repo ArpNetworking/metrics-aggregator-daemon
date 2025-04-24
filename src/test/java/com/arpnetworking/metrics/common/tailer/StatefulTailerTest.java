@@ -17,7 +17,6 @@
 package com.arpnetworking.metrics.common.tailer;
 
 import com.arpnetworking.utility.ManualSingleThreadedTrigger;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,7 +70,7 @@ public class StatefulTailerTest {
     @Test
     public void testReadData() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 10, expectedValues);
         }
 
@@ -87,7 +87,7 @@ public class StatefulTailerTest {
         Mockito.verify(_listener, Mockito.never()).handle(Mockito.any(Throwable.class));
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -98,7 +98,7 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 10, expectedValues);
         }
 
@@ -116,14 +116,14 @@ public class StatefulTailerTest {
         Mockito.verify(_listener, Mockito.atLeastOnce()).fileNotFound();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testReadDataDifferentLineTerminators() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             for (int i = 0; i < 12; ++i) {
                 final String value = UUID.randomUUID().toString();
                 expectedValues.add(value);
@@ -150,13 +150,13 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).initialize(_tailer);
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testTailData() throws IOException, InterruptedException {
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             _executor.execute(_tailer);
             Mockito.verify(_listener).initialize(_tailer);
 
@@ -169,7 +169,7 @@ public class StatefulTailerTest {
                 writer.flush();
                 _readTrigger.releaseTrigger();
                 _readTrigger.waitForWait();
-                Mockito.verify(_listener).handle(value.getBytes(Charsets.UTF_8));
+                Mockito.verify(_listener).handle(value.getBytes(StandardCharsets.UTF_8));
             }
 
             _readTrigger.disable();
@@ -188,7 +188,7 @@ public class StatefulTailerTest {
     public void testReadDataWithZeroOffset() throws IOException, InterruptedException {
         Mockito.when(_positionStore.getPosition(Mockito.anyString())).thenReturn(Optional.of(0L));
 
-        final BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
+        final BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
 
         final List<String> expectedValues = Lists.newArrayList();
         writeUuids(writer, 5, expectedValues);
@@ -209,13 +209,13 @@ public class StatefulTailerTest {
         _executor.awaitTermination(EXECUTOR_TERMINATE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testReadDataWithNonZeroOffsetInSmallFile() throws IOException, InterruptedException {
-        final BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
+        final BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
 
         // Insufficient data for hash; 5 * (36 + 1) = 185 bytes; 20 UUIDs of 36 characters plus line break
         final List<String> expectedValues = Lists.newArrayList();
@@ -241,7 +241,7 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).initialize(_tailer);
         Mockito.verify(_listener).fileOpened();
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
         Mockito.verifyNoMoreInteractions(_listener);
     }
@@ -252,7 +252,7 @@ public class StatefulTailerTest {
         Mockito.when(_positionStore.getPosition(Mockito.anyString())).thenReturn(Optional.of(555L));
         Mockito.doNothing().when(_positionStore).setPosition(Mockito.anyString(), Mockito.anyLong());
 
-        final BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
+        final BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
 
         final List<String> expectedValues = Lists.newArrayList();
         for (int i = 0; i < 15; ++i) {
@@ -280,7 +280,7 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).initialize(_tailer);
         Mockito.verify(_listener).fileOpened();
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
         Mockito.verifyNoMoreInteractions(_listener);
     }
@@ -288,7 +288,7 @@ public class StatefulTailerTest {
     @Test
     public void testRotateCopyTruncateLessData() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 5, expectedValues);
         }
 
@@ -304,7 +304,7 @@ public class StatefulTailerTest {
         // NOTE: This ensures the reader does not read duplicate data either from the old or new file
 
         // Write _less_ data to the new file
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)) {
             writeUuids(writer, 4, expectedValues);
         }
 
@@ -325,14 +325,14 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testRotateCopyTruncateEqualLengthData() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 5, expectedValues);
         }
         final BasicFileAttributes attributes = Files.readAttributes(_file, BasicFileAttributes.class);
@@ -353,7 +353,7 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write _same length_ of data to the new file
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)) {
             writeUuids(writer, 5, expectedValues);
         }
 
@@ -377,7 +377,7 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -393,7 +393,7 @@ public class StatefulTailerTest {
         // ** IMPORTANT **
 
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 5, expectedValues);
         }
 
@@ -413,7 +413,7 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write _same_ data to the new file
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)) {
             for (int i = 0; i < 5; ++i) {
                 writer.write(UUID.randomUUID().toString() + "\n");
             }
@@ -436,14 +436,14 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).initialize(_tailer);
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testRotateRenameRecreateLessData() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 5, expectedValues);
         }
 
@@ -463,7 +463,7 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write _less_ data to the new file
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 4, expectedValues);
         }
 
@@ -484,13 +484,13 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testRotateRenameRecreateLessDataWriteToOldAfterRotate() throws IOException, InterruptedException {
-        final BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
+        final BufferedWriter writerOld = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
         writeUuids(writerOld, 5, expectedValues);
 
@@ -511,7 +511,7 @@ public class StatefulTailerTest {
         writerOld.close();
 
         // Write _less_ data to the new file
-        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writerNew, 4, expectedValues);
         }
 
@@ -532,13 +532,13 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testRotateRenameRecreateLessDataWriteToOldAfterRotateNoDelay() throws IOException, InterruptedException {
-        final BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW);
+        final BufferedWriter writerOld = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
         final List<String> expectedValues = Lists.newArrayList();
         writeUuids(writerOld, 5, expectedValues);
 
@@ -555,7 +555,7 @@ public class StatefulTailerTest {
         writerOld.close();
 
         // Write _less_ data to the new file
-        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writerNew, 4, expectedValues);
         }
 
@@ -580,14 +580,14 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testRotateRenameRecreateEqualData() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 5, expectedValues);
         }
         final BasicFileAttributes attributes = Files.readAttributes(_file, BasicFileAttributes.class);
@@ -608,7 +608,7 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write _less_ data to the new file
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 5, expectedValues);
         }
 
@@ -633,14 +633,14 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testRotateRenameRecreateEqualDataWriteToOldAfterRotate() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writerOld, 5, expectedValues);
 
             _executor.execute(_tailer);
@@ -660,7 +660,7 @@ public class StatefulTailerTest {
         }
 
         // Write _equal_ data to the new file
-        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writerNew, 10, expectedValues);
         }
 
@@ -681,14 +681,14 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testRotateRenameRecreateEqualDataWriteToOldAfterRotateNoDelay() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writerOld, 5, expectedValues);
 
             _executor.execute(_tailer);
@@ -704,7 +704,7 @@ public class StatefulTailerTest {
         }
 
         // Write _equal_ data to the new file
-        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writerNew, 10, expectedValues);
         }
 
@@ -725,14 +725,14 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testRotateRenameRecreateMoreData() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 5, expectedValues);
         }
 
@@ -753,7 +753,7 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write _more_ data to the new file
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 10, expectedValues);
         }
 
@@ -774,14 +774,14 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testRotateRenameRecreateMoreDataWithCheckpointing() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 5, expectedValues);
         }
 
@@ -801,7 +801,7 @@ public class StatefulTailerTest {
         _readTrigger.waitForWait();
 
         // Write data to the new file sufficient to checkpoint
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writer, 15, expectedValues);
         }
 
@@ -822,14 +822,14 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.atLeastOnce()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testRotateRenameRecreateMoreDataWriteToOldAfterRotate() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writerOld, 5, expectedValues);
 
             _executor.execute(_tailer);
@@ -846,7 +846,7 @@ public class StatefulTailerTest {
         }
 
         // Write data to the new file
-        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writerNew, 11, expectedValues);
         }
 
@@ -866,14 +866,14 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Test
     public void testRotateRenameRecreateMoreDataWriteToOldAfterRotateNoDelay() throws IOException, InterruptedException {
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writerOld, 5, expectedValues);
 
             _executor.execute(_tailer);
@@ -889,7 +889,7 @@ public class StatefulTailerTest {
             writeUuids(writerOld, 5, expectedValues);
         }
 
-        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             // Write _more_ data to the new file
             writeUuids(writerNew, 11, expectedValues);
         }
@@ -910,7 +910,7 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileRotated();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -927,7 +927,7 @@ public class StatefulTailerTest {
         // ** IMPORTANT **
 
         final List<String> expectedValues = Lists.newArrayList();
-        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerOld = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(writerOld, 5, expectedValues);
         }
         final BasicFileAttributes attributes = Files.readAttributes(_file, BasicFileAttributes.class);
@@ -942,7 +942,7 @@ public class StatefulTailerTest {
         Files.move(_file, oldFile.toPath());
 
         // Write _exact same_ data to the new file
-        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writerNew = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             for (int i = 0; i < 5; ++i) {
                 writerNew.write(expectedValues.get(i) + "\n");
             }
@@ -966,7 +966,7 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileOpened();
         Mockito.verify(_positionStore, Mockito.never()).getPosition(Mockito.anyString());
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
 
         // BUG 1: File rotation is not detected
@@ -996,7 +996,7 @@ public class StatefulTailerTest {
         final List<String> expectedValues = Lists.newArrayList();
         _tailer = new StatefulTailer(builder, _readTrigger);
         Mockito.doNothing().when(_positionStore).setPosition(Mockito.anyString(), Mockito.anyLong());
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             for (int i = 0; i < 15; ++i) {
                 writer.write(UUID.randomUUID().toString() + "\n");
             }
@@ -1021,7 +1021,7 @@ public class StatefulTailerTest {
         Mockito.verify(_listener).fileOpened();
         Mockito.verify(_listener).initialize(_tailer);
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
         Mockito.verifyNoMoreInteractions(_listener);
     }
@@ -1041,7 +1041,7 @@ public class StatefulTailerTest {
 
         _tailer = new StatefulTailer(builder, _readTrigger);
         Mockito.doNothing().when(_positionStore).setPosition(Mockito.anyString(), Mockito.anyLong());
-        try (BufferedWriter writer = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
 
             for (int i = 0; i < 15; ++i) {
                 writer.write(UUID.randomUUID().toString() + "\n");
@@ -1060,7 +1060,7 @@ public class StatefulTailerTest {
         Files.move(_file, oldFile.toPath());
 
         // Write _more_ data to the new file
-        try (BufferedWriter newWriter = Files.newBufferedWriter(_file, Charsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+        try (BufferedWriter newWriter = Files.newBufferedWriter(_file, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             writeUuids(newWriter, 10, expectedValues);
         }
 
@@ -1085,7 +1085,7 @@ public class StatefulTailerTest {
         Mockito.verify(_listener, Mockito.times(2)).fileOpened();
         Mockito.verify(_listener).fileRotated();
         for (final String expectedValue : expectedValues) {
-            Mockito.verify(_listener).handle(expectedValue.getBytes(Charsets.UTF_8));
+            Mockito.verify(_listener).handle(expectedValue.getBytes(StandardCharsets.UTF_8));
         }
         Mockito.verifyNoMoreInteractions(_listener);
     }

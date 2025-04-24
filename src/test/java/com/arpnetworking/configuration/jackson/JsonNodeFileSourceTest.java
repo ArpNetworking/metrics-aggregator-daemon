@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.configuration.jackson;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -23,6 +22,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 
@@ -50,7 +50,7 @@ public class JsonNodeFileSourceTest {
     @Test
     public void testFileUnreadable() throws IOException {
         final File file = new File("./target/tmp/filter/JsonNodeFileSourceTest/testFileUnreadable.json");
-        Files.write(file.toPath(), "{\"foo\":\"bar\"}".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "{\"foo\":\"bar\"}".getBytes(StandardCharsets.UTF_8));
         Files.setPosixFilePermissions(file.toPath(), ImmutableSet.of(PosixFilePermission.OWNER_WRITE));
         final JsonNodeFileSource source = new JsonNodeFileSource.Builder()
                 .setFile(file)
@@ -61,7 +61,7 @@ public class JsonNodeFileSourceTest {
     @Test
     public void testValidJson() throws IOException {
         final File file = new File("./target/tmp/filter/JsonNodeFileSourceTest/testValidJson.json");
-        Files.write(file.toPath(), "{\"foo\":\"bar\"}".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "{\"foo\":\"bar\"}".getBytes(StandardCharsets.UTF_8));
         final JsonNodeFileSource source = new JsonNodeFileSource.Builder()
                 .setFile(file)
                 .build();
@@ -73,7 +73,7 @@ public class JsonNodeFileSourceTest {
     @Test(expected = RuntimeException.class)
     public void testInvalidJson() throws IOException {
         final File file = new File("./target/tmp/filter/JsonNodeFileSourceTest/testInvalidJson.json");
-        Files.write(file.toPath(), "This=not-json".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "This=not-json".getBytes(StandardCharsets.UTF_8));
         new JsonNodeFileSource.Builder()
                 .setFile(file)
                 .build();

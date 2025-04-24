@@ -22,7 +22,6 @@ import com.arpnetworking.metrics.generator.util.TestFileGenerator;
 import com.arpnetworking.metrics.mad.Pipeline;
 import com.arpnetworking.metrics.mad.configuration.PipelineConfiguration;
 import com.arpnetworking.tsdcore.sinks.Sink;
-import com.google.common.base.Charsets;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -34,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +62,7 @@ public class FilePerfTestBase {
             final ImmutableMap<String, String> variables)
             throws IOException {
         // Replace any variables in the configuration file
-        String configuration = Resources.toString(Resources.getResource(pipelineConfigurationFile), Charsets.UTF_8);
+        String configuration = Resources.toString(Resources.getResource(pipelineConfigurationFile), StandardCharsets.UTF_8);
         for (final Map.Entry<String, String> entry : variables.entrySet()) {
             configuration = configuration.replace(entry.getKey(), entry.getValue());
         }

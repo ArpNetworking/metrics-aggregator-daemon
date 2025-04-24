@@ -22,7 +22,6 @@ import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.incubator.PeriodicMetrics;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.test.TestBeanFactory;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.http.javadsl.model.HttpRequest;
@@ -37,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -72,7 +72,7 @@ public final class CollectdHttpSourceV1Test extends BaseActorSourceTest {
 
     @Test
     public void testParsesEntity() throws ParsingException {
-        final byte[] entity = "not a json document".getBytes(Charsets.UTF_8);
+        final byte[] entity = "not a json document".getBytes(StandardCharsets.UTF_8);
         Mockito.when(_parser.parse(Mockito.any())).thenThrow(new ParsingException("test exception", new byte[0]));
         dispatchRequest(HttpRequest.create().withEntity(entity).addHeader(RawHeader.create("x-tag-foo", "bar")));
         final ArgumentCaptor<com.arpnetworking.metrics.mad.model.HttpRequest> captor =

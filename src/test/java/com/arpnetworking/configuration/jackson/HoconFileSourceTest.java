@@ -15,7 +15,6 @@
  */
 package com.arpnetworking.configuration.jackson;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import com.typesafe.config.impl.ConfigImpl;
 import org.junit.Assert;
@@ -24,6 +23,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 
@@ -54,7 +54,7 @@ public class HoconFileSourceTest {
     @Test
     public void testFileUnreadable() throws IOException {
         final File file = new File("./target/tmp/filter/HoconFileSourceTest/testFileUnreadable.json");
-        Files.write(file.toPath(), "foo=\"bar\"".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "foo=\"bar\"".getBytes(StandardCharsets.UTF_8));
         Files.setPosixFilePermissions(file.toPath(), ImmutableSet.of(PosixFilePermission.OWNER_WRITE));
         final HoconFileSource source = new HoconFileSource.Builder()
                 .setFile(file)
@@ -65,7 +65,7 @@ public class HoconFileSourceTest {
     @Test
     public void testValidHocon() throws IOException {
         final File file = new File("./target/tmp/filter/HoconFileSourceTest/testValidHocon.conf");
-        Files.write(file.toPath(), "foo:\"bar\"".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "foo:\"bar\"".getBytes(StandardCharsets.UTF_8));
         final HoconFileSource source = new HoconFileSource.Builder()
                 .setFile(file)
                 .build();
@@ -77,7 +77,7 @@ public class HoconFileSourceTest {
     @Test
     public void testSystemPropertyDirect() throws IOException {
         final File file = new File("./target/tmp/filter/HoconFileSourceTest/testSystemPropertyDirect.hocon");
-        Files.write(file.toPath(), "".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "".getBytes(StandardCharsets.UTF_8));
         final HoconFileSource source = new HoconFileSource.Builder()
                 .setFile(file)
                 .build();
@@ -88,7 +88,7 @@ public class HoconFileSourceTest {
     @Test
     public void testSystemPropertyReference() throws IOException {
         final File file = new File("./target/tmp/filter/HoconFileSourceTest/testSystemPropertyReference.hocon");
-        Files.write(file.toPath(), "foo:${HoconFileSourceTest_testSystemPropertyReference_foo}".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "foo:${HoconFileSourceTest_testSystemPropertyReference_foo}".getBytes(StandardCharsets.UTF_8));
         final HoconFileSource source = new HoconFileSource.Builder()
                 .setFile(file)
                 .build();
@@ -99,7 +99,7 @@ public class HoconFileSourceTest {
     @Test(expected = RuntimeException.class)
     public void testInvalidHocon() throws IOException {
         final File file = new File("./target/tmp/filter/HoconFileSourceTest/testInvalidHocon.json");
-        Files.write(file.toPath(), "This=\"not-hocon".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "This=\"not-hocon".getBytes(StandardCharsets.UTF_8));
         new HoconFileSource.Builder()
                 .setFile(file)
                 .build();

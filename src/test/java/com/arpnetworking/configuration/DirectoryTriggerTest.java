@@ -16,13 +16,13 @@
 package com.arpnetworking.configuration;
 
 import com.arpnetworking.configuration.triggers.DirectoryTrigger;
-import com.google.common.base.Charsets;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -112,7 +112,7 @@ public class DirectoryTriggerTest {
         Assert.assertTrue(trigger.evaluateAndReset());
         Assert.assertFalse(trigger.evaluateAndReset());
 
-        Files.write(directory.toPath().resolve("foo.txt"), "bar".getBytes(Charsets.UTF_8));
+        Files.write(directory.toPath().resolve("foo.txt"), "bar".getBytes(StandardCharsets.UTF_8));
 
         Assert.assertTrue(trigger.evaluateAndReset());
     }
@@ -134,7 +134,7 @@ public class DirectoryTriggerTest {
 
         // Ensure file system modified time reflects the change
         Thread.sleep(1000);
-        Files.write(file.toPath(), "bar".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "bar".getBytes(StandardCharsets.UTF_8));
 
         Assert.assertTrue(trigger.evaluateAndReset());
     }
@@ -145,7 +145,7 @@ public class DirectoryTriggerTest {
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
         final File file = directory.toPath().resolve("foo.txt").toFile();
-        Files.write(file.toPath(), "bar".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "bar".getBytes(StandardCharsets.UTF_8));
 
         final Trigger trigger = new DirectoryTrigger.Builder()
                 .setDirectory(directory)
@@ -173,10 +173,10 @@ public class DirectoryTriggerTest {
         Assert.assertTrue(trigger.evaluateAndReset());
         Assert.assertFalse(trigger.evaluateAndReset());
 
-        Files.write(directory.toPath().resolve("foo.txt"), "bar".getBytes(Charsets.UTF_8));
+        Files.write(directory.toPath().resolve("foo.txt"), "bar".getBytes(StandardCharsets.UTF_8));
         Assert.assertFalse(trigger.evaluateAndReset());
 
-        Files.write(directory.toPath().resolve("bar.txt"), "bar".getBytes(Charsets.UTF_8));
+        Files.write(directory.toPath().resolve("bar.txt"), "bar".getBytes(StandardCharsets.UTF_8));
         Assert.assertTrue(trigger.evaluateAndReset());
     }
 
@@ -194,10 +194,10 @@ public class DirectoryTriggerTest {
         Assert.assertTrue(trigger.evaluateAndReset());
         Assert.assertFalse(trigger.evaluateAndReset());
 
-        Files.write(directory.toPath().resolve("foo.txt"), "bar".getBytes(Charsets.UTF_8));
+        Files.write(directory.toPath().resolve("foo.txt"), "bar".getBytes(StandardCharsets.UTF_8));
         Assert.assertFalse(trigger.evaluateAndReset());
 
-        Files.write(directory.toPath().resolve("foo.json"), "bar".getBytes(Charsets.UTF_8));
+        Files.write(directory.toPath().resolve("foo.json"), "bar".getBytes(StandardCharsets.UTF_8));
         Assert.assertTrue(trigger.evaluateAndReset());
     }
 

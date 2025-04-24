@@ -17,13 +17,13 @@ package com.arpnetworking.configuration.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.common.base.Charsets;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,8 +66,8 @@ public class JsonNodeDirectorySourceTest {
         final File directory = new File("./target/tmp/filter/JsonNodeDirectorySourceTest/testDirectoryAll");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
-        Files.write(directory.toPath().resolve("foo.json"), "[\"one\"]".getBytes(Charsets.UTF_8));
-        Files.write(directory.toPath().resolve("bar.txt"), "[\"two\"]".getBytes(Charsets.UTF_8));
+        Files.write(directory.toPath().resolve("foo.json"), "[\"one\"]".getBytes(StandardCharsets.UTF_8));
+        Files.write(directory.toPath().resolve("bar.txt"), "[\"two\"]".getBytes(StandardCharsets.UTF_8));
         final JsonNodeDirectorySource source = new JsonNodeDirectorySource.Builder()
                 .setDirectory(directory)
                 .build();
@@ -84,8 +84,8 @@ public class JsonNodeDirectorySourceTest {
         final File directory = new File("./target/tmp/filter/JsonNodeDirectorySourceTest/testDirectoryOnlyMatchingNames");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
-        Files.write(directory.toPath().resolve("foo.json"), "[\"one\"]".getBytes(Charsets.UTF_8));
-        Files.write(directory.toPath().resolve("bar.txt"), "[\"two\"]".getBytes(Charsets.UTF_8));
+        Files.write(directory.toPath().resolve("foo.json"), "[\"one\"]".getBytes(StandardCharsets.UTF_8));
+        Files.write(directory.toPath().resolve("bar.txt"), "[\"two\"]".getBytes(StandardCharsets.UTF_8));
         final JsonNodeDirectorySource source = new JsonNodeDirectorySource.Builder()
                 .setDirectory(directory)
                 .addFileName("foo.json")
@@ -102,8 +102,8 @@ public class JsonNodeDirectorySourceTest {
         final File directory = new File("./target/tmp/filter/JsonNodeDirectorySourceTest/testDirectoryOnlyMatchingNamePatterns");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
-        Files.write(directory.toPath().resolve("foo.json"), "[\"one\"]".getBytes(Charsets.UTF_8));
-        Files.write(directory.toPath().resolve("bar.txt"), "[\"two\"]".getBytes(Charsets.UTF_8));
+        Files.write(directory.toPath().resolve("foo.json"), "[\"one\"]".getBytes(StandardCharsets.UTF_8));
+        Files.write(directory.toPath().resolve("bar.txt"), "[\"two\"]".getBytes(StandardCharsets.UTF_8));
         final JsonNodeDirectorySource source = new JsonNodeDirectorySource.Builder()
                 .setDirectory(directory)
                 .addFileNamePattern(Pattern.compile(".*\\.json"))
@@ -120,8 +120,8 @@ public class JsonNodeDirectorySourceTest {
         final File directory = new File("./target/tmp/filter/JsonNodeDirectorySourceTest/testInvalidJson.json");
         deleteDirectory(directory);
         Files.createDirectory(directory.toPath());
-        Files.write(directory.toPath().resolve("foo.json"), "this=not-json".getBytes(Charsets.UTF_8));
-        Files.write(directory.toPath().resolve("bar.txt"), "\"two\"".getBytes(Charsets.UTF_8));
+        Files.write(directory.toPath().resolve("foo.json"), "this=not-json".getBytes(StandardCharsets.UTF_8));
+        Files.write(directory.toPath().resolve("bar.txt"), "\"two\"".getBytes(StandardCharsets.UTF_8));
         new JsonNodeDirectorySource.Builder()
                 .setDirectory(directory)
                 .build();

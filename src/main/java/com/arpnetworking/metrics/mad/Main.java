@@ -43,7 +43,6 @@ import com.arpnetworking.utility.Configurator;
 import com.arpnetworking.utility.Launchable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -81,6 +80,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -290,7 +290,7 @@ public final class Main implements Launchable {
         final PrivateKey privateKey;
         try (PEMParser keyReader = new PEMParser(
                 new InputStreamReader(
-                        new FileInputStream(_configuration.getHttpsKeyPath()), Charsets.UTF_8))) {
+                        new FileInputStream(_configuration.getHttpsKeyPath()), StandardCharsets.UTF_8))) {
             final Object keyObject = keyReader.readObject();
 
             if (keyObject instanceof PrivateKeyInfo) {
@@ -309,7 +309,7 @@ public final class Main implements Launchable {
         final X509Certificate cert;
         try (PEMParser certReader = new PEMParser(
                 new InputStreamReader(
-                        new FileInputStream(_configuration.getHttpsCertificatePath()), Charsets.UTF_8))) {
+                        new FileInputStream(_configuration.getHttpsCertificatePath()), StandardCharsets.UTF_8))) {
             final PemObject certObject = certReader.readPemObject();
             final CertificateFactory cf = CertificateFactory.getInstance("X.509");
             cert = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certObject.getContent()));

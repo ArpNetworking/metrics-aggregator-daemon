@@ -23,7 +23,6 @@ import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
 import com.arpnetworking.test.CollectorPeriodicMetrics;
 import com.arpnetworking.test.StringToRecordParser;
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -41,6 +40,7 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
 import java.io.Serial;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -222,7 +222,7 @@ public class KafkaSourceTest {
     @Test
     public void testSourceParsingException() throws ParsingException {
         final ParsingException exception =
-                new ParsingException("Could not parse data", "bad_data".getBytes(Charsets.UTF_8));
+                new ParsingException("Could not parse data", "bad_data".getBytes(StandardCharsets.UTF_8));
         createBadParsingSource(exception);
         final Observer observer = Mockito.mock(Observer.class);
         _source.attach(observer);
