@@ -16,13 +16,13 @@
 package com.arpnetworking.configuration;
 
 import com.arpnetworking.configuration.triggers.FileTrigger;
-import com.google.common.base.Charsets;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
 
@@ -116,7 +116,7 @@ public class FileTriggerTest {
     public void testFileChanged() throws IOException, InterruptedException {
         final File file = new File("./target/tmp/filter/FileTriggerTest/testFileChanged");
         Files.deleteIfExists(file.toPath());
-        Files.write(file.toPath(), "foo".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "foo".getBytes(StandardCharsets.UTF_8));
 
         final Trigger trigger = new FileTrigger.Builder()
                 .setFile(file)
@@ -127,7 +127,7 @@ public class FileTriggerTest {
 
         // Ensure file system modified time reflects the change
         Thread.sleep(1000);
-        Files.write(file.toPath(), "bar".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "bar".getBytes(StandardCharsets.UTF_8));
 
         Assert.assertTrue(trigger.evaluateAndReset());
     }
@@ -136,7 +136,7 @@ public class FileTriggerTest {
     public void testFileChangedLastModifiedOnly() throws IOException {
         final File file = new File("./target/tmp/filter/FileTriggerTest/testFileChangedLastModifiedOnly");
         Files.deleteIfExists(file.toPath());
-        Files.write(file.toPath(), "foo".getBytes(Charsets.UTF_8));
+        Files.write(file.toPath(), "foo".getBytes(StandardCharsets.UTF_8));
         Files.setLastModifiedTime(file.toPath(), FileTime.fromMillis(1418112007000L));
 
         final Trigger trigger = new FileTrigger.Builder()

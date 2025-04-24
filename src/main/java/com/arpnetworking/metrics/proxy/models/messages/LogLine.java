@@ -18,12 +18,12 @@ package com.arpnetworking.metrics.proxy.models.messages;
 
 import com.arpnetworking.logback.annotations.Loggable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Bytes;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -68,7 +68,7 @@ public final class LogLine {
      * @return The line data as a {@link String} interpreted as UTF-8.
      */
     public String convertLineToString() {
-        return convertLineToString(Charsets.UTF_8);
+        return convertLineToString(StandardCharsets.UTF_8);
     }
 
     /**

@@ -23,7 +23,6 @@ import com.arpnetworking.steno.Logger;
 import com.arpnetworking.steno.LoggerFactory;
 import com.arpnetworking.tsdcore.model.PeriodicData;
 import com.arpnetworking.tsdcore.model.RequestEntry;
-import com.google.common.base.Charsets;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -37,6 +36,7 @@ import org.asynchttpclient.Request;
 import org.asynchttpclient.Response;
 import scala.concurrent.duration.FiniteDuration;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
@@ -233,7 +233,7 @@ public class HttpPostSinkActor extends AbstractActorWithTimers {
         final Optional<String> responseBody = Optional.ofNullable(response.getResponseBody());
         final byte[] requestBodyBytes = rejected.getRequest().getByteData();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
-        final String requestBody = requestBodyBytes == null ? null : new String(requestBodyBytes, Charsets.UTF_8);
+        final String requestBody = requestBodyBytes == null ? null : new String(requestBodyBytes, StandardCharsets.UTF_8);
         // CHECKSTYLE.ON: IllegalInstantiation
         LOGGER.warn()
                 .setMessage("Post rejected")

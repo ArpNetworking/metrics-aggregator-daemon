@@ -21,7 +21,6 @@ import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
 import com.arpnetworking.metrics.common.tailer.InitialPosition;
 import com.arpnetworking.steno.LogBuilder;
 import com.arpnetworking.steno.Logger;
-import com.google.common.base.Charsets;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,6 +31,7 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -80,7 +80,7 @@ public class FileSourceTest {
         Files.deleteIfExists(state);
 
         final String expectedData = "Expected Data";
-        Mockito.when(_parser.parse(expectedData.getBytes(Charsets.UTF_8))).thenReturn(expectedData);
+        Mockito.when(_parser.parse(expectedData.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData);
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -95,10 +95,10 @@ public class FileSourceTest {
 
         Files.write(
                 file,
-                (expectedData + "\n").getBytes(Charsets.UTF_8),
+                (expectedData + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
 
-        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(Charsets.UTF_8));
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(StandardCharsets.UTF_8));
         Mockito.verify(_observer, Mockito.timeout(TIMEOUT)).notify(source, expectedData);
         source.stop();
     }
@@ -113,13 +113,13 @@ public class FileSourceTest {
         final String unexpectedData = "Unexpected Data";
         Files.write(
                 file,
-                (unexpectedData + "\n").getBytes(Charsets.UTF_8),
+                (unexpectedData + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
 
-        Mockito.when(_parser.parse(unexpectedData.getBytes(Charsets.UTF_8)))
+        Mockito.when(_parser.parse(unexpectedData.getBytes(StandardCharsets.UTF_8)))
                .thenThrow(new AssertionError("should not tail from beginning of file"));
 
-        Mockito.when(_parser.parse(expectedData.getBytes(Charsets.UTF_8))).thenReturn(expectedData);
+        Mockito.when(_parser.parse(expectedData.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData);
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -136,13 +136,13 @@ public class FileSourceTest {
 
         Files.write(
                 file,
-                (expectedData + "\n").getBytes(Charsets.UTF_8),
+                (expectedData + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
 
-        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(Charsets.UTF_8));
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(StandardCharsets.UTF_8));
         Mockito.verify(_observer, Mockito.timeout(TIMEOUT)).notify(source, expectedData);
         source.stop();
-        Mockito.verify(_parser, Mockito.never()).parse(unexpectedData.getBytes(Charsets.UTF_8));
+        Mockito.verify(_parser, Mockito.never()).parse(unexpectedData.getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -196,7 +196,7 @@ public class FileSourceTest {
         Files.createFile(file);
         Files.deleteIfExists(state);
 
-        Files.write(file, "Existing data in the log file\n".getBytes(Charsets.UTF_8));
+        Files.write(file, "Existing data in the log file\n".getBytes(StandardCharsets.UTF_8));
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -227,7 +227,7 @@ public class FileSourceTest {
 
         final String data1 = "Existing data in the log file\n";
         final String data2 = "new data in the log file     \n";
-        Files.write(file, data1.getBytes(Charsets.UTF_8));
+        Files.write(file, data1.getBytes(StandardCharsets.UTF_8));
         Files.setLastModifiedTime(file, FileTime.from(Instant.now().minus(10, ChronoUnit.DAYS)));
 
         final FileSource<Object> source = new FileSource<>(
@@ -245,7 +245,7 @@ public class FileSourceTest {
 
         renameRotate(file);
         Files.createFile(file);
-        Files.write(file, data2.getBytes(Charsets.UTF_8));
+        Files.write(file, data2.getBytes(StandardCharsets.UTF_8));
         Files.setLastModifiedTime(file, FileTime.from(Instant.now()));
 
         Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage("Tailer file rotate");
@@ -288,7 +288,7 @@ public class FileSourceTest {
         Files.createFile(file);
         Files.deleteIfExists(state);
 
-        Files.write(file, "Existing data in the log file\n".getBytes(Charsets.UTF_8));
+        Files.write(file, "Existing data in the log file\n".getBytes(StandardCharsets.UTF_8));
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -348,7 +348,7 @@ public class FileSourceTest {
         Files.deleteIfExists(state);
 
         final String expectedData = "Expected Data";
-        Mockito.when(_parser.parse(expectedData.getBytes(Charsets.UTF_8))).thenReturn(expectedData);
+        Mockito.when(_parser.parse(expectedData.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData);
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -365,12 +365,12 @@ public class FileSourceTest {
 
         Files.write(
                 file,
-                (expectedData + "\n").getBytes(Charsets.UTF_8),
+                (expectedData + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         renameRotate(file);
         Files.createFile(file);
 
-        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(Charsets.UTF_8));
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(StandardCharsets.UTF_8));
         Mockito.verify(_observer, Mockito.timeout(TIMEOUT)).notify(source, expectedData);
         Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file rotate"));
         source.stop();
@@ -392,7 +392,7 @@ public class FileSourceTest {
         Files.deleteIfExists(state);
 
         final String expectedData = "Expected Data";
-        Mockito.when(_parser.parse(expectedData.getBytes(Charsets.UTF_8))).thenReturn(expectedData);
+        Mockito.when(_parser.parse(expectedData.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData);
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -408,7 +408,7 @@ public class FileSourceTest {
         Thread.sleep(sleepInterval);
         Files.write(
                 file,
-                (expectedData + "\n").getBytes(Charsets.UTF_8),
+                (expectedData + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         copyRotate(file);
         truncate(file);
@@ -416,7 +416,7 @@ public class FileSourceTest {
         Mockito.verifyNoInteractions(_observer);
         Thread.sleep(3 * sleepInterval);
 
-        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(Charsets.UTF_8));
+        Mockito.verify(_parser, Mockito.timeout(TIMEOUT)).parse(expectedData.getBytes(StandardCharsets.UTF_8));
         Mockito.verify(_observer, Mockito.timeout(TIMEOUT)).notify(source, expectedData);
         Mockito.verify(_logBuilder, Mockito.timeout(TIMEOUT)).setMessage(Mockito.contains("Tailer file rotate"));
         source.stop();
@@ -432,8 +432,8 @@ public class FileSourceTest {
 
         final String expectedData1 = "Expected Data 1 must be larger";
         final String expectedData2 = "Expected Data 2";
-        Mockito.when(_parser.parse(expectedData1.getBytes(Charsets.UTF_8))).thenReturn(expectedData1);
-        Mockito.when(_parser.parse(expectedData2.getBytes(Charsets.UTF_8))).thenReturn(expectedData2);
+        Mockito.when(_parser.parse(expectedData1.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData1);
+        Mockito.when(_parser.parse(expectedData2.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData2);
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -450,13 +450,13 @@ public class FileSourceTest {
 
         Files.write(
                 file,
-                (expectedData1 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData1 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         renameRotate(file);
         Files.createFile(file);
         Files.write(
                 file,
-                (expectedData2 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData2 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
 
         final ArgumentCaptor<byte[]> parserCapture = ArgumentCaptor.forClass(byte[].class);
@@ -465,10 +465,10 @@ public class FileSourceTest {
         Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(2)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
-        Assert.assertTrue("actual=" + new String(parserValues.get(0), Charsets.UTF_8),
-                Arrays.equals(expectedData1.getBytes(Charsets.UTF_8), parserValues.get(0)));
-        Assert.assertTrue("actual=" + new String(parserValues.get(1), Charsets.UTF_8),
-                Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(0), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData1.getBytes(StandardCharsets.UTF_8), parserValues.get(0)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(1), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData2.getBytes(StandardCharsets.UTF_8), parserValues.get(1)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
         Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Mockito.eq(source), notifyCapture.capture());
@@ -498,8 +498,8 @@ public class FileSourceTest {
 
         final String expectedData1 = "Expected Data 1 must be larger";
         final String expectedData2 = "Expected Data 2";
-        Mockito.when(_parser.parse(expectedData1.getBytes(Charsets.UTF_8))).thenReturn(expectedData1);
-        Mockito.when(_parser.parse(expectedData2.getBytes(Charsets.UTF_8))).thenReturn(expectedData2);
+        Mockito.when(_parser.parse(expectedData1.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData1);
+        Mockito.when(_parser.parse(expectedData2.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData2);
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -516,13 +516,13 @@ public class FileSourceTest {
 
         Files.write(
                 file,
-                (expectedData1 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData1 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         copyRotate(file);
         truncate(file);
         Files.write(
                 file,
-                (expectedData2 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData2 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
 
         final ArgumentCaptor<byte[]> parserCapture = ArgumentCaptor.forClass(byte[].class);
@@ -531,10 +531,10 @@ public class FileSourceTest {
         Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(2)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
-        Assert.assertTrue("actual=" + new String(parserValues.get(0), Charsets.UTF_8),
-                Arrays.equals(expectedData1.getBytes(Charsets.UTF_8), parserValues.get(0)));
-        Assert.assertTrue("actual=" + new String(parserValues.get(1), Charsets.UTF_8),
-                Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(0), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData1.getBytes(StandardCharsets.UTF_8), parserValues.get(0)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(1), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData2.getBytes(StandardCharsets.UTF_8), parserValues.get(1)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
         Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(source, notifyCapture.capture());
@@ -557,9 +557,9 @@ public class FileSourceTest {
         final String expectedData1 = "Expected Data 1 must be larger";
         final String expectedData2 = "Expected Data 2 plus";
         final String expectedData3 = "Expected Data 3";
-        Mockito.when(_parser.parse(expectedData1.getBytes(Charsets.UTF_8))).thenReturn(expectedData1);
-        Mockito.when(_parser.parse(expectedData2.getBytes(Charsets.UTF_8))).thenReturn(expectedData2);
-        Mockito.when(_parser.parse(expectedData3.getBytes(Charsets.UTF_8))).thenReturn(expectedData3);
+        Mockito.when(_parser.parse(expectedData1.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData1);
+        Mockito.when(_parser.parse(expectedData2.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData2);
+        Mockito.when(_parser.parse(expectedData3.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData3);
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -576,17 +576,17 @@ public class FileSourceTest {
 
         Files.write(
                 file,
-                (expectedData1 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData1 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         Files.write(
                 file,
-                (expectedData2 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData2 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         renameRotate(file);
         Files.createFile(file);
         Files.write(
                 file,
-                (expectedData3 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData3 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
 
         final ArgumentCaptor<byte[]> parserCapture = ArgumentCaptor.forClass(byte[].class);
@@ -595,12 +595,12 @@ public class FileSourceTest {
         Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(3)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
-        Assert.assertTrue("actual=" + new String(parserValues.get(0), Charsets.UTF_8),
-                Arrays.equals(expectedData1.getBytes(Charsets.UTF_8), parserValues.get(0)));
-        Assert.assertTrue("actual=" + new String(parserValues.get(1), Charsets.UTF_8),
-                Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
-        Assert.assertTrue("actual=" + new String(parserValues.get(2), Charsets.UTF_8),
-                Arrays.equals(expectedData3.getBytes(Charsets.UTF_8), parserValues.get(2)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(0), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData1.getBytes(StandardCharsets.UTF_8), parserValues.get(0)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(1), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData2.getBytes(StandardCharsets.UTF_8), parserValues.get(1)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(2), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData3.getBytes(StandardCharsets.UTF_8), parserValues.get(2)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
         Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(3)).notify(Mockito.eq(source), notifyCapture.capture());
@@ -633,9 +633,9 @@ public class FileSourceTest {
         final String expectedData1 = "Expected Data 1 must be larger";
         final String expectedData2 = "Expected Data 2 plus";
         final String expectedData3 = "Expected Data 3";
-        Mockito.when(_parser.parse(expectedData1.getBytes(Charsets.UTF_8))).thenReturn(expectedData1);
-        Mockito.when(_parser.parse(expectedData2.getBytes(Charsets.UTF_8))).thenReturn(expectedData2);
-        Mockito.when(_parser.parse(expectedData3.getBytes(Charsets.UTF_8))).thenReturn(expectedData3);
+        Mockito.when(_parser.parse(expectedData1.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData1);
+        Mockito.when(_parser.parse(expectedData2.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData2);
+        Mockito.when(_parser.parse(expectedData3.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData3);
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -650,18 +650,18 @@ public class FileSourceTest {
 
         Files.write(
                 file,
-                (expectedData1 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData1 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         Thread.sleep(sleepInterval);
         Files.write(
                 file,
-                (expectedData2 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData2 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         copyRotate(file);
         truncate(file);
         Files.write(
                 file,
-                (expectedData3 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData3 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         Thread.sleep(3 * sleepInterval);
 
@@ -671,12 +671,12 @@ public class FileSourceTest {
         Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(3)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
-        Assert.assertTrue("actual=" + new String(parserValues.get(0), Charsets.UTF_8),
-                Arrays.equals(expectedData1.getBytes(Charsets.UTF_8), parserValues.get(0)));
-        Assert.assertTrue("actual=" + new String(parserValues.get(1), Charsets.UTF_8),
-                Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
-        Assert.assertTrue("actual=" + new String(parserValues.get(2), Charsets.UTF_8),
-                Arrays.equals(expectedData3.getBytes(Charsets.UTF_8), parserValues.get(2)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(0), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData1.getBytes(StandardCharsets.UTF_8), parserValues.get(0)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(1), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData2.getBytes(StandardCharsets.UTF_8), parserValues.get(1)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(2), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData3.getBytes(StandardCharsets.UTF_8), parserValues.get(2)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
         Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(3)).notify(Mockito.eq(source), notifyCapture.capture());
@@ -699,8 +699,8 @@ public class FileSourceTest {
 
         final String expectedData1 = "Expected Data 1 small";
         final String expectedData2 = "Expected Data 2 must be larger";
-        Mockito.when(_parser.parse(expectedData1.getBytes(Charsets.UTF_8))).thenReturn(expectedData1);
-        Mockito.when(_parser.parse(expectedData2.getBytes(Charsets.UTF_8))).thenReturn(expectedData2);
+        Mockito.when(_parser.parse(expectedData1.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData1);
+        Mockito.when(_parser.parse(expectedData2.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData2);
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -717,13 +717,13 @@ public class FileSourceTest {
 
         Files.write(
                 file,
-                (expectedData1 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData1 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         renameRotate(file);
         Files.createFile(file);
         Files.write(
                 file,
-                (expectedData2 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData2 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
 
         final ArgumentCaptor<byte[]> parserCapture = ArgumentCaptor.forClass(byte[].class);
@@ -732,10 +732,10 @@ public class FileSourceTest {
         Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(2)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
-        Assert.assertTrue("actual=" + new String(parserCapture.getValue(), Charsets.UTF_8),
-                Arrays.equals(expectedData1.getBytes(Charsets.UTF_8), parserValues.get(0)));
-        Assert.assertTrue("actual=" + new String(parserCapture.getValue(), Charsets.UTF_8),
-                Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
+        Assert.assertTrue("actual=" + new String(parserCapture.getValue(), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData1.getBytes(StandardCharsets.UTF_8), parserValues.get(0)));
+        Assert.assertTrue("actual=" + new String(parserCapture.getValue(), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData2.getBytes(StandardCharsets.UTF_8), parserValues.get(1)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
         Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Mockito.eq(source), notifyCapture.capture());
@@ -768,8 +768,8 @@ public class FileSourceTest {
 
         final String expectedData1 = "Expected Data 1 small";
         final String expectedData2 = "Expected Data 2 must be larger";
-        Mockito.when(_parser.parse(expectedData1.getBytes(Charsets.UTF_8))).thenReturn(expectedData1);
-        Mockito.when(_parser.parse(expectedData2.getBytes(Charsets.UTF_8))).thenReturn(expectedData2);
+        Mockito.when(_parser.parse(expectedData1.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData1);
+        Mockito.when(_parser.parse(expectedData2.getBytes(StandardCharsets.UTF_8))).thenReturn(expectedData2);
 
         final FileSource<Object> source = new FileSource<>(
                 new FileSource.Builder<>()
@@ -784,14 +784,14 @@ public class FileSourceTest {
 
         Files.write(
                 file,
-                (expectedData1 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData1 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         Thread.sleep(sleepInterval);
         copyRotate(file);
         truncate(file);
         Files.write(
                 file,
-                (expectedData2 + "\n").getBytes(Charsets.UTF_8),
+                (expectedData2 + "\n").getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
         Thread.sleep(3 * sleepInterval);
 
@@ -801,10 +801,10 @@ public class FileSourceTest {
         Mockito.verify(_parser, Mockito.timeout(TIMEOUT).times(2)).parse(parserCapture.capture());
         final List<byte[]> parserValues = parserCapture.getAllValues();
         // CHECKSTYLE.OFF: IllegalInstantiation - This is ok for String from byte[]
-        Assert.assertTrue("actual=" + new String(parserValues.get(0), Charsets.UTF_8),
-                Arrays.equals(expectedData1.getBytes(Charsets.UTF_8), parserValues.get(0)));
-        Assert.assertTrue("actual=" + new String(parserValues.get(1), Charsets.UTF_8),
-                Arrays.equals(expectedData2.getBytes(Charsets.UTF_8), parserValues.get(1)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(0), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData1.getBytes(StandardCharsets.UTF_8), parserValues.get(0)));
+        Assert.assertTrue("actual=" + new String(parserValues.get(1), StandardCharsets.UTF_8),
+                Arrays.equals(expectedData2.getBytes(StandardCharsets.UTF_8), parserValues.get(1)));
         // CHECKSTYLE.ON: IllegalInstantiation
 
         Mockito.verify(_observer, Mockito.timeout(TIMEOUT).times(2)).notify(Mockito.eq(source), notifyCapture.capture());

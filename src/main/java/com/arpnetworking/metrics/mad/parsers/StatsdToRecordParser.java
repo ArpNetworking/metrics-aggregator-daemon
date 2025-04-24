@@ -24,7 +24,6 @@ import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Record;
 import com.arpnetworking.metrics.mad.model.Unit;
-import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -34,6 +33,7 @@ import com.google.common.collect.Maps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.Clock;
@@ -76,14 +76,14 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
     @Override
     public List<Record> parse(final ByteBuffer datagram) throws ParsingException {
         // CHECKSTYLE.OFF: IllegalInstantiation - This is the recommended way
-        final String datagramAsString = new String(datagram.array(), Charsets.UTF_8);
+        final String datagramAsString = new String(datagram.array(), StandardCharsets.UTF_8);
         final ImmutableList.Builder<Record> recordListBuilder = ImmutableList.builder();
         try {
             for (final String line : LINE_SPLITTER.split(datagramAsString)) {
                 // CHECKSTYLE.ON: IllegalInstantiation
                 final Matcher matcher = STATSD_PATTERN.matcher(line);
                 if (!matcher.matches()) {
-                    throw new ParsingException("Invalid statsd line", line.getBytes(Charsets.UTF_8));
+                    throw new ParsingException("Invalid statsd line", line.getBytes(StandardCharsets.UTF_8));
                 }
 
                 // Parse the name

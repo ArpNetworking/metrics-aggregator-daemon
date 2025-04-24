@@ -22,7 +22,6 @@ import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -35,6 +34,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -81,7 +81,7 @@ public final class StatsdToRecordParserTest {
                         ))
                         .build(),
                 Iterables.getOnlyElement(
-                        _parser.parse(ByteBuffer.wrap("page.views:1|c".getBytes(Charsets.UTF_8)))));
+                        _parser.parse(ByteBuffer.wrap("page.views:1|c".getBytes(StandardCharsets.UTF_8)))));
     }
 
     @Test
@@ -104,7 +104,7 @@ public final class StatsdToRecordParserTest {
                         ))
                         .build(),
                 Iterables.getOnlyElement(
-                        _parser.parse(ByteBuffer.wrap("fuel.level:0.5|g".getBytes(Charsets.UTF_8)))));
+                        _parser.parse(ByteBuffer.wrap("fuel.level:0.5|g".getBytes(StandardCharsets.UTF_8)))));
     }
 
     @Test
@@ -128,13 +128,13 @@ public final class StatsdToRecordParserTest {
                         ))
                         .build(),
                 Iterables.getOnlyElement(
-                        _parser.parse(ByteBuffer.wrap("song.length:240|h|@0.5".getBytes(Charsets.UTF_8)))));
+                        _parser.parse(ByteBuffer.wrap("song.length:240|h|@0.5".getBytes(StandardCharsets.UTF_8)))));
     }
 
     @Test
     public void testExampleSamplingReject() throws ParsingException {
         Mockito.doReturn(0.51).when(_random).nextDouble();
-        Assert.assertTrue(_parser.parse(ByteBuffer.wrap("song.length:240|h|@0.5".getBytes(Charsets.UTF_8))).isEmpty());
+        Assert.assertTrue(_parser.parse(ByteBuffer.wrap("song.length:240|h|@0.5".getBytes(StandardCharsets.UTF_8))).isEmpty());
     }
 
     @Test
@@ -158,18 +158,18 @@ public final class StatsdToRecordParserTest {
                         ))
                         .build(),
                 Iterables.getOnlyElement(
-                        _parser.parse(ByteBuffer.wrap("song.length:240|h|@1".getBytes(Charsets.UTF_8)))));
+                        _parser.parse(ByteBuffer.wrap("song.length:240|h|@1".getBytes(StandardCharsets.UTF_8)))));
     }
 
     @Test
     public void testSamplingAlwaysReject() throws ParsingException {
         Mockito.doReturn(0.0).when(_random).nextDouble();
-        Assert.assertTrue(_parser.parse(ByteBuffer.wrap("song.length:240|h|@0".getBytes(Charsets.UTF_8))).isEmpty());
+        Assert.assertTrue(_parser.parse(ByteBuffer.wrap("song.length:240|h|@0".getBytes(StandardCharsets.UTF_8))).isEmpty());
     }
 
     @Test(expected = ParsingException.class)
     public void testExampleSetsNotSupported() throws ParsingException {
-        _parser.parse(ByteBuffer.wrap("users.uniques:1234|s".getBytes(Charsets.UTF_8)));
+        _parser.parse(ByteBuffer.wrap("users.uniques:1234|s".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -193,7 +193,7 @@ public final class StatsdToRecordParserTest {
                         ))
                         .build(),
                 Iterables.getOnlyElement(
-                        _parser.parse(ByteBuffer.wrap("users.online:1|c|#country:china".getBytes(Charsets.UTF_8)))));
+                        _parser.parse(ByteBuffer.wrap("users.online:1|c|#country:china".getBytes(StandardCharsets.UTF_8)))));
     }
 
     @Test
@@ -218,19 +218,20 @@ public final class StatsdToRecordParserTest {
                         ))
                         .build(),
                 Iterables.getOnlyElement(
-                        _parser.parse(ByteBuffer.wrap("users.online:1|c|@0.5|#country:china".getBytes(Charsets.UTF_8)))));
+                        _parser.parse(ByteBuffer.wrap("users.online:1|c|@0.5|#country:china".getBytes(StandardCharsets.UTF_8)))));
     }
 
     @Test(expected = ParsingException.class)
     public void testExampleTagsInvalid() throws ParsingException {
         Mockito.doReturn(0.50).when(_random).nextDouble();
-        _parser.parse(ByteBuffer.wrap("users.online:1|c|@0.5|#country:china,anotherTag".getBytes(Charsets.UTF_8)));
+        _parser.parse(ByteBuffer.wrap("users.online:1|c|@0.5|#country:china,anotherTag".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
     public void testExampleTagsSampledReject() throws ParsingException {
         Mockito.doReturn(0.51).when(_random).nextDouble();
-        Assert.assertTrue(_parser.parse(ByteBuffer.wrap("users.online:1|c|@0.5|#country:china".getBytes(Charsets.UTF_8))).isEmpty());
+        Assert.assertTrue(
+                _parser.parse(ByteBuffer.wrap("users.online:1|c|@0.5|#country:china".getBytes(StandardCharsets.UTF_8))).isEmpty());
     }
 
     @Test
@@ -254,21 +255,21 @@ public final class StatsdToRecordParserTest {
                         ))
                         .build(),
                 Iterables.getOnlyElement(
-                        _parser.parse(ByteBuffer.wrap("users.online,service=statsd:1|c".getBytes(Charsets.UTF_8)))));
+                        _parser.parse(ByteBuffer.wrap("users.online,service=statsd:1|c".getBytes(StandardCharsets.UTF_8)))));
 
     }
 
     @Test(expected = ParsingException.class)
     public void testInfluxStyleTagFormatInvalid() throws ParsingException {
         Mockito.doReturn(0.52).when(_random).nextDouble();
-        _parser.parse(ByteBuffer.wrap("users.online,service=statsd,tag2:1|c".getBytes(Charsets.UTF_8)));
+        _parser.parse(ByteBuffer.wrap("users.online,service=statsd,tag2:1|c".getBytes(StandardCharsets.UTF_8)));
 
     }
 
     @Test(expected = ParsingException.class)
     public void testInfluxStyleTagFormatInvalid2() throws ParsingException {
         Mockito.doReturn(0.53).when(_random).nextDouble();
-        _parser.parse(ByteBuffer.wrap("users.online,:,service=statsd|c".getBytes(Charsets.UTF_8)));
+        _parser.parse(ByteBuffer.wrap("users.online,:,service=statsd|c".getBytes(StandardCharsets.UTF_8)));
     }
 
     private void assertRecordEquality(final Record expected, final Record actual) {

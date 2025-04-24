@@ -24,7 +24,6 @@ import com.arpnetworking.metrics.mad.model.DefaultQuantity;
 import com.arpnetworking.metrics.mad.model.DefaultRecord;
 import com.arpnetworking.metrics.mad.model.MetricType;
 import com.arpnetworking.metrics.mad.model.Record;
-import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -33,6 +32,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.Instant;
@@ -95,14 +95,14 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
      */
     public List<Record> parse(final ByteBuffer record) throws ParsingException {
         // CHECKSTYLE.OFF: IllegalInstantiation - This is the recommended way
-        final String line = new String(record.array(), Charsets.UTF_8);
+        final String line = new String(record.array(), StandardCharsets.UTF_8);
         // CHECKSTYLE.ON: IllegalInstantiation
 
         final ImmutableList.Builder<Record> recordListBuilder = ImmutableList.builder();
         final ZonedDateTime now = ZonedDateTime.now();
         final Matcher matcher = GRAPHITE_PATTERN.matcher(line);
         if (!matcher.matches()) {
-            throw new ParsingException("Invalid graphite line", line.getBytes(Charsets.UTF_8));
+            throw new ParsingException("Invalid graphite line", line.getBytes(StandardCharsets.UTF_8));
         }
 
         // Annotations

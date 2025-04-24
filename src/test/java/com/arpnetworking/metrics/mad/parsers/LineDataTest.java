@@ -17,9 +17,10 @@
 package com.arpnetworking.metrics.mad.parsers;
 
 import com.arpnetworking.metrics.common.parsers.exceptions.ParsingException;
-import com.google.common.base.Charsets;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * Tests for query line parsing.
@@ -37,7 +38,7 @@ public class LineDataTest {
     @Test(expected = ParsingException.class)
     public void parseUnknownVersion() throws ParsingException {
         final JsonToRecordParser data = new JsonToRecordParser.Builder().build();
-        data.parse(UNKNOWN_VERSION_JSON.getBytes(Charsets.UTF_8));
+        data.parse(UNKNOWN_VERSION_JSON.getBytes(StandardCharsets.UTF_8));
     }
 
     private static final String UNKNOWN_VERSION_JSON = "{"
