@@ -255,12 +255,17 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
     private static final Splitter.MapSplitter TAG_SPLITTER = Splitter.on(',').withKeyValueSeparator(':');
 
     private enum StatsdType {
+        /** Counter. */
         COUNTER("c", MetricType.COUNTER, null),
+        /** Gauge. */
         GAUGE("g", MetricType.GAUGE, null),
+        /** Histogram. */
         HISTOGRAM("h", MetricType.TIMER, null),
+        /** Meter. */
         METERS("m", MetricType.COUNTER, null),
         // NOTE: Sets are not supported as per class Javadoc.
         //SET("s", null),
+        /** Timer. */
         TIMER("ms", MetricType.TIMER, Unit.MILLISECOND);
 
         private final String _token;
