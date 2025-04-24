@@ -19,6 +19,7 @@ pipeline {
 	    repo = m.group(5)
 	  }
 	}
+        discoverReferenceBuild()
       }
     }
     stage('Setup build') {
@@ -58,7 +59,6 @@ pipeline {
           sh "github-release upload --user ${org} --repo ${repo} --tag ${TAG_NAME} --name ${TAG_NAME}.tgz --file target/*.tgz"
           sh "github-release upload --user ${org} --repo ${repo} --tag ${TAG_NAME} --name ${TAG_NAME}.rpm --file target/rpm/*/RPMS/*/*.rpm"
         }
-        jacoco()
       }
     }
     stage('Save cache') {
@@ -74,6 +74,7 @@ pipeline {
   }
   post('Analysis') {
     always {
+      recordCoverage(tools: [[parser: 'JACOCO']])
       recordIssues(
           enabledForFailure: true, aggregatingResults: true,
           tools: [java(), mavenConsole(), javaDoc(), checkStyle(reportEncoding: 'UTF-8'), spotBugs()])
