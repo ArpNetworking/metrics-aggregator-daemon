@@ -673,9 +673,13 @@ public final class Version2g {
         }
 
         enum Category {
+            /** Time. */
             TIME,
+            /** Quantity of data. */
             DATA_SIZE,
+            /** Temperature. */
             TEMPERATURE,
+            /** Unit of rotation. */
             ROTATION
         }
 
