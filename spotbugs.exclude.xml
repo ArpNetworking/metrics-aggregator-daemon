@@ -29,6 +29,33 @@
          </Or>
      </Match>
 
+     <!-- Match THROWS_METHOD_THROWS_RUNTIMEEXCEPTION violations. We commonly
+	     use runtime exceptions with lambdas, streams, and promises to indicate
+	     failure
+     -->
+     <Match>
+         <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+     </Match>
+
+     <!-- We often throw Exception in tests to indicate an error. The exception itself is the point, not how to handle it
+     -->
+     <Match>
+         <Or>
+             <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+             <Bug pattern="DE_MIGHT_IGNORE" />
+         </Or>
+         <Or>
+             <Class name="~.*\.[^\.]+Test" />
+             <Class name="~.*\.[^\.]+Test\$.*" />
+             <Class name="~.*\.[^\.]+TestPerf" />
+             <Class name="~.*\.[^\.]+TestPerf\$.*" />
+             <Class name="~.*\.[^\.]+IT" />
+             <Class name="~.*\.[^\.]+IT\$.*" />
+             <Class name="~.*\.[^\.]+ITPerf" />
+             <Class name="~.*\.[^\.]+ITPerf\$.*" />
+         </Or>
+     </Match>
+
      <!-- Match all RV_RETURN_VALUE_IGNORED_BAD_PRACTICE violations on all unit
         test files since Mockito usage can cause this violation when stating
         expectations.
