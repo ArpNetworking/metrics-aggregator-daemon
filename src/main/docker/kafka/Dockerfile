@@ -33,7 +33,7 @@ RUN apt-get -o Acquire::Check-Valid-Until=false update && \
 COPY --link scripts/start-kafka.sh /usr/bin/start-kafka.sh
 
 # Supervisor config
-COPY --link supervisor/kafka.conf supervisor/zookeeper.conf /etc/supervisor/conf.d/
+COPY --link supervisor/kafka.conf supervisor/zookeeper.conf supervisor/supervisor.conf /etc/supervisor/conf.d/
 
 # 2181 is zookeeper, 9092 is kafka
 # EXPOSE 2181 9092
