@@ -107,7 +107,6 @@ import java.util.TreeMap;
         _periodicMetrics.recordCounter("actors/period_worker/stopped", 1);
 
         timers().cancel(IDLE_CHECK_TIMER);
-        timers().cancelAll();
 
         if (timers().isTimerActive(ROTATE_TIMER_KEY)) {
             timers().cancel(ROTATE_TIMER_KEY);

@@ -17,6 +17,7 @@ package com.arpnetworking.configuration.jackson.module.pekko;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.TimerSchedulerImpl;
 
 /**
  * Jackson module for serializing Pekko objects for use in JSON/Jackson based
@@ -34,6 +35,7 @@ public final class PekkoLoggingModule extends SimpleModule {
     @Override
     public void setupModule(final SetupContext context) {
         addSerializer(ActorRef.class, new ActorRefLoggingSerializer());
+        addSerializer(TimerSchedulerImpl.TimerMsg.class, new TimerMessageSerializer());
         super.setupModule(context);
     }
 
