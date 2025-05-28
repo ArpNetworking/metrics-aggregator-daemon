@@ -22,7 +22,6 @@ import com.arpnetworking.metrics.mad.model.Unit;
 import com.arpnetworking.test.TestBeanFactory;
 import com.arpnetworking.tsdcore.model.CalculatedValue;
 import com.google.common.collect.ImmutableMap;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.Assert;
 import org.junit.Test;
 

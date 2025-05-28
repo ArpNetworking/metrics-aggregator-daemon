@@ -20,7 +20,6 @@ import com.arpnetworking.logback.annotations.Loggable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Bytes;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
