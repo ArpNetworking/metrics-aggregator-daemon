@@ -141,7 +141,6 @@ public final class GraphitePlaintextToRecordParser implements Parser<List<Record
         return recordListBuilder.build();
     }
 
-    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
     // See: https://github.com/findbugsproject/findbugs/issues/79
     private String parseName(final ByteBuffer datagram, @Nullable final String name) throws ParsingException {
         if (Strings.isNullOrEmpty(name)) {

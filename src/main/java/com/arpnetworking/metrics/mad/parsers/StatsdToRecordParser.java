@@ -135,7 +135,6 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         return type;
     }
 
-    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
     // See: https://github.com/findbugsproject/findbugs/issues/79
     private String parseName(final ByteBuffer datagram, @Nullable final String name) throws ParsingException {
         if (Strings.isNullOrEmpty(name)) {
@@ -161,7 +160,6 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         }
     }
 
-    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
     // See: https://github.com/findbugsproject/findbugs/issues/79
     private ImmutableMap<String, String> parseTags(@Nullable final String tagsAsString) {
         if (null != tagsAsString) {
@@ -170,7 +168,6 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         return ImmutableMap.of();
     }
 
-    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
     // See: https://github.com/findbugsproject/findbugs/issues/79
     private ImmutableMap<String, String> parseInfluxStyleTags(@Nullable final String tagsAsString) {
         if (null != tagsAsString) {

@@ -172,7 +172,6 @@ public final class HistogramStatisticTest {
     }
 
     @Test
-    @SuppressFBWarnings(value = "FL_FLOATS_AS_LOOP_COUNTERS", justification = "Tests the floating point values")
     public void packAndUnpack() {
         final int precision = 7;
         final HistogramStatistic.Histogram histogram = new HistogramStatistic.Histogram(precision);
