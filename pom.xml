@@ -679,7 +679,7 @@
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-guice</artifactId>
+      <artifactId>jackson-module-guice7</artifactId>
       <version>${jackson.version}</version>
       <exclusions>
         <!-- TODO(ville): Remove this exclusion once the annotations package is consistently depended upon:
