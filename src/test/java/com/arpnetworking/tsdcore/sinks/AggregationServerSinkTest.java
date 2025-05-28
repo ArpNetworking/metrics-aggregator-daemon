@@ -140,7 +140,7 @@ public class AggregationServerSinkTest {
     }
 
     private ServerSocketChannel _serverChannel;
-    private int _port;
+    private volatile int _port;
 
     private static final AtomicInteger NEXT_PORT = new AtomicInteger(17065);
 }
