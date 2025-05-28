@@ -17,11 +17,13 @@ package com.arpnetworking.metrics.mad;
 
 import ch.qos.logback.classic.LoggerContext;
 import com.arpnetworking.commons.builder.Builder;
+import com.arpnetworking.commons.jackson.databind.ImmutableObjectMapper;
 import com.arpnetworking.commons.jackson.databind.ObjectMapperFactory;
 import com.arpnetworking.configuration.jackson.DynamicConfiguration;
 import com.arpnetworking.configuration.jackson.HoconFileSource;
 import com.arpnetworking.configuration.jackson.JsonNodeFileSource;
 import com.arpnetworking.configuration.jackson.JsonNodeSource;
+import com.arpnetworking.configuration.jackson.module.pekko.PekkoLoggingModule;
 import com.arpnetworking.configuration.triggers.FileTrigger;
 import com.arpnetworking.http.Routes;
 import com.arpnetworking.http.SupplementalRoutes;
@@ -533,6 +535,12 @@ public final class Main implements Launchable {
                 .setFile(configurationFile);
     }
 
+    private static ObjectMapper createMadObjectMapper() {
+        final ObjectMapper instance = ObjectMapperFactory.createInstance();
+        instance.registerModule(new PekkoLoggingModule());
+        return ImmutableObjectMapper.of(instance);
+    }
+
     private final AggregatorConfiguration _configuration;
 
     private volatile PipelinesLaunchable _pipelinesLaunchable;
@@ -543,7 +551,7 @@ public final class Main implements Launchable {
 
     private static final Long INITIAL_DELAY_IN_MILLIS = 0L;
     private static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getInstance();
+    private static final ObjectMapper OBJECT_MAPPER = createMadObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
     private static final Duration SHUTDOWN_TIMEOUT = Duration.create(30, TimeUnit.SECONDS);
     private static final Semaphore SHUTDOWN_SEMAPHORE = new Semaphore(0);
