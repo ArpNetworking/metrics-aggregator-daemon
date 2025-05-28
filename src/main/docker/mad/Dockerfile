@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:21-jre
 
 MAINTAINER arpnetworking
 
