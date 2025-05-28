@@ -124,7 +124,7 @@ import java.util.TreeMap;
     }
 
     @Override
-    public void preRestart(final Throwable reason, final Optional<Object> message) throws Exception {
+    public void preRestart(final Throwable reason, final Optional<Object> message) {
         _periodicMetrics.recordCounter("actors/period_worker/restarted", 1);
         LOGGER.error()
                 .setMessage("Restarting")

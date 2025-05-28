@@ -47,8 +47,19 @@ public class Configurator<T extends Launchable, S> implements Listener, Launchab
     }
 
     @Override
-    public synchronized void offerConfiguration(final Configuration configuration) throws Exception {
-        _offeredConfiguration = configuration.getAs(_configurationClass);
+    public synchronized void offerConfiguration(final Configuration configuration) throws ConfigurationException {
+        try {
+            _offeredConfiguration = configuration.getAs(_configurationClass);
+        // CHECKSTYLE.OFF: IllegalCatch - This exception is explicitly thrown by getAs()
+        } catch (final RuntimeException e) {
+        // CHECKSTYLE.ON: IllegalCatch
+            throw new ConfigurationException(
+                    String.format(
+                            "Unable to parse configuration as %s: %s",
+                            _configurationClass.getCanonicalName(),
+                            e.getMessage()),
+                    e);
+        }
     }
 
     @Override
