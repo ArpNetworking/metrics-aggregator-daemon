@@ -20,7 +20,6 @@ import com.arpnetworking.logback.annotations.Loggable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Bytes;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -43,7 +42,6 @@ public final class LogLine {
      * @param line The raw log line.
      */
     // TODO(vkoskela): Investigate the use of immutable rotating buffers [MAI-489]
-    @SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
     public LogLine(
             final Path file,
             final byte[] line) {

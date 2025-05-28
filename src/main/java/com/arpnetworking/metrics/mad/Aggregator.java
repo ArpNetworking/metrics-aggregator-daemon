@@ -40,7 +40,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.sf.oval.constraint.NotNull;
 import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.ActorRef;
@@ -135,7 +134,6 @@ public final class Aggregator implements Observer, Launchable {
     private static final Random R = new Random();
 
     @Override
-    @SuppressFBWarnings("IS2_INCONSISTENT_SYNC")
     public void notify(final Observable observable, final Object event) {
         if (!(event instanceof Record)) {
             LOGGER.error()

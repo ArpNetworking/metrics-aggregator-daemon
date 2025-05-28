@@ -141,6 +141,7 @@ public class HttpPostSinkActor extends AbstractActorWithTimers {
         _periodicMetrics.recordCounter("actors/http_post_sink/stopped", 1);
     }
 
+    @SuppressFBWarnings(value = "THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION", justification = "Super method throws this")
     @Override
     public void preRestart(final Throwable reason, final Optional<Object> message) throws Exception {
         super.preRestart(reason, message);

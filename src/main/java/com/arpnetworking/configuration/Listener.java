@@ -15,6 +15,8 @@
  */
 package com.arpnetworking.configuration;
 
+import com.arpnetworking.utility.ConfigurationException;
+
 /**
  * Interface for consumers registered for configuration events.
  *
@@ -30,11 +32,10 @@ public interface Listener {
      * error. Once any listener rejects the {@link Configuration} other
      * listeners may not be offered that instance.
      *
+     * @throws ConfigurationException if the {@link Configuration} is rejected.
      * @param configuration The new {@link Configuration} to be validated.
-     * @throws Exception Thrown if the {@link Configuration} should be
-     * rejected.
      */
-    void offerConfiguration(Configuration configuration) throws Exception;
+    void offerConfiguration(Configuration configuration) throws ConfigurationException;
 
     /**
      * Invoked to apply the most recently offered configuration. Any

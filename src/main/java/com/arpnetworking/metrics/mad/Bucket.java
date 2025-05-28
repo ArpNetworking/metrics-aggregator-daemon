@@ -364,7 +364,7 @@ import java.util.function.BiFunction;
         _dependentStatisticsCache = builder._dependentStatistics;
     }
 
-    private boolean _isOpen = true;
+    private volatile boolean _isOpen = true;
     private Optional<ZonedDateTime> _minRequestTime = Optional.empty();
 
     private final Map<String, Collection<Calculator<?>>> _counterMetricCalculators = Maps.newHashMap();

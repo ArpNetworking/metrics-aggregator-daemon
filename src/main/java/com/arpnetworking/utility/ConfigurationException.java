@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Brandon Arp
+ * Copyright 2025 Brandon Arp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,48 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.arpnetworking.metrics.common.parsers.exceptions;
+package com.arpnetworking.utility;
 
 import com.arpnetworking.logback.annotations.Loggable;
 
 import java.io.Serial;
 
 /**
- * Exception thrown when a {@link com.arpnetworking.metrics.common.parsers.Parser} fails to parse the data.
+ * Exception thrown when a configuration error occurs.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @Loggable
-public class ParsingException extends Exception {
+public class ConfigurationException extends Exception {
+    /**
+     * Public constructor.
+     */
+    public ConfigurationException() {
+        super();
+    }
+
     /**
      * Public constructor with a description.
      *
      * @param message Describes the exceptional condition.
-     * @param offendingData The raw data that failed to parse.
      */
-    public ParsingException(final String message, final byte[] offendingData) {
+    public ConfigurationException(final String message) {
         super(message);
-        _offendingData = offendingData;
     }
 
     /**
      * Public constructor with a description and cause.
      *
      * @param message Describes the exceptional condition.
-     * @param offendingData The raw data that failed to parse.
+     * @param cause   Causing exception.
+     */
+    public ConfigurationException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Public constructor with cause.
+     *
      * @param cause Causing exception.
      */
-    public ParsingException(final String message, final byte[] offendingData, final Throwable cause) {
-        super(message, cause);
-        _offendingData = offendingData;
+    public ConfigurationException(final Throwable cause) {
+        super(cause);
     }
-
-    public byte[] getOffendingData() {
-        return _offendingData;
-    }
-
-    // TODO(barp): change this into a List or similar structure to ensure no modifications
-    private final byte[] _offendingData;
 
     @Serial
     private static final long serialVersionUID = 1L;

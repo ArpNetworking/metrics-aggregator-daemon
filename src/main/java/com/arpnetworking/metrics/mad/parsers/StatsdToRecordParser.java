@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -135,7 +134,6 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         return type;
     }
 
-    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
     // See: https://github.com/findbugsproject/findbugs/issues/79
     private String parseName(final ByteBuffer datagram, @Nullable final String name) throws ParsingException {
         if (Strings.isNullOrEmpty(name)) {
@@ -161,7 +159,6 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         }
     }
 
-    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
     // See: https://github.com/findbugsproject/findbugs/issues/79
     private ImmutableMap<String, String> parseTags(@Nullable final String tagsAsString) {
         if (null != tagsAsString) {
@@ -170,7 +167,6 @@ public final class StatsdToRecordParser implements Parser<List<Record>, ByteBuff
         return ImmutableMap.of();
     }
 
-    @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
     // See: https://github.com/findbugsproject/findbugs/issues/79
     private ImmutableMap<String, String> parseInfluxStyleTags(@Nullable final String tagsAsString) {
         if (null != tagsAsString) {
