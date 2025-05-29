@@ -81,7 +81,7 @@
     <fastutil.version>8.5.15</fastutil.version>
     <guava.version>33.4.8-jre</guava.version>
     <guice.version>7.0.0</guice.version>
-    <jackson.version>2.18.3</jackson.version>
+    <jackson.version>2.19.0</jackson.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <javassist.maven.core.version>0.2.9</javassist.maven.core.version>
     <jsr305.version>3.0.2</jsr305.version>
