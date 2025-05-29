@@ -16,7 +16,7 @@
 package com.arpnetworking.tsdcore.model;
 
 import com.arpnetworking.metrics.aggregation.protocol.Messages;
-import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.GeneratedMessage;
 import io.vertx.core.buffer.Buffer;
 import org.apache.pekko.util.ByteString;
 import org.apache.pekko.util.ByteStringBuilder;
@@ -37,7 +37,7 @@ public final class AggregationMessage {
      * @param message The message.
      * @return New ${link AggregationMessage} instance.
      */
-    public static AggregationMessage create(final GeneratedMessageV3 message) {
+    public static AggregationMessage create(final GeneratedMessage message) {
         return new AggregationMessage(message);
     }
 
@@ -103,7 +103,7 @@ public final class AggregationMessage {
         return sizePrefix.result().concat(bs);
     }
 
-    public GeneratedMessageV3 getMessage() {
+    public GeneratedMessage getMessage() {
         return _message;
     }
 
@@ -111,11 +111,11 @@ public final class AggregationMessage {
         return _message.getSerializedSize() + HEADER_SIZE_IN_BYTES;
     }
 
-    private AggregationMessage(final GeneratedMessageV3 message) {
+    private AggregationMessage(final GeneratedMessage message) {
         _message = message;
     }
 
-    private final GeneratedMessageV3 _message;
+    private final GeneratedMessage _message;
 
     private static final int INTEGER_SIZE_IN_BYTES = Integer.SIZE / 8;
     private static final int HEADER_SIZE_IN_BYTES = INTEGER_SIZE_IN_BYTES + 1;
