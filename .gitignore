@@ -24,3 +24,5 @@ eclipse-bin/
 # VSCode
 .vscode
 .project
+
+.aider.*
