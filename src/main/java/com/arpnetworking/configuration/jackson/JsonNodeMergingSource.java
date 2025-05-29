@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
 import net.sf.oval.constraint.NotNull;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -75,9 +74,7 @@ public final class JsonNodeMergingSource implements JsonNodeSource {
             // the target node. Any unmatched fields from the source node are
             // simply added to the target node; this requires a deep copy
             // since subsequent merges may modify it.
-            final Iterator<Map.Entry<String, JsonNode>> iterator = source.fields();
-            while (iterator.hasNext()) {
-                final Map.Entry<String, JsonNode> sourceFieldEntry = iterator.next();
+            for (final Map.Entry<String, JsonNode> sourceFieldEntry : source.properties()) {
                 final JsonNode targetFieldValue = target.get(sourceFieldEntry.getKey());
                 if (targetFieldValue != null) {
                     // Recursively merge the source field value into the target
