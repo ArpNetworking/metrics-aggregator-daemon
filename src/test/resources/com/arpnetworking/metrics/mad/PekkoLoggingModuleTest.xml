@@ -16,7 +16,7 @@
 
 <configuration>
     <appender name="StenoEncoderAppender" class="ch.qos.logback.core.FileAppender">
-        <file>target/test-logs/AkkaLoggingModuleTest.log</file>
+        <file>target/test-logs/PekkoLoggingModuleTest.log</file>
         <append>false</append>
         <encoder class="com.arpnetworking.logback.StenoEncoder">
             <injectContextLogger>true</injectContextLogger>

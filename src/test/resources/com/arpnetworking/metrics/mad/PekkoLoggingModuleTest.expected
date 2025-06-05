@@ -1,0 +1,1 @@
+{"time":"<TIME>","name":"log","level":"info","data":{"message":"LoggingActorRefs","actorRef":"Actor[pekko://default/user/simple-actor]"},"context":{"host":"<HOST>","processId":"<PROCESS_ID>","threadId":"<THREAD_ID>","logger":"ROOT","line":"99","file":"PekkoLoggingModuleTest.java","class":"com.arpnetworking.metrics.mad.PekkoLoggingModuleTest"},"id":"<ID>","version":"0"}

@@ -92,17 +92,18 @@ public class PekkoLoggingModuleTest {
 
     @Test
     public void testLoggingActorRefs() {
-        final ActorRef actorRef = _actorSystem.actorOf(Props.create(SimpleActor.class, SimpleActor::new));
+        final ActorRef actorRef = _actorSystem.actorOf(Props.create(SimpleActor.class, SimpleActor::new), "simple-actor");
         getLogger().info()
                 .setMessage("LoggingActorRefs")
                 .addData("actorRef", actorRef)
                 .log();
+        assertOutput();
     }
 
     protected void assertOutput() {
         final URL expectedResource = getClass().getResource(
                 getClass().getSimpleName() + ".expected");
-        final File actualFile = new File("target/integration-test-logs/" + this.getClass().getSimpleName() + ".log");
+        final File actualFile = new File("target/test-logs/" + this.getClass().getSimpleName() + ".log");
         final String actualOutput;
         try {
             actualOutput = Files.readString(actualFile.toPath());
@@ -117,7 +118,18 @@ public class PekkoLoggingModuleTest {
     }
 
     protected void assertOutput(final String expected, final String actual) {
-        Assert.assertEquals(expected, actual);
+        Assert.assertEquals(expected.trim(), sanitizeOutput(actual.trim()));
+    }
+
+    protected String sanitizeOutput(final String output) {
+        return output.replaceAll("\"time\":\"[^\"]+\"", "\"time\":\"<TIME>\"")
+                .replaceAll("\"id\":\"[^\"]+\"", "\"id\":\"<ID>\"")
+                .replaceAll("Actor\\[pekko://default/user/simple-actor[^\"]+]\"", "Actor[pekko://default/user/simple-actor]\"")
+                .replaceAll("\"host\":\"[^\"]+\"", "\"host\":\"<HOST>\"")
+                .replaceAll("\"processId\":\"[^\"]+\"", "\"processId\":\"<PROCESS_ID>\"")
+                .replaceAll("\"threadId\":\"[^\"]+\"", "\"threadId\":\"<THREAD_ID>\"")
+                .replaceAll("\"backtrace\":\\[[^\\]]+\\]", "\"backtrace\":[]")
+                .replaceAll("\"_id\":\"[^\"]+\"", "\"_id\":\"<ID>\"");
     }
 
     protected Logger getLogger() {
