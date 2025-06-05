@@ -21,6 +21,7 @@
         <layout class="ch.qos.logback.classic.PatternLayout">
           <pattern>%relative %date %t [%level] %logger : %message %ex%n</pattern>
         </layout>
+        <jacksonModule class="com.arpnetworking.configuration.jackson.module.pekko.PekkoLoggingModule" />
       </encoder>
     </appender>
 

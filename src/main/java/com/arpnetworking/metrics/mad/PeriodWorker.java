@@ -167,7 +167,7 @@ import java.util.TreeMap;
 
     private void shutdown(final Aggregator.PeriodWorkerShutdown shutdown) {
         timers().cancelAll();
-        self().tell(PoisonPill.getInstance(), self());
+        timers().startSingleTimer("SELF_SHUTDOWN", PoisonPill.getInstance(), Duration.ofSeconds(5));
     }
 
     private void scheduleRotation(final ZonedDateTime now) {

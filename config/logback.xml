@@ -32,6 +32,7 @@
             <jacksonModule class="com.fasterxml.jackson.datatype.guava.GuavaModule" />
             <jacksonModule class="com.fasterxml.jackson.datatype.jdk8.Jdk8Module" />
             <jacksonModule class="com.fasterxml.jackson.datatype.jsr310.JavaTimeModule" />
+            <jacksonModule class="com.arpnetworking.configuration.jackson.module.pekko.PekkoLoggingModule" />
             <injectBeanIdentifier>true</injectBeanIdentifier>
         </encoder>
     </appender>

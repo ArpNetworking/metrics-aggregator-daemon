@@ -16,6 +16,7 @@
 package com.arpnetworking.configuration.jackson.module.pekko;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.apache.pekko.actor.ActorContext;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.LocalActorRef;
 import org.apache.pekko.actor.TimerSchedulerImpl;
@@ -37,12 +38,14 @@ public final class PekkoLoggingModule extends SimpleModule {
 
     @Override
     public void setupModule(final SetupContext context) {
-        addSerializer(ActorRef.class, new ActorRefLoggingSerializer());
-        addSerializer(LocalActorRef.class, new ActorRefLoggingSerializer());
-        addSerializer(TimerSchedulerImpl.TimerMsg.class, new TimerMessageSerializer());
-        addSerializer(TimerSchedulerImpl.InfluenceReceiveTimeoutTimerMsg.class, new TimerMessageSerializer());
-        addSerializer(TimerSchedulerImpl.NotInfluenceReceiveTimeoutTimerMsg.class, new TimerMessageSerializer());
-        super.setupModule(context);
+            addSerializer(ActorRef.class, new ActorRefLoggingSerializer());
+            addSerializer(LocalActorRef.class, new ActorRefLoggingSerializer());
+            addSerializer(TimerSchedulerImpl.TimerMsg.class, new TimerMessageSerializer());
+            addSerializer(TimerSchedulerImpl.InfluenceReceiveTimeoutTimerMsg.class, new TimerMessageSerializer());
+            addSerializer(TimerSchedulerImpl.NotInfluenceReceiveTimeoutTimerMsg.class, new TimerMessageSerializer());
+            addSerializer(TimerSchedulerImpl.class, new TimerSchedulerSerializer());
+            addSerializer(ActorContext.class, new ActorContextSerializer());
+            super.setupModule(context);
     }
 
     @Serial
