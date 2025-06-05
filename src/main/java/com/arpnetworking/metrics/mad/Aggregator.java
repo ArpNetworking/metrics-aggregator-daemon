@@ -44,7 +44,6 @@ import net.sf.oval.constraint.NotNull;
 import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
-import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.pattern.Patterns;
 
@@ -300,6 +299,18 @@ public final class Aggregator implements Observer, Launchable {
         private final Key _key;
     }
 
+    static final class PeriodWorkerShutdown {
+
+        private PeriodWorkerShutdown() {
+        }
+
+        public static PeriodWorkerShutdown getInstance() {
+            return INSTANCE;
+        }
+
+        private static final PeriodWorkerShutdown INSTANCE = new PeriodWorkerShutdown();
+    }
+
     /**
      * Internal actor to process requests.
      */
@@ -348,7 +359,7 @@ public final class Aggregator implements Observer, Launchable {
                 // Start period worker shutdown
                 final List<CompletableFuture<Boolean>> periodWorkerShutdown = new ArrayList<>();
                 for (final List<ActorRef> workers : _periodWorkerActors.values()) {
-                    periodWorkerShutdown.addAll(_aggregator.shutdownActors(workers, PoisonPill.getInstance()));
+                    periodWorkerShutdown.addAll(_aggregator.shutdownActors(workers, PeriodWorkerShutdown.getInstance()));
                 }
 
                 // Wait for shutdown
@@ -394,7 +405,7 @@ public final class Aggregator implements Observer, Launchable {
                         .log();
 
                 for (final ActorRef worker : workers) {
-                    worker.tell(PoisonPill.getInstance(), self());
+                    worker.tell(PeriodWorkerShutdown.getInstance(), self());
                 }
             }
         }

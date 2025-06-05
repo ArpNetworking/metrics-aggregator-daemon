@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.AbstractActorWithTimers;
 import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 
 import java.time.Duration;
@@ -138,6 +139,7 @@ import java.util.TreeMap;
     public AbstractActor.Receive createReceive() {
         return receiveBuilder()
                 .match(Record.class, this::processRecord)
+                .match(Aggregator.PeriodWorkerShutdown.class, this::shutdown)
                 .matchEquals(ROTATE_MESSAGE, m -> rotateAndSchedule())
                 .matchEquals(IDLE_CHECK_MESSAGE, m -> checkForIdle())
                 .build();
@@ -161,6 +163,11 @@ import java.util.TreeMap;
             _aggregator.tell(new Aggregator.PeriodWorkerIdle(_key), self());
         }
         _hasReceivedRecords = false;
+    }
+
+    private void shutdown(final Aggregator.PeriodWorkerShutdown shutdown) {
+        timers().cancelAll();
+        self().tell(PoisonPill.getInstance(), self());
     }
 
     private void scheduleRotation(final ZonedDateTime now) {
