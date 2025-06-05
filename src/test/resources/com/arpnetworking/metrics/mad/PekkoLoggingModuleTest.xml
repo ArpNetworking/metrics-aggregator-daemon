@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2018 Inscope Metrics, Inc.
+  ~ Copyright 2025 Brandon Arp
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,22 +13,21 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
 <configuration>
-    <appender name="mad-logger" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="StenoEncoderAppender" class="ch.qos.logback.core.FileAppender">
+        <file>target/test-logs/AkkaLoggingModuleTest.log</file>
+        <append>false</append>
         <encoder class="com.arpnetworking.logback.StenoEncoder">
             <injectContextLogger>true</injectContextLogger>
             <compressLoggerName>true</compressLoggerName>
-            <jacksonModule class="com.fasterxml.jackson.datatype.guava.GuavaModule" />
-            <jacksonModule class="com.fasterxml.jackson.datatype.jdk8.Jdk8Module" />
-            <jacksonModule class="com.fasterxml.jackson.datatype.jsr310.JavaTimeModule" />
-            <jacksonModule class="com.arpnetworking.configuration.jackson.module.pekko.PekkoLoggingModule" />
             <injectBeanIdentifier>true</injectBeanIdentifier>
+            <jacksonModule class="com.arpnetworking.configuration.jackson.module.pekko.PekkoLoggingModule" />
         </encoder>
     </appender>
 
-    <logger name="org.reflections.Reflections" level="ERROR" />
-
     <root level="INFO">
-        <appender-ref ref="mad-logger"/>
+        <appender-ref ref="StenoEncoderAppender" />
     </root>
+
 </configuration>
