@@ -104,7 +104,7 @@
     <slf4j.version>2.0.17</slf4j.version>
     <snappy.version>1.1.10.7</snappy.version>
     <spotbugs.annotations.version>4.9.3</spotbugs.annotations.version>
-    <typesafe.config.version>1.4.3</typesafe.config.version>
+    <typesafe.config.version>1.4.4</typesafe.config.version>
     <vertx.core.version>4.5.14</vertx.core.version>
 
     <!--Test dependency versions-->
