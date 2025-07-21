@@ -112,7 +112,7 @@
     <hamcrest.version>3.0</hamcrest.version>
     <junit.benchmarks.version>0.7.2</junit.benchmarks.version>
     <junit.version>4.13.2</junit.version>
-    <metrics.generator.version>1.4.0</metrics.generator.version>
+    <metrics.generator.version>1.4.1</metrics.generator.version>
     <mockito.version>5.18.0</mockito.version>
     <performance.test.version>1.2.2</performance.test.version>
     <statsd.client.timgroup>3.1.0</statsd.client.timgroup>
