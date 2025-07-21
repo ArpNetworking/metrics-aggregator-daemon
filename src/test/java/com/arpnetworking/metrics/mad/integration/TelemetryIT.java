@@ -83,7 +83,7 @@ public final class TelemetryIT {
                     future::complete);
 
             // Wait for subscription to be registered and align with aggregation period
-            Thread.sleep(1000);
+            Thread.sleep(3000);
             sleepToBeginningOfSecond();
 
             try (Metrics metrics = METRICS_FACTORY.create()) {
@@ -116,7 +116,7 @@ public final class TelemetryIT {
                     future::complete);
 
             // Wait for subscription to be registered
-            Thread.sleep(1000);
+            Thread.sleep(3000);
             sleepToBeginningOfSecond();
 
             try (Metrics metrics = METRICS_FACTORY.create()) {
@@ -175,7 +175,7 @@ public final class TelemetryIT {
                     future::complete);
 
             // Wait for subscription to be registered
-            Thread.sleep(1000);
+            Thread.sleep(3000);
             sleepToBeginningOfSecond();
 
             // First mixed samples-aggregates unit of work
