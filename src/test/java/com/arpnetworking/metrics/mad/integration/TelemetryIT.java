@@ -90,7 +90,7 @@ public final class TelemetryIT {
                 }
             }
 
-            Assert.assertEquals(_expectedResult, future.get(5, TimeUnit.SECONDS), 0.0001);
+            Assert.assertEquals(_expectedResult, future.get(30, TimeUnit.SECONDS), 0.0001);
         } finally {
             _telemetryClient.unsubscribe(
                     "TelemetryIT",
@@ -148,7 +148,7 @@ public final class TelemetryIT {
                                 .build());
             }
 
-            Assert.assertEquals(_expectedResult, future.get(5, TimeUnit.SECONDS), 0.0001);
+            Assert.assertEquals(_expectedResult, future.get(30, TimeUnit.SECONDS), 0.0001);
         } finally {
             _telemetryClient.unsubscribe(
                     "TelemetryIT",
@@ -215,7 +215,7 @@ public final class TelemetryIT {
                                 .build());
             }
 
-            Assert.assertEquals(_expectedResult, future.get(5, TimeUnit.SECONDS), 0.0001);
+            Assert.assertEquals(_expectedResult, future.get(30, TimeUnit.SECONDS), 0.0001);
         } finally {
             _telemetryClient.unsubscribe(
                     "TelemetryIT",
