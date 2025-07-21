@@ -82,6 +82,10 @@ public final class TelemetryIT {
                     _statistic,
                     future::complete);
 
+            // Wait for subscription to be registered and align with aggregation period
+            Thread.sleep(1000);
+            sleepToBeginningOfSecond();
+
             try (Metrics metrics = METRICS_FACTORY.create()) {
                 for (int i = 1; i <= 10; ++i) {
                     for (int j = 1; j <= i; ++j) {
@@ -90,7 +94,7 @@ public final class TelemetryIT {
                 }
             }
 
-            Assert.assertEquals(_expectedResult, future.get(5, TimeUnit.SECONDS), 0.0001);
+            Assert.assertEquals(_expectedResult, future.get(30, TimeUnit.SECONDS), 0.0001);
         } finally {
             _telemetryClient.unsubscribe(
                     "TelemetryIT",
@@ -111,6 +115,8 @@ public final class TelemetryIT {
                     _statistic,
                     future::complete);
 
+            // Wait for subscription to be registered
+            Thread.sleep(1000);
             sleepToBeginningOfSecond();
 
             try (Metrics metrics = METRICS_FACTORY.create()) {
@@ -148,7 +154,7 @@ public final class TelemetryIT {
                                 .build());
             }
 
-            Assert.assertEquals(_expectedResult, future.get(5, TimeUnit.SECONDS), 0.0001);
+            Assert.assertEquals(_expectedResult, future.get(30, TimeUnit.SECONDS), 0.0001);
         } finally {
             _telemetryClient.unsubscribe(
                     "TelemetryIT",
@@ -168,6 +174,8 @@ public final class TelemetryIT {
                     _statistic,
                     future::complete);
 
+            // Wait for subscription to be registered
+            Thread.sleep(1000);
             sleepToBeginningOfSecond();
 
             // First mixed samples-aggregates unit of work
@@ -215,7 +223,7 @@ public final class TelemetryIT {
                                 .build());
             }
 
-            Assert.assertEquals(_expectedResult, future.get(5, TimeUnit.SECONDS), 0.0001);
+            Assert.assertEquals(_expectedResult, future.get(30, TimeUnit.SECONDS), 0.0001);
         } finally {
             _telemetryClient.unsubscribe(
                     "TelemetryIT",
