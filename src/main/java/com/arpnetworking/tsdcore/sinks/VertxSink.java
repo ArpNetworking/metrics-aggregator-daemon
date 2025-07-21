@@ -222,10 +222,8 @@ public abstract class VertxSink extends BaseSink {
                 .addData("port", _serverPort)
                 .log();
         _lastConnectionAttempt = currentTime;
-        _client.connect(
-                _serverPort,
-                resolvedHostname,
-                new ConnectionHandler(resolvedHostname));
+        _client.connect(_serverPort, resolvedHostname)
+                .onComplete(new ConnectionHandler(resolvedHostname));
     }
 
     private Handler<Void> createSocketCloseHandler(final NetSocket socket) {
