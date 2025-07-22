@@ -92,7 +92,7 @@
     <metrics.aggregator.protocol.prometheus.version>1.2.1</metrics.aggregator.protocol.prometheus.version>
     <metrics.aggregator.protocol.version>1.3.1</metrics.aggregator.protocol.version>
     <metrics.client.version>0.13.0</metrics.client.version>
-    <metrics.client.http.version>0.14.0</metrics.client.http.version>
+    <metrics.client.http.version>0.14.1</metrics.client.http.version>
     <metrics.client.incubator.version>0.13.0</metrics.client.incubator.version>
     <metrics.jvm.extra.version>0.13.1</metrics.jvm.extra.version>
     <oval.version>3.2.1</oval.version>
