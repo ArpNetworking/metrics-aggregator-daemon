@@ -45,11 +45,17 @@ pipeline {
             usernamePassword(credentialsId: 'jenkins-central', usernameVariable: 'CENTRAL_USER', passwordVariable: 'CENTRAL_PASS'),
             string(credentialsId: 'jenkins-gpg', variable: 'GPG_PASS')]) {
           sh '''
-          # Create buildx context using current Docker environment
-          docker buildx create --name multiarch --driver docker-container --use || docker buildx use multiarch
+          # First create a Docker context with current environment settings
+          docker context create multiarch-context --docker "host=$DOCKER_HOST,ca=/certs/client/ca.pem,cert=/certs/client/cert.pem,key=/certs/client/key.pem" || echo "Context may already exist"
+          # Create buildx builder using the custom context
+          docker buildx create --name multiarch --driver docker-container --use multiarch-context || docker buildx use multiarch
           '''
           withMaven {
-            sh "./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true"
+            sh """
+            unset DOCKER_TLS_VERIFY DOCKER_CERT_PATH
+            echo "Cleared TLS env vars, keeping DOCKER_HOST=\$DOCKER_HOST"
+            ./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true
+            """
           }
         }
       }
