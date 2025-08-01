@@ -52,8 +52,8 @@ pipeline {
           '''
           withMaven {
             sh """
-            unset DOCKER_TLS_VERIFY DOCKER_CERT_PATH
-            echo "Cleared TLS env vars, keeping DOCKER_HOST=\$DOCKER_HOST"
+            export DOCKER_TLS_VERIFY=1
+            echo "Using existing DOCKER_HOST=\$DOCKER_HOST with TLS, DOCKER_CERT_PATH=\$DOCKER_CERT_PATH"
             ./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true
             """
           }
