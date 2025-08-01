@@ -45,9 +45,10 @@ pipeline {
             usernamePassword(credentialsId: 'jenkins-central', usernameVariable: 'CENTRAL_USER', passwordVariable: 'CENTRAL_PASS'),
             string(credentialsId: 'jenkins-gpg', variable: 'GPG_PASS')]) {
           sh 'docker buildx create --name multiarch --use dind-context || docker buildx use multiarch'
-          sh 'unset DOCKER_HOST DOCKER_TLS_VERIFY DOCKER_CERT_PATH'
-          withMaven {
-            sh "./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true"
+          withEnv(['DOCKER_HOST=', 'DOCKER_TLS_VERIFY=', 'DOCKER_CERT_PATH=']) {
+            withMaven {
+              sh "./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true"
+            }
           }
         }
       }
