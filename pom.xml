@@ -415,6 +415,12 @@
         <configuration>
           <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
           <showLogs>true</showLogs>
+          <buildx>
+            <platforms>
+              <platform>linux/amd64</platform>
+              <platform>linux/arm64</platform>
+            </platforms>
+          </buildx>
           <images>
             <image>
               <name>arpnetworking/mad/kafka:${docker.image.tag}</name>
@@ -428,7 +434,12 @@
                 <cacheFrom>
                   <image>docker.arpnetworking.com/arpnetworking/mad/kafka:cache-base</image>
                 </cacheFrom>
-
+                <buildx>
+                  <platforms>
+                    <platform>linux/amd64</platform>
+                    <platform>linux/arm64</platform>
+                  </platforms>
+                </buildx>
               </build>
               <run>
                 <network>
@@ -459,6 +470,12 @@
                 <cacheFrom>
                   <image>docker.arpnetworking.com/arpnetworking/mad:cache-base</image>
                 </cacheFrom>
+                <buildx>
+                  <platforms>
+                    <platform>linux/amd64</platform>
+                    <platform>linux/arm64</platform>
+                  </platforms>
+                </buildx>
               </build>
               <run>
                 <dependsOn>
