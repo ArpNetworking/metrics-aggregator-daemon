@@ -45,10 +45,22 @@ pipeline {
             usernamePassword(credentialsId: 'jenkins-central', usernameVariable: 'CENTRAL_USER', passwordVariable: 'CENTRAL_PASS'),
             string(credentialsId: 'jenkins-gpg', variable: 'GPG_PASS')]) {
           sh '''
-          # First create a Docker context with current environment settings
+          echo "=== Docker Environment Debug ==="
+          echo "DOCKER_HOST=$DOCKER_HOST"
+          echo "DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY"
+          echo "DOCKER_CERT_PATH=$DOCKER_CERT_PATH"
+          
+          echo "=== Creating Docker Context ==="
           docker context create multiarch-context --docker "host=$DOCKER_HOST,ca=/certs/client/ca.pem,cert=/certs/client/cert.pem,key=/certs/client/key.pem" || echo "Context may already exist"
-          # Create buildx builder using the custom context
+          
+          echo "=== Listing Docker Contexts ==="
+          docker context ls
+          
+          echo "=== Creating Buildx Builder ==="
           docker buildx create --name multiarch --driver docker-container --use multiarch-context || docker buildx use multiarch
+          
+          echo "=== Listing Buildx Builders ==="
+          docker buildx ls
           '''
           withMaven {
             sh """
