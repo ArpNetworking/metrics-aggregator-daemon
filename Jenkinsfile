@@ -57,7 +57,7 @@ pipeline {
           docker context ls
           
           echo "=== Creating Buildx Builder ==="
-          docker buildx create --name multiarch --driver docker-container --platform linux/amd64,linux/arm64 --use multiarch-context || docker buildx use multiarch
+          docker buildx create --name multiarch --driver docker --platform linux/amd64,linux/arm64 --use multiarch-context || docker buildx use multiarch
           
           echo "=== Activating Builder ==="
           docker buildx use multiarch
@@ -69,7 +69,13 @@ pipeline {
           withMaven {
             sh """
             export DOCKER_TLS_VERIFY=1
-            echo "Using existing DOCKER_HOST=\$DOCKER_HOST with TLS, DOCKER_CERT_PATH=\$DOCKER_CERT_PATH"
+            echo "=== Maven Environment Debug ==="
+            echo "DOCKER_HOST=\$DOCKER_HOST"
+            echo "DOCKER_TLS_VERIFY=\$DOCKER_TLS_VERIFY"
+            echo "DOCKER_CERT_PATH=\$DOCKER_CERT_PATH"
+            echo "HOME=\$HOME"
+            echo "=== Buildx Status for Maven ==="
+            docker buildx ls
             ./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true
             """
           }

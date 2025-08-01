@@ -430,7 +430,6 @@
                 </cacheFrom>
                 <buildx>
                   <builderName>multiarch</builderName>
-                  <contextName>multiarch-context</contextName>
                   <platforms>
                     <platform>linux/amd64</platform>
                     <platform>linux/arm64</platform>
@@ -468,7 +467,6 @@
                 </cacheFrom>
                 <buildx>
                   <builderName>multiarch</builderName>
-                  <contextName>multiarch-context</contextName>
                   <platforms>
                     <platform>linux/amd64</platform>
                     <platform>linux/arm64</platform>
