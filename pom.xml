@@ -416,6 +416,7 @@
           <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
           <showLogs>true</showLogs>
           <buildx>
+            <builderName>default</builderName>
             <platforms>
               <platform>linux/amd64</platform>
               <platform>linux/arm64</platform>
@@ -435,6 +436,7 @@
                   <image>docker.arpnetworking.com/arpnetworking/mad/kafka:cache-base</image>
                 </cacheFrom>
                 <buildx>
+                  <builderName>default</builderName>
                   <platforms>
                     <platform>linux/amd64</platform>
                     <platform>linux/arm64</platform>
@@ -471,6 +473,7 @@
                   <image>docker.arpnetworking.com/arpnetworking/mad:cache-base</image>
                 </cacheFrom>
                 <buildx>
+                  <builderName>default</builderName>
                   <platforms>
                     <platform>linux/amd64</platform>
                     <platform>linux/arm64</platform>
