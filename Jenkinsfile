@@ -45,17 +45,14 @@ pipeline {
             usernamePassword(credentialsId: 'jenkins-central', usernameVariable: 'CENTRAL_USER', passwordVariable: 'CENTRAL_PASS'),
             string(credentialsId: 'jenkins-gpg', variable: 'GPG_PASS')]) {
           sh 'docker buildx create --name multiarch --use dind-context || docker buildx use multiarch'
-          sh 'echo "DOCKER_HOST=$DOCKER_HOST"'
-          sh 'echo "DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY"'
-          sh 'echo "DOCKER_CERT_PATH=$DOCKER_CERT_PATH"'
-          sh 'echo "DOCKER_CONTEXT=$DOCKER_CONTEXT"'
-          withEnv(['DOCKER_HOST=', 'DOCKER_TLS_VERIFY=', 'DOCKER_CERT_PATH=']) {
-            sh 'echo "After withEnv - DOCKER_HOST=$DOCKER_HOST"'
-            sh 'echo "After withEnv - DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY"'
-            sh 'echo "After withEnv - DOCKER_CERT_PATH=$DOCKER_CERT_PATH"'
-            withMaven {
-              sh "./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true"
-            }
+          withMaven {
+            sh """
+            unset DOCKER_HOST DOCKER_TLS_VERIFY DOCKER_CERT_PATH
+            echo "Cleared DOCKER_HOST=\$DOCKER_HOST"
+            echo "Cleared DOCKER_TLS_VERIFY=\$DOCKER_TLS_VERIFY"
+            echo "Cleared DOCKER_CERT_PATH=\$DOCKER_CERT_PATH"
+            ./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true
+            """
           }
         }
       }
