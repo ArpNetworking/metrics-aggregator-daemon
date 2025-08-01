@@ -417,7 +417,6 @@
           <showLogs>true</showLogs>
           <buildx>
             <builderName>multiarch</builderName>
-            <createBuilder>false</createBuilder>
             <platforms>
               <platform>linux/amd64</platform>
               <platform>linux/arm64</platform>
@@ -438,7 +437,6 @@
                 </cacheFrom>
                 <buildx>
                   <builderName>multiarch</builderName>
-                  <createBuilder>false</createBuilder>
                   <platforms>
                     <platform>linux/amd64</platform>
                     <platform>linux/arm64</platform>
@@ -476,7 +474,6 @@
                 </cacheFrom>
                 <buildx>
                   <builderName>multiarch</builderName>
-                  <createBuilder>false</createBuilder>
                   <platforms>
                     <platform>linux/amd64</platform>
                     <platform>linux/arm64</platform>
