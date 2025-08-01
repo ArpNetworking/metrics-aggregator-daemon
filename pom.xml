@@ -415,9 +415,6 @@
         <configuration>
           <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
           <showLogs>true</showLogs>
-          <buildx>
-            <configFile>${user.home}/.docker</configFile>
-          </buildx>
           <images>
             <image>
               <name>arpnetworking/mad/kafka:${docker.image.tag}</name>
@@ -432,6 +429,7 @@
                   <image>docker.arpnetworking.com/arpnetworking/mad/kafka:cache-base</image>
                 </cacheFrom>
                 <buildx>
+                  <configFile>${user.home}/.docker</configFile>
                   <builderName>multiarch</builderName>
                   <platforms>
                     <platform>linux/amd64</platform>
@@ -469,6 +467,7 @@
                   <image>docker.arpnetworking.com/arpnetworking/mad:cache-base</image>
                 </cacheFrom>
                 <buildx>
+                  <configFile>${user.home}/.docker</configFile>
                   <builderName>multiarch</builderName>
                   <platforms>
                     <platform>linux/amd64</platform>
