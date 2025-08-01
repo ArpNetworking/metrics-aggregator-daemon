@@ -57,7 +57,7 @@ pipeline {
           docker context ls
           
           echo "=== Creating Buildx Builder ==="
-          docker buildx create --name multiarch --driver docker --platform linux/amd64,linux/arm64 --use multiarch-context || docker buildx use multiarch
+          docker buildx create --name multiarch --driver docker-container --platform linux/amd64,linux/arm64 --use multiarch-context || docker buildx use multiarch
           
           echo "=== Activating Builder ==="
           docker buildx use multiarch
@@ -69,6 +69,7 @@ pipeline {
           withMaven {
             sh """
             export DOCKER_TLS_VERIFY=1
+            export DOCKER_CERT_PATH=/certs/client
             echo "=== Maven Environment Debug ==="
             echo "DOCKER_HOST=\$DOCKER_HOST"
             echo "DOCKER_TLS_VERIFY=\$DOCKER_TLS_VERIFY"
