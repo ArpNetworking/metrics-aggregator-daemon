@@ -415,13 +415,6 @@
         <configuration>
           <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
           <showLogs>true</showLogs>
-          <buildx>
-            <builderName>multiarch</builderName>
-            <platforms>
-              <platform>linux/amd64</platform>
-              <platform>linux/arm64</platform>
-            </platforms>
-          </buildx>
           <images>
             <image>
               <name>arpnetworking/mad/kafka:${docker.image.tag}</name>

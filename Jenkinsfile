@@ -57,7 +57,7 @@ pipeline {
           docker context ls
           
           echo "=== Creating Buildx Builder ==="
-          docker buildx create --name multiarch --driver docker-container --use multiarch-context || docker buildx use multiarch
+          docker buildx create --name multiarch --driver docker-container --platform linux/amd64,linux/arm64 --use multiarch-context || docker buildx use multiarch
           
           echo "=== Activating Builder ==="
           docker buildx use multiarch
