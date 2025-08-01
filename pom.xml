@@ -415,6 +415,9 @@
         <configuration>
           <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
           <showLogs>true</showLogs>
+          <buildx>
+            <configFile>${user.home}/.docker</configFile>
+          </buildx>
           <images>
             <image>
               <name>arpnetworking/mad/kafka:${docker.image.tag}</name>
