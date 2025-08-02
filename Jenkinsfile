@@ -44,7 +44,10 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'jenkins-dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD'),
             usernamePassword(credentialsId: 'jenkins-central', usernameVariable: 'CENTRAL_USER', passwordVariable: 'CENTRAL_PASS'),
             string(credentialsId: 'jenkins-gpg', variable: 'GPG_PASS')]) {
-          sh 'docker buildx create --name multiarch --driver docker-container --platform linux/amd64,linux/arm64 --use || docker buildx use multiarch'
+          sh '''
+          docker context create multiarch-context --docker "host=$DOCKER_HOST,ca=/certs/client/ca.pem,cert=/certs/client/cert.pem,key=/certs/client/key.pem" || echo "Context exists"
+          docker buildx create --name multiarch --driver docker-container --platform linux/amd64,linux/arm64 --use multiarch-context || docker buildx use multiarch
+          '''
           withMaven {
             sh "./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true"
           }
