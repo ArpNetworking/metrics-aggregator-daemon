@@ -44,45 +44,9 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'jenkins-dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD'),
             usernamePassword(credentialsId: 'jenkins-central', usernameVariable: 'CENTRAL_USER', passwordVariable: 'CENTRAL_PASS'),
             string(credentialsId: 'jenkins-gpg', variable: 'GPG_PASS')]) {
-          sh '''
-          echo "=== Docker Environment Debug ==="
-          echo "DOCKER_HOST=$DOCKER_HOST"
-          echo "DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY"
-          echo "DOCKER_CERT_PATH=$DOCKER_CERT_PATH"
-          
-          echo "=== Creating Docker Context ==="
-          docker context create multiarch-context --docker "host=$DOCKER_HOST,ca=/certs/client/ca.pem,cert=/certs/client/cert.pem,key=/certs/client/key.pem" || echo "Context may already exist"
-          
-          echo "=== Listing Docker Contexts ==="
-          docker context ls
-          
-          echo "=== Creating Buildx Builder ==="
-          docker buildx create --name multiarch --driver docker-container --platform linux/amd64,linux/arm64 --use multiarch-context || docker buildx use multiarch
-          
-          echo "=== Activating Builder ==="
-          docker buildx use multiarch
-          docker buildx inspect --bootstrap
-          
-          echo "=== Listing Buildx Builders ==="
-          docker buildx ls
-          '''
+          sh 'docker buildx create --name multiarch --driver docker-container --platform linux/amd64,linux/arm64 --use || docker buildx use multiarch'
           withMaven {
-            sh """
-            export DOCKER_TLS_VERIFY=1
-            export DOCKER_CERT_PATH=/certs/client
-            export DOCKER_CONFIG=\$HOME/.docker
-            echo "=== Maven Environment Debug ==="
-            echo "DOCKER_HOST=\$DOCKER_HOST"
-            echo "DOCKER_TLS_VERIFY=\$DOCKER_TLS_VERIFY"
-            echo "DOCKER_CERT_PATH=\$DOCKER_CERT_PATH"
-            echo "DOCKER_CONFIG=\$DOCKER_CONFIG"
-            echo "HOME=\$HOME"
-            echo "=== Buildx Status for Maven ==="
-            docker buildx ls
-            echo "=== Checking builder files ==="
-            ls -la \$HOME/.docker/buildx/instances/ || echo "No buildx instances directory"
-            ./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true
-            """
+            sh "./jdk-wrapper.sh ./mvnw $target -P rpm -U -B -Dstyle.color=always -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Ddocker.verbose=true"
           }
         }
       }
