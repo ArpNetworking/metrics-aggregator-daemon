@@ -429,7 +429,7 @@
                   <image>docker.arpnetworking.com/arpnetworking/mad/kafka:cache-base</image>
                 </cacheFrom>
                 <buildx>
-                  <configFile>${user.home}/.docker</configFile>
+                  <dockerStateDir>${user.home}/.docker</dockerStateDir>
                   <builderName>multiarch</builderName>
                   <platforms>
                     <platform>linux/amd64</platform>
@@ -467,7 +467,7 @@
                   <image>docker.arpnetworking.com/arpnetworking/mad:cache-base</image>
                 </cacheFrom>
                 <buildx>
-                  <configFile>${user.home}/.docker</configFile>
+                  <dockerStateDir>${user.home}/.docker</dockerStateDir>
                   <builderName>multiarch</builderName>
                   <platforms>
                     <platform>linux/amd64</platform>
