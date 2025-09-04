@@ -105,7 +105,7 @@
     <snappy.version>1.1.10.8</snappy.version>
     <spotbugs.annotations.version>4.9.4</spotbugs.annotations.version>
     <typesafe.config.version>1.4.4</typesafe.config.version>
-    <vertx.core.version>4.5.14</vertx.core.version>
+    <vertx.core.version>5.0.4</vertx.core.version>
 
     <!--Test dependency versions-->
     <commons.math3.version>3.6.1</commons.math3.version>
