@@ -79,8 +79,7 @@ import javax.annotation.Nullable;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
-public final class Routes implements Function<HttpRequest, CompletionStage<HttpResponse>>,
-        org.apache.pekko.japi.Function<HttpRequest, CompletionStage<HttpResponse>> {
+public final class Routes implements Function<HttpRequest, CompletionStage<HttpResponse>> {
 
     /**
      * Public constructor.
