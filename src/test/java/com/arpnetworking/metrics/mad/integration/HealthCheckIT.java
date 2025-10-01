@@ -35,7 +35,7 @@ public class HealthCheckIT {
     public void test() throws IOException {
         final JsonNode expectedResponse = OBJECT_MAPPER.readTree("{\"status\":\"HEALTHY\"}");
         final JsonNode actualResponse = OBJECT_MAPPER.readTree(
-                new URL(getEndpoint() + "/ping"));
+                new URL(getEndpoint() + "/ping").openStream());
         Assert.assertEquals(expectedResponse, actualResponse);
     }
 
