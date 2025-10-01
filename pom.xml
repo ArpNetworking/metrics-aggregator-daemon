@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <!--
   ~ Copyright 2016 Groupon.com
   ~
@@ -81,7 +81,7 @@
     <fastutil.version>8.5.16</fastutil.version>
     <guava.version>33.5.0-jre</guava.version>
     <guice.version>7.0.0</guice.version>
-    <jackson.version>2.19.2</jackson.version>
+    <jackson.version>2.20.0</jackson.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <javassist.maven.core.version>0.2.9</javassist.maven.core.version>
     <jsr305.version>3.0.2</jsr305.version>
@@ -660,17 +660,14 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
       <exclusions>
         <!-- TODO(ville): Remove this exclusion once the annotations package is consistently depended upon:
             https://github.com/FasterXML/jackson-bom/issues/15
@@ -684,7 +681,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-guava</artifactId>
-      <version>${jackson.version}</version>
       <scope>runtime</scope>
       <exclusions>
         <!-- TODO(ville): Jackson has a very slow update policy towards Guava; see:
@@ -701,7 +697,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-guice7</artifactId>
-      <version>${jackson.version}</version>
       <exclusions>
         <!-- TODO(ville): Remove this exclusion once the annotations package is consistently depended upon:
             https://github.com/FasterXML/jackson-bom/issues/15
@@ -715,13 +710,11 @@
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jdk8</artifactId>
-      <version>${jackson.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>${jackson.version}</version>
       <scope>runtime</scope>
       <exclusions>
         <!-- TODO(ville): Remove this exclusion once the annotations package is consistently depended upon:
@@ -736,7 +729,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-afterburner</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
     <!-- Pekko -->
     <dependency>
@@ -986,6 +978,17 @@
       <version>${bouncy.castle.version}</version>
     </dependency>
   </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <profiles>
     <profile>
