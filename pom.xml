@@ -78,7 +78,7 @@
     <asynchttpclient.version>3.0.3</asynchttpclient.version>
     <bouncy.castle.version>1.82</bouncy.castle.version>
     <client.protocol.version>0.13.0</client.protocol.version>
-    <fastutil.version>8.5.16</fastutil.version>
+    <fastutil.version>8.5.17</fastutil.version>
     <guava.version>33.5.0-jre</guava.version>
     <guice.version>7.0.0</guice.version>
     <jackson.version>2.20.0</jackson.version>
