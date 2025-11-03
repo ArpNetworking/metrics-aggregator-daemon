@@ -97,7 +97,7 @@
     <metrics.jvm.extra.version>0.13.2</metrics.jvm.extra.version>
     <oval.version>3.2.1</oval.version>
     <pekko.version>1.2.1</pekko.version>
-    <pekko.http.version>1.2.0</pekko.http.version>
+    <pekko.http.version>1.3.0</pekko.http.version>
     <protobuf.version>4.33.0</protobuf.version>
     <scala.version>2.13</scala.version>
     <scala.library.version>2.13.17</scala.library.version>
