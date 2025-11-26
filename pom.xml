@@ -76,7 +76,7 @@
     <arpnetworking.commons.version>3.1.1</arpnetworking.commons.version>
     <aspectjrt.version>1.9.25</aspectjrt.version>
     <asynchttpclient.version>3.0.4</asynchttpclient.version>
-    <bouncy.castle.version>1.82</bouncy.castle.version>
+    <bouncy.castle.version>1.83</bouncy.castle.version>
     <client.protocol.version>0.13.0</client.protocol.version>
     <fastutil.version>8.5.18</fastutil.version>
     <guava.version>33.5.0-jre</guava.version>
